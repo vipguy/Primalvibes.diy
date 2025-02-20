@@ -225,6 +225,10 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
             {
               role: 'user' as const,
               content: input
+            },
+            {
+              role: 'assistant' as const,
+              content: '{"dependencies":'
             }
           ]
         });
@@ -235,13 +239,16 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
         
         if (response.content[0].type === 'text') {
           fullResponse = response.content[0].text;
+          debugger
           
           // Extract dependencies from JSON declaration
-          const depsMatch = fullResponse.match(/^\s*{\s*"dependencies"\s*:\s*({[^}]+})/);
+          const depsMatch = fullResponse.match(/^\s*{\s*([^}]+)}\s*}/);
           if (depsMatch) {
             try {
-              const depsObject = JSON.parse(depsMatch[1]);
+              const depsObject = JSON.parse(`{${depsMatch[1]}}`);
               dependencies = depsObject;
+              // Remove the dependencies object from the full response
+              fullResponse = fullResponse.replace(/^\s*{\s*[^}]+}\s*}/, '').trim();
             } catch (e) {
               console.error('Failed to parse dependencies:', e);
             }
