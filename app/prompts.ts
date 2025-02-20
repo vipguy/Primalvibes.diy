@@ -10,6 +10,7 @@ You are an AI assistant tasked with creating React components. You should create
 - Use Fireproof for data persistence
 - Consider and potentially reuse/extend code from previous responses if relevant
 
+<fireproof-docs>
 ## Basic Usage (with React)
 
 React hooks are the recommended way to use Fireproof in LLM code generation contexts. Here's how to use them:
@@ -21,6 +22,7 @@ Just as applications store user data, agents and LLMs often need to manage conve
 \`\`\`js
 import { useFireproof } from "use-fireproof";
 
+// Make sure to call useFireproof with a unique name for each database and to use the destructured variables
 const { database, useLiveQuery, useDocument } = useFireproof("my-ledger");
 \`\`\`
 
@@ -118,14 +120,6 @@ const queryResult = useLiveQuery("agentId", {
   limit: 5, 
   key: "llm-agent-1" 
 });
-\`\`\`
-
-To sort all documents withing a specific tag, use a view function and map by prefix (note that the function is sandboxed and can only access the document fields):
-\`\`\`js
-const queryResult = useLiveQuery(
-  (doc) => [doc.agent, doc.timestamp], 
-  { descending: true, limit: 5, prefix: ["llm-agent-1"] }
-);
 \`\`\`
 
 If you just want all the docs you can index the _id field and query for it, ids are roughly sequential so this query has the most recent docs first:
@@ -249,6 +243,92 @@ While the snippets above illustrate basic usage, here are some important conside
      );
      \`\`\`
    This builds an incremental index that can be efficiently filtered using the prefix parameter.
+
+
+## Example React Application
+
+This example shows a simple todo list application that uses Fireproof to store and sort them by creation date, allows users to add, toggle, and delete todos. The app can be delivered as a single file, with a link to this codepen for preview: https://codepen.io/useFireproof/pen/MYgNYdx
+
+Code listing for App.js:
+\`\`\`js
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { useFireproof } from "use-fireproof";
+
+function App() {
+  const { useLiveQuery, useDocument, database } = useFireproof("todo-list-db");
+
+  const {
+    doc: newTodo,
+    merge: mergeNewTodo,
+    submit: submitNewTodo
+  } = useDocument({
+    todo: "",
+    completed: false,
+    createdAt: Date.now()
+  });
+
+  const { docs: notes } = useLiveQuery("type", { 
+    key: "note",
+    descending: true 
+  });
+
+  const handleInputChange = (e) => {
+    mergeNewTodo({ todo: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    submitNewTodo();
+  };
+
+  database.allDocs().then((docs) => console.log(docs));
+
+  return (
+    <div className="max-w-md mx-auto p-4 bg-white shadow rounded">
+      <form onSubmit={handleSubmit} className="mb-4">
+        <label htmlFor="todo" className="block mb-2 font-semibold">Todo</label>
+        <input
+          className="w-full border border-gray-300 rounded px-2 py-1"
+          id="todo"
+          type="text"
+          onChange={handleInputChange}
+          value={newTodo.todo}
+        />
+      </form>
+      <ul className="space-y-3">
+        {notes.map((doc) => (
+          <li className="flex flex-col items-start p-2 border border-gray-200 rounded bg-gray-50" key={doc._id}>
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center">
+                <input
+                  className="mr-2"
+                  type="checkbox"
+                  checked={doc.completed}
+                  onChange={() => database.put({ ...doc, completed: !doc.completed })}
+                />
+                <span className="font-medium">{doc.todo}</span>
+              </div>
+              <button
+                className="text-sm bg-red-500 text-white px-2 py-1 rounded"
+                onClick={() => database.del(doc._id)}
+              >
+                Delete
+              </button>
+            </div>
+            <div className="text-xs text-gray-500 mt-1">
+              {new Date(doc.createdAt).toISOString()}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export default App;
+\`\`\`
+</fireproof-docs>
 
 If you need any npm dependencies, list them at the start of your response in this json format (note: use-fireproof is already provided, do not include it):
 {dependencies: {
