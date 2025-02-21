@@ -20,7 +20,7 @@ const indexHtml = `<!DOCTYPE html>
 
 const defaultCode = `export default function App() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 gap-6">
+    <div className="h-screen flex flex-col items-center justify-center bg-gray-50 gap-6">
       <div className="w-32 h-32 relative">
         <svg 
           viewBox="6000 6000 5000 5000"
@@ -59,9 +59,11 @@ const defaultCode = `export default function App() {
           </g>
         </svg>
       </div>
-      <h1 className="text-3xl font-semibold text-gray-700">
-        Send a message to generate your app.
-      </h1>
+      <div className="text-center px-4">
+        <h1 className="text-3xl font-semibold text-gray-700">
+          Send a message to generate your app.
+        </h1>
+      </div>
     </div>
   );
 }`;
@@ -69,7 +71,7 @@ const defaultCode = `export default function App() {
 function ResultPreview({ code, dependencies = {} }: ResultPreviewProps) {
   console.log(dependencies);
   return (
-    <div className="h-full">
+    <div className="h-full" style={{ overflow: 'hidden' }}>
       <SandpackProvider
         key={code}
         template="vite-react"
@@ -97,12 +99,13 @@ function ResultPreview({ code, dependencies = {} }: ResultPreviewProps) {
         }}
         theme="light"
       >
-        <SandpackLayout className="h-full">
+        <SandpackLayout className="h-full" style={{ height: '100vh' }}>
           <SandpackPreview
             showRefreshButton
             className="h-full"
+            style={{ height: '100%' }}
           />
-          <SandpackCodeEditor/>
+          <SandpackCodeEditor style={{ height: '100%' }}/>
         </SandpackLayout>
       </SandpackProvider>
     </div>

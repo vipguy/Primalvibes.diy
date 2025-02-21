@@ -23,11 +23,11 @@ export default function Home() {
   }
 
   return (
-    <div style={{ display: 'flex', height: '100vh' }}>
-      <div style={{ flex: '0 0 33.333%', borderRight: '1px solid #ccc' }}>
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+      <div style={{ flex: '0 0 33.333%', borderRight: '1px solid #ccc', overflow: 'hidden' }}>
         <ChatInterface onCodeGenerated={handleCodeGenerated} />
       </div>
-      <div style={{ flex: '0 0 66.667%' }}>
+      <div style={{ flex: '0 0 66.667%', overflow: 'hidden' }}>
         <ResultPreview code={state.generatedCode} dependencies={state.dependencies} />
       </div>
     </div>
