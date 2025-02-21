@@ -47,13 +47,13 @@ export default function App() {
         <div className="space-x-4">
           <button 
             onClick={() => setCount(c => c - 1)}
-            className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600"
+            className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 cursor-pointer"
           >
             Decrease
           </button>
           <button
             onClick={() => setCount(c => c + 1)}
-            className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600"
+            className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 cursor-pointer"
           >
             Increase
           </button>
@@ -143,10 +143,10 @@ export default function App() {
               Passionate about creating beautiful and functional web applications.
             </p>
             <div className="mt-6 flex justify-center space-x-4">
-              <button className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600">
+              <button className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 cursor-pointer">
                 Follow
               </button>
-              <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
+              <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 cursor-pointer">
                 Message
               </button>
             </div>
@@ -310,7 +310,7 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
           <button
             type="button"
             onClick={handleNewChat}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors cursor-pointer"
             disabled={isGenerating}
           >
             New Chat
@@ -374,23 +374,23 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
               <button
                 type="button"
                 onClick={() => setInput("Create a todo app with due dates and the ability to mark tasks as complete")}
-                className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors"
+                className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors cursor-pointer"
               >
-                A Todo App
+                Todo App
               </button>
               <button
                 type="button"
                 onClick={() => setInput("Create a pomodoro timer app with multiple timers work/break intervals and session tracking")}
-                className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors"
+                className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors cursor-pointer"
               >
-                A Pomodoro Tracker
+                Pomodoro Tracker
               </button>
               <button
                 type="button"
                 onClick={() => setInput("Create a simple drawing app with a canvas where users can draw with different colors and save their drawings")}
-                className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors"
+                className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors cursor-pointer"
               >
-                A Drawing App
+                Drawing App
               </button>
             </div>
           </div>
@@ -416,7 +416,7 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
               className={`px-4 py-2.5 rounded-xl transition-colors duration-200 flex items-center justify-center font-medium text-sm whitespace-nowrap ${
                 isGenerating 
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                  : 'bg-blue-500 text-white hover:bg-blue-600'
+                  : 'bg-blue-500 text-white hover:bg-blue-600 cursor-pointer'
               }`}
             >
               {isGenerating ? 'Generating...' : 'Send'}
