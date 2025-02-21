@@ -347,6 +347,35 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Quick access buttons */}
+      {messages.length === 0 && (
+        <div className="border-t bg-white px-4 py-3">
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setInput("Create a todo app with due dates and the ability to mark tasks as complete")}
+              className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors"
+            >
+              A Todo App
+            </button>
+            <button
+              type="button"
+              onClick={() => setInput("Create a pomodoro timer app with multiple timers work/break intervals and session tracking")}
+              className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors"
+            >
+              A Pomodoro Tracker
+            </button>
+            <button
+              type="button"
+              onClick={() => setInput("Create a simple drawing app with a canvas where users can draw with different colors and save their drawings")}
+              className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors"
+            >
+              A Drawing App
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Input area */}
       <div className="input-area border-t bg-white px-4 py-3">
         <div className="flex space-x-2 items-center">
