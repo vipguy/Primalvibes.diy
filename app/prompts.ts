@@ -246,6 +246,44 @@ While the snippets above illustrate basic usage, here are some important conside
      \`\`\`
    This builds an incremental index that can be efficiently filtered using the prefix parameter.
 
+#### Working with Files
+
+Fireproof has built-in support for file attachments. Files are encrypted by default and synced on-demand. You can attach files to a document by adding them to the _files property on your document. For example:
+
+\`\`\`html
+<input accept="image/*" title="save to Fireproof" type="file" id="files" multiple>
+\`\`\`
+
+\`\`\`js
+function handleFiles() {
+  const fileList = this.files;
+  const doc = {
+    type: "files",
+    _files: {}
+  };
+  for (const file of fileList) {
+    // Assign each File object to the document
+    doc._files[file.name] = file; 
+  }
+  database.put(doc);
+}
+
+document.getElementById("files").addEventListener("change", handleFiles, false);
+\`\`\`
+
+When loading a document with attachments, you can retrieve each attachment's actual File object by calling its .file() method. This returns a Promise that resolves with the File data, which you can display in your app:
+
+\`\`\`js
+const doc = await database.get("my-doc-id");
+for (const fileName in doc._files) {
+  const meta = doc._files[fileName];
+  if (meta.file) {
+    const fileObj = await meta.file();
+    console.log("Loaded file:", fileObj.name);
+  }
+}
+\`\`\`
+
 
 ## Example React Application
 

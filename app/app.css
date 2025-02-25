@@ -8,12 +8,39 @@
 html,
 body {
   @apply bg-white dark:bg-gray-950;
+  margin: 0;
+  padding: 0;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+    "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  width: 100%;
+  height: 100%;
 
   @media (prefers-color-scheme: dark) {
     color-scheme: dark;
   }
 }
 
+#root {
+  height: 100%;
+}
+
+button {
+  font-family: inherit;
+}
+
 .light {
   --sp-layout-height: 100vh !important;
+}
+
+/* Animation for share status message */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
 }
