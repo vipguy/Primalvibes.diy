@@ -79,6 +79,16 @@ button {
   font-family: inherit;
 }
 
+/* Ensure all buttons and links show pointer cursor on hover */
+button,
+a,
+[role="button"],
+[type="button"],
+[type="submit"],
+[type="reset"] {
+  cursor: pointer;
+}
+
 .light {
   --sp-layout-height: 100vh !important;
 }

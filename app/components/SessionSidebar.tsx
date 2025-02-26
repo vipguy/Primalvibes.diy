@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { useFireproof } from 'use-fireproof';
 
 // Define the session type
@@ -28,11 +29,32 @@ export default function SessionSidebar({
   onSelectSession,
 }: SessionSidebarProps) {
   const { database, useLiveQuery } = useFireproof('fireproof-chat-history');
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
   // Query chat sessions ordered by timestamp (newest first)
   const { docs: sessions } = useLiveQuery('timestamp', {
     descending: true,
   });
+
+  // Handle clicks outside the sidebar to close it
+  useEffect(() => {
+    // Only add listener if sidebar is visible
+    if (!isVisible) return;
+    
+    function handleClickOutside(event: MouseEvent) {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+        onToggle();
+      }
+    }
+    
+    // Add event listener
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    // Clean up event listener
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isVisible, onToggle]);
 
   // Select a session and notify parent component
   const handleSelectSession = (session: SessionDocument) => {
@@ -47,6 +69,7 @@ export default function SessionSidebar({
 
   return (
     <div
+      ref={sidebarRef}
       className={`bg-light-background-00 dark:bg-dark-background-00 fixed top-0 left-0 z-10 h-full shadow-lg transition-all duration-300 ${isVisible ? 'w-64 translate-x-0' : 'w-0 -translate-x-full'}`}
     >
       {/* Sidebar content */}
