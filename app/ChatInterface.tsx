@@ -9,7 +9,7 @@ interface ChatInterfaceProps {
 // Initialize Anthropic client
 const anthropic = new Anthropic({
   apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
-  dangerouslyAllowBrowser: true 
+  dangerouslyAllowBrowser: true,
 });
 
 // Collection of sample React components
@@ -155,17 +155,19 @@ export default function App() {
       </div>
     </div>
   );
-}`
+}`,
 ];
 
 // ChatInterface component handles user input and displays chat messages
 function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
-  const [messages, setMessages] = useState<Array<{
-    text: string;
-    type: 'user' | 'ai';
-    code?: string;
-    dependencies?: Record<string, string>;
-  }>>([]);
+  const [messages, setMessages] = useState<
+    Array<{
+      text: string;
+      type: 'user' | 'ai';
+      code?: string;
+      dependencies?: Record<string, string>;
+    }>
+  >([]);
   const [input, setInput] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentStreamedText, setCurrentStreamedText] = useState<string>('');
@@ -174,13 +176,17 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
 
   // Function to handle starting a new chat
   const handleNewChat = () => {
-    if (window.confirm("Starting a new chat will clear your current app. Are you sure you want to continue?")) {
+    if (
+      window.confirm(
+        'Starting a new chat will clear your current app. Are you sure you want to continue?'
+      )
+    ) {
       window.location.href = '/';
     }
   };
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   // Focus input on mount
@@ -197,22 +203,25 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
 
   // Function to build conversation history for the prompt
   function buildMessageHistory() {
-    return messages.map(msg => ({
-      role: msg.type === 'user' ? 'user' as const : 'assistant' as const,
-      content: msg.type === 'user' ? msg.text : `${msg.text}${
-        msg.code ? `\n\nHere's the code I generated:\n\`\`\`jsx\n${msg.code}\n\`\`\`` : ''
-      }${
-        msg.dependencies && Object.keys(msg.dependencies).length > 0 
-        ? `\n\nWith dependencies:\n${JSON.stringify(msg.dependencies, null, 2)}` 
-        : ''
-      }`
+    return messages.map((msg) => ({
+      role: msg.type === 'user' ? ('user' as const) : ('assistant' as const),
+      content:
+        msg.type === 'user'
+          ? msg.text
+          : `${msg.text}${
+              msg.code ? `\n\nHere's the code I generated:\n\`\`\`jsx\n${msg.code}\n\`\`\`` : ''
+            }${
+              msg.dependencies && Object.keys(msg.dependencies).length > 0
+                ? `\n\nWith dependencies:\n${JSON.stringify(msg.dependencies, null, 2)}`
+                : ''
+            }`,
     }));
   }
 
   async function handleSendMessage() {
     if (input.trim()) {
       // Add user message
-      setMessages(prev => [...prev, { text: input, type: 'user' }]);
+      setMessages((prev) => [...prev, { text: input, type: 'user' }]);
       setInput('');
       setIsGenerating(true);
 
@@ -222,35 +231,35 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
 
         // Call Claude API with system prompt and message history
         const response = await anthropic.messages.create({
-          model: "claude-3-7-sonnet-latest",
+          model: 'claude-3-7-sonnet-latest',
           max_tokens: 8192,
           system: [
             {
-              type: "text",
+              type: 'text',
               text: BASE_SYSTEM_PROMPT,
-              cache_control: { type: "ephemeral" }
-            }
+              cache_control: { type: 'ephemeral' },
+            },
           ],
           messages: [
             ...messageHistory,
             {
               role: 'user' as const,
-              content: input
+              content: input,
             },
             {
               role: 'assistant' as const,
-              content: '{"dependencies":'
-            }
-          ]
+              content: '{"dependencies":',
+            },
+          ],
         });
 
         let fullResponse = '';
         let generatedCode = '';
         let dependencies: Record<string, string> = {};
-        
+
         if (response.content[0].type === 'text') {
           fullResponse = response.content[0].text;
-          
+
           // Extract dependencies from JSON declaration
           const depsMatch = fullResponse.match(/^\s*{\s*([^}]+)}\s*}/);
           if (depsMatch) {
@@ -263,12 +272,12 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
               console.error('Failed to parse dependencies:', e);
             }
           }
-          
+
           // Extract code and explanation
           const codeBlockMatch = fullResponse.match(/```(?:jsx|js|javascript)?\n([\s\S]*?)```/);
           if (codeBlockMatch) {
             generatedCode = codeBlockMatch[1];
-            
+
             // Get the explanation by removing the code block and dependencies declaration
             const explanation = fullResponse
               .replace(/^\s*{\s*"dependencies"\s*:\s*{[^}]+}\s*/, '')
@@ -277,22 +286,28 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
             fullResponse = explanation;
           }
         }
-        
+
         // Add AI response with code and dependencies
-        setMessages(prev => [...prev, { 
-          text: fullResponse || "Here's your generated app:", 
-          type: 'ai',
-          code: generatedCode,
-          dependencies
-        }]);
-        
+        setMessages((prev) => [
+          ...prev,
+          {
+            text: fullResponse || "Here's your generated app:",
+            type: 'ai',
+            code: generatedCode,
+            dependencies,
+          },
+        ]);
+
         // Update the editor with code and dependencies
         onCodeGenerated(generatedCode, dependencies);
       } catch (error) {
-        setMessages(prev => [...prev, { 
-          text: "Sorry, there was an error generating the component. Please try again.", 
-          type: 'ai'
-        }]);
+        setMessages((prev) => [
+          ...prev,
+          {
+            text: 'Sorry, there was an error generating the component. Please try again.',
+            type: 'ai',
+          },
+        ]);
         console.error('Error calling Claude API:', error);
       } finally {
         setIsGenerating(false);
@@ -301,15 +316,15 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
   }
 
   return (
-    <div className="flex flex-col h-full" style={{ overflow: 'hidden' }}>
-      <div className="chat-interface h-full flex flex-col bg-white" style={{ overflow: 'hidden' }}>
+    <div className="flex h-full flex-col" style={{ overflow: 'hidden' }}>
+      <div className="chat-interface flex h-full flex-col bg-white" style={{ overflow: 'hidden' }}>
         {/* Header */}
-        <div className="bg-white border-b px-6 py-4 flex justify-between items-center">
+        <div className="flex items-center justify-between border-b bg-white px-6 py-4">
           <h1 className="text-xl font-semibold text-gray-800">Fireproof App Builder</h1>
           <button
             type="button"
             onClick={handleNewChat}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors cursor-pointer"
+            className="cursor-pointer rounded-lg bg-blue-500 px-4 py-2 text-white transition-colors hover:bg-blue-600"
             disabled={isGenerating}
           >
             New Chat
@@ -317,23 +332,25 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
         </div>
 
         {/* Messages */}
-        <div className="messages flex-1 overflow-y-auto p-4 space-y-4" style={{ maxHeight: 'calc(100vh - 140px)' }}>
+        <div
+          className="messages flex-1 space-y-4 overflow-y-auto p-4"
+          style={{ maxHeight: 'calc(100vh - 140px)' }}
+        >
           {messages.map((msg, i) => (
-            <div 
-              key={`${msg.type}-${i}`} 
-              className="flex flex-col"
-            >
+            <div key={`${msg.type}-${i}`} className="flex flex-col">
               <div className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
                 {msg.type === 'ai' && (
-                  <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-2">
+                  <div className="mr-2 flex h-8 w-8 items-center justify-center rounded-full bg-gray-200">
                     <span className="text-sm font-medium text-gray-600">AI</span>
                   </div>
                 )}
-                <div className={`message p-3 rounded-2xl ${
-                  msg.type === 'user' 
-                    ? 'bg-blue-500 text-white rounded-tr-sm' 
-                    : 'bg-gray-100 text-gray-800 rounded-tl-sm'
-                } max-w-[85%] shadow-sm`}>
+                <div
+                  className={`message rounded-2xl p-3 ${
+                    msg.type === 'user'
+                      ? 'rounded-tr-sm bg-blue-500 text-white'
+                      : 'rounded-tl-sm bg-gray-100 text-gray-800'
+                  } max-w-[85%] shadow-sm`}
+                >
                   {msg.text}
                 </div>
               </div>
@@ -341,22 +358,22 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
           ))}
           {isGenerating && (
             <div className="flex justify-start">
-              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-2">
+              <div className="mr-2 flex h-8 w-8 items-center justify-center rounded-full bg-gray-200">
                 <span className="text-sm font-medium text-gray-600">AI</span>
               </div>
-              <div className="message bg-gray-100 p-3 rounded-2xl rounded-tl-sm max-w-[85%] text-gray-800 shadow-sm">
+              <div className="message max-w-[85%] rounded-2xl rounded-tl-sm bg-gray-100 p-3 text-gray-800 shadow-sm">
                 {currentStreamedText ? (
                   <>
                     {currentStreamedText}
-                    <span className="inline-block w-2 h-4 ml-1 bg-gray-500 animate-pulse" />
+                    <span className="ml-1 inline-block h-4 w-2 animate-pulse bg-gray-500" />
                   </>
                 ) : (
                   <div className="flex items-center gap-2">
                     Thinking
                     <span className="flex gap-1">
-                      <span className="w-1.5 h-1.5 bg-gray-600 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                      <span className="w-1.5 h-1.5 bg-gray-600 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                      <span className="w-1.5 h-1.5 bg-gray-600 rounded-full animate-bounce" />
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-600 [animation-delay:-0.3s]" />
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-600 [animation-delay:-0.15s]" />
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-600" />
                     </span>
                   </div>
                 )}
@@ -372,22 +389,34 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
-                onClick={() => setInput("Create a todo app with due dates and the ability to mark tasks as complete")}
-                className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors cursor-pointer"
+                onClick={() =>
+                  setInput(
+                    'Create a todo app with due dates and the ability to mark tasks as complete'
+                  )
+                }
+                className="cursor-pointer rounded-lg bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
               >
                 Todo App
               </button>
               <button
                 type="button"
-                onClick={() => setInput("Create a pomodoro timer app with multiple timers work/break intervals and session tracking")}
-                className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors cursor-pointer"
+                onClick={() =>
+                  setInput(
+                    'Create a pomodoro timer app with multiple timers work/break intervals and session tracking'
+                  )
+                }
+                className="cursor-pointer rounded-lg bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
               >
                 Pomodoro Tracker
               </button>
               <button
                 type="button"
-                onClick={() => setInput("Create a simple drawing app with a canvas where users can draw with different colors and save their drawings")}
-                className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors cursor-pointer"
+                onClick={() =>
+                  setInput(
+                    'Create a simple drawing app with a canvas where users can draw with different colors and save their drawings'
+                  )
+                }
+                className="cursor-pointer rounded-lg bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
               >
                 Drawing App
               </button>
@@ -397,25 +426,25 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
 
         {/* Input area */}
         <div className="input-area border-t bg-white px-4 py-3">
-          <div className="flex space-x-2 items-center">
+          <div className="flex items-center space-x-2">
             <input
               ref={inputRef}
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !isGenerating && handleSendMessage()}
-              className="text-black flex-1 p-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+              className="flex-1 rounded-xl border border-gray-200 p-2.5 text-sm text-black transition-all focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
               placeholder="Describe the app you want to create..."
               disabled={isGenerating}
             />
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={handleSendMessage}
               disabled={isGenerating}
-              className={`px-4 py-2.5 rounded-xl transition-colors duration-200 flex items-center justify-center font-medium text-sm whitespace-nowrap ${
-                isGenerating 
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                  : 'bg-blue-500 text-white hover:bg-blue-600 cursor-pointer'
+              className={`flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors duration-200 ${
+                isGenerating
+                  ? 'cursor-not-allowed bg-gray-300 text-gray-500'
+                  : 'cursor-pointer bg-blue-500 text-white hover:bg-blue-600'
               }`}
             >
               {isGenerating ? 'Generating...' : 'Send'}
@@ -427,4 +456,4 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
   );
 }
 
-export default ChatInterface; 
+export default ChatInterface;

@@ -385,12 +385,12 @@ Start your response with {"dependencies": {"
 export const RESPONSE_FORMAT = {
   dependencies: {
     format: '{dependencies: { "package-name": "version" }}',
-    note: 'use-fireproof is already provided, do not include it'
+    note: 'use-fireproof is already provided, do not include it',
   },
   structure: [
     'Brief explanation',
     'Component code with proper Fireproof integration',
     'Real-time updates',
-    'Data persistence'
-  ]
+    'Data persistence',
+  ],
 };
