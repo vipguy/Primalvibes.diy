@@ -1,9 +1,24 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useFireproof } from 'use-fireproof';
+import SessionSidebar from './components/SessionSidebar';
 import { BASE_SYSTEM_PROMPT } from './prompts';
 
 interface ChatInterfaceProps {
   onCodeGenerated: (code: string, dependencies?: Record<string, string>) => void;
+}
+
+// Define the session document type
+interface SessionDocument {
+  _id: string;
+  title?: string;
+  timestamp: number;
+  messages?: Array<{
+    text: string;
+    type: 'user' | 'ai';
+    code?: string;
+    dependencies?: Record<string, string>;
+  }>;
 }
 
 // Initialize Anthropic client
@@ -171,23 +186,84 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
   const [input, setInput] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentStreamedText, setCurrentStreamedText] = useState<string>('');
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [isSidebarVisible, setIsSidebarVisible] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Function to handle starting a new chat
-  const handleNewChat = () => {
-    if (
-      window.confirm(
-        'Starting a new chat will clear your current app. Are you sure you want to continue?'
-      )
-    ) {
-      window.location.href = '/';
+  // Initialize Fireproof
+  const { database } = useFireproof('fireproof-chat-history');
+
+  // Toggle sidebar visibility
+  const toggleSidebar = useCallback(() => {
+    setIsSidebarVisible((prev) => !prev);
+  }, []);
+
+  // Function to save messages to Fireproof
+  const saveSession = useCallback(
+    async (sessionMessages: typeof messages) => {
+      if (sessionMessages.length === 0) return;
+
+      // Extract title from first user message
+      const firstUserMessage = sessionMessages.find((msg) => msg.type === 'user');
+      const title = firstUserMessage
+        ? `${firstUserMessage.text.substring(0, 50)}${firstUserMessage.text.length > 50 ? '...' : ''}`
+        : 'Untitled Chat';
+
+      try {
+        // If we have a current session ID, update it; otherwise create a new one
+        const sessionData = {
+          title,
+          messages: sessionMessages,
+          timestamp: Date.now(),
+          ...(currentSessionId ? { _id: currentSessionId } : {}),
+        };
+
+        const result = await database.put(sessionData);
+        if (!currentSessionId) {
+          setCurrentSessionId(result.id);
+        }
+      } catch (error) {
+        console.error('Error saving session to Fireproof:', error);
+      }
+    },
+    [database, currentSessionId]
+  );
+
+  // Function to load a session from Fireproof
+  const loadSession = async (session: SessionDocument) => {
+    if (!session?._id) return;
+
+    try {
+      setCurrentSessionId(session._id);
+
+      if (session.messages && Array.isArray(session.messages)) {
+        setMessages(session.messages);
+
+        // Find the last AI message with code to update the editor
+        const lastAiMessageWithCode = [...session.messages]
+          .reverse()
+          .find((msg) => msg.type === 'ai' && msg.code);
+
+        if (lastAiMessageWithCode?.code) {
+          onCodeGenerated(lastAiMessageWithCode.code, lastAiMessageWithCode.dependencies || {});
+        }
+      }
+    } catch (error) {
+      console.error('Error loading session from Fireproof:', error);
     }
   };
 
-  const scrollToBottom = () => {
+  // Save messages to Fireproof whenever they change
+  useEffect(() => {
+    if (messages.length > 0) {
+      saveSession(messages);
+    }
+  }, [messages, saveSession]);
+
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  }, []);
 
   // Focus input on mount
   useEffect(() => {
@@ -196,10 +272,15 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
 
   // Scroll to bottom whenever messages or streaming text changes
   useEffect(() => {
-    if (messagesEndRef.current) {
+    scrollToBottom();
+  }, [scrollToBottom]);
+
+  // Watch for changes in messages and current streamed text to trigger scroll
+  useEffect(() => {
+    if (messages.length > 0 || currentStreamedText) {
       scrollToBottom();
     }
-  }, [messages.length, currentStreamedText.length]);
+  }, [messages, currentStreamedText, scrollToBottom]);
 
   // Function to build conversation history for the prompt
   function buildMessageHistory() {
@@ -315,16 +396,66 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
     }
   }
 
+  // Function to handle starting a new chat
+  const handleNewChat = () => {
+    if (
+      window.confirm(
+        'Starting a new chat will clear your current app. Are you sure you want to continue?'
+      )
+    ) {
+      setCurrentSessionId(null);
+      setMessages([]);
+      setInput('');
+      onCodeGenerated('', {});
+    }
+  };
+
   return (
     <div className="flex h-full flex-col" style={{ overflow: 'hidden' }}>
-      <div className="chat-interface flex h-full flex-col bg-white" style={{ overflow: 'hidden' }}>
+      {/* SessionSidebar component */}
+      <SessionSidebar
+        isVisible={isSidebarVisible}
+        onToggle={toggleSidebar}
+        onSelectSession={loadSession}
+      />
+
+      <div
+        className="chat-interface bg-light-background-00 dark:bg-dark-background-00 flex h-full flex-col"
+        style={{ overflow: 'hidden' }}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between border-b bg-white px-6 py-4">
-          <h1 className="text-xl font-semibold text-gray-800">Fireproof App Builder</h1>
+        <div className="border-light-decorative-00 dark:border-dark-decorative-00 bg-light-background-00 dark:bg-dark-background-00 flex items-center justify-between border-b px-6 py-4">
+          <div className="flex items-center">
+            <button
+              type="button"
+              onClick={toggleSidebar}
+              className="text-light-primary dark:text-dark-primary hover:text-accent-02-light dark:hover:text-accent-02-dark mr-3"
+              aria-label="Toggle chat history"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h7"
+                />
+              </svg>
+            </button>
+            <h1 className="text-light-primary dark:text-dark-primary text-xl font-semibold">
+              Fireproof App Builder
+            </h1>
+          </div>
           <button
             type="button"
             onClick={handleNewChat}
-            className="cursor-pointer rounded-lg bg-blue-500 px-4 py-2 text-white transition-colors hover:bg-blue-600"
+            className="bg-accent-02-light dark:bg-accent-02-dark hover:bg-accent-03-light dark:hover:bg-accent-03-dark cursor-pointer rounded-lg px-4 py-2 text-white transition-colors"
             disabled={isGenerating}
           >
             New Chat
@@ -333,22 +464,24 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
 
         {/* Messages */}
         <div
-          className="messages flex-1 space-y-4 overflow-y-auto p-4"
+          className="messages bg-light-background-01 dark:bg-dark-background-01 flex-1 space-y-4 overflow-y-auto p-4"
           style={{ maxHeight: 'calc(100vh - 140px)' }}
         >
           {messages.map((msg, i) => (
             <div key={`${msg.type}-${i}`} className="flex flex-col">
               <div className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
                 {msg.type === 'ai' && (
-                  <div className="mr-2 flex h-8 w-8 items-center justify-center rounded-full bg-gray-200">
-                    <span className="text-sm font-medium text-gray-600">AI</span>
+                  <div className="bg-dark-decorative-00 dark:bg-light-decorative-00 mr-2 flex h-8 w-8 items-center justify-center rounded-full">
+                    <span className="text-light-primary dark:text-dark-primary text-sm font-medium">
+                      AI
+                    </span>
                   </div>
                 )}
                 <div
                   className={`message rounded-2xl p-3 ${
                     msg.type === 'user'
-                      ? 'rounded-tr-sm bg-blue-500 text-white'
-                      : 'rounded-tl-sm bg-gray-100 text-gray-800'
+                      ? 'bg-accent-02-light dark:bg-accent-02-dark rounded-tr-sm text-white'
+                      : 'bg-light-decorative-00 dark:bg-dark-decorative-00 text-light-primary dark:text-dark-primary rounded-tl-sm'
                   } max-w-[85%] shadow-sm`}
                 >
                   {msg.text}
@@ -358,22 +491,24 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
           ))}
           {isGenerating && (
             <div className="flex justify-start">
-              <div className="mr-2 flex h-8 w-8 items-center justify-center rounded-full bg-gray-200">
-                <span className="text-sm font-medium text-gray-600">AI</span>
+              <div className="bg-dark-decorative-00 dark:bg-light-decorative-00 mr-2 flex h-8 w-8 items-center justify-center rounded-full">
+                <span className="text-light-primary dark:text-dark-primary text-sm font-medium">
+                  AI
+                </span>
               </div>
-              <div className="message max-w-[85%] rounded-2xl rounded-tl-sm bg-gray-100 p-3 text-gray-800 shadow-sm">
+              <div className="message bg-light-decorative-00 dark:bg-dark-decorative-00 text-light-primary dark:text-dark-primary max-w-[85%] rounded-2xl rounded-tl-sm p-3 shadow-sm">
                 {currentStreamedText ? (
                   <>
                     {currentStreamedText}
-                    <span className="ml-1 inline-block h-4 w-2 animate-pulse bg-gray-500" />
+                    <span className="bg-light-primary dark:bg-dark-primary ml-1 inline-block h-4 w-2 animate-pulse" />
                   </>
                 ) : (
                   <div className="flex items-center gap-2">
                     Thinking
                     <span className="flex gap-1">
-                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-600 [animation-delay:-0.3s]" />
-                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-600 [animation-delay:-0.15s]" />
-                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-600" />
+                      <span className="bg-light-primary dark:bg-dark-primary h-1.5 w-1.5 animate-bounce rounded-full [animation-delay:-0.3s]" />
+                      <span className="bg-light-primary dark:bg-dark-primary h-1.5 w-1.5 animate-bounce rounded-full [animation-delay:-0.15s]" />
+                      <span className="bg-light-primary dark:bg-dark-primary h-1.5 w-1.5 animate-bounce rounded-full" />
                     </span>
                   </div>
                 )}
@@ -385,7 +520,7 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
 
         {/* Quick access buttons */}
         {messages.length === 0 && (
-          <div className="border-t bg-white px-4 py-3">
+          <div className="border-light-decorative-00 dark:border-dark-decorative-00 bg-light-background-00 dark:bg-dark-background-00 border-t px-4 py-3">
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
@@ -394,7 +529,7 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
                     'Create a todo app with due dates and the ability to mark tasks as complete'
                   )
                 }
-                className="cursor-pointer rounded-lg bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
+                className="bg-light-decorative-00 dark:bg-dark-decorative-00 text-light-primary dark:text-dark-primary hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 cursor-pointer rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
               >
                 Todo App
               </button>
@@ -405,7 +540,7 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
                     'Create a pomodoro timer app with multiple timers work/break intervals and session tracking'
                   )
                 }
-                className="cursor-pointer rounded-lg bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
+                className="bg-light-decorative-00 dark:bg-dark-decorative-00 text-light-primary dark:text-dark-primary hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 cursor-pointer rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
               >
                 Pomodoro Tracker
               </button>
@@ -416,7 +551,7 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
                     'Create a simple drawing app with a canvas where users can draw with different colors and save their drawings'
                   )
                 }
-                className="cursor-pointer rounded-lg bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
+                className="bg-light-decorative-00 dark:bg-dark-decorative-00 text-light-primary dark:text-dark-primary hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 cursor-pointer rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
               >
                 Drawing App
               </button>
@@ -425,7 +560,7 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
         )}
 
         {/* Input area */}
-        <div className="input-area border-t bg-white px-4 py-3">
+        <div className="input-area border-light-decorative-00 dark:border-dark-decorative-00 bg-light-background-00 dark:bg-dark-background-00 border-t px-4 py-3">
           <div className="flex items-center space-x-2">
             <input
               ref={inputRef}
@@ -433,7 +568,7 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !isGenerating && handleSendMessage()}
-              className="flex-1 rounded-xl border border-gray-200 p-2.5 text-sm text-black transition-all focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="border-light-decorative-00 dark:border-dark-decorative-00 text-light-primary dark:text-dark-primary bg-light-background-00 dark:bg-dark-background-00 focus:ring-accent-01-light dark:focus:ring-accent-01-dark flex-1 rounded-xl border p-2.5 text-sm transition-all focus:border-transparent focus:ring-2 focus:outline-none"
               placeholder="Describe the app you want to create..."
               disabled={isGenerating}
             />
@@ -443,8 +578,8 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
               disabled={isGenerating}
               className={`flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors duration-200 ${
                 isGenerating
-                  ? 'cursor-not-allowed bg-gray-300 text-gray-500'
-                  : 'cursor-pointer bg-blue-500 text-white hover:bg-blue-600'
+                  ? 'bg-light-decorative-01 dark:bg-dark-decorative-01 text-light-primary dark:text-dark-primary cursor-not-allowed opacity-50'
+                  : 'bg-accent-01-light dark:bg-accent-01-dark hover:bg-accent-02-light dark:hover:bg-accent-02-dark cursor-pointer text-white'
               }`}
             >
               {isGenerating ? 'Generating...' : 'Send'}

@@ -19,16 +19,51 @@ const indexHtml = `<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'light-primary': '#2C2C2C',
+              'light-secondary': '#2C2C2C',
+              'light-decorative-00': '#EBEAEA',
+              'light-decorative-01': '#E0DEDE',
+              'light-decorative-02': '#2C2C2C',
+              'light-background-00': '#FFFFFF',
+              'light-background-01': '#F5F5F5',
+              'light-background-02': '#F0F0F0',
+              'dark-primary': '#FFFFFF',
+              'dark-secondary': '#FFFFFF',
+              'dark-decorative-00': '#302F30',
+              'dark-decorative-01': '#414141',
+              'dark-decorative-02': '#FFFFFF',
+              'dark-background-00': '#171616',
+              'dark-background-01': '#201F20',
+              'dark-background-02': '#201F20',
+              'accent-00-light': '#F9A100',
+              'accent-01-light': '#F58709',
+              'accent-02-light': '#F16C12',
+              'accent-03-light': '#EE521C',
+              'accent-00-dark': '#FFAA0F',
+              'accent-01-dark': '#FF8F0F',
+              'accent-02-dark': '#FF7119',
+              'accent-03-dark': '#FF612A',
+            }
+          }
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
-     <script type="module" src="/index.jsx"></script>
+    <script type="module" src="/index.jsx"></script>
   </body>
 </html>`;
 
 const defaultCode = `export default function App() {
   return (
-    <div className="h-screen flex flex-col items-center justify-center bg-gray-50 gap-6">
+    <div className="h-screen flex flex-col items-center justify-center bg-light-background-01 dark:bg-dark-background-01 gap-6">
       <div className="w-32 h-32 relative">
         <svg 
           viewBox="6000 6000 5000 5000"
@@ -68,7 +103,7 @@ const defaultCode = `export default function App() {
         </svg>
       </div>
       <div className="text-center px-4">
-        <h1 className="text-3xl font-semibold text-gray-700">
+        <h1 className="text-3xl font-semibold text-light-primary dark:text-dark-primary">
           Send a message to generate your app.
         </h1>
       </div>
@@ -82,15 +117,15 @@ function ResultPreview({ code, dependencies = {}, onShare, shareStatus }: Result
   console.log(dependencies);
   return (
     <div className="h-full" style={{ overflow: 'hidden' }}>
-      <div className="flex items-center justify-between border-b border-gray-200 bg-white p-2">
-        <div className="flex space-x-1 rounded-lg bg-gray-100 p-1 shadow-sm">
+      <div className="border-light-decorative-00 dark:border-dark-decorative-00 bg-light-background-00 dark:bg-dark-background-00 flex items-center justify-between border-b p-2">
+        <div className="bg-light-decorative-00 dark:bg-dark-decorative-00 flex space-x-1 rounded-lg p-1 shadow-sm">
           <button
             type="button"
             onClick={() => setActiveView('preview')}
             className={`flex items-center space-x-1.5 rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
               activeView === 'preview'
-                ? 'bg-white text-gray-800 shadow-sm'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
+                ? 'bg-light-background-00 dark:bg-dark-background-00 text-light-primary dark:text-dark-primary shadow-sm'
+                : 'text-light-primary dark:text-dark-primary hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01'
             }`}
             aria-label="Switch to preview"
           >
@@ -122,8 +157,8 @@ function ResultPreview({ code, dependencies = {}, onShare, shareStatus }: Result
             onClick={() => setActiveView('code')}
             className={`flex items-center space-x-1.5 rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
               activeView === 'code'
-                ? 'bg-white text-gray-800 shadow-sm'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
+                ? 'bg-light-background-00 dark:bg-dark-background-00 text-light-primary dark:text-dark-primary shadow-sm'
+                : 'text-light-primary dark:text-dark-primary hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01'
             }`}
             aria-label="Switch to code editor"
           >
@@ -149,15 +184,15 @@ function ResultPreview({ code, dependencies = {}, onShare, shareStatus }: Result
         {onShare && (
           <div className="flex items-center gap-2">
             {shareStatus && (
-              <div className="animate-fade-in rounded-lg bg-green-100 px-3 py-1 text-sm text-green-800">
+              <div className="animate-fade-in bg-accent-00-light dark:bg-accent-00-dark text-light-primary dark:text-dark-primary rounded-lg px-3 py-1 text-sm">
                 {shareStatus}
               </div>
             )}
-            <div className="flex space-x-1 rounded-lg bg-gray-100 p-1 shadow-sm">
+            <div className="bg-light-decorative-00 dark:bg-dark-decorative-00 flex space-x-1 rounded-lg p-1 shadow-sm">
               <button
                 type="button"
                 onClick={onShare}
-                className="flex items-center space-x-1.5 rounded-md px-4 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-800"
+                className="text-light-primary dark:text-dark-primary hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 flex items-center space-x-1.5 rounded-md px-4 py-1.5 text-sm font-medium transition-colors"
                 aria-label="Share app"
               >
                 <svg
@@ -221,7 +256,6 @@ function ResultPreview({ code, dependencies = {}, onShare, shareStatus }: Result
               showRestartButton={false}
               showOpenNewtab={false}
               className="h-full w-full"
-              className="h-full"
               style={{ height: '100%' }}
             />
           </div>

@@ -1,10 +1,11 @@
+import { useEffect } from 'react';
 import {
-  isRouteErrorResponse,
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
+  isRouteErrorResponse,
 } from 'react-router';
 
 import type { Route } from './+types/root';
@@ -23,7 +24,39 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
+/**
+ * Sets up theme detection based on system preferences
+ */
+function useThemeDetection() {
+  useEffect(() => {
+    // Check if user has dark mode preference
+    const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    // Apply initial theme
+    if (prefersDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+
+    // Set up listener for changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      if (e.matches) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
+  useThemeDetection();
+
   return (
     <html lang="en">
       <head>

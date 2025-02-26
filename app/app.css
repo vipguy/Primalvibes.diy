@@ -1,6 +1,43 @@
 @import 'tailwindcss';
 
 @theme {
+  /* Color definitions - these will be available as bg-midnight, text-tahiti, etc. */
+  --color-midnight: #121063;
+  --color-tahiti: #3ab7bf;
+  --color-bermuda: #78dcca;
+
+  /* Light mode colors */
+  --color-light-primary: #2c2c2c;
+  --color-light-secondary: #2c2c2c;
+  --color-light-decorative-00: #ebeaea;
+  --color-light-decorative-01: #e0dede;
+  --color-light-decorative-02: #2c2c2c;
+  --color-light-background-00: #ffffff;
+  --color-light-background-01: #f5f5f5;
+  --color-light-background-02: #f0f0f0;
+
+  /* Dark mode colors */
+  --color-dark-primary: #ffffff;
+  --color-dark-secondary: #ffffff;
+  --color-dark-decorative-00: #302f30;
+  --color-dark-decorative-01: #414141;
+  --color-dark-decorative-02: #ffffff;
+  --color-dark-background-00: #171616;
+  --color-dark-background-01: #201f20;
+  --color-dark-background-02: #201f20;
+
+  /* Accent colors - Light mode */
+  --color-accent-00-light: #f9a100;
+  --color-accent-01-light: #f58709;
+  --color-accent-02-light: #f16c12;
+  --color-accent-03-light: #ee521c;
+
+  /* Accent colors - Dark mode */
+  --color-accent-00-dark: #ffaa0f;
+  --color-accent-01-dark: #ff8f0f;
+  --color-accent-02-dark: #ff7119;
+  --color-accent-03-dark: #ff612a;
+
   --font-sans:
     'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
     'Segoe UI Symbol', 'Noto Color Emoji';
@@ -8,7 +45,7 @@
 
 html,
 body {
-  @apply bg-white dark:bg-gray-950;
+  @apply bg-light-background-00 dark:bg-dark-background-00 text-light-primary dark:text-dark-primary;
   margin: 0;
   padding: 0;
   font-family:
@@ -58,4 +95,61 @@ button {
 
 .animate-fade-in {
   animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Add the color utility classes */
+.accent-00 {
+  @apply bg-accent-00-light dark:bg-accent-00-dark;
+}
+
+.accent-01 {
+  @apply bg-accent-01-light dark:bg-accent-01-dark;
+}
+
+.accent-02 {
+  @apply bg-accent-02-light dark:bg-accent-02-dark;
+}
+
+.accent-03 {
+  @apply bg-accent-03-light dark:bg-accent-03-dark;
+}
+
+.text-accent-00 {
+  @apply text-accent-00-light dark:text-accent-00-dark;
+}
+
+.text-accent-01 {
+  @apply text-accent-01-light dark:text-accent-01-dark;
+}
+
+.text-accent-02 {
+  @apply text-accent-02-light dark:text-accent-02-dark;
+}
+
+.text-accent-03 {
+  @apply text-accent-03-light dark:text-accent-03-dark;
+}
+
+.decorative-00 {
+  @apply bg-light-decorative-00 dark:bg-dark-decorative-00;
+}
+
+.decorative-01 {
+  @apply bg-light-decorative-01 dark:bg-dark-decorative-01;
+}
+
+.decorative-02 {
+  @apply bg-light-decorative-02 dark:bg-dark-decorative-02;
+}
+
+.bg-primary {
+  @apply bg-light-background-00 dark:bg-dark-background-00;
+}
+
+.bg-secondary {
+  @apply bg-light-background-01 dark:bg-dark-background-01;
+}
+
+.bg-tertiary {
+  @apply bg-light-background-02 dark:bg-dark-background-02;
 }
