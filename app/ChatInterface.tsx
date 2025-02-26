@@ -211,11 +211,24 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
         : 'Untitled Chat';
 
       try {
+        // If we have a current session ID, fetch the existing document to get its timestamp
+        let existingTimestamp: number | undefined;
+        
+        if (currentSessionId) {
+          try {
+            const existingDoc = await database.get(currentSessionId) as SessionDocument;
+            existingTimestamp = existingDoc.timestamp;
+          } catch (err) {
+            console.error('Error fetching existing session:', err);
+          }
+        }
+        
         // If we have a current session ID, update it; otherwise create a new one
         const sessionData = {
           title,
           messages: sessionMessages,
-          timestamp: Date.now(),
+          // Use existing timestamp if available, otherwise create a new one
+          timestamp: existingTimestamp || Date.now(),
           ...(currentSessionId ? { _id: currentSessionId } : {}),
         };
 
