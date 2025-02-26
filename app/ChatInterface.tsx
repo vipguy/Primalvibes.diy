@@ -465,14 +465,36 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
               Fireproof App Builder
             </h1>
           </div>
-          <button
-            type="button"
-            onClick={handleNewChat}
-            className="bg-accent-02-light dark:bg-accent-02-dark hover:bg-accent-03-light dark:hover:bg-accent-03-dark cursor-pointer rounded-lg px-4 py-2 text-white transition-colors"
-            disabled={isGenerating}
-          >
-            New Chat
-          </button>
+          <div className="relative group">
+            <button
+              type="button"
+              onClick={handleNewChat}
+              className="bg-accent-02-light dark:bg-accent-02-dark hover:bg-accent-03-light dark:hover:bg-accent-03-dark cursor-pointer rounded-full p-2.5 text-white transition-colors flex items-center justify-center"
+              disabled={isGenerating}
+              aria-label="New Chat"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                />
+              </svg>
+            </button>
+            <div className="absolute right-0 top-full mt-1 scale-0 origin-top-right transition-all duration-100 group-hover:scale-100">
+              <div className="bg-gray-800 text-white text-sm rounded py-1 px-2 whitespace-nowrap">
+                New Chat
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Messages */}

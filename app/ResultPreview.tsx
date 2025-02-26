@@ -117,7 +117,7 @@ function ResultPreview({ code, dependencies = {}, onShare, shareStatus }: Result
   console.log(dependencies);
   return (
     <div className="h-full" style={{ overflow: 'hidden' }}>
-      <div className="border-light-decorative-00 dark:border-dark-decorative-00 bg-light-background-00 dark:bg-dark-background-00 flex items-center justify-between border-b p-2">
+      <div className="border-light-decorative-00 dark:border-dark-decorative-00 bg-light-background-00 dark:bg-dark-background-00 flex items-center justify-between border-b p-4">
         <div className="bg-light-decorative-00 dark:bg-dark-decorative-00 flex space-x-1 rounded-lg p-1 shadow-sm">
           <button
             type="button"
