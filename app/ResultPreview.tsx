@@ -1,8 +1,11 @@
 import { SandpackCodeEditor, SandpackLayout, SandpackPreview, SandpackProvider } from '@codesandbox/sandpack-react';
+import { useState } from 'react';
 
 interface ResultPreviewProps {
   code: string;
   dependencies?: Record<string, string>;
+  onShare?: () => void;
+  shareStatus?: string;
 }
 
 const indexHtml = `<!DOCTYPE html>
@@ -68,10 +71,73 @@ const defaultCode = `export default function App() {
   );
 }`;
 
-function ResultPreview({ code, dependencies = {} }: ResultPreviewProps) {
+function ResultPreview({ code, dependencies = {}, onShare, shareStatus }: ResultPreviewProps) {
+  const [activeView, setActiveView] = useState<'preview' | 'code'>('preview');
+  
   console.log(dependencies);
   return (
     <div className="h-full" style={{ overflow: 'hidden' }}>
+      <div className="bg-white border-b border-gray-200 p-2 flex items-center justify-between">
+        <div className="flex space-x-1 rounded-lg bg-gray-100 p-1 shadow-sm">
+          <button
+            type="button"
+            onClick={() => setActiveView('preview')}
+            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center space-x-1.5 ${
+              activeView === 'preview'
+                ? 'bg-white text-gray-800 shadow-sm'
+                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
+            }`}
+            aria-label="Switch to preview"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <title>Preview icon</title>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            <span>Preview</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveView('code')}
+            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center space-x-1.5 ${
+              activeView === 'code'
+                ? 'bg-white text-gray-800 shadow-sm'
+                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
+            }`}
+            aria-label="Switch to code editor"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <title>Code icon</title>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+            </svg>
+            <span>Code</span>
+          </button>
+        </div>
+        
+        {onShare && (
+          <div className="flex items-center gap-2">
+            {shareStatus && (
+              <div className="bg-green-100 text-green-800 px-3 py-1 rounded-lg text-sm animate-fade-in">
+                {shareStatus}
+              </div>
+            )}
+            <div className="flex space-x-1 rounded-lg bg-gray-100 p-1 shadow-sm">
+              <button 
+                type="button"
+                onClick={onShare}
+                className="px-4 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center space-x-1.5 text-gray-600 hover:bg-gray-50 hover:text-gray-800"
+                aria-label="Share app"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <title>Share icon</title>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
+                <span>Share</span>
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
       <SandpackProvider
         key={code}
         template="vite-react"
@@ -99,13 +165,27 @@ function ResultPreview({ code, dependencies = {} }: ResultPreviewProps) {
         }}
         theme="light"
       >
-        <SandpackLayout className="h-full" style={{ height: '100vh' }}>
-          <SandpackPreview
-            showRefreshButton
-            className="h-full"
-            style={{ height: '100%' }}
-          />
-          <SandpackCodeEditor style={{ height: '100%' }}/>
+        <SandpackLayout className="h-full" style={{ height: 'calc(100vh - 49px)' }}>
+          <div style={{ 
+            display: activeView === 'preview' ? 'block' : 'none',
+            height: '100%',
+            width: '100%' 
+          }}>
+            <SandpackPreview
+              showRefreshButton
+              className="h-full"
+              style={{ height: '100%' }}
+            />
+          </div>
+          <div style={{ 
+            display: activeView === 'code' ? 'block' : 'none',
+            height: '100%',
+            width: '100%' 
+          }}>
+            <SandpackCodeEditor 
+              style={{ height: '100%' }}
+            />
+          </div>
         </SandpackLayout>
       </SandpackProvider>
     </div>

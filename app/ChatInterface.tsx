@@ -250,7 +250,6 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
         
         if (response.content[0].type === 'text') {
           fullResponse = response.content[0].text;
-          debugger
           
           // Extract dependencies from JSON declaration
           const depsMatch = fullResponse.match(/^\s*{\s*([^}]+)}\s*}/);
