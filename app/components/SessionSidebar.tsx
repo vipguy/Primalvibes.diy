@@ -60,10 +60,8 @@ export default function SessionSidebar({
   const handleSelectSession = (session: SessionDocument) => {
     if (onSelectSession) {
       onSelectSession(session);
-      // Auto-hide sidebar after selection on mobile/smaller screens
-      if (window.innerWidth < 768) {
-        onToggle();
-      }
+      // Close sidebar after selection regardless of screen size
+      onToggle();
     }
   };
 
