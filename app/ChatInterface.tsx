@@ -189,10 +189,21 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // Initialize Fireproof
   const { database } = useFireproof('fireproof-chat-history');
+
+  // Auto-resize textarea function
+  const autoResizeTextarea = useCallback(() => {
+    const textarea = inputRef.current;
+    if (textarea) {
+      // Reset height to auto to get the correct scrollHeight
+      textarea.style.height = 'auto';
+      // Set the height to match content (with a minimum height)
+      textarea.style.height = `${Math.max(60, textarea.scrollHeight)}px`;
+    }
+  }, []);
 
   // Toggle sidebar visibility
   const toggleSidebar = useCallback(() => {
@@ -282,6 +293,11 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
+  // Auto-resize textarea when input changes
+  useEffect(() => {
+    autoResizeTextarea();
+  }, [autoResizeTextarea]);
 
   // Scroll to bottom whenever messages or streaming text changes
   useEffect(() => {
@@ -596,28 +612,47 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
 
         {/* Input area */}
         <div className="input-area border-light-decorative-00 dark:border-dark-decorative-00 bg-light-background-00 dark:bg-dark-background-00 border-t px-4 py-3">
-          <div className="flex items-center space-x-2">
-            <input
+          <div className="relative flex items-start">
+            <textarea
               ref={inputRef}
-              type="text"
               value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && !isGenerating && handleSendMessage()}
-              className="border-light-decorative-00 dark:border-dark-decorative-00 text-light-primary dark:text-dark-primary bg-light-background-00 dark:bg-dark-background-00 focus:ring-accent-01-light dark:focus:ring-accent-01-dark flex-1 rounded-xl border p-2.5 text-sm transition-all focus:border-transparent focus:ring-2 focus:outline-none"
+              onChange={(e) => {
+                setInput(e.target.value);
+                autoResizeTextarea();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey && !isGenerating) {
+                  e.preventDefault();
+                  handleSendMessage();
+                }
+              }}
+              className="border-light-decorative-00 dark:border-dark-decorative-00 text-light-primary dark:text-dark-primary bg-light-background-00 dark:bg-dark-background-00 focus:ring-accent-01-light dark:focus:ring-accent-01-dark flex-1 w-full rounded-xl border p-2.5 text-sm transition-all focus:border-transparent focus:ring-2 focus:outline-none min-h-[60px] max-h-[150px] pr-12 resize-y"
               placeholder="Describe the app you want to create..."
               disabled={isGenerating}
+              rows={2}
             />
             <button
               type="button"
               onClick={handleSendMessage}
               disabled={isGenerating}
-              className={`flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors duration-200 ${
+              className={`absolute right-2 bottom-2 flex items-center justify-center rounded-full p-2 text-sm font-medium transition-colors duration-200 ${
                 isGenerating
                   ? 'bg-light-decorative-01 dark:bg-dark-decorative-01 text-light-primary dark:text-dark-primary cursor-not-allowed opacity-50'
                   : 'bg-accent-01-light dark:bg-accent-01-dark hover:bg-accent-02-light dark:hover:bg-accent-02-dark cursor-pointer text-white'
               }`}
+              aria-label={isGenerating ? "Generating" : "Send message"}
             >
-              {isGenerating ? 'Generating...' : 'Send'}
+              {isGenerating ? (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <title>Generating message</title>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <title>Send message</title>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5l0 14M12 5l-4 4M12 5l4 4" />
+                </svg>
+              )}
             </button>
           </div>
         </div>
