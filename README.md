@@ -12,9 +12,9 @@ An AI-powered application for building React components with Fireproof data pers
 ## Getting Started
 
 1. Clone the repository
-2. Install dependencies with `npm install`
+2. Install dependencies with `pnpm install`
 3. Set up your environment variables
-4. Run with `npm run dev`
+4. Run with `pnpm run dev`
 
 ## Chat Session History
 
