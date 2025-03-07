@@ -57,12 +57,13 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
       setMessages((prev) => [...prev, { text: input, type: 'user' }]);
       setInput('');
       setIsGenerating(true);
+      setCurrentStreamedText(''); // Reset streamed text
 
       try {
         // Build message history
         const messageHistory = buildMessageHistory();
 
-        // Call OpenRouter API
+        // Call OpenRouter API with streaming enabled
         const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
           method: 'POST',
           headers: {
@@ -73,6 +74,7 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
           },
           body: JSON.stringify({
             model: CHOSEN_MODEL,
+            stream: true, // Enable streaming
             messages: [
               {
                 role: 'system',
@@ -91,44 +93,73 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
           }),
         });
 
-        const data = await response.json();
-        
-        if (data.error) {
-          console.error('OpenRouter API error:', data.error);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const reader = response.body?.getReader();
+        if (!reader) {
+          throw new Error('Response body is not readable');
         }
 
         let fullResponse = '';
         let generatedCode = '';
         let dependencies: Record<string, string> = {};
+        const decoder = new TextDecoder();
 
-        if (data.choices && data.choices[0] && data.choices[0].message) {
-          fullResponse = data.choices[0].message.content;
-          console.log('AI response:', fullResponse);
-          // Extract dependencies from JSON declaration
-          const depsMatch = fullResponse.match(/^\s*{\s*([^}]+)}\s*}/);
-          if (depsMatch) {
-            try {
-              const depsObject = JSON.parse(`{${depsMatch[1]}}`);
-              dependencies = depsObject;
-              // Remove the dependencies object from the full response
-              fullResponse = fullResponse.replace(/^\s*{\s*[^}]+}\s*}/, '').trim();
-            } catch (e) {
-              console.error('Failed to parse dependencies:', e);
+        // Process the stream
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          // Decode the chunk
+          const chunk = decoder.decode(value, { stream: true });
+          
+          // Process each line (each SSE event)
+          const lines = chunk.split('\n');
+          for (const line of lines) {
+            if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+              try {
+                const data = JSON.parse(line.substring(6));
+                if (data.choices && data.choices[0]?.delta?.content) {
+                  const content = data.choices[0].delta.content;
+                  fullResponse += content;
+                  setCurrentStreamedText(prev => prev + content);
+                }
+              } catch (e) {
+                console.error('Error parsing chunk:', e);
+              }
             }
           }
+        }
 
-          // Extract code and explanation
-          const codeBlockMatch = fullResponse.match(/```(?:jsx|js|javascript)?\n([\s\S]*?)```/);
-          if (codeBlockMatch) {
-            generatedCode = codeBlockMatch[1];
-
-            // Get the explanation by removing the code block and dependencies declaration
-            const explanation = fullResponse
-              .replace(/^\s*{\s*"dependencies"\s*:\s*{[^}]+}\s*/, '')
-              .replace(/```(?:jsx|js|javascript)?\n[\s\S]*?```/, '')
-              .trim();
-            fullResponse = explanation;
+        // Extract dependencies and code from the complete response
+        console.log('AI response:', fullResponse);
+        
+        // Extract dependencies from JSON declaration
+        const depsMatch = fullResponse.match(/^\s*{\s*([^}]+)}\s*}/);
+        if (depsMatch) {
+          try {
+            const depsObject = JSON.parse(`{${depsMatch[1]}}`);
+            dependencies = depsObject;
+            // Remove the dependencies object from the full response
+            fullResponse = fullResponse.replace(/^\s*{\s*[^}]+}\s*}/, '').trim();
+          } catch (e) {
+            console.error('Failed to parse dependencies:', e);
           }
+        }
+
+        // Extract code and explanation
+        const codeBlockMatch = fullResponse.match(/```(?:jsx|js|javascript)?\n([\s\S]*?)```/);
+        if (codeBlockMatch) {
+          generatedCode = codeBlockMatch[1];
+
+          // Get the explanation by removing the code block and dependencies declaration
+          const explanation = fullResponse
+            .replace(/^\s*{\s*"dependencies"\s*:\s*{[^}]+}\s*/, '')
+            .replace(/```(?:jsx|js|javascript)?\n[\s\S]*?```/, '')
+            .trim();
+          fullResponse = explanation;
         }
 
         // Add AI response with code and dependencies
