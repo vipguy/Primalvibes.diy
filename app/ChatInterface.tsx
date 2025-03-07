@@ -1,8 +1,10 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFireproof } from 'use-fireproof';
 import SessionSidebar from './components/SessionSidebar';
 import { BASE_SYSTEM_PROMPT } from './prompts';
+
+// const CHOSEN_MODEL = 'qwen/qwq-32b:free';
+const CHOSEN_MODEL = 'anthropic/claude-3.7-sonnet';
 
 interface ChatInterfaceProps {
   onCodeGenerated: (code: string, dependencies?: Record<string, string>) => void;
@@ -20,12 +22,6 @@ interface SessionDocument {
     dependencies?: Record<string, string>;
   }>;
 }
-
-// Initialize Anthropic client
-const anthropic = new Anthropic({
-  apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
-  dangerouslyAllowBrowser: true,
-});
 
 // Collection of sample React components
 const sampleApps = [
@@ -339,36 +335,47 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
         // Build message history
         const messageHistory = buildMessageHistory();
 
-        // Call Claude API with system prompt and message history
-        const response = await anthropic.messages.create({
-          model: 'claude-3-7-sonnet-latest',
-          max_tokens: 8192,
-          system: [
-            {
-              type: 'text',
-              text: BASE_SYSTEM_PROMPT,
-              cache_control: { type: 'ephemeral' },
-            },
-          ],
-          messages: [
-            ...messageHistory,
-            {
-              role: 'user' as const,
-              content: input,
-            },
-            {
-              role: 'assistant' as const,
-              content: '{"dependencies":',
-            },
-          ],
+        // Call OpenRouter API instead of Anthropic
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': window.location.origin, // Optional: Site URL for rankings on OpenRouter
+            'X-Title': 'Fireproof App Builder', // Optional: Site title for rankings on OpenRouter
+          },
+          body: JSON.stringify({
+            model: CHOSEN_MODEL, // You can change this to any model from OpenRouter
+            messages: [
+              {
+                role: 'system',
+                content: BASE_SYSTEM_PROMPT,
+              },
+              ...messageHistory,
+              {
+                role: 'user',
+                content: input,
+              },
+              {
+                role: 'assistant',
+                content: '{"dependencies":',
+              },
+            ],
+          }),
         });
+
+        const data = await response.json();
+        
+        if (data.error) {
+          console.error('OpenRouter API error:', data.error);
+        }
 
         let fullResponse = '';
         let generatedCode = '';
         let dependencies: Record<string, string> = {};
 
-        if (response.content[0].type === 'text') {
-          fullResponse = response.content[0].text;
+        if (data.choices && data.choices[0] && data.choices[0].message) {
+          fullResponse = data.choices[0].message.content;
 
           // Extract dependencies from JSON declaration
           const depsMatch = fullResponse.match(/^\s*{\s*([^}]+)}\s*}/);
@@ -418,7 +425,7 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
             type: 'ai',
           },
         ]);
-        console.error('Error calling Claude API:', error);
+        console.error('Error calling OpenRouter API:', error);
       } finally {
         setIsGenerating(false);
       }

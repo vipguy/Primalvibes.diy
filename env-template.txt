@@ -1,0 +1,4 @@
+# Environment Variables for AI App Builder
+# Copy this file to .env and add your OpenRouter API key
+
+VITE_OPENROUTER_API_KEY=your_openrouter_api_key_here
