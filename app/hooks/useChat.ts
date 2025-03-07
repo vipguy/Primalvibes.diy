@@ -1,8 +1,9 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import type { ChatMessage } from '../types/chat';
 import { makeBaseSystemPrompt } from '../prompts';
 
 const CHOSEN_MODEL = 'anthropic/claude-3.7-sonnet';
+// const CHOSEN_MODEL = 'qwen/qwq-32b:free';
 
 export function useChat(onCodeGenerated: (code: string, dependencies?: Record<string, string>) => void) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -14,7 +15,7 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Initialize system prompt
-  useCallback(() => {
+  useEffect(() => {
     makeBaseSystemPrompt(CHOSEN_MODEL).then((prompt) => {
       setSystemPrompt(prompt);
     });

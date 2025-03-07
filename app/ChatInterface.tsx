@@ -8,9 +8,6 @@ import MessageList from './components/MessageList';
 import ChatInput from './components/ChatInput';
 import QuickSuggestions from './components/QuickSuggestions';
 
-// const CHOSEN_MODEL = 'qwen/qwq-32b:free';
-const CHOSEN_MODEL = 'anthropic/claude-3.7-sonnet';
-
 interface ChatInterfaceProps {
   onCodeGenerated: (code: string, dependencies?: Record<string, string>) => void;
 }

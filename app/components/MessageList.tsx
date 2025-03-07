@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { ChatMessage } from '../types/chat';
+import ReactMarkdown from 'react-markdown';
 
 interface MessageListProps {
   messages: ChatMessage[];
@@ -13,6 +14,17 @@ function MessageList({ messages, isGenerating, currentStreamedText }: MessageLis
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, currentStreamedText]);
+
+  // Function to render message content with markdown support
+  const renderMessageContent = (text: string) => {
+    return (
+      <div className="prose prose-sm max-w-none dark:prose-invert">
+        <ReactMarkdown>
+          {text}
+        </ReactMarkdown>
+      </div>
+    );
+  };
 
   return (
     <div
@@ -36,7 +48,7 @@ function MessageList({ messages, isGenerating, currentStreamedText }: MessageLis
                   : 'bg-light-decorative-00 dark:bg-dark-decorative-00 text-light-primary dark:text-dark-primary rounded-tl-sm'
               } max-w-[85%] shadow-sm`}
             >
-              {msg.text}
+              {renderMessageContent(msg.text)}
             </div>
           </div>
         </div>
@@ -51,7 +63,7 @@ function MessageList({ messages, isGenerating, currentStreamedText }: MessageLis
           <div className="message bg-light-decorative-00 dark:bg-dark-decorative-00 text-light-primary dark:text-dark-primary max-w-[85%] rounded-2xl rounded-tl-sm p-3 shadow-sm">
             {currentStreamedText ? (
               <>
-                {currentStreamedText}
+                {renderMessageContent(currentStreamedText)}
                 <span className="bg-light-primary dark:bg-dark-primary ml-1 inline-block h-4 w-2 animate-pulse" />
               </>
             ) : (
