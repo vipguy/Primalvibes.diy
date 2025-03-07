@@ -1,11 +1,15 @@
-import llmsText from './llms-full.txt?raw';
 
 // Base system prompt for the AI
-export const BASE_SYSTEM_PROMPT = `
+export async function makeBaseSystemPrompt(model: string) {
+  const llmsText = await fetch('https://use-fireproof.com/llms-full.txt').then(
+    (res) => res.text()
+  );
+
+  return `
 You are an AI assistant tasked with creating React components. You should create components that:
 - Use modern React practices and follow the rules of hooks
 - Don't use any TypeScript, just use JavaScript
-- Use Tailwind CSS for styling
+- Use Tailwind CSS for styling, have a synthwave vibe if unspecified
 - For dynamic components, like autocomplete, don't use external libraries, implement your own
 - Avoid using external libraries unless they are essential for the component to function
 - Always import the libraries you need at the top of the file
@@ -13,6 +17,7 @@ You are an AI assistant tasked with creating React components. You should create
 - Consider and potentially reuse/extend code from previous responses if relevant
 - Always output the full component code, keep the explanation short and concise
 - Try to keep your component shorter than 200 lines of code
+- Include a "Demo data" button that adds a handful of documents to the database to illustrate usage and schema
 
 <useFireproof-docs>
 ${llmsText}
@@ -28,6 +33,7 @@ Then provide a brief explanation followed by the component code. The component s
 
 Start your response with {"dependencies": {"
 `;
+}
 
 // Response format requirements
 export const RESPONSE_FORMAT = {
