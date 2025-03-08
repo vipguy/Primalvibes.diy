@@ -72,84 +72,61 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
   // State machine function for processing streaming chunks
   function processStreamChunk(chunk: string) {
     let currentDisplayText = '';
+
+    console.log('Processing chunk:', chunk, 'inDependencyMode:', inDependencyMode);
     
-    // Handle dependency chunks that come in parts
-    if (inDependencyMode || chunk.trim().startsWith('{"') || pendingDependencyChunk) {
-      // Accumulate dependency JSON chunks
-      const combinedChunk = pendingDependencyChunk + chunk;
+    // Add an early return for any chunk while in dependency mode
+    if (inDependencyMode) {
+      setPendingDependencyChunk(pendingDependencyChunk + chunk);
       
-      // Check if this completes a dependency declaration
-      if (combinedChunk.includes('}}')) {
-        const endIndex = combinedChunk.indexOf('}}') + 2;
-        const dependencyPart = combinedChunk.substring(0, endIndex);
+      // Only process further if we see the end of the dependency declaration
+      if ((pendingDependencyChunk + chunk).includes('}}')) {
+        const combined = pendingDependencyChunk + chunk;
+        const afterJson = combined.substring(combined.indexOf('}}') + 2);
         
-        try {
-          // Clean and parse the dependency part
-          let dependencyJson = dependencyPart;
-          if (dependencyJson.endsWith('}}')) {
-            dependencyJson = dependencyJson.substring(0, dependencyJson.length - 1); // Remove extra }
-          }
-          
-          console.log('Attempting to parse combined dependency:', dependencyJson);
-          const depsObject = JSON.parse(dependencyJson);
-          
-          // Add dependencies
-          Object.keys(depsObject).forEach(key => {
-            parserState.current.dependencies[key] = depsObject[key];
+        // Extract dependencies using regex
+        const matches = combined.match(/"([^"]+)"\s*:\s*"([^"]+)"/g);
+        if (matches) {
+          matches.forEach(match => {
+            const parts = match.split(':');
+            if (parts.length === 2) {
+              const key = parts[0].replace(/"/g, '').trim();
+              const value = parts[1].replace(/"/g, '').trim();
+              parserState.current.dependencies[key] = value;
+              console.log(`Added dependency: ${key} = ${value}`);
+            }
           });
-          
-          console.log('Added dependencies:', parserState.current.dependencies);
-          
-          // Process any remaining content after the dependency part
-          const remainingContent = combinedChunk.substring(endIndex);
-          if (remainingContent.trim()) {
-            // Process the remaining content normally
-            console.log('Processing remaining content:', remainingContent);
-            
-            // Recursively process the remaining content
-            setInDependencyMode(false);
-            setPendingDependencyChunk('');
-            processStreamChunk(remainingContent);
-          } else {
-            setInDependencyMode(false);
-            setPendingDependencyChunk('');
-          }
-          
-          // Don't continue processing this chunk since we've handled it
-          return;
-        } catch (e) {
-          console.error('Failed to parse combined dependency:', e);
-          
-          // If we can't parse it, check if it's a partial dependency
-          if (combinedChunk.startsWith('{"') && !combinedChunk.includes('}}}')) {
-            // Still looks like a dependency - keep accumulating
-            setPendingDependencyChunk(combinedChunk);
-            setInDependencyMode(true);
-            return;
-          }
         }
-      } else if (combinedChunk.startsWith('{"')) {
-        // Looks like a dependency but not complete - keep accumulating
-        setPendingDependencyChunk(combinedChunk);
-        setInDependencyMode(true);
-        return;
+        
+        // Reset dependency mode
+        setInDependencyMode(false);
+        setPendingDependencyChunk('');
+        
+        // Process remaining content if any
+        if (afterJson.trim()) {
+          processStreamChunk(afterJson);
+        }
       }
+      
+      return;
     }
     
-    // Existing code for handling completed chunks/dependency sections
-    if (chunk.includes('}}')) {
-      const contentIndex = chunk.indexOf('}}') + 2;
-      chunk = chunk.substring(contentIndex);
-      console.log('Skipped dependency part, now processing:', chunk);
-    }
-    
-    // Attempt to remove any stray dependency JSON that might have slipped through
-    if (/\{\s*"[^"]+"\s*:\s*"[^"]+/.test(chunk) && !chunk.includes('```')) {
-      const matched = chunk.match(/\{\s*"[^"]+"\s*:\s*"[^"]+".*?([\}\n]|$)/);
-      if (matched && matched.index === 0) {
-        console.log('Ignoring apparent dependency fragment:', chunk);
-        return;
-      }
+    // Check for various patterns that indicate dependency data
+    const isDependencyChunk = 
+      // Package name fragment - includes quotes and : but not at beginning
+      (chunk.includes('"') && chunk.includes(':') && !chunk.includes('```')) ||
+      // Start of package object
+      chunk.trim().startsWith('{') || 
+      // End of package declaration with }} 
+      (chunk.includes('}}') && chunk.indexOf('}}') < 20) ||
+      // Fragment starting with "-" followed by package name
+      (chunk.trim().startsWith('-') && chunk.includes('"'));
+      
+    if (isDependencyChunk) {
+      console.log('Dependency chunk detected, setting mode and accumulating:', chunk);
+      setPendingDependencyChunk(pendingDependencyChunk + chunk);
+      setInDependencyMode(true);
+      return;
     }
     
     // Append processed chunk to the full response buffer
@@ -188,13 +165,28 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
           parserState.current.inCodeBlock = false;
           parserState.current.backtickCount = 0;
 
-          // Clean up the code content
+          // Clean up the code content - more robust language identifier handling
           let cleanedCode = parserState.current.codeBlockContent;
+          
+          // Check for language identifier at the beginning in different formats
+          // Case 1: Language on its own line: "js\n..."
           const firstLineBreak = cleanedCode.indexOf('\n');
           if (firstLineBreak > -1) {
             const firstLine = cleanedCode.substring(0, firstLineBreak).trim();
             if (['js', 'jsx', 'javascript', 'ts', 'typescript'].includes(firstLine)) {
               cleanedCode = cleanedCode.substring(firstLineBreak + 1);
+            }
+          }
+          
+          // Case 2: Language without a line break: "js..." (at the beginning)
+          const languageIdentifiers = ['js', 'jsx', 'javascript', 'ts', 'typescript'];
+          for (const lang of languageIdentifiers) {
+            if (cleanedCode.trimStart().startsWith(lang)) {
+              // Only remove if it's followed by a space or newline to avoid removing code that happens to start with "js"
+              const afterLang = cleanedCode.trimStart().substring(lang.length);
+              if (afterLang.startsWith(' ') || afterLang.startsWith('\n')) {
+                cleanedCode = afterLang.trimStart();
+              }
             }
           }
 
@@ -338,15 +330,58 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
         console.log('Final dependencies collected:', dependencies);
         console.log('Final streamed text before trim:', currentStreamedText);
         
-        // Use the already cleaned streamed text
-        const explanation = currentStreamedText.trim();
-        
-        console.log('Final explanation after trim:', explanation);
+        // Apply more aggressive cleanup to the final message
+        let cleanedExplanation = currentStreamedText;
+
+        // 1. Remove any string that looks like a partial dependency declaration
+        const patterns = [
+          /\{\s*"[^"]*"\s*:\s*"[^"]*"\s*\}\}/g,            // Full JSON object
+          /\{\s*"[^"]*"\s*:\s*"[^"]*"\s*\}/g,              // JSON object without }}
+          /"[^"]*"\s*:\s*"[^"]*"\s*\}/g,                   // Partial JSON without leading {
+          /-[^"]*"\s*:\s*"[^"]*"/g,                         // Package name fragment with -
+          /icons"\s*:\s*"[^"]*"/g,                         // "icons":"version" fragment 
+          /\{\s*"react[^}]*\}/g,                           // Any JSON with react
+          /^[^#\n]*"[^"]*"\s*:\s*"[^"]*"[^#\n]*$/gm        // Any line containing "key":"value"
+        ];
+
+        // Apply all cleanup patterns
+        patterns.forEach(pattern => {
+          cleanedExplanation = cleanedExplanation.replace(pattern, '');
+        });
+
+        // 2. Remove any line that might contain part of a dependency declaration
+        cleanedExplanation = cleanedExplanation
+          .split('\n')
+          .filter(line => {
+            const trimmed = line.trim();
+            // Skip suspicious lines 
+            return !(
+              // Has package-like pattern
+              (trimmed.includes('"') && trimmed.includes(':') && !trimmed.includes('```')) ||
+              // Starts with suspicious characters for dependency fragments
+              trimmed.startsWith('-') || 
+              trimmed.startsWith('{') ||
+              // Is just a closing brace at start of line
+              trimmed.startsWith('}}')
+            );
+          })
+          .join('\n');
+
+        // 3. Do a simple capitalization-based cleanup - most artifact fragments are lowercase,
+        // while real content usually starts with uppercase or # character
+        const lines = cleanedExplanation.split('\n');
+        if (lines.length > 0 && lines[0].trim() && 
+           !lines[0].trim().startsWith('#') && 
+           !lines[0].trim()[0].match(/[A-Z]/)) {
+          // First line doesn't start with # or uppercase - likely a fragment
+          lines.shift();
+        }
+        cleanedExplanation = lines.join('\n');
 
         setMessages((prev) => [
           ...prev,
           {
-            text: explanation || "Here's your generated app:",
+            text: cleanedExplanation || "Here's your generated app:",
             type: 'ai',
             code: generatedCode,
             dependencies,
