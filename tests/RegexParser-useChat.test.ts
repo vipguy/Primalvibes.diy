@@ -87,4 +87,54 @@ describe('RegexParser in useChat context', () => {
     expect(codeContent).toContain('import React');
     expect(codeContent).toContain('export default function App()');
   });
+
+  it('should handle incomplete JSX import statements', () => {
+    // Create a parser instance
+    const parser = new RegexParser();
+    
+    // Create spies for the events
+    const codeSpy = vi.fn();
+    const textSpy = vi.fn();
+    const dependenciesSpy = vi.fn();
+    
+    // Register event handlers
+    parser.on('code', codeSpy);
+    parser.on('text', textSpy);
+    parser.on('dependencies', dependenciesSpy);
+    
+    // Disable console.debug during test
+    const originalConsoleDebug = console.debug;
+    console.debug = vi.fn();
+    
+    try {
+      // Simulate a raw dependencies buffer
+      parser.write('{dependencies: {}}');
+      
+      // Add some markdown text
+      parser.write('\n\n# Pomodoro Timer App\n\n');
+      parser.write('This Pomodoro timer app lets you track work/break cycles with customizable durations. It persists timer settings and session history with Fireproof, allowing you to review your productivity sessions.\n\n');
+      
+      // Write an incomplete JSX code block with unfinished import
+      parser.write('```jsx\nimport React, { useState, useEffect,\n```');
+      
+      // End the stream
+      parser.end();
+      
+      // Check what was parsed
+      console.log('Dependencies:', parser.dependencies);
+      console.log('Code content:', parser.codeBlockContent);
+      
+      // Verify the parser handled the incomplete code properly
+      expect(parser.inCodeBlock).toBe(false); // Should have exited code block mode
+      expect(parser.codeBlockContent).toContain('import React'); // Should have captured partial import
+      expect(parser.codeBlockContent).toContain('useEffect'); // Should have captured partial import
+      
+      // Check if dependencies were properly parsed
+      expect(dependenciesSpy).toHaveBeenCalled();
+      expect(parser.dependencies).toEqual({});
+    } finally {
+      // Restore console.debug
+      console.debug = originalConsoleDebug;
+    }
+  });
 });
