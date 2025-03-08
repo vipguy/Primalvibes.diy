@@ -5,7 +5,7 @@ import {
   SandpackProvider,
   useSandpack,
 } from '@codesandbox/sandpack-react';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { sandpackDependencies } from './utils/versions';
 
 interface ResultPreviewProps {
@@ -157,9 +157,11 @@ const defaultCode = `export default function App() {
 function SandpackEventListener({
   setActiveView,
   setBundlingComplete,
+  isStreaming,
 }: {
   setActiveView: (view: 'preview' | 'code') => void;
   setBundlingComplete: (complete: boolean) => void;
+  isStreaming: boolean;
 }) {
   const { listen } = useSandpack();
 
@@ -170,19 +172,21 @@ function SandpackEventListener({
     const unsubscribe = listen((message) => {
       if (message.type === 'start') {
         setBundlingComplete(false);
-        // } else if (message.type === 'status') {
       } else if (message.type === 'urlchange') {
         // Mark bundling as complete
         setBundlingComplete(true);
-        // Switch to preview when bundling is complete
-        setActiveView('preview');
+        
+        // Only switch to preview if we're not currently streaming
+        if (!isStreaming) {
+          setActiveView('preview');
+        }
       }
     });
 
     return () => {
       unsubscribe();
     };
-  }, [listen, setActiveView, setBundlingComplete]);
+  }, [listen, setActiveView, setBundlingComplete, isStreaming]);
 
   return null;
 }
@@ -494,8 +498,9 @@ function ResultPreview({
         
         // Hide welcome screen when streaming starts
         setShowWelcome(false);
-        // Always show code view when streaming and lock it
+        // Always show code view when streaming
         setActiveView('code');
+        // We want to lock the view to code during streaming
         setLockCodeView(true);
       }
     }
@@ -505,6 +510,8 @@ function ResultPreview({
   useEffect(() => {
     if (!isStreaming) {
       setLockCodeView(false);
+      // The next URL change event will now trigger the switch to preview
+      // since we've updated the SandpackEventListener to check isStreaming
     }
   }, [isStreaming]);
 
@@ -683,10 +690,11 @@ function ResultPreview({
         // Show sandbox
         <div data-testid="sandpack-provider">
           <SandpackProvider
-            key={sandpackKey}
+            key={isStreaming ? 'streaming' : 'completed'}
             template="vite-react"
             options={{
               externalResources: ['https://cdn.tailwindcss.com'],
+              classes: { 'sp-wrapper': 'h-full' },
             }}
             customSetup={{
               dependencies: {
@@ -699,14 +707,12 @@ function ResultPreview({
           >
             <SandpackEventListener
               setActiveView={(view) => {
-                // Only allow switching to preview if code view isn't locked
-                if (view === 'preview' && !lockCodeView) {
-                  setActiveView(view);
-                } else if (view === 'code') {
-                  setActiveView(view);
-                }
+                // Always allow switching to preview on URL change events
+                // Only restrict manual switching when lockCodeView is true
+                setActiveView(view);
               }}
               setBundlingComplete={setBundlingComplete}
+              isStreaming={isStreaming}
             />
             {isStreaming && <SandpackScrollController />}
             <SandpackLayout className="h-full" style={{ height: 'calc(100vh - 49px)' }}>
