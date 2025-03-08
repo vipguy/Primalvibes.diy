@@ -111,13 +111,12 @@ function ChatInterface({ chatState }: ChatInterfaceProps) {
         .find((msg: ChatMessage) => msg.type === 'ai' && msg.code);
 
       if (lastAiMessageWithCode?.code) {
-        // Use the last code from the loaded session
         // No need to handle this here as it's handled by the parent component through onCodeGenerated
       }
     }
   }, [loadSession, setMessages]);
 
-  // Function to handle starting a new chat - memoized
+  // Function to handle starting a new chat - memoized with complete dependencies
   const handleNewChat = useCallback(() => {
     // Start the shrinking animation
     setIsShrinking(true);
@@ -138,7 +137,7 @@ function ChatInterface({ chatState }: ChatInterfaceProps) {
       },
       500 + messages.length * 50
     ); // Account for staggered animation of messages
-  }, [createNewSession, messages.length, setInput, setMessages]);
+  }, [createNewSession, messages.length, setInput, setMessages, setIsShrinking, setIsExpanding]);
 
   // Memoize child components to prevent unnecessary re-renders
   const sessionSidebar = useMemo(() => (

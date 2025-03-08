@@ -45,7 +45,7 @@ function ChatHeader({ onToggleSidebar, onNewChat, isGenerating }: ChatHeaderProp
         <button
           type="button"
           onClick={onNewChat}
-          className="bg-accent-02-light dark:bg-accent-02-dark hover:bg-accent-03-light dark:hover:bg-accent-03-dark flex cursor-pointer items-center justify-center rounded-full p-2.5 text-white transition-colors"
+          className="peer bg-accent-02-light dark:bg-accent-02-dark hover:bg-accent-03-light dark:hover:bg-accent-03-dark flex cursor-pointer items-center justify-center rounded-full p-2.5 text-white transition-colors"
           disabled={isGenerating}
           aria-label="New Chat"
           title="New Chat"
@@ -66,7 +66,7 @@ function ChatHeader({ onToggleSidebar, onNewChat, isGenerating }: ChatHeaderProp
             />
           </svg>
         </button>
-        <span className="absolute top-full right-0 mt-1 rounded bg-gray-800 px-2 py-1 text-sm whitespace-nowrap text-white opacity-0 pointer-events-none transition-opacity hover:opacity-100 peer-hover:[.peer]:opacity-100">
+        <span className="absolute top-full right-0 mt-1 rounded bg-gray-800 px-2 py-1 text-sm whitespace-nowrap text-white opacity-0 pointer-events-none transition-opacity peer-hover:opacity-100">
           New Chat
         </span>
       </div>

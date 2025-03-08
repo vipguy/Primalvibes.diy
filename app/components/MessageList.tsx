@@ -10,6 +10,16 @@ interface MessageListProps {
   isExpanding?: boolean;
 }
 
+// Shared utility function for rendering markdown content
+// Extracted outside the component to prevent recreation on each render
+const renderMarkdownContent = (text: string) => {
+  return (
+    <div className="prose prose-sm dark:prose-invert max-w-none">
+      <ReactMarkdown>{text}</ReactMarkdown>
+    </div>
+  );
+};
+
 // Individual message component to optimize rendering
 const Message = memo(({ 
   message, 
@@ -22,15 +32,6 @@ const Message = memo(({
   isShrinking: boolean; 
   isExpanding: boolean;
 }) => {
-  // Function to render message content with markdown support
-  const renderMessageContent = (text: string) => {
-    return (
-      <div className="prose prose-sm dark:prose-invert max-w-none">
-        <ReactMarkdown>{text}</ReactMarkdown>
-      </div>
-    );
-  };
-
   return (
     <div
       className={`flex flex-col transition-all duration-500 ${
@@ -55,7 +56,7 @@ const Message = memo(({
               : 'bg-light-decorative-00 dark:bg-dark-decorative-00 text-light-primary dark:text-dark-primary rounded-tl-sm'
           } max-w-[85%] shadow-sm`}
         >
-          {renderMessageContent(message.text)}
+          {renderMarkdownContent(message.text)}
         </div>
       </div>
     </div>
@@ -64,15 +65,6 @@ const Message = memo(({
 
 // Optimized AI Typing component
 const AITyping = memo(({ currentStreamedText }: { currentStreamedText: string }) => {
-  // Function to render message content with markdown support
-  const renderMessageContent = (text: string) => {
-    return (
-      <div className="prose prose-sm dark:prose-invert max-w-none">
-        <ReactMarkdown>{text}</ReactMarkdown>
-      </div>
-    );
-  };
-
   return (
     <div className="flex justify-start">
       <div className="bg-dark-decorative-00 dark:bg-light-decorative-00 mr-2 flex h-8 w-8 items-center justify-center rounded-full">
@@ -83,7 +75,7 @@ const AITyping = memo(({ currentStreamedText }: { currentStreamedText: string })
       <div className="message bg-light-decorative-00 dark:bg-dark-decorative-00 text-light-primary dark:text-dark-primary max-w-[85%] rounded-2xl rounded-tl-sm p-3 shadow-sm">
         {currentStreamedText ? (
           <>
-            {renderMessageContent(currentStreamedText)}
+            {renderMarkdownContent(currentStreamedText)}
             <span className="bg-light-primary dark:bg-dark-primary ml-1 inline-block h-4 w-2 animate-pulse" />
           </>
         ) : (
