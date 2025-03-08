@@ -2,41 +2,41 @@
 
 @theme {
   /* Color definitions - these will be available as bg-midnight, text-tahiti, etc. */
-  --color-midnight: #121063;
-  --color-tahiti: #3ab7bf;
-  --color-bermuda: #78dcca;
+  --color-midnight: #333;
+  --color-tahiti: #999;
+  --color-bermuda: #ccc;
 
   /* Light mode colors */
-  --color-light-primary: #2c2c2c;
-  --color-light-secondary: #2c2c2c;
-  --color-light-decorative-00: #ebeaea;
-  --color-light-decorative-01: #e0dede;
-  --color-light-decorative-02: #2c2c2c;
-  --color-light-background-00: #ffffff;
-  --color-light-background-01: #f5f5f5;
-  --color-light-background-02: #f0f0f0;
+  --color-light-primary: #333;
+  --color-light-secondary: #333;
+  --color-light-decorative-00: #eee;
+  --color-light-decorative-01: #ddd;
+  --color-light-decorative-02: #333;
+  --color-light-background-00: #fff;
+  --color-light-background-01: #eee;
+  --color-light-background-02: #ddd;
 
   /* Dark mode colors */
-  --color-dark-primary: #ffffff;
-  --color-dark-secondary: #ffffff;
-  --color-dark-decorative-00: #302f30;
-  --color-dark-decorative-01: #414141;
-  --color-dark-decorative-02: #ffffff;
-  --color-dark-background-00: #171616;
-  --color-dark-background-01: #201f20;
-  --color-dark-background-02: #201f20;
+  --color-dark-primary: #fff;
+  --color-dark-secondary: #fff;
+  --color-dark-decorative-00: #333;
+  --color-dark-decorative-01: #444;
+  --color-dark-decorative-02: #fff;
+  --color-dark-background-00: #111;
+  --color-dark-background-01: #222;
+  --color-dark-background-02: #222;
 
   /* Accent colors - Light mode */
-  --color-accent-00-light: #f9a100;
-  --color-accent-01-light: #f58709;
-  --color-accent-02-light: #f16c12;
-  --color-accent-03-light: #ee521c;
+  --color-accent-00-light: #aaa;
+  --color-accent-01-light: #999;
+  --color-accent-02-light: #888;
+  --color-accent-03-light: #777;
 
   /* Accent colors - Dark mode */
-  --color-accent-00-dark: #ffaa0f;
-  --color-accent-01-dark: #ff8f0f;
-  --color-accent-02-dark: #ff7119;
-  --color-accent-03-dark: #ff612a;
+  --color-accent-00-dark: #bbb;
+  --color-accent-01-dark: #aaa;
+  --color-accent-02-dark: #777;
+  --color-accent-03-dark: #666;
 
   --font-sans:
     'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
