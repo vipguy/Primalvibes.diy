@@ -13,6 +13,9 @@ interface ResultPreviewProps {
   dependencies?: Record<string, string>;
   onShare?: () => void;
   shareStatus?: string;
+  completedMessage?: string;
+  currentMessage?: { content: string };
+  currentStreamContent?: string;
 }
 
 const indexHtml = `<!DOCTYPE html>
@@ -119,7 +122,10 @@ function ResultPreview({
   isStreaming = false,
   dependencies = {}, 
   onShare, 
-  shareStatus 
+  shareStatus,
+  completedMessage,
+  currentMessage,
+  currentStreamContent
 }: ResultPreviewProps) {
   const [activeView, setActiveView] = useState<'preview' | 'code'>('preview');
   const [displayCode, setDisplayCode] = useState(code || defaultCode);
@@ -303,6 +309,13 @@ function ResultPreview({
           </div>
         </SandpackLayout>
       </SandpackProvider>
+      <div className="result-content">
+        {streamingCode ? (
+          <div>{currentStreamContent}</div>
+        ) : (
+          <div>{completedMessage || currentMessage?.content || ""}</div>
+        )}
+      </div>
     </div>
   );
 }

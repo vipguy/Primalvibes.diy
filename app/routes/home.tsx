@@ -127,6 +127,11 @@ export default function Home() {
           dependencies={chatState.parserState?.current?.dependencies || state.dependencies}
           onShare={handleShare}
           shareStatus={shareStatus}
+          completedMessage={chatState.completedMessage}
+          currentStreamContent={chatState.currentStreamedText}
+          currentMessage={chatState.messages.length > 0 
+            ? chatState.messages[chatState.messages.length - 1] 
+            : undefined}
         />
       </div>
     </div>

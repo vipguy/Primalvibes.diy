@@ -15,6 +15,7 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
   const [streamingCode, setStreamingCode] = useState<string>('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [completedCode, setCompletedCode] = useState<string>('');
+  const [completedMessage, setCompletedMessage] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const parserState = useRef<RegexParser>(new RegexParser());
@@ -209,6 +210,27 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
 
         // Update the editor with code and dependencies
         onCodeGenerated(completedCode || parser.codeBlockContent, parser.dependencies);
+
+        // When the stream is done, we need to set the final message
+        setMessages((prevMessages) => {
+          const updatedMessages = [...prevMessages];
+          const lastMessageIndex = updatedMessages.length - 1;
+          
+          if (lastMessageIndex >= 0) {
+            // Make sure to preserve the complete message content
+            updatedMessages[lastMessageIndex] = {
+              ...updatedMessages[lastMessageIndex],
+              text: cleanedMessage, // Use 'text' instead of 'content' to match your ChatMessage type
+              streaming: false,
+              completed: true, // Add a completed flag
+            };
+          }
+          
+          return updatedMessages;
+        });
+
+        // Also set the completedMessage state
+        setCompletedMessage(cleanedMessage);
       } catch (error) {
         setMessages((prev) => [
           ...prev,
@@ -240,6 +262,7 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
     autoResizeTextarea,
     scrollToBottom,
     sendMessage,
-    parserState
+    parserState,
+    completedMessage
   };
 } 

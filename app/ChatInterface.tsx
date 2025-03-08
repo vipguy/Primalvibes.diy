@@ -33,6 +33,7 @@ interface ChatInterfaceProps {
       fullResponseBuffer: string;
       dependencies: Record<string, string>;
     }>;
+    completedMessage: string;
   };
 }
 
@@ -51,7 +52,8 @@ function ChatInterface({ chatState }: ChatInterfaceProps) {
     messagesEndRef, 
     autoResizeTextarea, 
     scrollToBottom, 
-    sendMessage
+    sendMessage,
+    completedMessage
   } = chatState;
   
   const { 
