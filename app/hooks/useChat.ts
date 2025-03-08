@@ -76,7 +76,9 @@ export function useChat(
       // Debug log to see the raw stream content when code block starts
       console.log('Raw stream at code block start:', parserState.current.displayText);
       // Log the completely unmodified raw stream data
-      console.log('Unmodified raw stream buffer:', rawStreamBuffer.current);
+      setTimeout(() => {
+        console.log('Unmodified raw stream buffer:', rawStreamBuffer.current);
+      }, 200);
 
       setCurrentStreamedText((prevText) => {
         // Add the "Writing code..." message with newlines before and after
