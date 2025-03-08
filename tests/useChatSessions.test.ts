@@ -49,11 +49,18 @@ describe('useChatSessions', () => {
     expect(result.currentSessionId).toBe(null);
     expect(typeof result.saveSession).toBe('function');
     expect(typeof result.loadSession).toBe('function');
-    expect(typeof result.createNewSession).toBe('function');
+    // createNewSession is no longer part of the API
+    expect(result).not.toHaveProperty('createNewSession');
   });
 
-  it('saves a session', async () => {
-    const result = useChatSessions();
+  it('initializes with provided sessionId', () => {
+    const result = useChatSessions('test-session-id');
+    expect(result.currentSessionId).toBe('test-session-id');
+  });
+
+  it('saves a session without sessionId', async () => {
+    const mockCallback = vi.fn();
+    const result = useChatSessions(null, mockCallback);
 
     const messages: ChatMessage[] = [
       { text: 'Hello', type: 'user' },
@@ -68,10 +75,37 @@ describe('useChatSessions', () => {
         messages,
       })
     );
+
+    // Check that callback was called with the new session ID
+    expect(mockCallback).toHaveBeenCalledWith('test-id');
+  });
+
+  it('saves a session with sessionId', async () => {
+    const mockCallback = vi.fn();
+    const result = useChatSessions('existing-session', mockCallback);
+
+    const messages: ChatMessage[] = [
+      { text: 'Hello', type: 'user' },
+      { text: 'Hi there!', type: 'ai' },
+    ];
+
+    await result.saveSession(messages);
+
+    expect(mockPut).toHaveBeenCalledWith(
+      expect.objectContaining({
+        _id: 'existing-session',
+        title: 'Hello',
+        messages,
+      })
+    );
+
+    // Callback should not be called when updating existing session
+    expect(mockCallback).not.toHaveBeenCalled();
   });
 
   it('loads a session', async () => {
-    const result = useChatSessions();
+    const mockCallback = vi.fn();
+    const result = useChatSessions(null, mockCallback);
 
     const session: SessionDocument = {
       _id: 'test-session',
@@ -81,16 +115,10 @@ describe('useChatSessions', () => {
 
     await result.loadSession(session);
 
-    // Check that the currentSessionId setter was called
-    expect(result.currentSessionId).toBe(null); // It's still null because our mock doesn't update the state
-  });
+    // Check that the get method was called
+    expect(mockGet).toHaveBeenCalledWith('test-session');
 
-  it('creates a new session', () => {
-    const result = useChatSessions();
-
-    result.createNewSession();
-
-    // Check that the currentSessionId setter was called with null
-    expect(result.currentSessionId).toBe(null);
+    // Check that callback was called with the session ID
+    expect(mockCallback).toHaveBeenCalledWith('test-session');
   });
 });

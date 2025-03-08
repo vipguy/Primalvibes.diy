@@ -1,6 +1,6 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
-import type { ChatMessage } from './types/chat';
-import { useChatSessions } from './hooks/useChatSessions';
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
+import type { ChatMessage, SessionDocument } from './types/chat';
+import { useFireproof } from 'use-fireproof';
 import SessionSidebar from './components/SessionSidebar';
 import ChatHeader from './components/ChatHeader';
 import MessageList from './components/MessageList';
@@ -36,13 +36,24 @@ interface ChatInterfaceProps {
     }>;
     completedMessage: string;
   };
+  sessionId?: string | null;
+  onSessionCreated?: (newSessionId: string) => void;
+  onNewChat?: () => void;
+  onCodeGenerated?: (code: string, dependencies?: Record<string, string>) => void;
 }
 
 // ChatInterface component handles user input and displays chat messages
-function ChatInterface({ chatState }: ChatInterfaceProps) {
+function ChatInterface({
+  chatState,
+  sessionId,
+  onSessionCreated,
+  onNewChat,
+  onCodeGenerated,
+}: ChatInterfaceProps) {
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
   const [isShrinking, setIsShrinking] = useState(false);
   const [isExpanding, setIsExpanding] = useState(false);
+  const { database, useLiveQuery } = useFireproof('fireproof-chat-history');
 
   const {
     messages,
@@ -59,7 +70,10 @@ function ChatInterface({ chatState }: ChatInterfaceProps) {
     completedMessage,
   } = chatState;
 
-  const { currentSessionId, saveSession, loadSession, createNewSession } = useChatSessions();
+  // Query chat sessions ordered by timestamp (newest first)
+  const { docs: sessions } = useLiveQuery('timestamp', {
+    descending: true,
+  });
 
   // Memoize handler functions to prevent re-renders
   const handleSelectSuggestion = useCallback(
@@ -93,36 +107,119 @@ function ChatInterface({ chatState }: ChatInterfaceProps) {
     autoResizeTextarea();
   }, [autoResizeTextarea]);
 
-  // Save messages to Fireproof whenever they change, but only when not streaming
+  // Load session data when sessionId changes
   useEffect(() => {
-    if (messages.length > 0 && !isGenerating) {
-      console.log('Saving completed session to Fireproof');
-      saveSession(messages);
-    }
-  }, [messages, saveSession, isGenerating]);
-
-  // Load a session from the sidebar - memoized to prevent re-renders
-  const handleLoadSession = useCallback(
-    async (session: any) => {
-      const loadedSession = await loadSession(session);
-
-      if (loadedSession?.messages && Array.isArray(loadedSession.messages)) {
-        setMessages(loadedSession.messages);
-
-        // Find the last AI message with code to update the editor
-        const lastAiMessageWithCode = [...loadedSession.messages]
-          .reverse()
-          .find((msg: ChatMessage) => msg.type === 'ai' && msg.code);
-
-        if (lastAiMessageWithCode?.code) {
-          // No need to handle this here as it's handled by the parent component through onCodeGenerated
+    async function loadSessionData() {
+      if (sessionId) {
+        try {
+          const sessionData = (await database.get(sessionId)) as SessionDocument;
+          if (sessionData?.messages && Array.isArray(sessionData.messages)) {
+            setMessages(sessionData.messages);
+          }
+        } catch (err) {
+          console.error('Error loading session:', err);
         }
       }
+    }
+
+    loadSessionData();
+  }, [sessionId, database, setMessages]);
+
+  // Track streaming state to detect when streaming completes
+  const wasGeneratingRef = useRef(isGenerating);
+
+  // Save messages to Fireproof ONLY when streaming completes or on message count change
+  useEffect(() => {
+    async function saveSessionData() {
+      // Only save when streaming just completed (wasGenerating was true, but isGenerating is now false)
+      const streamingJustCompleted = wasGeneratingRef.current && !isGenerating;
+
+      if (messages.length > 0 && streamingJustCompleted) {
+        console.log('Saving completed session to Fireproof - streaming completed');
+
+        // Extract title from first user message
+        const firstUserMessage = messages.find((msg) => msg.type === 'user');
+        const title = firstUserMessage
+          ? `${firstUserMessage.text.substring(0, 50)}${firstUserMessage.text.length > 50 ? '...' : ''}`
+          : 'Untitled Chat';
+
+        try {
+          // If we have a session ID, update it; otherwise create a new one
+          const sessionData = {
+            title,
+            messages,
+            timestamp: Date.now(),
+            ...(sessionId ? { _id: sessionId } : {}),
+          };
+
+          const result = await database.put(sessionData);
+
+          // If this was a new session, notify the parent component
+          if (!sessionId && onSessionCreated) {
+            onSessionCreated(result.id);
+          }
+        } catch (error) {
+          console.error('Error saving session to Fireproof:', error);
+        }
+      }
+
+      // Update ref for next comparison
+      wasGeneratingRef.current = isGenerating;
+    }
+
+    saveSessionData();
+  }, [isGenerating, messages, sessionId, database, onSessionCreated]);
+
+  // Load a session from the sidebar
+  const handleLoadSession = useCallback(
+    async (session: SessionDocument) => {
+      if (!session?._id) return;
+
+      try {
+        const sessionData = (await database.get(session._id)) as SessionDocument;
+        if (sessionData?.messages && Array.isArray(sessionData.messages)) {
+          setMessages(sessionData.messages);
+
+          // Find the last AI message with code to update the editor
+          const lastAiMessageWithCode = [...sessionData.messages]
+            .reverse()
+            .find((msg: ChatMessage) => msg.type === 'ai' && msg.code);
+
+          // If we found an AI message with code, update the code view
+          if (lastAiMessageWithCode?.code) {
+            const dependencies = lastAiMessageWithCode.dependencies || {};
+            console.log('Loading code from session:', lastAiMessageWithCode.code);
+
+            // 1. Update local chatState
+            chatState.streamingCode = lastAiMessageWithCode.code;
+            chatState.completedCode = lastAiMessageWithCode.code;
+            chatState.parserState.current.dependencies = dependencies;
+            chatState.isStreaming = false;
+            chatState.isGenerating = false;
+
+            // Manually extract the UI code for app preview
+            chatState.completedMessage = lastAiMessageWithCode.text || "Here's your app:";
+
+            // 2. Call the onCodeGenerated callback to update parent state
+            if (onCodeGenerated) {
+              onCodeGenerated(lastAiMessageWithCode.code, dependencies);
+              console.log('Called onCodeGenerated to update parent component');
+            }
+          }
+
+          // Notify parent component of session change
+          if (onSessionCreated) {
+            onSessionCreated(session._id);
+          }
+        }
+      } catch (err) {
+        console.error('Error loading session:', err);
+      }
     },
-    [loadSession, setMessages]
+    [database, setMessages, onSessionCreated, chatState, onCodeGenerated]
   );
 
-  // Function to handle starting a new chat - memoized with complete dependencies
+  // Function to handle starting a new chat
   const handleNewChat = useCallback(() => {
     // Start the shrinking animation
     setIsShrinking(true);
@@ -130,9 +227,14 @@ function ChatInterface({ chatState }: ChatInterfaceProps) {
     // After animation completes, reset the state
     setTimeout(
       () => {
-        createNewSession();
-        setMessages([]);
-        setInput('');
+        // Use parent's onNewChat if provided
+        if (onNewChat) {
+          onNewChat();
+        } else {
+          setMessages([]);
+          setInput('');
+        }
+
         setIsShrinking(false);
 
         // Add a small bounce effect when the new chat appears
@@ -143,7 +245,7 @@ function ChatInterface({ chatState }: ChatInterfaceProps) {
       },
       500 + messages.length * 50
     ); // Account for staggered animation of messages
-  }, [createNewSession, messages.length, setInput, setMessages, setIsShrinking, setIsExpanding]);
+  }, [onNewChat, messages.length, setInput, setMessages, setIsShrinking, setIsExpanding]);
 
   // Memoize child components to prevent unnecessary re-renders
   const sessionSidebar = useMemo(

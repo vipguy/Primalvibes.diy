@@ -44,6 +44,7 @@ export default function Home() {
   });
   const [shareStatus, setShareStatus] = useState<string>('');
   const [isSharedApp, setIsSharedApp] = useState<boolean>(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
   // Hoist the useChat hook to this component
   const chatState = useChat((code: string, dependencies?: Record<string, string>) => {
@@ -68,6 +69,19 @@ export default function Home() {
       }
     }
   }, []);
+
+  // Handle new session creation
+  const handleSessionCreated = (newSessionId: string) => {
+    setSessionId(newSessionId);
+    console.log('New session created:', newSessionId);
+  };
+
+  // Handle new chat (reset session)
+  const handleNewChat = () => {
+    setSessionId(null);
+    setState({ generatedCode: '', dependencies: {} });
+    chatState.setMessages([]);
+  };
 
   function handleShare() {
     if (!state.generatedCode) {
@@ -115,7 +129,18 @@ export default function Home() {
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
       <div style={{ flex: '0 0 33.333%', overflow: 'hidden', position: 'relative' }}>
-        <ChatInterface chatState={chatState} />
+        <ChatInterface
+          chatState={chatState}
+          sessionId={sessionId}
+          onSessionCreated={handleSessionCreated}
+          onNewChat={handleNewChat}
+          onCodeGenerated={(code, dependencies) => {
+            setState({
+              generatedCode: code,
+              dependencies: dependencies || {},
+            });
+          }}
+        />
       </div>
       <div style={{ flex: '0 0 66.667%', overflow: 'hidden', position: 'relative' }}>
         <ResultPreview
