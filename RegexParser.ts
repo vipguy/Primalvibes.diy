@@ -7,10 +7,10 @@ export class RegexParser {
   private readonly regex: RegExp;
   
   // Chat-specific state tracking
-  private inCodeBlock: boolean = false;
+  public inCodeBlock: boolean = false; // Make this public so useChat can access it
   private backtickCount: number = 0;
   private languageId: string = '';
-  private inDependencyMode: boolean = false;
+  private inDependencyMode: boolean = true; // Start in dependency mode by default
   private dependencyContent: string = '';
   
   // Public properties that can be accessed directly
@@ -23,7 +23,8 @@ export class RegexParser {
     'text': [],
     'code': [],
     'dependencies': [],
-    'match': []
+    'match': [],
+    'codeUpdate': [] // Add codeUpdate event type
   };
   
   /**
@@ -81,7 +82,8 @@ export class RegexParser {
    * @param chunk - Text chunk to process
    */
   write(chunk: string): void {
-    console.log('Parser processing chunk:', chunk);
+    // Simple debug logging of input chunk
+    console.debug(`- ${chunk.replace(/\n/g, '\\n')}`);
     
     // Process the chunk for chat-specific parsing
     this._processChatChunk(chunk);
@@ -177,9 +179,11 @@ export class RegexParser {
         }
         
         // Emit dependencies event with all collected dependencies
+        console.debug(`Dependencies detected: ${JSON.stringify(this.dependencies)}`);
         this.emit('dependencies', this.dependencies);
         
-        // Reset dependency mode
+        // Exit dependency mode permanently
+        console.debug(`Exiting dependency mode. Remaining text: "${afterJson.substring(0, 20)}..."`);
         this.inDependencyMode = false;
         this.dependencyContent = '';
         
@@ -192,14 +196,7 @@ export class RegexParser {
       return;
     }
     
-    // Check if this chunk might contain dependency data
-    if (this._isDependencyChunk(chunk)) {
-      this.dependencyContent += chunk;
-      this.inDependencyMode = true;
-      return;
-    }
-    
-    // Process as normal text/code
+    // Process as normal text/code if we're not in dependency mode
     this._processDisplayText(chunk);
   }
   
@@ -218,17 +215,18 @@ export class RegexParser {
         if (this.backtickCount === 3) {
           if (!this.inCodeBlock) {
             // Start of code block
+            console.debug(`Starting code block`);
             this.inCodeBlock = true;
             this.backtickCount = 0;
             i = this._skipLanguageIdentifier(text, i + 1);
-            console.log('Started code block with language:', this.languageId);
           } else {
             // End of code block
+            console.debug(`> ${this.codeBlockContent.substring(0, 40)}...`);
+            console.debug(`Ending code block (${this.codeBlockContent.length} chars)`);
             this.inCodeBlock = false;
             this.backtickCount = 0;
             
             // Emit the completed code block
-            console.log('Emitting code block:', this.codeBlockContent.substring(0, 50) + '...');
             this.emit('code', this.codeBlockContent, this.languageId);
           }
         }
@@ -242,6 +240,10 @@ export class RegexParser {
       } else {
         if (this.inCodeBlock) {
           this.codeBlockContent += char;
+          // Only log code updates periodically to avoid console spam
+          if (this.codeBlockContent.length % 200 === 0) {
+            console.debug(`> Code progress: ${this.codeBlockContent.length} chars`);
+          }
           // Emit code update event for streaming
           this.emit('codeUpdate', this.codeBlockContent);
         } else {
@@ -276,54 +278,6 @@ export class RegexParser {
   }
   
   /**
-   * Check if a chunk might contain dependency data
-   * @private
-   */
-  private _isDependencyChunk(chunk: string): boolean {
-    // If chunk contains "}}," process it specially
-    if (chunk.includes('}}')) {
-      const endIndex = chunk.indexOf('}}') + 2;
-      const beforePart = chunk.substring(0, endIndex);
-      const afterPart = chunk.substring(endIndex);
-      
-      // Extract dependencies from the dependency part
-      const matches = beforePart.match(/"([^"]+)"\s*:\s*"([^"]+)"/g);
-      if (matches) {
-        matches.forEach(match => {
-          const keyMatch = match.match(/"([^"]+)"\s*:/);
-          const valueMatch = match.match(/:\s*"([^"]+)"/);
-          
-          if (keyMatch?.[1] && valueMatch?.[1]) {
-            const key = keyMatch[1].trim();
-            const value = valueMatch[1].trim();
-            
-            if (key && value) {
-              this.dependencies[key] = value;
-            }
-          }
-        });
-      }
-      
-      // Process the after part normally
-      if (afterPart.trim()) {
-        this._processDisplayText(afterPart);
-      }
-      
-      // Emit dependencies event
-      this.emit('dependencies', this.dependencies);
-      
-      return false;
-    }
-    
-    // Standard dependency detection
-    return (
-      (chunk.includes('"') && chunk.includes(':') && !chunk.includes('```')) ||
-      chunk.trim().startsWith('{') || 
-      (chunk.trim().startsWith('-') && chunk.includes('"'))
-    );
-  }
-  
-  /**
    * Reset the parser state
    */
   public reset(): void {
@@ -332,7 +286,7 @@ export class RegexParser {
     this.codeBlockContent = '';
     this.backtickCount = 0;
     this.languageId = '';
-    this.inDependencyMode = false;
+    this.inDependencyMode = true; // Reset to start in dependency mode
     this.dependencyContent = '';
     this.dependencies = {};
     this.displayText = '';

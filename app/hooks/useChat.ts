@@ -68,19 +68,26 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
     
     // Set up event listeners
     parserState.current.on('text', (textChunk: string, fullText: string) => {
-      setCurrentStreamedText(fullText);
+      // Clean up any JSON artifacts at the beginning
+      let cleanedText = fullText;
+      if (cleanedText.startsWith('{"dependencies":')) {
+        cleanedText = cleanedText.replace(/^{"dependencies":.*?}}/, '');
+      }
+      cleanedText = cleanedText.replace(/^\s*:""[}\s]*/, '');
+      cleanedText = cleanedText.replace(/^\s*""\s*:\s*""[}\s]*/, '');
+      cleanedText = cleanedText.trimStart();
+      
+      setCurrentStreamedText(cleanedText);
     });
     
     // Listen for both complete code blocks and incremental updates
     parserState.current.on('code', (code: string, languageId: string) => {
-      console.log('Complete code block received:', code.substring(0, 50) + '...');
       setStreamingCode(code);
       setCompletedCode(code);
     });
     
     // Add a listener for incremental code updates
     parserState.current.on('codeUpdate', (code: string) => {
-      console.log('Code update received:', code.substring(0, 50) + '...');
       setStreamingCode(code);
     });
     
@@ -133,10 +140,6 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
                 role: 'user',
                 content: input,
               },
-              {
-                role: 'assistant',
-                content: '{"dependencies":',
-              },
             ],
           }),
         });
@@ -151,12 +154,6 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
         }
 
         const decoder = new TextDecoder();
-        const dependencies: Record<string, string> = {};
-
-        // Set up dependency event listener
-        parser.on('dependencies', (deps: Record<string, string>) => {
-          Object.assign(dependencies, deps);
-        });
 
         // Process the stream
         while (true) {
@@ -174,7 +171,6 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
                 const data = JSON.parse(line.substring(6));
                 if (data.choices && data.choices[0]?.delta?.content) {
                   const content = data.choices[0].delta.content;
-                  console.log('Received content chunk:', content);
                   
                   // Feed the chunk to our parser
                   parser.write(content);
@@ -196,10 +192,6 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
 
         // Clean up the message text - remove any leading noise
         let cleanedMessage = currentStreamedText;
-        
-        // Remove any artifacts at the beginning that look like malformed JSON
-        cleanedMessage = cleanedMessage.replace(/^\s*:""[}\s]*/, '');
-        cleanedMessage = cleanedMessage.replace(/^\s*""\s*:\s*""[}\s]*/, '');
         
         // Clean up any extra whitespace at the beginning
         cleanedMessage = cleanedMessage.trimStart();
