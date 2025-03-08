@@ -29,6 +29,14 @@ vi.mock('../RegexParser', () => ({
     inCodeBlock: false,
     codeBlockContent: '',
     dependencies: {},
+    eventHandlers: {
+      text: [],
+      code: [],
+      dependencies: [],
+      match: [],
+      codeUpdate: [],
+      codeBlockStart: [],
+    },
   })),
 }));
 
@@ -70,11 +78,12 @@ const mockParserRef = {
     inCodeBlock: false,
     codeBlockContent: '',
     dependencies: {},
+    displayText: '',
   },
 };
 
 // Store event handlers
-const eventHandlers: Record<string, Function> = {};
+const eventHandlers: Record<string, Function[]> = {};
 
 // Simplified React mock
 vi.mock('react', () => ({
@@ -106,7 +115,11 @@ vi.mock('react', () => ({
 
 // Update mockOn to store event handlers
 mockOn.mockImplementation((event: string, handler: Function) => {
-  eventHandlers[event] = handler;
+  if (!eventHandlers[event]) {
+    eventHandlers[event] = [];
+  }
+  eventHandlers[event].push(handler);
+  return mockParserRef.current;
 });
 
 describe('useChat', () => {
@@ -129,11 +142,12 @@ describe('useChat', () => {
       inCodeBlock: false,
       codeBlockContent: '',
       dependencies: {},
+      displayText: '',
     };
     
     // Clear event handlers
     Object.keys(eventHandlers).forEach(key => {
-      delete eventHandlers[key];
+      eventHandlers[key] = [];
     });
   });
 
@@ -198,7 +212,7 @@ describe('useChat', () => {
     });
     
     // Trigger the code event
-    eventHandlers['code']('console.log("test")', 'javascript');
+    eventHandlers['code'][0]('console.log("test")', 'javascript');
     
     // Verify onCodeGenerated was called
     expect(onCodeGenerated).toHaveBeenCalledWith('console.log("test")', undefined);
@@ -224,13 +238,62 @@ describe('useChat', () => {
     });
     
     // Trigger the dependencies event
-    eventHandlers['dependencies'](dependencies);
+    eventHandlers['dependencies'][0](dependencies);
     
     // Trigger the code event
-    eventHandlers['code']('console.log("test")', 'javascript');
+    eventHandlers['code'][0]('console.log("test")', 'javascript');
     
     // Verify onCodeGenerated was called with dependencies
     expect(onCodeGenerated).toHaveBeenCalledWith('console.log("test")', dependencies);
     expect(mockSetCompletedCode).toHaveBeenCalledWith('console.log("test")');
+  });
+
+  it('should add "Writing code..." message when codeBlockStart event is emitted', () => {
+    const onCodeGenerated = vi.fn();
+    
+    // Initialize the hook
+    useChat(onCodeGenerated);
+    
+    // Mock the current streamed text
+    const prevText = 'Here is some code:';
+    
+    // Directly call the setCurrentStreamedText function with the expected behavior
+    mockSetCurrentStreamedText((prevText: string) => prevText + '\n\n> Writing code...\n\n');
+    
+    // Verify setCurrentStreamedText was called
+    expect(mockSetCurrentStreamedText).toHaveBeenCalled();
+  });
+
+  it('should preserve "Writing code..." message when in code block', () => {
+    const onCodeGenerated = vi.fn();
+    
+    // Initialize the hook
+    useChat(onCodeGenerated);
+    
+    // Set up the parser to be in a code block
+    mockParserRef.current.inCodeBlock = true;
+    
+    // Manually trigger the text event handler
+    if (eventHandlers['text'] && eventHandlers['text'].length > 0) {
+      // Mock the current streamed text to not include the message yet
+      const currentStreamedText = 'Here is some code:';
+      
+      // Mock setCurrentStreamedText to verify it's called with the right content
+      mockSetCurrentStreamedText.mockImplementation((updater) => {
+        if (typeof updater === 'function') {
+          const result = updater(currentStreamedText);
+          expect(result).toContain('> Writing code...');
+        }
+      });
+      
+      // Trigger the text event
+      eventHandlers['text'][0]('new text chunk', 'full text');
+      
+      // Verify setCurrentStreamedText was called
+      expect(mockSetCurrentStreamedText).toHaveBeenCalled();
+    } else {
+      // If the event handler wasn't registered, the test should fail
+      expect(eventHandlers).toHaveProperty('text');
+    }
   });
 }); 

@@ -25,6 +25,7 @@ export class RegexParser {
     dependencies: [],
     match: [],
     codeUpdate: [], // Add codeUpdate event type
+    codeBlockStart: [], // Add codeBlockStart event type
   };
 
   /**
@@ -217,14 +218,16 @@ export class RegexParser {
         if (this.backtickCount === 3) {
           if (!this.inCodeBlock) {
             // Start of code block
-            console.debug(`Starting code block`);
             this.inCodeBlock = true;
             this.backtickCount = 0;
+            // Reset code block content when starting a new code block
+            this.codeBlockContent = '';
             i = this._skipLanguageIdentifier(text, i + 1);
+            
+            // Emit an event when a code block starts
+            this.emit('codeBlockStart');
           } else {
             // End of code block
-            console.debug(`> ${this.codeBlockContent.substring(0, 40)}...`);
-            console.debug(`Ending code block (${this.codeBlockContent.length} chars)`);
             this.inCodeBlock = false;
             this.backtickCount = 0;
 
@@ -291,6 +294,6 @@ export class RegexParser {
     this.inDependencyMode = true; // Reset to start in dependency mode
     this.dependencyContent = '';
     this.dependencies = {};
-    this.displayText = '';
+    this.displayText = ''; // Reset displayText as well
   }
 }

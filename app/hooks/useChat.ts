@@ -69,6 +69,15 @@ export function useChat(
       parserState.current = new RegexParser();
     }
 
+    // Listen for code block start
+    parserState.current.on('codeBlockStart', () => {
+      setCurrentStreamedText(prevText => {
+        // Add the "Writing code..." message with newlines before and after
+        const updatedText = prevText + '\n\n> Writing code...\n\n';
+        return updatedText;
+      });
+    });
+
     // Set up event listeners
     parserState.current.on('text', (textChunk: string, fullText: string) => {
       // Clean up any JSON artifacts at the beginning
@@ -80,7 +89,20 @@ export function useChat(
       cleanedText = cleanedText.replace(/^\s*""\s*:\s*""[}\s]*/, '');
       cleanedText = cleanedText.trimStart();
 
-      setCurrentStreamedText(cleanedText);
+      // Check if we're in a code block and preserve the "Writing code..." message
+      if (parserState.current.inCodeBlock) {
+        // Only update if the text doesn't already contain our message
+        if (!currentStreamedText.includes('\n\n> Writing code...\n\n')) {
+          setCurrentStreamedText(prevText => {
+            if (!prevText.includes('\n\n> Writing code...\n\n')) {
+              return prevText + '\n\n> Writing code...\n\n';
+            }
+            return prevText;
+          });
+        }
+      } else {
+        setCurrentStreamedText(cleanedText);
+      }
     });
 
     // Listen for both complete code blocks and incremental updates
@@ -116,6 +138,9 @@ export function useChat(
 
       // Initialize parser
       const parser = initParser();
+      
+      // Track if we've already added the "Writing code..." message
+      let writingCodeMessageAdded = false;
 
       try {
         // Build message history
@@ -177,6 +202,15 @@ export function useChat(
 
                   // Feed the chunk to our parser
                   parser.write(content);
+
+                  // Direct check for code block markers
+                  if (!writingCodeMessageAdded && content.includes('```')) {
+                    setCurrentStreamedText(prevText => {
+                      const updatedText = prevText + '\n\n> Writing code...\n\n';
+                      return updatedText;
+                    });
+                    writingCodeMessageAdded = true;
+                  }
 
                   // Also update streaming code directly from parser's current state
                   if (parser.inCodeBlock) {
