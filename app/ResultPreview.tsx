@@ -189,11 +189,11 @@ function ResultPreview({
 
   // Track when streaming ends
   useEffect(() => {
-    if (isStreaming) {
+    if (isStreaming && streamingCode) {
       justFinishedStreamingRef.current = true;
       setActiveView('code');
     }
-  }, [isStreaming]);
+  }, [isStreaming, streamingCode]);
 
   // Reset justFinishedStreamingRef when bundling completes
   useEffect(() => {
