@@ -6,9 +6,17 @@ interface MessageListProps {
   messages: ChatMessage[];
   isGenerating: boolean;
   currentStreamedText: string;
+  isShrinking?: boolean;
+  isExpanding?: boolean;
 }
 
-function MessageList({ messages, isGenerating, currentStreamedText }: MessageListProps) {
+function MessageList({ 
+  messages, 
+  isGenerating, 
+  currentStreamedText,
+  isShrinking = false,
+  isExpanding = false
+}: MessageListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -30,7 +38,15 @@ function MessageList({ messages, isGenerating, currentStreamedText }: MessageLis
       style={{ maxHeight: 'calc(100vh - 140px)' }}
     >
       {messages.map((msg, i) => (
-        <div key={`${msg.type}-${i}`} className="flex flex-col">
+        <div 
+          key={`${msg.type}-${i}`} 
+          className={`flex flex-col transition-all duration-500 ${
+            isShrinking ? 'scale-0 opacity-0 origin-top-left' : 'scale-100 opacity-100'
+          } ${isExpanding ? 'animate-bounce-in' : ''}`}
+          style={{ 
+            transitionDelay: isShrinking ? `${i * 50}ms` : '0ms' 
+          }}
+        >
           <div className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
             {msg.type === 'ai' && (
               <div className="bg-dark-decorative-00 dark:bg-light-decorative-00 mr-2 flex h-8 w-8 items-center justify-center rounded-full">

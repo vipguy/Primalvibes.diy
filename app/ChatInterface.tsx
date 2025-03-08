@@ -41,6 +41,8 @@ interface ChatInterfaceProps {
 // ChatInterface component handles user input and displays chat messages
 function ChatInterface({ chatState }: ChatInterfaceProps) {
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
+  const [isShrinking, setIsShrinking] = useState(false);
+  const [isExpanding, setIsExpanding] = useState(false);
 
   const {
     messages,
@@ -105,16 +107,24 @@ function ChatInterface({ chatState }: ChatInterfaceProps) {
 
   // Function to handle starting a new chat
   const handleNewChat = () => {
-    if (
-      window.confirm(
-        'Starting a new chat will clear your current app. Are you sure you want to continue?'
-      )
-    ) {
+    // Start the shrinking animation
+    setIsShrinking(true);
+    
+    // After animation completes, reset the state
+    setTimeout(() => {
       createNewSession();
       setMessages([]);
       setInput('');
+      setIsShrinking(false);
+      
+      // Add a small bounce effect when the new chat appears
+      setIsExpanding(true);
+      setTimeout(() => {
+        setIsExpanding(false);
+      }, 300);
+      
       // The empty code will be handled by the onCodeGenerated callback
-    }
+    }, 500 + messages.length * 50); // Account for staggered animation of messages
   };
 
   return (
@@ -142,6 +152,8 @@ function ChatInterface({ chatState }: ChatInterfaceProps) {
           messages={messages}
           isGenerating={isGenerating}
           currentStreamedText={currentStreamedText}
+          isShrinking={isShrinking}
+          isExpanding={isExpanding}
         />
 
         {/* Quick access buttons */}
