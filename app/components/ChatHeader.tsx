@@ -8,7 +8,7 @@ interface ChatHeaderProps {
 
 function ChatHeader({ onToggleSidebar, onNewChat, isGenerating }: ChatHeaderProps) {
   return (
-    <div className="border-light-decorative-00 dark:border-dark-decorative-00 bg-light-background-00 dark:bg-dark-background-00 flex items-center justify-between border-b px-6 py-4">
+    <div className="border-light-decorative-00 dark:border-dark-decorative-00 bg-light-background-00 dark:bg-dark-background-00 flex items-center justify-between border-b px-6 py-4 min-h-[4rem]">
       <div className="flex items-center">
         <button
           type="button"
