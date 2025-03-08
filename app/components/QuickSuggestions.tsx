@@ -19,14 +19,14 @@ function QuickSuggestions({ onSelectSuggestion }: QuickSuggestionsProps) {
   ];
 
   return (
-    <div className="border-light-decorative-00 dark:border-dark-decorative-00 bg-light-background-00 dark:bg-dark-background-00 border-t px-4 py-3">
+    <div className="bg-light-background-01 dark:bg-dark-background-01 px-4 py-3">
       <div className="flex flex-wrap gap-2">
         {suggestions.map((suggestion, index) => (
           <button
             key={index}
             type="button"
             onClick={() => onSelectSuggestion(suggestion.text)}
-            className="bg-light-decorative-00 dark:bg-dark-decorative-00 text-light-primary dark:text-dark-primary hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 cursor-pointer rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
+            className="bg-light-background-00 dark:bg-dark-background-00 text-light-primary dark:text-dark-primary hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 cursor-pointer rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
           >
             {suggestion.label}
           </button>
