@@ -67,6 +67,24 @@ const indexHtml = `<!DOCTYPE html>
   </body>
 </html>`;
 
+// Welcome component to show instead of sandbox on initial load
+function WelcomeScreen() {
+  return (
+    <div className="h-full flex items-center justify-center bg-light-background-01 dark:bg-dark-background-01">
+      <img 
+        src="/lightup.png" 
+        alt="Lightup" 
+        className="max-w-xs w-full h-auto"
+        style={{
+          width: '100%',
+          height: 'auto',
+          transform: 'rotate(-5deg)',
+        }}
+      />
+    </div>
+  );
+}
+
 const defaultCode = `export default function App() {
   return (
     <div className="h-screen flex flex-col items-center justify-center bg-light-background-01 dark:bg-dark-background-01 gap-6">
@@ -162,11 +180,17 @@ function ResultPreview({
   const [appStartedCount, setAppStartedCount] = useState(0);
   const [bundlingComplete, setBundlingComplete] = useState(true);
   const justFinishedStreamingRef = useRef(false);
+  // Add state to control whether to show welcome screen or sandbox
+  const [showWelcome, setShowWelcome] = useState(true);
 
   // Update displayed code when code changes or streaming ends
   useEffect(() => {
     if (!isStreaming) {
       setDisplayCode(code || defaultCode);
+      // If we have actual code (not default), hide welcome screen
+      if (code) {
+        setShowWelcome(false);
+      }
     }
   }, [code, isStreaming]);
 
@@ -174,6 +198,8 @@ function ResultPreview({
   useEffect(() => {
     if (isStreaming && streamingCode) {
       setDisplayCode(streamingCode);
+      // Hide welcome screen when streaming starts
+      setShowWelcome(false);
     }
   }, [streamingCode, isStreaming]);
 
@@ -256,7 +282,11 @@ function ResultPreview({
           </button>
           <button
             type="button"
-            onClick={() => setActiveView('code')}
+            onClick={() => {
+              setActiveView('code');
+              // Hide welcome screen when switching to code view
+              setShowWelcome(false);
+            }}
             className={`flex items-center space-x-1.5 rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
               activeView === 'code'
                 ? 'bg-light-background-00 dark:bg-dark-background-00 text-light-primary dark:text-dark-primary shadow-sm'
@@ -324,71 +354,83 @@ function ResultPreview({
           </div>
         )}
       </div>
-      <div data-testid="sandpack-provider">
-        <SandpackProvider
-          key={displayCode}
-          template="vite-react"
-          options={{
-            externalResources: ['https://cdn.tailwindcss.com'],
-          }}
-          customSetup={{
-            dependencies: {
-              ...dependencies,
-              'use-fireproof': '0.20.0-dev-preview-41',
-              '@adviser/cement': 'latest',
-            },
-          }}
-          files={{
-            '/index.html': {
-              code: indexHtml,
-              hidden: true,
-            },
-            '/App.jsx': {
-              code: displayCode,
-              active: true,
-            },
-          }}
-          theme="light"
-        >
-          <SandpackEventListener setActiveView={setActiveView} setBundlingComplete={setBundlingComplete} />
-          <SandpackLayout className="h-full" style={{ height: 'calc(100vh - 49px)' }}>
-            <div
-              style={{
-                display: activeView === 'preview' ? 'block' : 'none',
-                height: '100%',
-                width: '100%',
-              }}
-            >
-              <SandpackPreview
-                showNavigator={false}
-                showOpenInCodeSandbox={false}
-                showRefreshButton={true}
-                showRestartButton={false}
-                showOpenNewtab={false}
-                className="h-full w-full"
-                style={{ height: '100%' }}
-              />
-            </div>
-            <div
-              style={{
-                display: activeView === 'code' ? 'block' : 'none',
-                height: '100%',
-                width: '100%',
-              }}
-            >
-              <SandpackCodeEditor style={{ height: '100%' }} />
-            </div>
-          </SandpackLayout>
-        </SandpackProvider>
-      </div>
+      
+      {showWelcome ? (
+        // Show welcome screen
+        <div className="h-full" style={{ height: 'calc(100vh - 49px)' }}>
+          <WelcomeScreen />
+        </div>
+      ) : (
+        // Show sandbox
+        <div data-testid="sandpack-provider">
+          <SandpackProvider
+            key={displayCode}
+            template="vite-react"
+            options={{
+              externalResources: ['https://cdn.tailwindcss.com'],
+            }}
+            customSetup={{
+              dependencies: {
+                ...dependencies,
+                'use-fireproof': '0.20.0-dev-preview-41',
+                '@adviser/cement': 'latest',
+              },
+            }}
+            files={{
+              '/index.html': {
+                code: indexHtml,
+                hidden: true,
+              },
+              '/App.jsx': {
+                code: displayCode,
+                active: true,
+              },
+            }}
+            theme="light"
+          >
+            <SandpackEventListener setActiveView={setActiveView} setBundlingComplete={setBundlingComplete} />
+            <SandpackLayout className="h-full" style={{ height: 'calc(100vh - 49px)' }}>
+              <div
+                style={{
+                  display: activeView === 'preview' ? 'block' : 'none',
+                  height: '100%',
+                  width: '100%',
+                }}
+              >
+                <SandpackPreview
+                  showNavigator={false}
+                  showOpenInCodeSandbox={false}
+                  showRefreshButton={true}
+                  showRestartButton={false}
+                  showOpenNewtab={false}
+                  className="h-full w-full"
+                  style={{ height: '100%' }}
+                />
+              </div>
+              <div
+                style={{
+                  display: activeView === 'code' ? 'block' : 'none',
+                  height: '100%',
+                  width: '100%',
+                }}
+              >
+                <SandpackCodeEditor style={{ height: '100%' }} />
+              </div>
+            </SandpackLayout>
+          </SandpackProvider>
+        </div>
+      )}
+      
       <div className="result-content">
-        <button
-          data-testid="copy-button"
-          onClick={() => navigator.clipboard.writeText(displayCode)}
-          className="text-light-primary dark:text-dark-primary hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 rounded-md px-4 py-1.5 text-sm font-medium transition-colors"
-        >
-          Copy to Clipboard
-        </button>
+        {!showWelcome && (
+          <button
+            data-testid="copy-button"
+            onClick={() => navigator.clipboard.writeText(displayCode)}
+            className="text-light-primary dark:text-dark-primary hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 rounded-md px-4 py-1.5 text-sm font-medium transition-colors"
+          >
+            Copy to Clipboard
+          </button>
+        )}
         {streamingCode ? (
           <div>{currentStreamContent}</div>
         ) : (
