@@ -7,14 +7,14 @@ import type { ChatMessage } from '../app/types/chat';
 
 // Mock dependencies
 vi.mock('react-markdown', () => ({
-  default: ({ children }: { children: string }) => <div data-testid="markdown">{children}</div>
+  default: ({ children }: { children: string }) => <div data-testid="markdown">{children}</div>,
 }));
 
 vi.mock('use-fireproof', () => ({
   useFireproof: () => ({
     database: {},
-    useLiveQuery: () => ({ docs: [] })
-  })
+    useLiveQuery: () => ({ docs: [] }),
+  }),
 }));
 
 describe('Component Rendering', () => {
@@ -23,11 +23,7 @@ describe('Component Rendering', () => {
       const onToggleSidebar = vi.fn();
       const onNewChat = vi.fn();
       render(
-        <ChatHeader 
-          onToggleSidebar={onToggleSidebar} 
-          onNewChat={onNewChat} 
-          isGenerating={false} 
-        />
+        <ChatHeader onToggleSidebar={onToggleSidebar} onNewChat={onNewChat} isGenerating={false} />
       );
       expect(screen.getByLabelText('New Chat')).toBeInTheDocument();
     });
@@ -36,33 +32,25 @@ describe('Component Rendering', () => {
       const onToggleSidebar = vi.fn();
       const onNewChat = vi.fn();
       const { container } = render(
-        <ChatHeader 
-          onToggleSidebar={onToggleSidebar} 
-          onNewChat={onNewChat} 
-          isGenerating={false} 
-        />
+        <ChatHeader onToggleSidebar={onToggleSidebar} onNewChat={onNewChat} isGenerating={false} />
       );
-      
+
       // Check if the button has the peer class
       const button = screen.getByLabelText('New Chat');
       expect(button).toHaveClass('peer');
-      
+
       // Check if the tooltip has correct classes
       const tooltip = container.querySelector('.absolute.top-full');
       expect(tooltip).toHaveClass('peer-hover:opacity-100');
     });
-    
+
     it('disables new chat button when generating', () => {
       const onToggleSidebar = vi.fn();
       const onNewChat = vi.fn();
       render(
-        <ChatHeader 
-          onToggleSidebar={onToggleSidebar} 
-          onNewChat={onNewChat} 
-          isGenerating={true} 
-        />
+        <ChatHeader onToggleSidebar={onToggleSidebar} onNewChat={onNewChat} isGenerating={true} />
       );
-      
+
       expect(screen.getByLabelText('New Chat')).toBeDisabled();
     });
   });
@@ -72,11 +60,7 @@ describe('Component Rendering', () => {
       const onToggle = vi.fn();
       const onSelectSession = vi.fn();
       const { container } = render(
-        <SessionSidebar 
-          isVisible={false} 
-          onToggle={onToggle} 
-          onSelectSession={onSelectSession}
-        />
+        <SessionSidebar isVisible={false} onToggle={onToggle} onSelectSession={onSelectSession} />
       );
       // Check that it has the hidden class
       expect(container.firstChild).toHaveClass('-translate-x-full');
@@ -86,27 +70,19 @@ describe('Component Rendering', () => {
       const onToggle = vi.fn();
       const onSelectSession = vi.fn();
       const { container } = render(
-        <SessionSidebar 
-          isVisible={true} 
-          onToggle={onToggle} 
-          onSelectSession={onSelectSession}
-        />
+        <SessionSidebar isVisible={true} onToggle={onToggle} onSelectSession={onSelectSession} />
       );
       expect(container.firstChild).toHaveClass('translate-x-0');
-      
+
       // Check that content is rendered when visible
       expect(screen.getByText('Chat History')).toBeInTheDocument();
     });
-    
+
     it('shows empty state when no sessions', () => {
       const onToggle = vi.fn();
       const onSelectSession = vi.fn();
       render(
-        <SessionSidebar 
-          isVisible={true} 
-          onToggle={onToggle} 
-          onSelectSession={onSelectSession}
-        />
+        <SessionSidebar isVisible={true} onToggle={onToggle} onSelectSession={onSelectSession} />
       );
       expect(screen.getByText('No saved sessions yet')).toBeInTheDocument();
     });
@@ -115,11 +91,7 @@ describe('Component Rendering', () => {
   describe('MessageList', () => {
     it('renders empty list', () => {
       const { container } = render(
-        <MessageList 
-          messages={[]} 
-          isGenerating={false} 
-          currentStreamedText="" 
-        />
+        <MessageList messages={[]} isGenerating={false} currentStreamedText="" />
       );
       expect(container.querySelector('.messages')).toBeInTheDocument();
     });
@@ -127,38 +99,22 @@ describe('Component Rendering', () => {
     it('renders messages correctly', () => {
       const messages: ChatMessage[] = [
         { text: 'Hello', type: 'user' },
-        { text: 'Hi there', type: 'ai' }
+        { text: 'Hi there', type: 'ai' },
       ];
-      render(
-        <MessageList 
-          messages={messages} 
-          isGenerating={false} 
-          currentStreamedText="" 
-        />
-      );
+      render(<MessageList messages={messages} isGenerating={false} currentStreamedText="" />);
       expect(screen.getAllByTestId('markdown')).toHaveLength(2);
       expect(screen.getByText('Hello')).toBeInTheDocument();
       expect(screen.getByText('Hi there')).toBeInTheDocument();
     });
-    
+
     it('renders AI typing indicator when generating', () => {
-      render(
-        <MessageList 
-          messages={[]} 
-          isGenerating={true} 
-          currentStreamedText="" 
-        />
-      );
+      render(<MessageList messages={[]} isGenerating={true} currentStreamedText="" />);
       expect(screen.getByText('Thinking')).toBeInTheDocument();
     });
-    
+
     it('renders streamed text when available', () => {
       render(
-        <MessageList 
-          messages={[]} 
-          isGenerating={true} 
-          currentStreamedText="I am thinking..." 
-        />
+        <MessageList messages={[]} isGenerating={true} currentStreamedText="I am thinking..." />
       );
       expect(screen.getByText('I am thinking...')).toBeInTheDocument();
     });

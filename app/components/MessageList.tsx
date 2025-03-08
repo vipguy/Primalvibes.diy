@@ -21,56 +21,56 @@ const renderMarkdownContent = (text: string) => {
 };
 
 // Individual message component to optimize rendering
-const Message = memo(({ 
-  message, 
-  index, 
-  isShrinking, 
-  isExpanding 
-}: { 
-  message: ChatMessage; 
-  index: number; 
-  isShrinking: boolean; 
-  isExpanding: boolean;
-}) => {
-  return (
-    <div
-      className={`flex flex-col transition-all duration-500 ${
-        isShrinking ? 'origin-top-left scale-0 opacity-0' : 'scale-100 opacity-100'
-      } ${isExpanding ? 'animate-bounce-in' : ''}`}
-      style={{
-        transitionDelay: isShrinking ? `${index * 50}ms` : '0ms',
-      }}
-    >
-      <div className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-        {message.type === 'ai' && (
-          <div className="bg-dark-decorative-00 dark:bg-light-decorative-00 mr-2 flex h-8 w-8 items-center justify-center rounded-full">
-            <span className="text-light-primary dark:text-dark-primary text-sm font-medium">
-              AI
-            </span>
+const Message = memo(
+  ({
+    message,
+    index,
+    isShrinking,
+    isExpanding,
+  }: {
+    message: ChatMessage;
+    index: number;
+    isShrinking: boolean;
+    isExpanding: boolean;
+  }) => {
+    return (
+      <div
+        className={`flex flex-col transition-all duration-500 ${
+          isShrinking ? 'origin-top-left scale-0 opacity-0' : 'scale-100 opacity-100'
+        } ${isExpanding ? 'animate-bounce-in' : ''}`}
+        style={{
+          transitionDelay: isShrinking ? `${index * 50}ms` : '0ms',
+        }}
+      >
+        <div className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+          {message.type === 'ai' && (
+            <div className="bg-dark-decorative-00 dark:bg-light-decorative-00 mr-2 flex h-8 w-8 items-center justify-center rounded-full">
+              <span className="text-light-primary dark:text-dark-primary text-sm font-medium">
+                AI
+              </span>
+            </div>
+          )}
+          <div
+            className={`message rounded-2xl p-3 ${
+              message.type === 'user'
+                ? 'bg-accent-02-light dark:bg-accent-02-dark rounded-tr-sm text-white'
+                : 'bg-light-decorative-00 dark:bg-dark-decorative-00 text-light-primary dark:text-dark-primary rounded-tl-sm'
+            } max-w-[85%] shadow-sm`}
+          >
+            {renderMarkdownContent(message.text)}
           </div>
-        )}
-        <div
-          className={`message rounded-2xl p-3 ${
-            message.type === 'user'
-              ? 'bg-accent-02-light dark:bg-accent-02-dark rounded-tr-sm text-white'
-              : 'bg-light-decorative-00 dark:bg-dark-decorative-00 text-light-primary dark:text-dark-primary rounded-tl-sm'
-          } max-w-[85%] shadow-sm`}
-        >
-          {renderMarkdownContent(message.text)}
         </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 // Optimized AI Typing component
 const AITyping = memo(({ currentStreamedText }: { currentStreamedText: string }) => {
   return (
     <div className="flex justify-start">
       <div className="bg-dark-decorative-00 dark:bg-light-decorative-00 mr-2 flex h-8 w-8 items-center justify-center rounded-full">
-        <span className="text-light-primary dark:text-dark-primary text-sm font-medium">
-          AI
-        </span>
+        <span className="text-light-primary dark:text-dark-primary text-sm font-medium">AI</span>
       </div>
       <div className="message bg-light-decorative-00 dark:bg-dark-decorative-00 text-light-primary dark:text-dark-primary max-w-[85%] rounded-2xl rounded-tl-sm p-3 shadow-sm">
         {currentStreamedText ? (
@@ -117,10 +117,10 @@ function MessageList({
   // Memoize the message list to prevent unnecessary re-renders
   const messageElements = useMemo(() => {
     return messages.map((msg, i) => (
-      <Message 
-        key={`${msg.type}-${i}`} 
-        message={msg} 
-        index={i} 
+      <Message
+        key={`${msg.type}-${i}`}
+        message={msg}
+        index={i}
         isShrinking={isShrinking}
         isExpanding={isExpanding}
       />
@@ -142,14 +142,15 @@ function MessageList({
 // Export a memoized version of the component to prevent unnecessary re-renders
 export default memo(MessageList, (prevProps, nextProps) => {
   // Check if arrays have the same length and references
-  const areMessagesEqual = 
-    prevProps.messages === nextProps.messages || 
-    (prevProps.messages.length === nextProps.messages.length && 
-     prevProps.messages.every((msg, i) => 
-       msg === nextProps.messages[i] || 
-       (msg.text === nextProps.messages[i].text && msg.type === nextProps.messages[i].type)
-     ));
-  
+  const areMessagesEqual =
+    prevProps.messages === nextProps.messages ||
+    (prevProps.messages.length === nextProps.messages.length &&
+      prevProps.messages.every(
+        (msg, i) =>
+          msg === nextProps.messages[i] ||
+          (msg.text === nextProps.messages[i].text && msg.type === nextProps.messages[i].type)
+      ));
+
   // Return true if nothing changed to prevent re-render
   return (
     areMessagesEqual &&

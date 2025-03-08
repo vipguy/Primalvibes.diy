@@ -8,7 +8,7 @@ interface ChatHeaderProps {
 
 function ChatHeader({ onToggleSidebar, onNewChat, isGenerating }: ChatHeaderProps) {
   return (
-    <div className="border-light-decorative-00 dark:border-dark-decorative-00 bg-light-background-00 dark:bg-dark-background-00 flex items-center justify-between border-b px-6 py-4 min-h-[4rem]">
+    <div className="border-light-decorative-00 dark:border-dark-decorative-00 bg-light-background-00 dark:bg-dark-background-00 flex min-h-[4rem] items-center justify-between border-b px-6 py-4">
       <div className="flex items-center">
         <button
           type="button"
@@ -66,7 +66,7 @@ function ChatHeader({ onToggleSidebar, onNewChat, isGenerating }: ChatHeaderProp
             />
           </svg>
         </button>
-        <span className="absolute top-full right-0 mt-1 rounded bg-gray-800 px-2 py-1 text-sm whitespace-nowrap text-white opacity-0 pointer-events-none transition-opacity peer-hover:opacity-100">
+        <span className="pointer-events-none absolute top-full right-0 mt-1 rounded bg-gray-800 px-2 py-1 text-sm whitespace-nowrap text-white opacity-0 transition-opacity peer-hover:opacity-100">
           New Chat
         </span>
       </div>

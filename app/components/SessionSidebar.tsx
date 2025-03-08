@@ -23,11 +23,7 @@ interface SessionSidebarProps {
 /**
  * Component that displays a collapsible sidebar with chat session history
  */
-function SessionSidebar({
-  isVisible,
-  onToggle,
-  onSelectSession,
-}: SessionSidebarProps) {
+function SessionSidebar({ isVisible, onToggle, onSelectSession }: SessionSidebarProps) {
   const { database, useLiveQuery } = useFireproof('fireproof-chat-history');
   const sidebarRef = useRef<HTMLDivElement>(null);
 
@@ -74,10 +70,7 @@ function SessionSidebar({
 
   // Conditionally render content but keep animation classes
   return (
-    <div
-      ref={sidebarRef}
-      className={sidebarClasses}
-    >
+    <div ref={sidebarRef} className={sidebarClasses}>
       {/* Only render content when sidebar is visible to save resources */}
       {isVisible && (
         <div className="h-full overflow-y-auto">

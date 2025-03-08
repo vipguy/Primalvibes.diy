@@ -62,19 +62,22 @@ function ChatInterface({ chatState }: ChatInterfaceProps) {
   const { currentSessionId, saveSession, loadSession, createNewSession } = useChatSessions();
 
   // Memoize handler functions to prevent re-renders
-  const handleSelectSuggestion = useCallback((suggestion: string) => {
-    setInput(suggestion);
-    // Focus the input after setting the value
-    setTimeout(() => {
-      if (inputRef.current) {
-        inputRef.current.focus();
-        // Move cursor to the end
-        const length = suggestion.length;
-        inputRef.current.selectionStart = length;
-        inputRef.current.selectionEnd = length;
-      }
-    }, 0);
-  }, [inputRef, setInput]);
+  const handleSelectSuggestion = useCallback(
+    (suggestion: string) => {
+      setInput(suggestion);
+      // Focus the input after setting the value
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+          // Move cursor to the end
+          const length = suggestion.length;
+          inputRef.current.selectionStart = length;
+          inputRef.current.selectionEnd = length;
+        }
+      }, 0);
+    },
+    [inputRef, setInput]
+  );
 
   const toggleSidebar = useCallback(() => {
     setIsSidebarVisible((prev) => !prev);
@@ -99,22 +102,25 @@ function ChatInterface({ chatState }: ChatInterfaceProps) {
   }, [messages, saveSession, isGenerating]);
 
   // Load a session from the sidebar - memoized to prevent re-renders
-  const handleLoadSession = useCallback(async (session: any) => {
-    const loadedSession = await loadSession(session);
+  const handleLoadSession = useCallback(
+    async (session: any) => {
+      const loadedSession = await loadSession(session);
 
-    if (loadedSession?.messages && Array.isArray(loadedSession.messages)) {
-      setMessages(loadedSession.messages);
+      if (loadedSession?.messages && Array.isArray(loadedSession.messages)) {
+        setMessages(loadedSession.messages);
 
-      // Find the last AI message with code to update the editor
-      const lastAiMessageWithCode = [...loadedSession.messages]
-        .reverse()
-        .find((msg: ChatMessage) => msg.type === 'ai' && msg.code);
+        // Find the last AI message with code to update the editor
+        const lastAiMessageWithCode = [...loadedSession.messages]
+          .reverse()
+          .find((msg: ChatMessage) => msg.type === 'ai' && msg.code);
 
-      if (lastAiMessageWithCode?.code) {
-        // No need to handle this here as it's handled by the parent component through onCodeGenerated
+        if (lastAiMessageWithCode?.code) {
+          // No need to handle this here as it's handled by the parent component through onCodeGenerated
+        }
       }
-    }
-  }, [loadSession, setMessages]);
+    },
+    [loadSession, setMessages]
+  );
 
   // Function to handle starting a new chat - memoized with complete dependencies
   const handleNewChat = useCallback(() => {
@@ -140,46 +146,59 @@ function ChatInterface({ chatState }: ChatInterfaceProps) {
   }, [createNewSession, messages.length, setInput, setMessages, setIsShrinking, setIsExpanding]);
 
   // Memoize child components to prevent unnecessary re-renders
-  const sessionSidebar = useMemo(() => (
-    <SessionSidebar
-      isVisible={isSidebarVisible}
-      onToggle={toggleSidebar}
-      onSelectSession={handleLoadSession}
-    />
-  ), [isSidebarVisible, toggleSidebar, handleLoadSession]);
+  const sessionSidebar = useMemo(
+    () => (
+      <SessionSidebar
+        isVisible={isSidebarVisible}
+        onToggle={toggleSidebar}
+        onSelectSession={handleLoadSession}
+      />
+    ),
+    [isSidebarVisible, toggleSidebar, handleLoadSession]
+  );
 
-  const chatHeader = useMemo(() => (
-    <ChatHeader
-      onToggleSidebar={toggleSidebar}
-      onNewChat={handleNewChat}
-      isGenerating={isGenerating}
-    />
-  ), [toggleSidebar, handleNewChat, isGenerating]);
+  const chatHeader = useMemo(
+    () => (
+      <ChatHeader
+        onToggleSidebar={toggleSidebar}
+        onNewChat={handleNewChat}
+        isGenerating={isGenerating}
+      />
+    ),
+    [toggleSidebar, handleNewChat, isGenerating]
+  );
 
-  const messageList = useMemo(() => (
-    <MessageList
-      messages={messages}
-      isGenerating={isGenerating}
-      currentStreamedText={currentStreamedText}
-      isShrinking={isShrinking}
-      isExpanding={isExpanding}
-    />
-  ), [messages, isGenerating, currentStreamedText, isShrinking, isExpanding]);
+  const messageList = useMemo(
+    () => (
+      <MessageList
+        messages={messages}
+        isGenerating={isGenerating}
+        currentStreamedText={currentStreamedText}
+        isShrinking={isShrinking}
+        isExpanding={isExpanding}
+      />
+    ),
+    [messages, isGenerating, currentStreamedText, isShrinking, isExpanding]
+  );
 
-  const quickSuggestions = useMemo(() => (
-    messages.length === 0 && <QuickSuggestions onSelectSuggestion={handleSelectSuggestion} />
-  ), [messages.length, handleSelectSuggestion]);
+  const quickSuggestions = useMemo(
+    () => messages.length === 0 && <QuickSuggestions onSelectSuggestion={handleSelectSuggestion} />,
+    [messages.length, handleSelectSuggestion]
+  );
 
-  const chatInput = useMemo(() => (
-    <ChatInput
-      input={input}
-      setInput={setInput}
-      isGenerating={isGenerating}
-      onSend={sendMessage}
-      autoResizeTextarea={autoResizeTextarea}
-      inputRef={inputRef}
-    />
-  ), [input, setInput, isGenerating, sendMessage, autoResizeTextarea, inputRef]);
+  const chatInput = useMemo(
+    () => (
+      <ChatInput
+        input={input}
+        setInput={setInput}
+        isGenerating={isGenerating}
+        onSend={sendMessage}
+        autoResizeTextarea={autoResizeTextarea}
+        inputRef={inputRef}
+      />
+    ),
+    [input, setInput, isGenerating, sendMessage, autoResizeTextarea, inputRef]
+  );
 
   return (
     <div className="flex h-full flex-col" style={{ overflow: 'hidden' }}>
