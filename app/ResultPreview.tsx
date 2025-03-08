@@ -3,8 +3,9 @@ import {
   SandpackLayout,
   SandpackPreview,
   SandpackProvider,
+  useSandpack,
 } from '@codesandbox/sandpack-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 interface ResultPreviewProps {
   code: string;
@@ -116,6 +117,45 @@ const defaultCode = `export default function App() {
   );
 }`;
 
+// Component to listen for Sandpack events
+function SandpackEventListener({ 
+  setActiveView, 
+  setBundlingComplete 
+}: { 
+  setActiveView: (view: 'preview' | 'code') => void,
+  setBundlingComplete: (complete: boolean) => void
+}) {
+  const { listen } = useSandpack();
+  
+  useEffect(() => {
+    // Set bundling as not complete when the component mounts
+    setBundlingComplete(false);
+    
+    const unsubscribe = listen(message => {
+      console.log('Sandpack message:', message.type);
+      
+      if (message.type === 'start') {
+        console.log('Sandpack is starting...');
+        setBundlingComplete(false);
+      } else if (message.type === 'status') {
+        console.log('Sandpack status update:', message.status);
+      } else if (message.type === 'urlchange') {
+        console.log('Sandpack urlchange complete!');
+        // Mark bundling as complete
+        setBundlingComplete(true);
+        // Switch to preview when bundling is complete
+        setActiveView('preview');
+      }
+    });
+    
+    return () => {
+      unsubscribe();
+    };
+  }, [listen, setActiveView, setBundlingComplete]);
+  
+  return null;
+}
+
 function ResultPreview({
   code,
   streamingCode = '',
@@ -129,6 +169,9 @@ function ResultPreview({
 }: ResultPreviewProps) {
   const [activeView, setActiveView] = useState<'preview' | 'code'>('preview');
   const [displayCode, setDisplayCode] = useState(code || defaultCode);
+  const [appStartedCount, setAppStartedCount] = useState(0);
+  const [bundlingComplete, setBundlingComplete] = useState(true);
+  const justFinishedStreamingRef = useRef(false);
 
   // Update displayed code when code changes or streaming ends
   useEffect(() => {
@@ -144,12 +187,48 @@ function ResultPreview({
     }
   }, [streamingCode, isStreaming]);
 
+  // Track when streaming ends
+  useEffect(() => {
+    if (isStreaming) {
+      justFinishedStreamingRef.current = true;
+      setActiveView('code');
+    }
+  }, [isStreaming]);
+
+  // Reset justFinishedStreamingRef when bundling completes
+  useEffect(() => {
+    if (bundlingComplete) {
+      justFinishedStreamingRef.current = false;
+    }
+  }, [bundlingComplete]);
+
+  // Determine if the preview icon should spin
+  const shouldSpin = !isStreaming && justFinishedStreamingRef.current && !bundlingComplete;
+
   useEffect(() => {
     console.log('dependencies', dependencies);
   }, [dependencies]);
 
+  // CSS for the spinning animation
+  const spinningIconClass = shouldSpin ? 'animate-spin-slow' : '';
+
   return (
     <div className="h-full" style={{ overflow: 'hidden' }}>
+      <style>
+        {`
+          @keyframes spin-slow {
+            from {
+              transform: rotate(0deg);
+            }
+            to {
+              transform: rotate(360deg);
+            }
+          }
+          .animate-spin-slow {
+            animation: spin-slow 1s linear infinite;
+          }
+        `}
+      </style>
       <div className="border-light-decorative-00 dark:border-dark-decorative-00 bg-light-background-00 dark:bg-dark-background-00 flex items-center justify-between border-b p-4">
         <div className="bg-light-decorative-00 dark:bg-dark-decorative-00 flex space-x-1 rounded-lg p-1 shadow-sm">
           <button
@@ -164,7 +243,7 @@ function ResultPreview({
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4"
+              className={`h-4 w-4 ${spinningIconClass}`}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -281,6 +360,7 @@ function ResultPreview({
           }}
           theme="light"
         >
+          <SandpackEventListener setActiveView={setActiveView} setBundlingComplete={setBundlingComplete} />
           <SandpackLayout className="h-full" style={{ height: 'calc(100vh - 49px)' }}>
             <div
               style={{
