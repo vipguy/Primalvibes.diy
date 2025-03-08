@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { ChatMessage } from '../types/chat';
 import { makeBaseSystemPrompt } from '../prompts';
+import { RegexParser } from '../../RegexParser';
 
 const CHOSEN_MODEL = 'anthropic/claude-3.7-sonnet';
 // const CHOSEN_MODEL = 'qwen/qwq-32b:free';
@@ -14,24 +15,9 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
   const [streamingCode, setStreamingCode] = useState<string>('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [completedCode, setCompletedCode] = useState<string>('');
-  const [pendingDependencyChunk, setPendingDependencyChunk] = useState<string>('');
-  const [inDependencyMode, setInDependencyMode] = useState<boolean>(false);
-  const [pendingTextBuffer, setPendingTextBuffer] = useState('');
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Parser state for tracking code blocks and dependencies
-  const parserState = useRef({
-    inCodeBlock: false,
-    codeBlockContent: '',
-    backtickCount: 0,
-    languageId: '',
-    inDependencies: false,
-    dependenciesContent: '',
-    fullResponseBuffer: '',
-    dependencies: {} as Record<string, string>,
-    dependencyRanges: [] as [number, number][]
-  });
+  const parserState = useRef<RegexParser>(new RegexParser());
 
   // Initialize system prompt
   useEffect(() => {
@@ -70,232 +56,56 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
     }));
   }
 
-  // State machine function for processing streaming chunks
-  function processStreamChunk(chunk: string) {
-    let currentDisplayText = '';
-
-    console.log('Processing chunk:', chunk, 'inDependencyMode:', inDependencyMode);
-    
-    // Add an early return for any chunk while in dependency mode
-    if (inDependencyMode) {
-      const combinedChunk = pendingDependencyChunk + chunk;
-      
-      // Check if this chunk contains a markdown heading (false positive)
-      if (combinedChunk.includes('#') && !combinedChunk.includes('}}')) {
-        console.log('Found # character before dependency end, might be a heading - exiting dependency mode');
-        // This might be a heading, not a dependency section
-        setInDependencyMode(false);
-        setPendingDependencyChunk('');
-        parserState.current.fullResponseBuffer += combinedChunk;
-        processDisplayText(combinedChunk);
-        console.log('Leaving dependency mode. Current dependencies:', parserState.current.dependencies);
-        return;
-      }
-      
-      // Only process further if we see the end of the dependency declaration
-      if (combinedChunk.includes('}}')) {
-        const endIndex = combinedChunk.indexOf('}}') + 2;
-        const dependencyPart = combinedChunk.substring(0, endIndex);
-        const afterJson = combinedChunk.substring(endIndex);
-        
-        // First try to extract dependencies using regex - more reliable for fragments
-        const matches = dependencyPart.match(/"([^"]+)"\s*:\s*"([^"]+)"/g);
-        if (matches) {
-          matches.forEach(match => {
-            const keyMatch = match.match(/"([^"]+)"\s*:/);
-            const valueMatch = match.match(/:\s*"([^"]+)"/);
-            
-            if (keyMatch && keyMatch[1] && valueMatch && valueMatch[1]) {
-              const key = keyMatch[1].trim();
-              const value = valueMatch[1].trim();
-              
-              // Skip empty keys and values
-              if (key && value && key !== "" && value !== "") {
-                parserState.current.dependencies[key] = value;
-                console.log(`Added dependency via regex: ${key} = ${value}`);
-              } else {
-                console.log(`Skipping empty dependency key or value: ${key}=${value}`);
-              }
-            }
-          });
-        }
-        
-        // Reset dependency mode
-        setInDependencyMode(false);
-        setPendingDependencyChunk('');
-        console.log('Leaving dependency mode. Final dependencies:', parserState.current.dependencies);
-        
-        // Process remaining content if any
-        if (afterJson.trim()) {
-          // Add to response buffer for code extraction later
-          parserState.current.fullResponseBuffer += afterJson;
-          processDisplayText(afterJson);
-        }
-      } else {
-        // Still collecting dependencies
-        setPendingDependencyChunk(combinedChunk);
-      }
-      
-      return;
-    }
-    
-    // Helper to process display text (extract non-display parts to avoid duplication)
-    function processDisplayText(text) {
-      for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-        if (char === '`') {
-          parserState.current.backtickCount++;
-          if (parserState.current.backtickCount === 3) {
-            if (!parserState.current.inCodeBlock) {
-              // Start of code block, don't add backticks to display text
-              parserState.current.inCodeBlock = true;
-              parserState.current.backtickCount = 0;
-              i = skipLanguageIdentifier(text, i + 1);
-            } else {
-              // End of code block
-              parserState.current.inCodeBlock = false;
-              parserState.current.backtickCount = 0;
-            }
-          }
-        } else if (parserState.current.backtickCount > 0) {
-          if (parserState.current.inCodeBlock) {
-            parserState.current.codeBlockContent += '`'.repeat(parserState.current.backtickCount) + char;
-          } else {
-            currentDisplayText += '`'.repeat(parserState.current.backtickCount) + char;
-          }
-          parserState.current.backtickCount = 0;
-        } else {
-          if (parserState.current.inCodeBlock) {
-            parserState.current.codeBlockContent += char;
-          } else {
-            currentDisplayText += char;
-          }
-        }
-      }
-      
-      if (currentDisplayText) {
-        setCurrentStreamedText(prev => prev + currentDisplayText);
-      }
-      
-      if (parserState.current.inCodeBlock) {
-        setStreamingCode(parserState.current.codeBlockContent);
-      }
-    }
-    
-    // Helper function to skip language identifier after code block start
-    function skipLanguageIdentifier(text, startIndex) {
-      let j = startIndex;
-      while (j < text.length && text[j] !== '\n') {
-        j++;
-      }
-      
-      if (j < text.length) {
-        parserState.current.languageId = text.substring(startIndex, j).trim();
-        return j; // Skip to after the newline
-      }
-      
-      return startIndex; // Couldn't find newline, just return the start
-    }
-    
-    // Check for various patterns that indicate dependency data
-    const isDependencyChunk = (chunk) => {
-      // If we're not in dependency mode yet and the chunk contains "}}",
-      // process it specially to extract both dependencies and text
-      if (!inDependencyMode && chunk.includes('}}')) {
-        const endIndex = chunk.indexOf('}}') + 2;
-        const beforePart = chunk.substring(0, endIndex);
-        const afterPart = chunk.substring(endIndex);
-        
-        console.log('Processing mixed chunk with both dependency and content:', 
-                    'Dep part:', beforePart, 'Content part:', afterPart);
-        
-        // Extract dependencies from the dependency part
-        const matches = beforePart.match(/"([^"]+)"\s*:\s*"([^"]+)"/g);
-        if (matches) {
-          matches.forEach(match => {
-            const keyMatch = match.match(/"([^"]+)"\s*:/);
-            const valueMatch = match.match(/:\s*"([^"]+)"/);
-            
-            if (keyMatch && keyMatch[1] && valueMatch && valueMatch[1]) {
-              const key = keyMatch[1].trim();
-              const value = valueMatch[1].trim();
-              
-              // Skip empty keys and values
-              if (key && value && key !== "" && value !== "") {
-                parserState.current.dependencies[key] = value;
-                console.log(`Added dependency via regex: ${key} = ${value}`);
-              } else {
-                console.log(`Skipping empty dependency key or value: ${key}=${value}`);
-              }
-            }
-          });
-        }
-        
-        // Process the after part normally - store the full content for the next processing step
-        setPendingTextBuffer(afterPart);
-        
-        // We've handled this chunk completely
-        return false;
-      }
-      
-      // Standard dependency detection for chunks without split
-      return (
-        // Package name fragment - includes quotes and : but not at beginning
-        (chunk.includes('"') && chunk.includes(':') && !chunk.includes('```')) ||
-        // Start of package object
-        chunk.trim().startsWith('{') || 
-        // Fragment starting with "-" followed by package name
-        (chunk.trim().startsWith('-') && chunk.includes('"'))
-      );
-    };
-
-    if (isDependencyChunk(chunk)) {
-      console.log('Dependency chunk detected, setting mode and accumulating:', chunk);
-      setPendingDependencyChunk(pendingDependencyChunk + chunk);
-      setInDependencyMode(true);
-      return;
-    }
-    
-    // Not in dependency mode, process as normal text/code
-    parserState.current.fullResponseBuffer += chunk;
-
-    // If we have pending text from a previous dependency chunk, prepend it
-    if (pendingTextBuffer) {
-      const fullChunk = pendingTextBuffer + chunk;
-      setPendingTextBuffer(''); // Reset the buffer
-      processDisplayText(fullChunk);
+  // Initialize the parser
+  const initParser = useCallback(() => {
+    // Reset the existing parser
+    if (parserState.current) {
+      parserState.current.removeAllListeners();
+      parserState.current.reset();
     } else {
-      processDisplayText(chunk);
+      parserState.current = new RegexParser();
     }
-  }
+    
+    // Set up event listeners
+    parserState.current.on('text', (textChunk: string, fullText: string) => {
+      setCurrentStreamedText(fullText);
+    });
+    
+    // Listen for both complete code blocks and incremental updates
+    parserState.current.on('code', (code: string, languageId: string) => {
+      console.log('Complete code block received:', code.substring(0, 50) + '...');
+      setStreamingCode(code);
+      setCompletedCode(code);
+    });
+    
+    // Add a listener for incremental code updates
+    parserState.current.on('codeUpdate', (code: string) => {
+      console.log('Code update received:', code.substring(0, 50) + '...');
+      setStreamingCode(code);
+    });
+    
+    parserState.current.on('dependencies', (dependencies: Record<string, string>) => {
+      console.log('Dependencies detected:', dependencies);
+    });
+    
+    return parserState.current;
+  }, []);
 
   async function sendMessage() {
     if (input.trim()) {
-      // Reset dependency parsing state
-      setPendingDependencyChunk('');
-      setInDependencyMode(false);
+      // Reset state for new message
+      setCurrentStreamedText('');
+      setStreamingCode('');
+      setCompletedCode('');
+      setIsStreaming(true);
+      setIsGenerating(true);
       
       // Add user message
       setMessages((prev) => [...prev, { text: input, type: 'user' }]);
       setInput('');
-      setIsGenerating(true);
-      setCurrentStreamedText(''); // Reset streamed text
-      setStreamingCode(''); // Reset streaming code
-      setCompletedCode(''); // Reset completed code
-      setIsStreaming(true); // Start streaming state
       
-      // Reset parser state
-      parserState.current = {
-        inCodeBlock: false,
-        codeBlockContent: '',
-        backtickCount: 0,
-        languageId: '',
-        inDependencies: false,
-        dependenciesContent: '',
-        fullResponseBuffer: '',
-        dependencies: {},
-        dependencyRanges: []
-      };
+      // Initialize parser
+      const parser = initParser();
 
       try {
         // Build message history
@@ -341,6 +151,12 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
         }
 
         const decoder = new TextDecoder();
+        const dependencies: Record<string, string> = {};
+
+        // Set up dependency event listener
+        parser.on('dependencies', (deps: Record<string, string>) => {
+          Object.assign(dependencies, deps);
+        });
 
         // Process the stream
         while (true) {
@@ -359,7 +175,14 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
                 if (data.choices && data.choices[0]?.delta?.content) {
                   const content = data.choices[0].delta.content;
                   console.log('Received content chunk:', content);
-                  processStreamChunk(content);
+                  
+                  // Feed the chunk to our parser
+                  parser.write(content);
+                  
+                  // Also update streaming code directly from parser's current state
+                  if (parser.inCodeBlock) {
+                    setStreamingCode(parser.codeBlockContent);
+                  }
                 }
               } catch (e) {
                 console.error('Error parsing chunk:', e);
@@ -368,13 +191,9 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
           }
         }
 
-        // When stream completes, finalize code and dependencies
-        const generatedCode = parserState.current.codeBlockContent || completedCode;
-        const dependencies = parserState.current.dependencies;
-        
-        console.log('Final dependencies collected:', dependencies);
-        console.log('Final streamed text before trim:', currentStreamedText);
-        
+        // End the parser stream
+        parser.end();
+
         // Clean up the message text - remove any leading noise
         let cleanedMessage = currentStreamedText;
         
@@ -391,13 +210,13 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
           {
             text: cleanedMessage || "Here's your generated app:",
             type: 'ai',
-            code: generatedCode,
-            dependencies,
+            code: completedCode || parser.codeBlockContent,
+            dependencies: parser.dependencies,
           },
         ]);
 
         // Update the editor with code and dependencies
-        onCodeGenerated(generatedCode, dependencies);
+        onCodeGenerated(completedCode || parser.codeBlockContent, parser.dependencies);
       } catch (error) {
         setMessages((prev) => [
           ...prev,
