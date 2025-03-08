@@ -1,9 +1,6 @@
-
 // Base system prompt for the AI
 export async function makeBaseSystemPrompt(model: string) {
-  const llmsText = await fetch('https://use-fireproof.com/llms-full.txt').then(
-    (res) => res.text()
-  );
+  const llmsText = await fetch('https://use-fireproof.com/llms-full.txt').then((res) => res.text());
 
   return `
 You are an AI assistant tasked with creating React components. You should create components that:

@@ -34,11 +34,11 @@ function ChatHeader({ onToggleSidebar, onNewChat, isGenerating }: ChatHeaderProp
           Fireproof App Builder
         </h1>
       </div>
-      <div className="relative group">
+      <div className="group relative">
         <button
           type="button"
           onClick={onNewChat}
-          className="bg-accent-02-light dark:bg-accent-02-dark hover:bg-accent-03-light dark:hover:bg-accent-03-dark cursor-pointer rounded-full p-2.5 text-white transition-colors flex items-center justify-center"
+          className="bg-accent-02-light dark:bg-accent-02-dark hover:bg-accent-03-light dark:hover:bg-accent-03-dark flex cursor-pointer items-center justify-center rounded-full p-2.5 text-white transition-colors"
           disabled={isGenerating}
           aria-label="New Chat"
         >
@@ -58,8 +58,8 @@ function ChatHeader({ onToggleSidebar, onNewChat, isGenerating }: ChatHeaderProp
             />
           </svg>
         </button>
-        <div className="absolute right-0 top-full mt-1 scale-0 origin-top-right transition-all duration-100 group-hover:scale-100">
-          <div className="bg-gray-800 text-white text-sm rounded py-1 px-2 whitespace-nowrap">
+        <div className="absolute top-full right-0 mt-1 origin-top-right scale-0 transition-all duration-100 group-hover:scale-100">
+          <div className="rounded bg-gray-800 px-2 py-1 text-sm whitespace-nowrap text-white">
             New Chat
           </div>
         </div>
@@ -68,4 +68,4 @@ function ChatHeader({ onToggleSidebar, onNewChat, isGenerating }: ChatHeaderProp
   );
 }
 
-export default ChatHeader; 
+export default ChatHeader;

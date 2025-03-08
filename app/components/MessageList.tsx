@@ -18,10 +18,8 @@ function MessageList({ messages, isGenerating, currentStreamedText }: MessageLis
   // Function to render message content with markdown support
   const renderMessageContent = (text: string) => {
     return (
-      <div className="prose prose-sm max-w-none dark:prose-invert">
-        <ReactMarkdown>
-          {text}
-        </ReactMarkdown>
+      <div className="prose prose-sm dark:prose-invert max-w-none">
+        <ReactMarkdown>{text}</ReactMarkdown>
       </div>
     );
   };
@@ -84,4 +82,4 @@ function MessageList({ messages, isGenerating, currentStreamedText }: MessageLis
   );
 }
 
-export default MessageList; 
+export default MessageList;

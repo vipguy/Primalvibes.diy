@@ -116,27 +116,27 @@ const defaultCode = `export default function App() {
   );
 }`;
 
-function ResultPreview({ 
-  code, 
-  streamingCode = '', 
+function ResultPreview({
+  code,
+  streamingCode = '',
   isStreaming = false,
-  dependencies = {}, 
-  onShare, 
+  dependencies = {},
+  onShare,
   shareStatus,
   completedMessage,
   currentMessage,
-  currentStreamContent
+  currentStreamContent,
 }: ResultPreviewProps) {
   const [activeView, setActiveView] = useState<'preview' | 'code'>('preview');
   const [displayCode, setDisplayCode] = useState(code || defaultCode);
-  
+
   // Update displayed code when code changes or streaming ends
   useEffect(() => {
     if (!isStreaming) {
       setDisplayCode(code || defaultCode);
     }
   }, [code, isStreaming]);
-  
+
   // Update displayed code during streaming
   useEffect(() => {
     if (isStreaming && streamingCode) {
@@ -250,7 +250,7 @@ function ResultPreview({
         )}
 
         {isStreaming && (
-          <div className="ml-2 text-sm text-accent-03-light dark:text-accent-03-dark animate-pulse">
+          <div className="text-accent-03-light dark:text-accent-03-dark ml-2 animate-pulse text-sm">
             Streaming {streamingCode.split('\n').length} lines of code...
           </div>
         )}
@@ -313,7 +313,7 @@ function ResultPreview({
         {streamingCode ? (
           <div>{currentStreamContent}</div>
         ) : (
-          <div>{completedMessage || currentMessage?.content || ""}</div>
+          <div>{completedMessage || currentMessage?.content || ''}</div>
         )}
       </div>
     </div>

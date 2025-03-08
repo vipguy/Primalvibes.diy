@@ -5,17 +5,17 @@ interface QuickSuggestionsProps {
 function QuickSuggestions({ onSelectSuggestion }: QuickSuggestionsProps) {
   const suggestions = [
     {
-      label: "Todo App",
-      text: "Create a todo app with due dates and the ability to mark tasks as complete"
+      label: 'Todo App',
+      text: 'Create a todo app with due dates and the ability to mark tasks as complete',
     },
     {
-      label: "Pomodoro Tracker",
-      text: "Create a pomodoro timer app with multiple timers work/break intervals and session tracking"
+      label: 'Pomodoro Tracker',
+      text: 'Create a pomodoro timer app with multiple timers work/break intervals and session tracking',
     },
     {
-      label: "Drawing App",
-      text: "Create a simple drawing app with a canvas where users can draw with different colors and save their drawings"
-    }
+      label: 'Drawing App',
+      text: 'Create a simple drawing app with a canvas where users can draw with different colors and save their drawings',
+    },
   ];
 
   return (
@@ -36,4 +36,4 @@ function QuickSuggestions({ onSelectSuggestion }: QuickSuggestionsProps) {
   );
 }
 
-export default QuickSuggestions; 
+export default QuickSuggestions;

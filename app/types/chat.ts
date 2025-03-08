@@ -14,4 +14,4 @@ export interface SessionDocument {
 
 export interface ChatInterfaceProps {
   onCodeGenerated: (code: string, dependencies?: Record<string, string>) => void;
-} 
+}

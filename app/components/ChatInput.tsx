@@ -9,7 +9,14 @@ interface ChatInputProps {
   inputRef: React.RefObject<HTMLTextAreaElement | null>;
 }
 
-function ChatInput({ input, setInput, isGenerating, onSend, autoResizeTextarea, inputRef }: ChatInputProps) {
+function ChatInput({
+  input,
+  setInput,
+  isGenerating,
+  onSend,
+  autoResizeTextarea,
+  inputRef,
+}: ChatInputProps) {
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
     autoResizeTextarea();
@@ -30,7 +37,7 @@ function ChatInput({ input, setInput, isGenerating, onSend, autoResizeTextarea, 
           value={input}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          className="border-light-decorative-00 dark:border-dark-decorative-00 text-light-primary dark:text-dark-primary bg-light-background-00 dark:bg-dark-background-00 focus:ring-accent-01-light dark:focus:ring-accent-01-dark flex-1 w-full rounded-xl border p-2.5 text-sm transition-all focus:border-transparent focus:ring-2 focus:outline-none min-h-[60px] max-h-[150px] pr-12 resize-y"
+          className="border-light-decorative-00 dark:border-dark-decorative-00 text-light-primary dark:text-dark-primary bg-light-background-00 dark:bg-dark-background-00 focus:ring-accent-01-light dark:focus:ring-accent-01-dark max-h-[150px] min-h-[60px] w-full flex-1 resize-y rounded-xl border p-2.5 pr-12 text-sm transition-all focus:border-transparent focus:ring-2 focus:outline-none"
           placeholder="Describe the app you want to create..."
           disabled={isGenerating}
           rows={2}
@@ -44,17 +51,39 @@ function ChatInput({ input, setInput, isGenerating, onSend, autoResizeTextarea, 
               ? 'bg-light-decorative-01 dark:bg-dark-decorative-01 text-light-primary dark:text-dark-primary cursor-not-allowed opacity-50'
               : 'bg-accent-01-light dark:bg-accent-01-dark hover:bg-accent-02-light dark:hover:bg-accent-02-dark cursor-pointer text-white'
           }`}
-          aria-label={isGenerating ? "Generating" : "Send message"}
+          aria-label={isGenerating ? 'Generating' : 'Send message'}
         >
           {isGenerating ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 animate-spin"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
               <title>Generating message</title>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
             </svg>
           ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
               <title>Send message</title>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5l0 14M12 5l-4 4M12 5l4 4" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 5l0 14M12 5l-4 4M12 5l4 4"
+              />
             </svg>
           )}
         </button>
@@ -63,4 +92,4 @@ function ChatInput({ input, setInput, isGenerating, onSend, autoResizeTextarea, 
   );
 }
 
-export default ChatInput; 
+export default ChatInput;

@@ -6,7 +6,9 @@ import { RegexParser } from '../../RegexParser';
 const CHOSEN_MODEL = 'anthropic/claude-3.7-sonnet';
 // const CHOSEN_MODEL = 'qwen/qwq-32b:free';
 
-export function useChat(onCodeGenerated: (code: string, dependencies?: Record<string, string>) => void) {
+export function useChat(
+  onCodeGenerated: (code: string, dependencies?: Record<string, string>) => void
+) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -15,7 +17,7 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
   const [streamingCode, setStreamingCode] = useState<string>('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [completedCode, setCompletedCode] = useState<string>('');
-  const [completedMessage, setCompletedMessage] = useState("");
+  const [completedMessage, setCompletedMessage] = useState('');
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const parserState = useRef<RegexParser>(new RegexParser());
@@ -66,7 +68,7 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
     } else {
       parserState.current = new RegexParser();
     }
-    
+
     // Set up event listeners
     parserState.current.on('text', (textChunk: string, fullText: string) => {
       // Clean up any JSON artifacts at the beginning
@@ -77,25 +79,25 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
       cleanedText = cleanedText.replace(/^\s*:""[}\s]*/, '');
       cleanedText = cleanedText.replace(/^\s*""\s*:\s*""[}\s]*/, '');
       cleanedText = cleanedText.trimStart();
-      
+
       setCurrentStreamedText(cleanedText);
     });
-    
+
     // Listen for both complete code blocks and incremental updates
     parserState.current.on('code', (code: string, languageId: string) => {
       setStreamingCode(code);
       setCompletedCode(code);
     });
-    
+
     // Add a listener for incremental code updates
     parserState.current.on('codeUpdate', (code: string) => {
       setStreamingCode(code);
     });
-    
+
     parserState.current.on('dependencies', (dependencies: Record<string, string>) => {
       console.log('Dependencies detected:', dependencies);
     });
-    
+
     return parserState.current;
   }, []);
 
@@ -107,11 +109,11 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
       setCompletedCode('');
       setIsStreaming(true);
       setIsGenerating(true);
-      
+
       // Add user message
       setMessages((prev) => [...prev, { text: input, type: 'user' }]);
       setInput('');
-      
+
       // Initialize parser
       const parser = initParser();
 
@@ -123,7 +125,7 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
         const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
+            Authorization: `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
             'Content-Type': 'application/json',
             'HTTP-Referer': window.location.origin,
             'X-Title': 'Fireproof App Builder',
@@ -160,10 +162,10 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
-          
+
           // Decode the chunk
           const chunk = decoder.decode(value, { stream: true });
-          
+
           // Process each line (each SSE event)
           const lines = chunk.split('\n');
           for (const line of lines) {
@@ -172,10 +174,10 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
                 const data = JSON.parse(line.substring(6));
                 if (data.choices && data.choices[0]?.delta?.content) {
                   const content = data.choices[0].delta.content;
-                  
+
                   // Feed the chunk to our parser
                   parser.write(content);
-                  
+
                   // Also update streaming code directly from parser's current state
                   if (parser.inCodeBlock) {
                     setStreamingCode(parser.codeBlockContent);
@@ -193,10 +195,10 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
 
         // Clean up the message text - remove any leading noise
         let cleanedMessage = currentStreamedText;
-        
+
         // Clean up any extra whitespace at the beginning
         cleanedMessage = cleanedMessage.trimStart();
-        
+
         // Add AI response with code and dependencies
         setMessages((prev) => [
           ...prev,
@@ -212,24 +214,28 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
         onCodeGenerated(completedCode || parser.codeBlockContent, parser.dependencies);
 
         // Add this before setting the final message
-        console.log("Debug values:", {
+        console.log('Debug values:', {
           currentStreamedText,
           cleanedMessage,
-          parser
+          parser,
         });
 
         // Add this debug log to confirm parser state
-        console.log("Parser state at stream end:", parser);
+        console.log('Parser state at stream end:', parser);
 
         // Use parser's displayText property instead of the non-existent fullResponseBuffer
-        const finalMessage = parser.displayText.trim() || cleanedMessage || currentStreamedText || "Here's your generated app:";
+        const finalMessage =
+          parser.displayText.trim() ||
+          cleanedMessage ||
+          currentStreamedText ||
+          "Here's your generated app:";
         setCompletedMessage(finalMessage);
 
         // Update the messages array
         setMessages((prevMessages) => {
           const updatedMessages = [...prevMessages];
           const lastMessageIndex = updatedMessages.length - 1;
-          
+
           if (lastMessageIndex >= 0) {
             updatedMessages[lastMessageIndex] = {
               ...updatedMessages[lastMessageIndex],
@@ -238,7 +244,7 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
               completed: true,
             };
           }
-          
+
           return updatedMessages;
         });
       } catch (error) {
@@ -273,6 +279,6 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
     scrollToBottom,
     sendMessage,
     parserState,
-    completedMessage
+    completedMessage,
   };
-} 
+}

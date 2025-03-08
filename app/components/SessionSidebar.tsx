@@ -40,16 +40,16 @@ export default function SessionSidebar({
   useEffect(() => {
     // Only add listener if sidebar is visible
     if (!isVisible) return;
-    
+
     function handleClickOutside(event: MouseEvent) {
       if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
         onToggle();
       }
     }
-    
+
     // Add event listener
     document.addEventListener('mousedown', handleClickOutside);
-    
+
     // Clean up event listener
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);

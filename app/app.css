@@ -82,10 +82,10 @@ button {
 /* Ensure all buttons and links show pointer cursor on hover */
 button,
 a,
-[role="button"],
-[type="button"],
-[type="submit"],
-[type="reset"] {
+[role='button'],
+[type='button'],
+[type='submit'],
+[type='reset'] {
   cursor: pointer;
 }
 

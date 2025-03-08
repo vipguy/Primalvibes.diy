@@ -40,28 +40,23 @@ interface ChatInterfaceProps {
 // ChatInterface component handles user input and displays chat messages
 function ChatInterface({ chatState }: ChatInterfaceProps) {
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
-  
-  const { 
-    messages, 
-    setMessages, 
-    input, 
-    setInput, 
-    isGenerating, 
+
+  const {
+    messages,
+    setMessages,
+    input,
+    setInput,
+    isGenerating,
     currentStreamedText,
-    inputRef, 
-    messagesEndRef, 
-    autoResizeTextarea, 
-    scrollToBottom, 
+    inputRef,
+    messagesEndRef,
+    autoResizeTextarea,
+    scrollToBottom,
     sendMessage,
-    completedMessage
+    completedMessage,
   } = chatState;
-  
-  const { 
-    currentSessionId, 
-    saveSession, 
-    loadSession, 
-    createNewSession 
-  } = useChatSessions();
+
+  const { currentSessionId, saveSession, loadSession, createNewSession } = useChatSessions();
 
   const toggleSidebar = () => {
     setIsSidebarVisible((prev) => !prev);
@@ -87,7 +82,7 @@ function ChatInterface({ chatState }: ChatInterfaceProps) {
   // Load a session from the sidebar
   const handleLoadSession = async (session: any) => {
     const loadedSession = await loadSession(session);
-    
+
     if (loadedSession?.messages && Array.isArray(loadedSession.messages)) {
       setMessages(loadedSession.messages);
 
@@ -100,7 +95,7 @@ function ChatInterface({ chatState }: ChatInterfaceProps) {
         // Use the last code from the loaded session
         const code = lastAiMessageWithCode.code;
         const dependencies = lastAiMessageWithCode.dependencies || {};
-        
+
         // We need to notify the parent component about this code
         // This will be handled by the onCodeGenerated callback in useChat
       }
@@ -135,26 +130,24 @@ function ChatInterface({ chatState }: ChatInterfaceProps) {
         style={{ overflow: 'hidden' }}
       >
         {/* Header */}
-        <ChatHeader 
-          onToggleSidebar={toggleSidebar} 
-          onNewChat={handleNewChat} 
-          isGenerating={isGenerating} 
+        <ChatHeader
+          onToggleSidebar={toggleSidebar}
+          onNewChat={handleNewChat}
+          isGenerating={isGenerating}
         />
 
         {/* Messages */}
-        <MessageList 
-          messages={messages} 
-          isGenerating={isGenerating} 
-          currentStreamedText={currentStreamedText} 
+        <MessageList
+          messages={messages}
+          isGenerating={isGenerating}
+          currentStreamedText={currentStreamedText}
         />
 
         {/* Quick access buttons */}
-        {messages.length === 0 && (
-          <QuickSuggestions onSelectSuggestion={setInput} />
-        )}
+        {messages.length === 0 && <QuickSuggestions onSelectSuggestion={setInput} />}
 
         {/* Input area */}
-        <ChatInput 
+        <ChatInput
           input={input}
           setInput={setInput}
           isGenerating={isGenerating}

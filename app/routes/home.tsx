@@ -115,9 +115,7 @@ export default function Home() {
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
       <div style={{ flex: '0 0 33.333%', overflow: 'hidden', position: 'relative' }}>
-        <ChatInterface 
-          chatState={chatState}
-        />
+        <ChatInterface chatState={chatState} />
       </div>
       <div style={{ flex: '0 0 66.667%', overflow: 'hidden', position: 'relative' }}>
         <ResultPreview
@@ -129,9 +127,11 @@ export default function Home() {
           shareStatus={shareStatus}
           completedMessage={chatState.completedMessage}
           currentStreamContent={chatState.currentStreamedText}
-          currentMessage={chatState.messages.length > 0 
-            ? chatState.messages[chatState.messages.length - 1] 
-            : undefined}
+          currentMessage={
+            chatState.messages.length > 0
+              ? chatState.messages[chatState.messages.length - 1]
+              : undefined
+          }
         />
       </div>
     </div>
