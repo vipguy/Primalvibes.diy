@@ -30,9 +30,18 @@ function ChatHeader({ onToggleSidebar, onNewChat, isGenerating }: ChatHeaderProp
             />
           </svg>
         </button>
-        <h1 className="text-light-primary dark:text-dark-primary text-xl font-semibold">
-          Fireproof App Builder
-        </h1>
+        <div className="flex items-center">
+          <img 
+            src="/fp-logo.svg" 
+            alt="Fireproof App Builder" 
+            className="h-8 block dark:hidden" 
+          />
+          <img 
+            src="/fp-logo-white.svg" 
+            alt="Fireproof App Builder" 
+            className="h-8 hidden dark:block" 
+          />
+        </div>
       </div>
       <div className="group relative">
         <button
