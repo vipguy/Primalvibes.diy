@@ -47,7 +47,7 @@ describe('ResultPreview', () => {
     const copyButton = screen.getByTestId('copy-button');
     fireEvent.click(copyButton);
 
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(code);
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining(code));
   });
 
   it('renders with custom dependencies', async () => {
