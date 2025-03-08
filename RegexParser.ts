@@ -275,7 +275,9 @@ export class RegexParser {
     }
 
     if (j < text.length) {
-      this.languageId = text.substring(startIndex, j).trim();
+      // Extract language ID, trim whitespace, and remove any trailing colon
+      const rawLanguageId = text.substring(startIndex, j).trim();
+      this.languageId = rawLanguageId.replace(/:(\s*)$/, '').trim();
       return j; // Skip to after the newline
     }
 

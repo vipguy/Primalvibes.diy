@@ -162,4 +162,81 @@ describe('RegexParser', () => {
       typescript: '5.0.4'
     });
   });
+
+  it('should properly handle language identifiers with tags in code blocks', () => {
+    // Create spies to track emitted events
+    const codeSpy = vi.fn();
+    const codeBlockStartSpy = vi.fn();
+    
+    // Create parser and register event handlers
+    const parser = new RegexParser();
+    parser.on('code', codeSpy);
+    parser.on('codeBlockStart', codeBlockStartSpy);
+    
+    // Disable console.debug during test
+    const originalConsoleDebug = console.debug;
+    console.debug = vi.fn();
+    
+    try {
+      // Test with various language identifier formats
+      const testCases = [
+        // Test with colons
+        { input: '```typescript:\nconsole.log("hello");\n```', expectedLang: 'typescript' },
+        { input: '```javascript:\nconst x = 1;\n```', expectedLang: 'javascript' },
+        
+        // Test without colons
+        { input: '```typescript\nconsole.log("hello");\n```', expectedLang: 'typescript' },
+        { input: '```javascript\nconst x = 1;\n```', expectedLang: 'javascript' },
+        
+        // Test with different case
+        { input: '```JavaScript\nconst x = 1;\n```', expectedLang: 'JavaScript' },
+        { input: '```TypeScript\nconsole.log("hello");\n```', expectedLang: 'TypeScript' },
+        
+        // Test with common extensions
+        { input: '```tsx\nconst Component = () => <div>Hello</div>;\n```', expectedLang: 'tsx' },
+        { input: '```jsx\nconst Component = () => <div>Hello</div>;\n```', expectedLang: 'jsx' },
+        
+        // Test with other languages
+        { input: '```python\nprint("hello")\n```', expectedLang: 'python' },
+        { input: '```ruby\nputs "hello"\n```', expectedLang: 'ruby' },
+        
+        // Test with no language
+        { input: '```\nconsole.log("no language");\n```', expectedLang: '' },
+        
+        // Test with whitespace
+        { input: '``` javascript \nconst x = 1;\n```', expectedLang: 'javascript' },
+        { input: '```javascript   \nconst x = 1;\n```', expectedLang: 'javascript' },
+        
+        // Test with trailing colon and whitespace
+        { input: '```javascript:   \nconst x = 1;\n```', expectedLang: 'javascript' }
+      ];
+      
+      for (const testCase of testCases) {
+        // Reset parser state before each test case
+        parser.reset();
+        
+        // Exit dependency mode first
+        parser.write('{"dependency": "1.0.0"}}');
+        
+        // Process the input
+        parser.write(testCase.input);
+        
+        // Verify code block start was detected
+        expect(codeBlockStartSpy).toHaveBeenCalled();
+        
+        // Verify code was emitted with correct language
+        expect(codeSpy).toHaveBeenCalledWith(
+          expect.any(String),
+          testCase.expectedLang.replace(/:$/, '') // Language ID should not have trailing colon
+        );
+        
+        // Reset spies for next test case
+        codeSpy.mockClear();
+        codeBlockStartSpy.mockClear();
+      }
+    } finally {
+      // Restore console.debug
+      console.debug = originalConsoleDebug;
+    }
+  });
 }); 
