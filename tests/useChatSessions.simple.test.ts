@@ -3,27 +3,7 @@ import { useChatSessions } from '../app/hooks/useChatSessions';
 
 // Mock Fireproof
 vi.mock('use-fireproof', () => ({
-  useFireproof: () => ({
-    useDocument: vi.fn().mockReturnValue({
-      doc: null,
-      loading: false,
-      error: null,
-      save: vi
-        .fn()
-        .mockImplementation((doc) => Promise.resolve({ ...doc, _id: doc._id || 'test-id' })),
-    }),
-    useFind: vi.fn().mockReturnValue({
-      docs: [
-        { _id: 'session-1', title: 'Session 1', timestamp: Date.now() - 1000 },
-        { _id: 'session-2', title: 'Session 2', timestamp: Date.now() },
-      ],
-      loading: false,
-      error: null,
-    }),
-    useIndex: vi.fn().mockReturnValue({
-      index: { delete: vi.fn().mockResolvedValue(true) },
-    }),
-  }),
+  useFireproof: () => ({}),
 }));
 
 // Mock React hooks
