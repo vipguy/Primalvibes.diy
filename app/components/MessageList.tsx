@@ -104,7 +104,14 @@ function MessageList({
 
   // Scroll to bottom when messages change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    try {
+      // Only run scrollIntoView if the element exists and the function is available
+      if (messagesEndRef.current && typeof messagesEndRef.current.scrollIntoView === 'function') {
+        messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
+    } catch (error) {
+      console.error('Error scrolling into view:', error);
+    }
   }, [messages, currentStreamedText]);
 
   // Memoize the message list to prevent unnecessary re-renders
@@ -133,4 +140,22 @@ function MessageList({
 }
 
 // Export a memoized version of the component to prevent unnecessary re-renders
-export default memo(MessageList);
+export default memo(MessageList, (prevProps, nextProps) => {
+  // Check if arrays have the same length and references
+  const areMessagesEqual = 
+    prevProps.messages === nextProps.messages || 
+    (prevProps.messages.length === nextProps.messages.length && 
+     prevProps.messages.every((msg, i) => 
+       msg === nextProps.messages[i] || 
+       (msg.text === nextProps.messages[i].text && msg.type === nextProps.messages[i].type)
+     ));
+  
+  // Return true if nothing changed to prevent re-render
+  return (
+    areMessagesEqual &&
+    prevProps.isGenerating === nextProps.isGenerating &&
+    prevProps.currentStreamedText === nextProps.currentStreamedText &&
+    prevProps.isShrinking === nextProps.isShrinking &&
+    prevProps.isExpanding === nextProps.isExpanding
+  );
+});

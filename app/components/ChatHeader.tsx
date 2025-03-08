@@ -74,4 +74,14 @@ function ChatHeader({ onToggleSidebar, onNewChat, isGenerating }: ChatHeaderProp
   );
 }
 
-export default memo(ChatHeader);
+// Use React.memo with a custom comparison function to ensure the component only
+// re-renders when its props actually change
+export default memo(ChatHeader, (prevProps, nextProps) => {
+  // Only re-render if isGenerating changes
+  // Note: Functions should be memoized by parent components
+  return (
+    prevProps.isGenerating === nextProps.isGenerating &&
+    prevProps.onNewChat === nextProps.onNewChat &&
+    prevProps.onToggleSidebar === nextProps.onToggleSidebar
+  );
+});

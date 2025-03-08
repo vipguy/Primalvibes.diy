@@ -31,6 +31,7 @@ export default defineConfig(({ command, mode }) => {
           'app/prompts.ts',
           'app/root.tsx',
           'app/routes.ts',
+          'app/components/**/*.tsx',
         ],
         enabled: true,
       },
