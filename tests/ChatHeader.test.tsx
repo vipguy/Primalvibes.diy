@@ -1,6 +1,6 @@
 import { vi, describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import ChatHeader from './mocks/ChatHeader.mock';
+import ChatHeader from '../app/components/ChatHeader';
 
 describe('ChatHeader', () => {
   it('renders correctly', () => {
@@ -15,13 +15,8 @@ describe('ChatHeader', () => {
       />
     );
     
-    // Check that the toggle sidebar button is rendered
-    const toggleButton = screen.getByLabelText('Toggle chat history');
-    expect(toggleButton).toBeDefined();
-    
-    // Check that the new chat button is rendered
-    const newChatButton = screen.getByText('New Chat');
-    expect(newChatButton).toBeDefined();
+    expect(screen.getByLabelText('Toggle chat history')).toBeDefined();
+    expect(screen.getByLabelText('New Chat')).toBeDefined();
   });
   
   it('calls onToggleSidebar when the toggle button is clicked', () => {
@@ -54,7 +49,7 @@ describe('ChatHeader', () => {
       />
     );
     
-    const newChatButton = screen.getByText('New Chat');
+    const newChatButton = screen.getByLabelText('New Chat');
     fireEvent.click(newChatButton);
     
     expect(onNewChat).toHaveBeenCalledTimes(1);
@@ -72,8 +67,8 @@ describe('ChatHeader', () => {
       />
     );
     
-    const newChatButton = screen.getByText('New Chat');
-    expect(newChatButton).toHaveAttribute('disabled');
+    const newChatButton = screen.getByLabelText('New Chat');
+    expect(newChatButton).toBeDisabled();
     
     fireEvent.click(newChatButton);
     expect(onNewChat).not.toHaveBeenCalled();

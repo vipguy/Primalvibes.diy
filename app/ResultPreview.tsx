@@ -255,61 +255,70 @@ function ResultPreview({
           </div>
         )}
       </div>
-      <SandpackProvider
-        key={displayCode}
-        template="vite-react"
-        options={{
-          externalResources: ['https://cdn.tailwindcss.com'],
-        }}
-        customSetup={{
-          dependencies: {
-            ...dependencies,
-            'use-fireproof': '0.20.0-dev-preview-41',
-            '@adviser/cement': 'latest',
-          },
-        }}
-        files={{
-          '/index.html': {
-            code: indexHtml,
-            hidden: true,
-          },
-          '/App.jsx': {
-            code: displayCode,
-            active: true,
-          },
-        }}
-        theme="light"
-      >
-        <SandpackLayout className="h-full" style={{ height: 'calc(100vh - 49px)' }}>
-          <div
-            style={{
-              display: activeView === 'preview' ? 'block' : 'none',
-              height: '100%',
-              width: '100%',
-            }}
-          >
-            <SandpackPreview
-              showNavigator={false}
-              showOpenInCodeSandbox={false}
-              showRefreshButton={true}
-              showRestartButton={false}
-              showOpenNewtab={false}
-              className="h-full w-full"
-              style={{ height: '100%' }}
-            />
-          </div>
-          <div
-            style={{
-              display: activeView === 'code' ? 'block' : 'none',
-              height: '100%',
-              width: '100%',
-            }}
-          >
-            <SandpackCodeEditor style={{ height: '100%' }} />
-          </div>
-        </SandpackLayout>
-      </SandpackProvider>
+      <div data-testid="sandpack-provider">
+        <SandpackProvider
+          key={displayCode}
+          template="vite-react"
+          options={{
+            externalResources: ['https://cdn.tailwindcss.com'],
+          }}
+          customSetup={{
+            dependencies: {
+              ...dependencies,
+              'use-fireproof': '0.20.0-dev-preview-41',
+              '@adviser/cement': 'latest',
+            },
+          }}
+          files={{
+            '/index.html': {
+              code: indexHtml,
+              hidden: true,
+            },
+            '/App.jsx': {
+              code: displayCode,
+              active: true,
+            },
+          }}
+          theme="light"
+        >
+          <SandpackLayout className="h-full" style={{ height: 'calc(100vh - 49px)' }}>
+            <div
+              style={{
+                display: activeView === 'preview' ? 'block' : 'none',
+                height: '100%',
+                width: '100%',
+              }}
+            >
+              <SandpackPreview
+                showNavigator={false}
+                showOpenInCodeSandbox={false}
+                showRefreshButton={true}
+                showRestartButton={false}
+                showOpenNewtab={false}
+                className="h-full w-full"
+                style={{ height: '100%' }}
+              />
+            </div>
+            <div
+              style={{
+                display: activeView === 'code' ? 'block' : 'none',
+                height: '100%',
+                width: '100%',
+              }}
+            >
+              <SandpackCodeEditor style={{ height: '100%' }} />
+            </div>
+          </SandpackLayout>
+        </SandpackProvider>
+      </div>
       <div className="result-content">
+        <button
+          data-testid="copy-button"
+          onClick={() => navigator.clipboard.writeText(displayCode)}
+          className="text-light-primary dark:text-dark-primary hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 rounded-md px-4 py-1.5 text-sm font-medium transition-colors"
+        >
+          Copy to Clipboard
+        </button>
         {streamingCode ? (
           <div>{currentStreamContent}</div>
         ) : (
