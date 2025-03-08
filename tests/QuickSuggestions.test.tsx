@@ -9,7 +9,7 @@ describe('QuickSuggestions', () => {
     render(<QuickSuggestions onSelectSuggestion={onSelectSuggestion} />);
 
     expect(screen.getByText('Todo App')).toBeDefined();
-    expect(screen.getByText('Pomodoro Tracker')).toBeDefined();
+    expect(screen.getByText('Pomodoro')).toBeDefined();
     expect(screen.getByText('Drawing App')).toBeDefined();
   });
 

@@ -9,13 +9,29 @@ function QuickSuggestions({ onSelectSuggestion }: QuickSuggestionsProps) {
       text: 'Create a todo app with due dates and the ability to mark tasks as complete',
     },
     {
-      label: 'Pomodoro Tracker',
+      label: 'Pomodoro',
       text: 'Create a pomodoro timer app with multiple timers work/break intervals and session tracking',
     },
     {
       label: 'Drawing App',
       text: 'Create a simple drawing app with a canvas where users can draw with different colors and save their drawings',
     },
+    {
+      label: 'Calculator',
+      text: 'Create a calculator app with basic arithmetic operations',
+    },
+    {
+      label: 'Photo Gallery',
+      text: 'Create a photo gallery app with a grid of images and a modal for each image',
+    },
+    {
+      label: 'Quiz App',
+      text: 'Create a quiz app with a timer and score tracking',
+    },
+    {
+      label: 'Wildcard',
+      text: 'Generate a wildcard app, something I wouldn\'t expect.',
+    },    
   ];
 
   return (
