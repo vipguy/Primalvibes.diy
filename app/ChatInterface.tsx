@@ -18,20 +18,21 @@ interface ChatInterfaceProps {
     streamingCode: string;
     completedCode: string;
     isStreaming: boolean;
-    inputRef: React.RefObject<HTMLTextAreaElement>;
-    messagesEndRef: React.RefObject<HTMLDivElement>;
+    inputRef: React.RefObject<HTMLTextAreaElement | null>;
+    messagesEndRef: React.RefObject<HTMLDivElement | null>;
     autoResizeTextarea: () => void;
     scrollToBottom: () => void;
     sendMessage: () => Promise<void>;
     parserState: React.MutableRefObject<{
       inCodeBlock: boolean;
       codeBlockContent: string;
-      backtickCount: number;
-      languageId: string;
-      inDependencies: boolean;
-      dependenciesContent: string;
-      fullResponseBuffer: string;
       dependencies: Record<string, string>;
+      displayText: string;
+      on: (event: string, callback: Function) => void;
+      removeAllListeners: () => void;
+      write: (chunk: string) => void;
+      end: () => void;
+      reset: () => void;
     }>;
     completedMessage: string;
   };

@@ -129,7 +129,7 @@ export default function Home() {
           currentStreamContent={chatState.currentStreamedText}
           currentMessage={
             chatState.messages.length > 0
-              ? chatState.messages[chatState.messages.length - 1]
+              ? { content: chatState.messages[chatState.messages.length - 1].text }
               : undefined
           }
         />

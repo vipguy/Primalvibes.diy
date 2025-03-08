@@ -3,6 +3,8 @@ export interface ChatMessage {
   type: 'user' | 'ai';
   code?: string;
   dependencies?: Record<string, string>;
+  streaming?: boolean;
+  completed?: boolean;
 }
 
 export interface SessionDocument {

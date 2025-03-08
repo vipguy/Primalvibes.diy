@@ -251,7 +251,7 @@ function ResultPreview({
 
         {isStreaming && (
           <div className="text-accent-03-light dark:text-accent-03-dark ml-2 animate-pulse text-sm">
-            Streaming {streamingCode.split('\n').length} lines of code...
+            {streamingCode.split('\n').length > 2 ? streamingCode.split('\n').length : '' }
           </div>
         )}
       </div>
