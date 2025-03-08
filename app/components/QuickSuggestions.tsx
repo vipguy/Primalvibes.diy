@@ -32,6 +32,10 @@ function QuickSuggestions({ onSelectSuggestion }: QuickSuggestionsProps) {
       label: 'Wildcard',
       text: 'Generate a wildcard app, something I wouldn\'t expect.',
     },    
+    {
+      label: 'Music',
+      text: 'Make a fan app where I can rate my favorite pop music lyrics',
+    }
   ];
 
   return (
