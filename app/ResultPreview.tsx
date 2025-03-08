@@ -6,6 +6,7 @@ import {
   useSandpack,
 } from '@codesandbox/sandpack-react';
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { sandpackDependencies } from './utils/versions';
 
 interface ResultPreviewProps {
   code: string;
@@ -70,11 +71,11 @@ const indexHtml = `<!DOCTYPE html>
 // Welcome component to show instead of sandbox on initial load
 function WelcomeScreen() {
   return (
-    <div className="bg-light-background-01 dark:bg-dark-background-01 flex h-full items-center justify-center">
+    <div className="bg-light-background-01 dark:bg-dark-background-01 flex h-full items-center justify-center flex-col">
       <img
         src="/lightup.png"
         alt="Lightup"
-        className="h-auto w-full max-w-xs"
+        className="h-auto w-full max-w-xs pulsing"
         style={{
           width: '100%',
           height: 'auto',
@@ -82,6 +83,7 @@ function WelcomeScreen() {
           animation: 'pulse 8s infinite',
         }}
       />
+
       <style
         dangerouslySetInnerHTML={{
           __html: `
@@ -96,7 +98,7 @@ function WelcomeScreen() {
               transform: rotate(-5deg) scale(1);
             }
           }
-          img {
+          img.pulsing {
             animation: pulse 8s infinite;
           }
         `,
@@ -393,8 +395,7 @@ function ResultPreview({
             customSetup={{
               dependencies: {
                 ...dependencies,
-                'use-fireproof': '0.20.0-dev-preview-41',
-                '@adviser/cement': 'latest',
+                ...sandpackDependencies,
               },
             }}
             files={{

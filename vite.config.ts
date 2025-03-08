@@ -14,6 +14,10 @@ export default defineConfig(({ command, mode }) => {
       ...(!disableReactRouter ? [reactRouter()] : []),
       tsconfigPaths(),
     ],
+    // Ensure JSON imports are properly handled
+    json: {
+      stringify: true,
+    },
     test: {
       environment: 'jsdom',
       coverage: {
