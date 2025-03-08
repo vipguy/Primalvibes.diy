@@ -197,12 +197,13 @@ const cleanCodeBeforeImport = (codeString: string) => {
 };
 
 // A scroll controller that prioritizes staying at the bottom with line highlighting
-function SandpackScrollController() {
+function SandpackScrollController({ isStreaming }: { isStreaming: boolean }) {
   // Keep track of scroll state to avoid unnecessary scrolling
   const lastScrollHeight = useRef(0);
   const lastScrollPosition = useRef(0);
   const isScrolling = useRef(false);
   const hasUserScrolled = useRef(false); // Track if user has manually scrolled
+  const highlightIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
   useEffect(() => {
     let primaryScroller: HTMLElement | null = null;
@@ -265,7 +266,7 @@ function SandpackScrollController() {
     
     // Simpler function to just apply the highlight to the last line
     const highlightLastLine = () => {
-      if (!primaryScroller) return;
+      if (!primaryScroller || !isStreaming) return;
       
       // First, remove all existing highlights to start fresh
       document.querySelectorAll('.cm-line-highlighted').forEach(el => {
@@ -322,8 +323,15 @@ function SandpackScrollController() {
         
         const newHeight = primaryScroller.scrollHeight;
         
-        // Always try to highlight the last line
-        highlightLastLine();
+        // Only highlight the last line if streaming is active
+        if (isStreaming) {
+          highlightLastLine();
+        } else {
+          // Remove all highlights when not streaming
+          document.querySelectorAll('.cm-line-highlighted').forEach(el => {
+            el.classList.remove('cm-line-highlighted');
+          });
+        }
         
         // Only proceed with scrolling if height changed
         if (newHeight === lastScrollHeight.current) return;
@@ -370,18 +378,25 @@ function SandpackScrollController() {
         // Add scroll listener
         primaryScroller.addEventListener('scroll', handleScroll);
         
-        // Initial highlight
-        highlightLastLine();
+        // Initial highlight if streaming
+        if (isStreaming) {
+          highlightLastLine();
+        }
       }
       
-      // Also set up a fallback timer to periodically check for and highlight new lines
-      // Using a very frequent interval (10ms) to catch every line change
-      const highlightInterval = setInterval(highlightLastLine, 10);
+      // Set up a fallback timer to periodically check for and highlight new lines
+      // Only if streaming is active
+      if (isStreaming) {
+        highlightIntervalRef.current = setInterval(highlightLastLine, 10);
+      }
       
       // Cleanup function
       return () => {
         clearInterval(checkForScroller);
-        clearInterval(highlightInterval);
+        if (highlightIntervalRef.current) {
+          clearInterval(highlightIntervalRef.current);
+          highlightIntervalRef.current = null;
+        }
         contentObserver.disconnect();
         primaryScroller?.removeEventListener('scroll', handleScroll);
       };
@@ -393,9 +408,27 @@ function SandpackScrollController() {
     // Cleanup all intervals on unmount
     return () => {
       clearInterval(checkForScroller);
+      if (highlightIntervalRef.current) {
+        clearInterval(highlightIntervalRef.current);
+        highlightIntervalRef.current = null;
+      }
       // We'll leave the style element to avoid flickering if component remounts
     };
-  }, []);
+  }, [isStreaming]);
+  
+  // Effect to handle changes in streaming state
+  useEffect(() => {
+    // If streaming stops, clear the highlight interval
+    if (!isStreaming && highlightIntervalRef.current) {
+      clearInterval(highlightIntervalRef.current);
+      highlightIntervalRef.current = null;
+      
+      // Remove all highlights
+      document.querySelectorAll('.cm-line-highlighted').forEach(el => {
+        el.classList.remove('cm-line-highlighted');
+      });
+    }
+  }, [isStreaming]);
   
   return null;
 }
@@ -714,7 +747,7 @@ function ResultPreview({
               setBundlingComplete={setBundlingComplete}
               isStreaming={isStreaming}
             />
-            {isStreaming && <SandpackScrollController />}
+            {isStreaming && <SandpackScrollController isStreaming={isStreaming} />}
             <SandpackLayout className="h-full" style={{ height: 'calc(100vh - 49px)' }}>
               <div
                 style={{
