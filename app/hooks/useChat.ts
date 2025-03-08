@@ -11,8 +11,26 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentStreamedText, setCurrentStreamedText] = useState<string>('');
   const [systemPrompt, setSystemPrompt] = useState('');
+  const [streamingCode, setStreamingCode] = useState<string>('');
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [completedCode, setCompletedCode] = useState<string>('');
+  const [pendingDependencyChunk, setPendingDependencyChunk] = useState<string>('');
+  const [inDependencyMode, setInDependencyMode] = useState<boolean>(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Parser state for tracking code blocks and dependencies
+  const parserState = useRef({
+    inCodeBlock: false,
+    codeBlockContent: '',
+    backtickCount: 0,
+    languageId: '',
+    inDependencies: false,
+    dependenciesContent: '',
+    fullResponseBuffer: '',
+    dependencies: {} as Record<string, string>,
+    dependencyRanges: [] as [number, number][]
+  });
 
   // Initialize system prompt
   useEffect(() => {
@@ -51,13 +69,196 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
     }));
   }
 
+  // State machine function for processing streaming chunks
+  function processStreamChunk(chunk: string) {
+    let currentDisplayText = '';
+    
+    // Handle dependency chunks that come in parts
+    if (inDependencyMode || chunk.trim().startsWith('{"') || pendingDependencyChunk) {
+      // Accumulate dependency JSON chunks
+      const combinedChunk = pendingDependencyChunk + chunk;
+      
+      // Check if this completes a dependency declaration
+      if (combinedChunk.includes('}}')) {
+        const endIndex = combinedChunk.indexOf('}}') + 2;
+        const dependencyPart = combinedChunk.substring(0, endIndex);
+        
+        try {
+          // Clean and parse the dependency part
+          let dependencyJson = dependencyPart;
+          if (dependencyJson.endsWith('}}')) {
+            dependencyJson = dependencyJson.substring(0, dependencyJson.length - 1); // Remove extra }
+          }
+          
+          console.log('Attempting to parse combined dependency:', dependencyJson);
+          const depsObject = JSON.parse(dependencyJson);
+          
+          // Add dependencies
+          Object.keys(depsObject).forEach(key => {
+            parserState.current.dependencies[key] = depsObject[key];
+          });
+          
+          console.log('Added dependencies:', parserState.current.dependencies);
+          
+          // Process any remaining content after the dependency part
+          const remainingContent = combinedChunk.substring(endIndex);
+          if (remainingContent.trim()) {
+            // Process the remaining content normally
+            console.log('Processing remaining content:', remainingContent);
+            
+            // Recursively process the remaining content
+            setInDependencyMode(false);
+            setPendingDependencyChunk('');
+            processStreamChunk(remainingContent);
+          } else {
+            setInDependencyMode(false);
+            setPendingDependencyChunk('');
+          }
+          
+          // Don't continue processing this chunk since we've handled it
+          return;
+        } catch (e) {
+          console.error('Failed to parse combined dependency:', e);
+          
+          // If we can't parse it, check if it's a partial dependency
+          if (combinedChunk.startsWith('{"') && !combinedChunk.includes('}}}')) {
+            // Still looks like a dependency - keep accumulating
+            setPendingDependencyChunk(combinedChunk);
+            setInDependencyMode(true);
+            return;
+          }
+        }
+      } else if (combinedChunk.startsWith('{"')) {
+        // Looks like a dependency but not complete - keep accumulating
+        setPendingDependencyChunk(combinedChunk);
+        setInDependencyMode(true);
+        return;
+      }
+    }
+    
+    // Existing code for handling completed chunks/dependency sections
+    if (chunk.includes('}}')) {
+      const contentIndex = chunk.indexOf('}}') + 2;
+      chunk = chunk.substring(contentIndex);
+      console.log('Skipped dependency part, now processing:', chunk);
+    }
+    
+    // Attempt to remove any stray dependency JSON that might have slipped through
+    if (/\{\s*"[^"]+"\s*:\s*"[^"]+/.test(chunk) && !chunk.includes('```')) {
+      const matched = chunk.match(/\{\s*"[^"]+"\s*:\s*"[^"]+".*?([\}\n]|$)/);
+      if (matched && matched.index === 0) {
+        console.log('Ignoring apparent dependency fragment:', chunk);
+        return;
+      }
+    }
+    
+    // Append processed chunk to the full response buffer
+    parserState.current.fullResponseBuffer += chunk;
+    
+    // Continue with standard processing for code blocks
+    for (let i = 0; i < chunk.length; i++) {
+      const char = chunk[i];
+
+      if (char === '`') {
+        parserState.current.backtickCount++;
+
+        // Check for code block start (```)
+        if (parserState.current.backtickCount === 3 && !parserState.current.inCodeBlock) {
+          parserState.current.inCodeBlock = true;
+          parserState.current.backtickCount = 0;
+          parserState.current.codeBlockContent = '';
+
+          // Look ahead for language ID
+          let languageId = '';
+          let j = i + 1;
+          while (j < chunk.length && chunk[j] !== '\n') {
+            languageId += chunk[j];
+            j++;
+          }
+
+          if (j < chunk.length) {
+            i = j; // Skip to after the newline
+            parserState.current.languageId = languageId.trim();
+          }
+          continue;
+        }
+
+        // Check for code block end (```)
+        if (parserState.current.backtickCount === 3 && parserState.current.inCodeBlock) {
+          parserState.current.inCodeBlock = false;
+          parserState.current.backtickCount = 0;
+
+          // Clean up the code content
+          let cleanedCode = parserState.current.codeBlockContent;
+          const firstLineBreak = cleanedCode.indexOf('\n');
+          if (firstLineBreak > -1) {
+            const firstLine = cleanedCode.substring(0, firstLineBreak).trim();
+            if (['js', 'jsx', 'javascript', 'ts', 'typescript'].includes(firstLine)) {
+              cleanedCode = cleanedCode.substring(firstLineBreak + 1);
+            }
+          }
+
+          setStreamingCode(cleanedCode);
+          setCompletedCode(cleanedCode);
+          continue;
+        }
+      } else if (parserState.current.backtickCount > 0 && parserState.current.backtickCount < 3) {
+        if (parserState.current.inCodeBlock) {
+          parserState.current.codeBlockContent += '`'.repeat(parserState.current.backtickCount) + char;
+        } else {
+          currentDisplayText += '`'.repeat(parserState.current.backtickCount) + char;
+        }
+        parserState.current.backtickCount = 0;
+      } else {
+        parserState.current.backtickCount = 0;
+
+        if (parserState.current.inCodeBlock) {
+          parserState.current.codeBlockContent += char;
+          if (i % 10 === 0 || i === chunk.length - 1) {
+            setStreamingCode(parserState.current.codeBlockContent);
+          }
+        } else {
+          currentDisplayText += char;
+        }
+      }
+    }
+
+    if (parserState.current.inCodeBlock) {
+      setStreamingCode(parserState.current.codeBlockContent);
+    }
+
+    if (currentDisplayText) {
+      setCurrentStreamedText(prev => prev + currentDisplayText);
+    }
+  }
+
   async function sendMessage() {
     if (input.trim()) {
+      // Reset dependency parsing state
+      setPendingDependencyChunk('');
+      setInDependencyMode(false);
+      
       // Add user message
       setMessages((prev) => [...prev, { text: input, type: 'user' }]);
       setInput('');
       setIsGenerating(true);
       setCurrentStreamedText(''); // Reset streamed text
+      setStreamingCode(''); // Reset streaming code
+      setCompletedCode(''); // Reset completed code
+      setIsStreaming(true); // Start streaming state
+      
+      // Reset parser state
+      parserState.current = {
+        inCodeBlock: false,
+        codeBlockContent: '',
+        backtickCount: 0,
+        languageId: '',
+        inDependencies: false,
+        dependenciesContent: '',
+        fullResponseBuffer: '',
+        dependencies: {},
+        dependencyRanges: []
+      };
 
       try {
         // Build message history
@@ -102,9 +303,6 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
           throw new Error('Response body is not readable');
         }
 
-        let fullResponse = '';
-        let generatedCode = '';
-        let dependencies: Record<string, string> = {};
         const decoder = new TextDecoder();
 
         // Process the stream
@@ -123,8 +321,8 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
                 const data = JSON.parse(line.substring(6));
                 if (data.choices && data.choices[0]?.delta?.content) {
                   const content = data.choices[0].delta.content;
-                  fullResponse += content;
-                  setCurrentStreamedText(prev => prev + content);
+                  console.log('Received content chunk:', content);
+                  processStreamChunk(content);
                 }
               } catch (e) {
                 console.error('Error parsing chunk:', e);
@@ -133,47 +331,28 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
           }
         }
 
-        // Extract dependencies and code from the complete response
-        console.log('AI response:', fullResponse);
+        // When stream completes, finalize code and dependencies
+        const generatedCode = parserState.current.codeBlockContent || completedCode;
+        const dependencies = parserState.current.dependencies;
         
-        // Extract dependencies from JSON declaration
-        const depsMatch = fullResponse.match(/^\s*{\s*([^}]+)}\s*}/);
-        if (depsMatch) {
-          try {
-            const depsObject = JSON.parse(`{${depsMatch[1]}}`);
-            dependencies = depsObject;
-            // Remove the dependencies object from the full response
-            fullResponse = fullResponse.replace(/^\s*{\s*[^}]+}\s*}/, '').trim();
-          } catch (e) {
-            console.error('Failed to parse dependencies:', e);
-          }
-        }
+        console.log('Final dependencies collected:', dependencies);
+        console.log('Final streamed text before trim:', currentStreamedText);
+        
+        // Use the already cleaned streamed text
+        const explanation = currentStreamedText.trim();
+        
+        console.log('Final explanation after trim:', explanation);
 
-        // Extract code and explanation
-        const codeBlockMatch = fullResponse.match(/```(?:jsx|js|javascript)?\n([\s\S]*?)```/);
-        if (codeBlockMatch) {
-          generatedCode = codeBlockMatch[1];
-
-          // Get the explanation by removing the code block and dependencies declaration
-          const explanation = fullResponse
-            .replace(/^\s*{\s*"dependencies"\s*:\s*{[^}]+}\s*/, '')
-            .replace(/```(?:jsx|js|javascript)?\n[\s\S]*?```/, '')
-            .trim();
-          fullResponse = explanation;
-        }
-
-        // Add AI response with code and dependencies
         setMessages((prev) => [
           ...prev,
           {
-            text: fullResponse || "Here's your generated app:",
+            text: explanation || "Here's your generated app:",
             type: 'ai',
             code: generatedCode,
             dependencies,
           },
         ]);
 
-        // Update the editor with code and dependencies
         onCodeGenerated(generatedCode, dependencies);
       } catch (error) {
         setMessages((prev) => [
@@ -186,6 +365,7 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
         console.error('Error calling OpenRouter API:', error);
       } finally {
         setIsGenerating(false);
+        setIsStreaming(false);
       }
     }
   }
@@ -197,10 +377,14 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
     setInput,
     isGenerating,
     currentStreamedText,
+    streamingCode,
+    completedCode,
+    isStreaming,
     inputRef,
     messagesEndRef,
     autoResizeTextarea,
     scrollToBottom,
-    sendMessage
+    sendMessage,
+    parserState
   };
 } 

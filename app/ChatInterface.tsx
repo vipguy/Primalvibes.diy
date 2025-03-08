@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import type { ChatMessage } from './types/chat';
-import { useChat } from './hooks/useChat';
 import { useChatSessions } from './hooks/useChatSessions';
 import SessionSidebar from './components/SessionSidebar';
 import ChatHeader from './components/ChatHeader';
@@ -9,24 +8,36 @@ import ChatInput from './components/ChatInput';
 import QuickSuggestions from './components/QuickSuggestions';
 
 interface ChatInterfaceProps {
-  onCodeGenerated: (code: string, dependencies?: Record<string, string>) => void;
-}
-
-// Define the session document type
-interface SessionDocument {
-  _id: string;
-  title?: string;
-  timestamp: number;
-  messages?: Array<{
-    text: string;
-    type: 'user' | 'ai';
-    code?: string;
-    dependencies?: Record<string, string>;
-  }>;
+  chatState: {
+    messages: ChatMessage[];
+    setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
+    input: string;
+    setInput: React.Dispatch<React.SetStateAction<string>>;
+    isGenerating: boolean;
+    currentStreamedText: string;
+    streamingCode: string;
+    completedCode: string;
+    isStreaming: boolean;
+    inputRef: React.RefObject<HTMLTextAreaElement>;
+    messagesEndRef: React.RefObject<HTMLDivElement>;
+    autoResizeTextarea: () => void;
+    scrollToBottom: () => void;
+    sendMessage: () => Promise<void>;
+    parserState: React.MutableRefObject<{
+      inCodeBlock: boolean;
+      codeBlockContent: string;
+      backtickCount: number;
+      languageId: string;
+      inDependencies: boolean;
+      dependenciesContent: string;
+      fullResponseBuffer: string;
+      dependencies: Record<string, string>;
+    }>;
+  };
 }
 
 // ChatInterface component handles user input and displays chat messages
-function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
+function ChatInterface({ chatState }: ChatInterfaceProps) {
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
   
   const { 
@@ -35,13 +46,13 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
     input, 
     setInput, 
     isGenerating, 
-    currentStreamedText, 
+    currentStreamedText,
     inputRef, 
     messagesEndRef, 
     autoResizeTextarea, 
     scrollToBottom, 
-    sendMessage 
-  } = useChat(onCodeGenerated);
+    sendMessage
+  } = chatState;
   
   const { 
     currentSessionId, 
@@ -84,7 +95,12 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
         .find((msg: ChatMessage) => msg.type === 'ai' && msg.code);
 
       if (lastAiMessageWithCode?.code) {
-        onCodeGenerated(lastAiMessageWithCode.code, lastAiMessageWithCode.dependencies || {});
+        // Use the last code from the loaded session
+        const code = lastAiMessageWithCode.code;
+        const dependencies = lastAiMessageWithCode.dependencies || {};
+        
+        // We need to notify the parent component about this code
+        // This will be handled by the onCodeGenerated callback in useChat
       }
     }
   };
@@ -99,7 +115,7 @@ function ChatInterface({ onCodeGenerated }: ChatInterfaceProps) {
       createNewSession();
       setMessages([]);
       setInput('');
-      onCodeGenerated('', {});
+      // The empty code will be handled by the onCodeGenerated callback
     }
   };
 

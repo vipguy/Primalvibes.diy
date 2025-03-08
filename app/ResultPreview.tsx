@@ -4,10 +4,12 @@ import {
   SandpackPreview,
   SandpackProvider,
 } from '@codesandbox/sandpack-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface ResultPreviewProps {
   code: string;
+  streamingCode?: string;
+  isStreaming?: boolean;
   dependencies?: Record<string, string>;
   onShare?: () => void;
   shareStatus?: string;
@@ -111,10 +113,35 @@ const defaultCode = `export default function App() {
   );
 }`;
 
-function ResultPreview({ code, dependencies = {}, onShare, shareStatus }: ResultPreviewProps) {
+function ResultPreview({ 
+  code, 
+  streamingCode = '', 
+  isStreaming = false,
+  dependencies = {}, 
+  onShare, 
+  shareStatus 
+}: ResultPreviewProps) {
   const [activeView, setActiveView] = useState<'preview' | 'code'>('preview');
+  const [displayCode, setDisplayCode] = useState(code || defaultCode);
+  
+  // Update displayed code when code changes or streaming ends
+  useEffect(() => {
+    if (!isStreaming) {
+      setDisplayCode(code || defaultCode);
+    }
+  }, [code, isStreaming]);
+  
+  // Update displayed code during streaming
+  useEffect(() => {
+    if (isStreaming && streamingCode) {
+      setDisplayCode(streamingCode);
+    }
+  }, [streamingCode, isStreaming]);
 
-  console.log(dependencies);
+  useEffect(() => {
+    console.log('dependencies', dependencies);
+  }, [dependencies]);
+
   return (
     <div className="h-full" style={{ overflow: 'hidden' }}>
       <div className="border-light-decorative-00 dark:border-dark-decorative-00 bg-light-background-00 dark:bg-dark-background-00 flex items-center justify-between border-b p-4">
@@ -215,9 +242,15 @@ function ResultPreview({ code, dependencies = {}, onShare, shareStatus }: Result
             </div>
           </div>
         )}
+
+        {isStreaming && (
+          <div className="ml-2 text-sm text-accent-03-light dark:text-accent-03-dark animate-pulse">
+            Streaming code...
+          </div>
+        )}
       </div>
       <SandpackProvider
-        key={code}
+        key={displayCode}
         template="vite-react"
         options={{
           externalResources: ['https://cdn.tailwindcss.com'],
@@ -235,7 +268,7 @@ function ResultPreview({ code, dependencies = {}, onShare, shareStatus }: Result
             hidden: true,
           },
           '/App.jsx': {
-            code: code || defaultCode,
+            code: displayCode,
             active: true,
           },
         }}

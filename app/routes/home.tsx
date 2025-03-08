@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import ChatInterface from '../ChatInterface';
 import ResultPreview from '../ResultPreview';
+import { useChat } from '../hooks/useChat';
 
 export function meta() {
   return [
@@ -44,6 +45,14 @@ export default function Home() {
   const [shareStatus, setShareStatus] = useState<string>('');
   const [isSharedApp, setIsSharedApp] = useState<boolean>(false);
 
+  // Hoist the useChat hook to this component
+  const chatState = useChat((code: string, dependencies?: Record<string, string>) => {
+    setState({
+      generatedCode: code,
+      dependencies: dependencies || {},
+    });
+  });
+
   // Check for state in URL on component mount
   useEffect(() => {
     const hash = window.location.hash;
@@ -59,13 +68,6 @@ export default function Home() {
       }
     }
   }, []);
-
-  function handleCodeGenerated(code: string, deps?: Record<string, string>) {
-    setState({
-      generatedCode: code,
-      dependencies: deps || {},
-    });
-  }
 
   function handleShare() {
     if (!state.generatedCode) {
@@ -113,12 +115,16 @@ export default function Home() {
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
       <div style={{ flex: '0 0 33.333%', overflow: 'hidden', position: 'relative' }}>
-        <ChatInterface onCodeGenerated={handleCodeGenerated} />
+        <ChatInterface 
+          chatState={chatState}
+        />
       </div>
       <div style={{ flex: '0 0 66.667%', overflow: 'hidden', position: 'relative' }}>
         <ResultPreview
           code={state.generatedCode}
-          dependencies={state.dependencies}
+          streamingCode={chatState.streamingCode}
+          isStreaming={chatState.isStreaming}
+          dependencies={chatState.parserState?.current?.dependencies || state.dependencies}
           onShare={handleShare}
           shareStatus={shareStatus}
         />
