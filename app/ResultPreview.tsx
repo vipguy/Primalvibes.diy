@@ -108,11 +108,6 @@ const defaultCode = `export default function App() {
           </g>
         </svg>
       </div>
-      <div className="text-center px-4">
-        <h1 className="text-3xl font-semibold text-light-primary dark:text-dark-primary">
-          Send a message to generate your app.
-        </h1>
-      </div>
     </div>
   );
 }`;
@@ -132,15 +127,10 @@ function SandpackEventListener({
     setBundlingComplete(false);
     
     const unsubscribe = listen(message => {
-      console.log('Sandpack message:', message.type);
-      
       if (message.type === 'start') {
-        console.log('Sandpack is starting...');
         setBundlingComplete(false);
-      } else if (message.type === 'status') {
-        console.log('Sandpack status update:', message.status);
+      // } else if (message.type === 'status') {
       } else if (message.type === 'urlchange') {
-        console.log('Sandpack urlchange complete!');
         // Mark bundling as complete
         setBundlingComplete(true);
         // Switch to preview when bundling is complete
