@@ -61,6 +61,21 @@ function ChatInterface({ chatState }: ChatInterfaceProps) {
 
   const { currentSessionId, saveSession, loadSession, createNewSession } = useChatSessions();
 
+  // Handle selecting a suggestion - set input and focus the textarea
+  const handleSelectSuggestion = (suggestion: string) => {
+    setInput(suggestion);
+    // Focus the input after setting the value
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+        // Move cursor to the end
+        const length = suggestion.length;
+        inputRef.current.selectionStart = length;
+        inputRef.current.selectionEnd = length;
+      }
+    }, 0);
+  };
+
   const toggleSidebar = () => {
     setIsSidebarVisible((prev) => !prev);
   };
@@ -161,7 +176,7 @@ function ChatInterface({ chatState }: ChatInterfaceProps) {
         />
 
         {/* Quick access buttons */}
-        {messages.length === 0 && <QuickSuggestions onSelectSuggestion={setInput} />}
+        {messages.length === 0 && <QuickSuggestions onSelectSuggestion={handleSelectSuggestion} />}
 
         {/* Input area */}
         <ChatInput

@@ -12,4 +12,4 @@ export const cementVersion = 'latest'; // Keep this as latest or extract from pa
 export const sandpackDependencies = {
   'use-fireproof': fireproofVersion,
   '@adviser/cement': cementVersion,
-}; 
+};

@@ -71,11 +71,11 @@ const indexHtml = `<!DOCTYPE html>
 // Welcome component to show instead of sandbox on initial load
 function WelcomeScreen() {
   return (
-    <div className="bg-light-background-01 dark:bg-dark-background-01 flex h-full items-center justify-center flex-col">
+    <div className="bg-light-background-01 dark:bg-dark-background-01 flex h-full flex-col items-center justify-center">
       <img
         src="/lightup.png"
         alt="Lightup"
-        className="h-auto w-full max-w-xs pulsing"
+        className="pulsing h-auto w-full max-w-xs"
         style={{
           width: '100%',
           height: 'auto',
@@ -359,6 +359,12 @@ function ResultPreview({
           </button>
         </div>
 
+        {isStreaming && (
+          <div className="text-accent-03-light dark:text-accent-03-dark ml-2 w-10 animate-pulse text-sm">
+            {streamingCode.split('\n').length > 2 ? streamingCode.split('\n').length : ''}
+          </div>
+        )}
+
         {onShare && (
           <div className="flex items-center gap-2">
             {shareStatus && (
@@ -393,12 +399,6 @@ function ResultPreview({
             </div>
           </div>
         )}
-
-        {isStreaming && (
-          <div className="text-accent-03-light dark:text-accent-03-dark ml-2 w-10 animate-pulse text-sm">
-            {streamingCode.split('\n').length > 2 ? streamingCode.split('\n').length : ''}
-          </div>
-        )}
       </div>
 
       {showWelcome ? (
@@ -431,7 +431,7 @@ function ResultPreview({
                 active: true,
               },
             }}
-            theme={isDarkMode ? "dark" : "light"}
+            theme={isDarkMode ? 'dark' : 'light'}
           >
             <SandpackEventListener
               setActiveView={setActiveView}
