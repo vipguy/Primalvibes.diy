@@ -211,26 +211,36 @@ export function useChat(onCodeGenerated: (code: string, dependencies?: Record<st
         // Update the editor with code and dependencies
         onCodeGenerated(completedCode || parser.codeBlockContent, parser.dependencies);
 
-        // When the stream is done, we need to set the final message
+        // Add this before setting the final message
+        console.log("Debug values:", {
+          currentStreamedText,
+          cleanedMessage,
+          parser
+        });
+
+        // Add this debug log to confirm parser state
+        console.log("Parser state at stream end:", parser);
+
+        // Use parser's displayText property instead of the non-existent fullResponseBuffer
+        const finalMessage = parser.displayText.trim() || cleanedMessage || currentStreamedText || "Here's your generated app:";
+        setCompletedMessage(finalMessage);
+
+        // Update the messages array
         setMessages((prevMessages) => {
           const updatedMessages = [...prevMessages];
           const lastMessageIndex = updatedMessages.length - 1;
           
           if (lastMessageIndex >= 0) {
-            // Make sure to preserve the complete message content
             updatedMessages[lastMessageIndex] = {
               ...updatedMessages[lastMessageIndex],
-              text: cleanedMessage, // Use 'text' instead of 'content' to match your ChatMessage type
+              text: finalMessage,
               streaming: false,
-              completed: true, // Add a completed flag
+              completed: true,
             };
           }
           
           return updatedMessages;
         });
-
-        // Also set the completedMessage state
-        setCompletedMessage(cleanedMessage);
       } catch (error) {
         setMessages((prev) => [
           ...prev,
