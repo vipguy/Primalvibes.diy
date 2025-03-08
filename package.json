@@ -9,7 +9,8 @@
     "typecheck": "react-router typegen && tsc",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "vitest run",
+    "test:router": "vitest run",
+    "test": "DISABLE_REACT_ROUTER=true vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
@@ -28,6 +29,7 @@
   "devDependencies": {
     "@react-router/dev": "^7.1.5",
     "@tailwindcss/vite": "^4.0.0",
+    "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@testing-library/react-hooks": "^8.0.1",
     "@types/node": "^22.13.4",

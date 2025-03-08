@@ -1,0 +1,81 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { Layout, ErrorBoundary } from './mocks/root.mock';
+
+describe('Root Component', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    
+    // Mock window.matchMedia
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      value: vi.fn().mockImplementation(query => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
+    
+    // Reset document classes
+    document.documentElement.classList.remove('dark');
+  });
+
+  it('renders the Layout component with children', () => {
+    render(
+      <Layout>
+        <div data-testid="test-child">Test Child</div>
+      </Layout>
+    );
+    
+    // Check that the layout renders the children
+    expect(screen.getByTestId('test-child')).toBeDefined();
+    
+    // Check that the layout includes the required router components
+    expect(screen.getByTestId('links')).toBeDefined();
+    expect(screen.getByTestId('meta')).toBeDefined();
+    expect(screen.getByTestId('scripts')).toBeDefined();
+    expect(screen.getByTestId('scroll-restoration')).toBeDefined();
+  });
+
+  it('applies dark mode when system preference is dark', () => {
+    // Mock matchMedia to return dark mode preference
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      value: vi.fn().mockImplementation(query => ({
+        matches: query === '(prefers-color-scheme: dark)',
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
+    
+    render(
+      <Layout>
+        <div>Test</div>
+      </Layout>
+    );
+    
+    // Check that dark class is added to html element
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+  });
+
+  it('renders the ErrorBoundary component with an error', () => {
+    const testError = new Error('Test error');
+    
+    render(
+      <ErrorBoundary error={testError} params={{}} />
+    );
+    
+    // Check that the error message is displayed
+    expect(screen.getByText(/something went wrong/i)).toBeDefined();
+  });
+}); 
