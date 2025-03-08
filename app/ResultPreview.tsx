@@ -79,8 +79,27 @@ function WelcomeScreen() {
           width: '100%',
           height: 'auto',
           transform: 'rotate(-5deg)',
+          animation: 'pulse 8s infinite',
         }}
       />
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          @keyframes pulse {
+            0% {
+              transform: rotate(-5deg) scale(1);
+            }
+            50% {
+              transform: rotate(0deg) scale(1.05);
+            }
+            100% {
+              transform: rotate(-5deg) scale(1);
+            }
+          }
+          img {
+            animation: pulse 8s infinite;
+          }
+        `
+      }} />
     </div>
   );
 }
@@ -349,7 +368,7 @@ function ResultPreview({
         )}
 
         {isStreaming && (
-          <div className="text-accent-03-light dark:text-accent-03-dark ml-2 animate-pulse text-sm">
+          <div className="text-accent-03-light dark:text-accent-03-dark ml-2 animate-pulse text-sm w-10">
             {streamingCode.split('\n').length > 2 ? streamingCode.split('\n').length : '' }
           </div>
         )}

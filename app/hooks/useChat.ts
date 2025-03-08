@@ -21,6 +21,8 @@ export function useChat(
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const parserState = useRef<RegexParser>(new RegexParser());
+  // Add a ref to store the raw stream data for debugging
+  const rawStreamBuffer = useRef<string>('');
 
   // Initialize system prompt
   useEffect(() => {
@@ -71,6 +73,11 @@ export function useChat(
 
     // Listen for code block start
     parserState.current.on('codeBlockStart', () => {
+      // Debug log to see the raw stream content when code block starts
+      console.log('Raw stream at code block start:', parserState.current.displayText);
+      // Log the completely unmodified raw stream data
+      console.log('Unmodified raw stream buffer:', rawStreamBuffer.current);
+      
       setCurrentStreamedText(prevText => {
         // Add the "Writing code..." message with newlines before and after
         const updatedText = prevText + '\n\n> Writing code...\n\n';
@@ -131,6 +138,8 @@ export function useChat(
       setCompletedCode('');
       setIsStreaming(true);
       setIsGenerating(true);
+      // Reset the raw stream buffer
+      rawStreamBuffer.current = '';
 
       // Add user message
       setMessages((prev) => [...prev, { text: input, type: 'user' }]);
@@ -199,6 +208,9 @@ export function useChat(
                 const data = JSON.parse(line.substring(6));
                 if (data.choices && data.choices[0]?.delta?.content) {
                   const content = data.choices[0].delta.content;
+
+                  // Capture raw stream data for debugging
+                  rawStreamBuffer.current += content;
 
                   // Feed the chunk to our parser
                   parser.write(content);
