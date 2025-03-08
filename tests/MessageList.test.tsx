@@ -14,19 +14,15 @@ describe('MessageList', () => {
       { type: 'ai', text: 'Hi there!' },
     ];
 
-    render(
-      <MessageList messages={messages} isGenerating={false} currentStreamedText="" />
-    );
+    render(<MessageList messages={messages} isGenerating={false} currentStreamedText="" />);
 
     expect(screen.getByText('Hello')).toBeDefined();
     expect(screen.getByText('Hi there!')).toBeDefined();
   });
 
   it('renders streaming text correctly', () => {
-    render(
-      <MessageList messages={[]} isGenerating={true} currentStreamedText="Thinking..." />
-    );
+    render(<MessageList messages={[]} isGenerating={true} currentStreamedText="Thinking..." />);
 
     expect(screen.getByText('Thinking...')).toBeDefined();
   });
-}); 
+});

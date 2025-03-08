@@ -10,12 +10,12 @@ interface MessageListProps {
   isExpanding?: boolean;
 }
 
-function MessageList({ 
-  messages, 
-  isGenerating, 
+function MessageList({
+  messages,
+  isGenerating,
   currentStreamedText,
   isShrinking = false,
-  isExpanding = false
+  isExpanding = false,
 }: MessageListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -38,13 +38,13 @@ function MessageList({
       style={{ maxHeight: 'calc(100vh - 140px)' }}
     >
       {messages.map((msg, i) => (
-        <div 
-          key={`${msg.type}-${i}`} 
+        <div
+          key={`${msg.type}-${i}`}
           className={`flex flex-col transition-all duration-500 ${
-            isShrinking ? 'scale-0 opacity-0 origin-top-left' : 'scale-100 opacity-100'
+            isShrinking ? 'origin-top-left scale-0 opacity-0' : 'scale-100 opacity-100'
           } ${isExpanding ? 'animate-bounce-in' : ''}`}
-          style={{ 
-            transitionDelay: isShrinking ? `${i * 50}ms` : '0ms' 
+          style={{
+            transitionDelay: isShrinking ? `${i * 50}ms` : '0ms',
           }}
         >
           <div className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>

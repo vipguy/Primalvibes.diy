@@ -21,4 +21,4 @@ export const mockParams = {};
 // Reset all mocks
 export function resetRouterMocks() {
   mockNavigate.mockReset();
-} 
+}

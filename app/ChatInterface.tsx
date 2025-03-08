@@ -109,22 +109,25 @@ function ChatInterface({ chatState }: ChatInterfaceProps) {
   const handleNewChat = () => {
     // Start the shrinking animation
     setIsShrinking(true);
-    
+
     // After animation completes, reset the state
-    setTimeout(() => {
-      createNewSession();
-      setMessages([]);
-      setInput('');
-      setIsShrinking(false);
-      
-      // Add a small bounce effect when the new chat appears
-      setIsExpanding(true);
-      setTimeout(() => {
-        setIsExpanding(false);
-      }, 300);
-      
-      // The empty code will be handled by the onCodeGenerated callback
-    }, 500 + messages.length * 50); // Account for staggered animation of messages
+    setTimeout(
+      () => {
+        createNewSession();
+        setMessages([]);
+        setInput('');
+        setIsShrinking(false);
+
+        // Add a small bounce effect when the new chat appears
+        setIsExpanding(true);
+        setTimeout(() => {
+          setIsExpanding(false);
+        }, 300);
+
+        // The empty code will be handled by the onCodeGenerated callback
+      },
+      500 + messages.length * 50
+    ); // Account for staggered animation of messages
   };
 
   return (

@@ -77,8 +77,8 @@ export function useChat(
       console.log('Raw stream at code block start:', parserState.current.displayText);
       // Log the completely unmodified raw stream data
       console.log('Unmodified raw stream buffer:', rawStreamBuffer.current);
-      
-      setCurrentStreamedText(prevText => {
+
+      setCurrentStreamedText((prevText) => {
         // Add the "Writing code..." message with newlines before and after
         const updatedText = prevText + '\n\n> Writing code...\n\n';
         return updatedText;
@@ -100,7 +100,7 @@ export function useChat(
       if (parserState.current.inCodeBlock) {
         // Only update if the text doesn't already contain our message
         if (!currentStreamedText.includes('\n\n> Writing code...\n\n')) {
-          setCurrentStreamedText(prevText => {
+          setCurrentStreamedText((prevText) => {
             if (!prevText.includes('\n\n> Writing code...\n\n')) {
               return prevText + '\n\n> Writing code...\n\n';
             }
@@ -147,7 +147,7 @@ export function useChat(
 
       // Initialize parser
       const parser = initParser();
-      
+
       // Track if we've already added the "Writing code..." message
       let writingCodeMessageAdded = false;
 
@@ -217,7 +217,7 @@ export function useChat(
 
                   // Direct check for code block markers
                   if (!writingCodeMessageAdded && content.includes('```')) {
-                    setCurrentStreamedText(prevText => {
+                    setCurrentStreamedText((prevText) => {
                       const updatedText = prevText + '\n\n> Writing code...\n\n';
                       return updatedText;
                     });

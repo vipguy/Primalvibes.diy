@@ -88,17 +88,21 @@ const eventHandlers: Record<string, Function[]> = {};
 // Simplified React mock
 vi.mock('react', () => ({
   useState: vi.fn((initialValue: any) => {
-    if (Array.isArray(initialValue) && initialValue.length === 0) return [mockMessages, mockSetMessages];
+    if (Array.isArray(initialValue) && initialValue.length === 0)
+      return [mockMessages, mockSetMessages];
     if (initialValue === '') {
       if (mockSetInput.mock.calls.length === 0) return [mockInput, mockSetInput];
-      if (mockSetSystemPrompt.mock.calls.length === 0) return [mockSystemPrompt, mockSetSystemPrompt];
-      if (mockSetCurrentStreamedText.mock.calls.length === 0) return ['', mockSetCurrentStreamedText];
+      if (mockSetSystemPrompt.mock.calls.length === 0)
+        return [mockSystemPrompt, mockSetSystemPrompt];
+      if (mockSetCurrentStreamedText.mock.calls.length === 0)
+        return ['', mockSetCurrentStreamedText];
       if (mockSetStreamingCode.mock.calls.length === 0) return ['', mockSetStreamingCode];
       if (mockSetCompletedCode.mock.calls.length === 0) return ['', mockSetCompletedCode];
       if (mockSetCompletedMessage.mock.calls.length === 0) return ['', mockSetCompletedMessage];
     }
     if (initialValue === false) {
-      if (mockSetIsGenerating.mock.calls.length === 0) return [mockIsGenerating, mockSetIsGenerating];
+      if (mockSetIsGenerating.mock.calls.length === 0)
+        return [mockIsGenerating, mockSetIsGenerating];
       return [false, mockSetIsStreaming];
     }
     return [initialValue, vi.fn()];
@@ -125,13 +129,13 @@ mockOn.mockImplementation((event: string, handler: Function) => {
 describe('useChat', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Reset mock values
     mockMessages = [];
     mockInput = '';
     mockIsGenerating = false;
     mockSystemPrompt = '';
-    
+
     // Reset the mock parser ref
     mockParserRef.current = {
       removeAllListeners: mockRemoveAllListeners,
@@ -144,9 +148,9 @@ describe('useChat', () => {
       dependencies: {},
       displayText: '',
     };
-    
+
     // Clear event handlers
-    Object.keys(eventHandlers).forEach(key => {
+    Object.keys(eventHandlers).forEach((key) => {
       eventHandlers[key] = [];
     });
   });
@@ -154,7 +158,7 @@ describe('useChat', () => {
   it('should initialize with empty messages', () => {
     const onCodeGenerated = vi.fn();
     const result = useChat(onCodeGenerated);
-    
+
     expect(result).toBeDefined();
     expect(result.messages).toEqual([]);
   });
@@ -162,7 +166,7 @@ describe('useChat', () => {
   it('should update input when setInput is called', () => {
     const onCodeGenerated = vi.fn();
     const result = useChat(onCodeGenerated);
-    
+
     result.setInput('new input');
     expect(mockSetInput).toHaveBeenCalledWith('new input');
   });
@@ -171,9 +175,9 @@ describe('useChat', () => {
     const onCodeGenerated = vi.fn();
     mockInput = 'test message';
     mockSystemPrompt = 'system prompt';
-    
+
     const result = useChat(onCodeGenerated);
-    
+
     // Mock the implementation of sendMessage to avoid API calls
     vi.spyOn(result, 'sendMessage').mockImplementation(async () => {
       mockSetIsGenerating(true);
@@ -186,10 +190,10 @@ describe('useChat', () => {
       mockOn('dependencies', expect.any(Function));
       mockSetIsGenerating(false);
     });
-    
+
     // Call sendMessage
     await result.sendMessage();
-    
+
     // Verify state changes
     expect(mockSetIsGenerating).toHaveBeenCalledWith(true);
     expect(mockSetMessages).toHaveBeenCalled();
@@ -201,19 +205,19 @@ describe('useChat', () => {
 
   it('should handle code generation events', () => {
     const onCodeGenerated = vi.fn();
-    
+
     // Initialize the hook
     useChat(onCodeGenerated);
-    
+
     // Register event handlers
     mockOn('code', (code: string, language: string) => {
       onCodeGenerated(code, undefined);
       mockSetCompletedCode(code);
     });
-    
+
     // Trigger the code event
     eventHandlers['code'][0]('console.log("test")', 'javascript');
-    
+
     // Verify onCodeGenerated was called
     expect(onCodeGenerated).toHaveBeenCalledWith('console.log("test")', undefined);
     expect(mockSetCompletedCode).toHaveBeenCalledWith('console.log("test")');
@@ -222,27 +226,27 @@ describe('useChat', () => {
   it('should handle dependency events', () => {
     const onCodeGenerated = vi.fn();
     const dependencies = { react: '18.2.0', typescript: '5.0.4' };
-    
+
     // Initialize the hook
     useChat(onCodeGenerated);
-    
+
     // Register event handlers
     mockOn('dependencies', (deps: Record<string, string>) => {
       // Store dependencies for later use with code
       mockParserRef.current.dependencies = deps;
     });
-    
+
     mockOn('code', (code: string, language: string) => {
       onCodeGenerated(code, mockParserRef.current.dependencies);
       mockSetCompletedCode(code);
     });
-    
+
     // Trigger the dependencies event
     eventHandlers['dependencies'][0](dependencies);
-    
+
     // Trigger the code event
     eventHandlers['code'][0]('console.log("test")', 'javascript');
-    
+
     // Verify onCodeGenerated was called with dependencies
     expect(onCodeGenerated).toHaveBeenCalledWith('console.log("test")', dependencies);
     expect(mockSetCompletedCode).toHaveBeenCalledWith('console.log("test")');
@@ -250,34 +254,34 @@ describe('useChat', () => {
 
   it('should add "Writing code..." message when codeBlockStart event is emitted', () => {
     const onCodeGenerated = vi.fn();
-    
+
     // Initialize the hook
     useChat(onCodeGenerated);
-    
+
     // Mock the current streamed text
     const prevText = 'Here is some code:';
-    
+
     // Directly call the setCurrentStreamedText function with the expected behavior
     mockSetCurrentStreamedText((prevText: string) => prevText + '\n\n> Writing code...\n\n');
-    
+
     // Verify setCurrentStreamedText was called
     expect(mockSetCurrentStreamedText).toHaveBeenCalled();
   });
 
   it('should preserve "Writing code..." message when in code block', () => {
     const onCodeGenerated = vi.fn();
-    
+
     // Initialize the hook
     useChat(onCodeGenerated);
-    
+
     // Set up the parser to be in a code block
     mockParserRef.current.inCodeBlock = true;
-    
+
     // Manually trigger the text event handler
     if (eventHandlers['text'] && eventHandlers['text'].length > 0) {
       // Mock the current streamed text to not include the message yet
       const currentStreamedText = 'Here is some code:';
-      
+
       // Mock setCurrentStreamedText to verify it's called with the right content
       mockSetCurrentStreamedText.mockImplementation((updater) => {
         if (typeof updater === 'function') {
@@ -285,10 +289,10 @@ describe('useChat', () => {
           expect(result).toContain('> Writing code...');
         }
       });
-      
+
       // Trigger the text event
       eventHandlers['text'][0]('new text chunk', 'full text');
-      
+
       // Verify setCurrentStreamedText was called
       expect(mockSetCurrentStreamedText).toHaveBeenCalled();
     } else {
@@ -296,4 +300,4 @@ describe('useChat', () => {
       expect(eventHandlers).toHaveProperty('text');
     }
   });
-}); 
+});

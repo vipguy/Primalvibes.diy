@@ -27,4 +27,4 @@ describe('SessionSidebar', () => {
 
     expect(onToggle).toHaveBeenCalled();
   });
-}); 
+});

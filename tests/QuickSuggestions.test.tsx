@@ -25,4 +25,4 @@ describe('QuickSuggestions', () => {
       'Create a todo app with due dates and the ability to mark tasks as complete'
     );
   });
-}); 
+});

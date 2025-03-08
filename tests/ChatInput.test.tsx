@@ -47,4 +47,4 @@ describe('ChatInput', () => {
     expect(setInput).toHaveBeenCalledWith('New input');
     expect(autoResizeTextarea).toHaveBeenCalled();
   });
-}); 
+});

@@ -5,4 +5,4 @@ process.env.DISABLE_REACT_ROUTER = 'true';
 process.env.NODE_ENV = 'test';
 
 // Run Vitest with the test environment
-require('vitest/vitest.mjs').run(['run']); 
+require('vitest/vitest.mjs').run(['run']);

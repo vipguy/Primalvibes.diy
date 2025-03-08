@@ -40,7 +40,7 @@ vi.mock('react', () => {
 
 describe('useChat - Basic Functionality', () => {
   const mockOnCodeGenerated = vi.fn();
-  
+
   beforeEach(() => {
     vi.clearAllMocks();
     global.fetch = vi.fn();
@@ -49,17 +49,17 @@ describe('useChat - Basic Functionality', () => {
   it('initializes with correct default values', () => {
     // Call the hook
     const result = useChat(mockOnCodeGenerated);
-    
+
     // Check that the hook returns the expected properties
     expect(result).toHaveProperty('messages');
     expect(result).toHaveProperty('input');
     expect(result).toHaveProperty('setInput');
     expect(result).toHaveProperty('isGenerating');
     expect(result).toHaveProperty('sendMessage');
-    
+
     // Check default values
     expect(result.messages).toEqual([]);
     expect(result.input).toBe('');
     expect(result.isGenerating).toBe(false);
   });
-}); 
+});

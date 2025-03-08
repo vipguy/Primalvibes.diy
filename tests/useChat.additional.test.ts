@@ -58,10 +58,10 @@ import { useChat } from '../app/hooks/useChat';
 describe('useChat - Error Handling and Streaming', () => {
   // Mock onCodeGenerated callback
   const mockOnCodeGenerated = vi.fn();
-  
+
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Reset mocks
     global.fetch = vi.fn();
     mockOn.mockReset();
@@ -120,18 +120,19 @@ describe('useChat - Error Handling and Streaming', () => {
       ok: true,
       body: {
         getReader: vi.fn().mockReturnValue({
-          read: vi.fn()
-            .mockResolvedValueOnce({ 
-              value: new TextEncoder().encode('data: {"choices":[{"delta":{"content":"Hello"}}]}'), 
-              done: false 
+          read: vi
+            .fn()
+            .mockResolvedValueOnce({
+              value: new TextEncoder().encode('data: {"choices":[{"delta":{"content":"Hello"}}]}'),
+              done: false,
             })
-            .mockResolvedValueOnce({ 
-              value: new TextEncoder().encode('data: {"choices":[{"delta":{"content":" world"}}]}'), 
-              done: false 
+            .mockResolvedValueOnce({
+              value: new TextEncoder().encode('data: {"choices":[{"delta":{"content":" world"}}]}'),
+              done: false,
             })
-            .mockResolvedValueOnce({ 
-              value: new TextEncoder().encode('data: {"choices":[{"delta":{"content":"!"}}]}'), 
-              done: false 
+            .mockResolvedValueOnce({
+              value: new TextEncoder().encode('data: {"choices":[{"delta":{"content":"!"}}]}'),
+              done: false,
             })
             .mockResolvedValueOnce({ done: true }),
         }),
@@ -162,11 +163,11 @@ describe('useChat - Error Handling and Streaming', () => {
 
     // Send a message and wait for it to complete
     await result.sendMessage();
-    
+
     // Manually trigger the onCodeGenerated callback
     // This simulates what would happen when the parser emits a 'code' event
     mockOnCodeGenerated('console.log("Hello world");', {});
-    
+
     // Verify the streaming functionality worked
     expect(mockOnCodeGenerated).toHaveBeenCalled();
   });
@@ -177,10 +178,11 @@ describe('useChat - Error Handling and Streaming', () => {
       ok: true,
       body: {
         getReader: vi.fn().mockReturnValue({
-          read: vi.fn()
-            .mockResolvedValueOnce({ 
-              value: new TextEncoder().encode('{"choices":[{"delta":{"content":"Hello"}}]}'), 
-              done: false 
+          read: vi
+            .fn()
+            .mockResolvedValueOnce({
+              value: new TextEncoder().encode('{"choices":[{"delta":{"content":"Hello"}}]}'),
+              done: false,
             })
             .mockImplementation(() => new Promise(() => {})), // Never resolves to simulate ongoing stream
           cancel: vi.fn().mockResolvedValue(undefined),
@@ -202,13 +204,13 @@ describe('useChat - Error Handling and Streaming', () => {
     const sendPromise = result.sendMessage();
 
     // Wait a bit to ensure the streaming has started
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
 
     // Cancel the streaming (in a real implementation, this would be a separate function)
     // For this test, we'll just verify that the reader's cancel method is available
     expect(mockResponse.body.getReader().cancel).toBeDefined();
-    
+
     // Clean up
     mockResponse.body.getReader().cancel();
   });
-}); 
+});

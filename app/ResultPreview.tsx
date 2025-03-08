@@ -70,11 +70,11 @@ const indexHtml = `<!DOCTYPE html>
 // Welcome component to show instead of sandbox on initial load
 function WelcomeScreen() {
   return (
-    <div className="h-full flex items-center justify-center bg-light-background-01 dark:bg-dark-background-01">
-      <img 
-        src="/lightup.png" 
-        alt="Lightup" 
-        className="max-w-xs w-full h-auto"
+    <div className="bg-light-background-01 dark:bg-dark-background-01 flex h-full items-center justify-center">
+      <img
+        src="/lightup.png"
+        alt="Lightup"
+        className="h-auto w-full max-w-xs"
         style={{
           width: '100%',
           height: 'auto',
@@ -82,8 +82,9 @@ function WelcomeScreen() {
           animation: 'pulse 8s infinite',
         }}
       />
-      <style dangerouslySetInnerHTML={{
-        __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
           @keyframes pulse {
             0% {
               transform: rotate(-5deg) scale(1);
@@ -98,8 +99,9 @@ function WelcomeScreen() {
           img {
             animation: pulse 8s infinite;
           }
-        `
-      }} />
+        `,
+        }}
+      />
     </div>
   );
 }
@@ -150,23 +152,23 @@ const defaultCode = `export default function App() {
 }`;
 
 // Component to listen for Sandpack events
-function SandpackEventListener({ 
-  setActiveView, 
-  setBundlingComplete 
-}: { 
-  setActiveView: (view: 'preview' | 'code') => void,
-  setBundlingComplete: (complete: boolean) => void
+function SandpackEventListener({
+  setActiveView,
+  setBundlingComplete,
+}: {
+  setActiveView: (view: 'preview' | 'code') => void;
+  setBundlingComplete: (complete: boolean) => void;
 }) {
   const { listen } = useSandpack();
-  
+
   useEffect(() => {
     // Set bundling as not complete when the component mounts
     setBundlingComplete(false);
-    
-    const unsubscribe = listen(message => {
+
+    const unsubscribe = listen((message) => {
       if (message.type === 'start') {
         setBundlingComplete(false);
-      // } else if (message.type === 'status') {
+        // } else if (message.type === 'status') {
       } else if (message.type === 'urlchange') {
         // Mark bundling as complete
         setBundlingComplete(true);
@@ -174,12 +176,12 @@ function SandpackEventListener({
         setActiveView('preview');
       }
     });
-    
+
     return () => {
       unsubscribe();
     };
   }, [listen, setActiveView, setBundlingComplete]);
-  
+
   return null;
 }
 
@@ -368,12 +370,12 @@ function ResultPreview({
         )}
 
         {isStreaming && (
-          <div className="text-accent-03-light dark:text-accent-03-dark ml-2 animate-pulse text-sm w-10">
-            {streamingCode.split('\n').length > 2 ? streamingCode.split('\n').length : '' }
+          <div className="text-accent-03-light dark:text-accent-03-dark ml-2 w-10 animate-pulse text-sm">
+            {streamingCode.split('\n').length > 2 ? streamingCode.split('\n').length : ''}
           </div>
         )}
       </div>
-      
+
       {showWelcome ? (
         // Show welcome screen
         <div className="h-full" style={{ height: 'calc(100vh - 49px)' }}>
@@ -407,7 +409,10 @@ function ResultPreview({
             }}
             theme="light"
           >
-            <SandpackEventListener setActiveView={setActiveView} setBundlingComplete={setBundlingComplete} />
+            <SandpackEventListener
+              setActiveView={setActiveView}
+              setBundlingComplete={setBundlingComplete}
+            />
             <SandpackLayout className="h-full" style={{ height: 'calc(100vh - 49px)' }}>
               <div
                 style={{
@@ -439,7 +444,7 @@ function ResultPreview({
           </SandpackProvider>
         </div>
       )}
-      
+
       <div className="result-content">
         {!showWelcome && (
           <button

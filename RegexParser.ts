@@ -223,7 +223,7 @@ export class RegexParser {
             // Reset code block content when starting a new code block
             this.codeBlockContent = '';
             i = this._skipLanguageIdentifier(text, i + 1);
-            
+
             // Emit an event when a code block starts
             this.emit('codeBlockStart');
           } else {

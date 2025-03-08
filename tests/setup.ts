@@ -22,8 +22,8 @@ vi.mock('../app/prompts', () => ({
 // Mock React Router modules globally
 vi.mock('@react-router/dev/vite', () => ({
   reactRouter: () => ({
-    name: 'mocked-react-router'
-  })
+    name: 'mocked-react-router',
+  }),
 }));
 
 // Mock React Router modules
@@ -32,7 +32,8 @@ vi.mock('react-router', () => ({
   Meta: () => React.createElement('div', { 'data-testid': 'meta' }, 'Meta'),
   Outlet: () => React.createElement('div', { 'data-testid': 'outlet' }, 'Outlet Content'),
   Scripts: () => React.createElement('div', { 'data-testid': 'scripts' }, 'Scripts'),
-  ScrollRestoration: () => React.createElement('div', { 'data-testid': 'scroll-restoration' }, 'Scroll Restoration'),
+  ScrollRestoration: () =>
+    React.createElement('div', { 'data-testid': 'scroll-restoration' }, 'Scroll Restoration'),
   isRouteErrorResponse: vi.fn().mockReturnValue(false),
   useNavigate: vi.fn(),
   useLocation: () => ({ pathname: '/' }),
@@ -40,15 +41,15 @@ vi.mock('react-router', () => ({
 }));
 
 vi.mock('react-router-dom', () => ({
-  Link: ({ children, to, ...props }: any) => 
+  Link: ({ children, to, ...props }: any) =>
     React.createElement('a', { href: to, ...props }, children),
-  NavLink: ({ children, to, ...props }: any) => 
+  NavLink: ({ children, to, ...props }: any) =>
     React.createElement('a', { href: to, ...props }, children),
   useNavigate: () => vi.fn(),
   useLocation: () => ({ pathname: '/' }),
   useParams: () => ({}),
   Outlet: () => React.createElement('div', { 'data-testid': 'outlet' }, 'Outlet Content'),
-  MemoryRouter: ({ children }: { children: React.ReactNode }) => 
+  MemoryRouter: ({ children }: { children: React.ReactNode }) =>
     React.createElement('div', { 'data-testid': 'memory-router' }, children),
 }));
 
@@ -64,7 +65,7 @@ afterAll(() => {
 // Mock window.matchMedia for tests
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: vi.fn().mockImplementation(query => ({
+  value: vi.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -101,4 +102,4 @@ if (typeof TextEncoder === 'undefined') {
       return { read: text.length, written: encoded.length };
     }
   };
-} 
+}

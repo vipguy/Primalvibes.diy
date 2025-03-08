@@ -8,7 +8,9 @@ vi.mock('use-fireproof', () => ({
       doc: null,
       loading: false,
       error: null,
-      save: vi.fn().mockImplementation((doc) => Promise.resolve({ ...doc, _id: doc._id || 'test-id' })),
+      save: vi
+        .fn()
+        .mockImplementation((doc) => Promise.resolve({ ...doc, _id: doc._id || 'test-id' })),
     }),
     useFind: vi.fn().mockReturnValue({
       docs: [
@@ -38,7 +40,7 @@ vi.mock('react', async () => {
 describe('useChatSessions - Basic Functionality', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Mock localStorage
     const localStorageMock = {
       getItem: vi.fn(),
@@ -52,16 +54,16 @@ describe('useChatSessions - Basic Functionality', () => {
   it('returns the expected functions and properties', () => {
     // Call the hook
     const result = useChatSessions();
-    
+
     // Check that the hook returns the expected properties
     expect(result).toHaveProperty('currentSessionId');
     expect(result).toHaveProperty('saveSession');
     expect(result).toHaveProperty('loadSession');
     expect(result).toHaveProperty('createNewSession');
-    
+
     // Check that the functions are defined
     expect(typeof result.saveSession).toBe('function');
     expect(typeof result.loadSession).toBe('function');
     expect(typeof result.createNewSession).toBe('function');
   });
-}); 
+});

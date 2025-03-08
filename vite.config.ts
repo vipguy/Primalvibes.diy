@@ -6,13 +6,13 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 export default defineConfig(({ command, mode }) => {
   // Disable React Router plugin for tests or when explicitly disabled
   const disableReactRouter = mode === 'test' || process.env.DISABLE_REACT_ROUTER === 'true';
-  
+
   return {
     plugins: [
-      tailwindcss(), 
+      tailwindcss(),
       // Only include React Router plugin when not disabled
-      ...(!disableReactRouter ? [reactRouter()] : []), 
-      tsconfigPaths()
+      ...(!disableReactRouter ? [reactRouter()] : []),
+      tsconfigPaths(),
     ],
     test: {
       environment: 'jsdom',
@@ -20,27 +20,27 @@ export default defineConfig(({ command, mode }) => {
         provider: 'v8',
         reporter: ['text', 'json', 'html'],
         include: [
-          'RegexParser.ts', 
+          'RegexParser.ts',
           'app/hooks/useChat.ts',
           'app/ChatInterface.tsx',
           'app/ResultPreview.tsx',
           'app/prompts.ts',
           'app/root.tsx',
-          'app/routes.ts'
+          'app/routes.ts',
         ],
-        enabled: true
+        enabled: true,
       },
       globals: true,
       setupFiles: ['./tests/setup.ts'],
       exclude: ['node_modules', 'dist', '.idea', '.git', '.cache'],
       server: {
         deps: {
-          inline: ['react-router', '@react-router/dev']
-        }
+          inline: ['react-router', '@react-router/dev'],
+        },
       },
       deps: {
-        inline: ['react-router', '@react-router/dev']
-      }
+        inline: ['react-router', '@react-router/dev'],
+      },
     },
   };
 });
