@@ -6,12 +6,20 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 export default defineConfig({
   plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
   test: {
-    environment: 'node',
+    environment: 'jsdom',
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: ['RegexParser.ts'],
+      include: ['RegexParser.ts', 'app/hooks/useChat.ts'],
       enabled: true
     },
+    globals: true,
+    setupFiles: ['./tests/setup.ts'],
+    exclude: ['node_modules', 'dist', '.idea', '.git', '.cache'],
+    server: {
+      deps: {
+        inline: ['react-router']
+      }
+    }
   },
 });

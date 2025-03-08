@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { RegexParser } from './RegexParser';
+import { RegexParser } from '../RegexParser';
 
 describe('RegexParser', () => {
   it('should be importable and instantiable', () => {
