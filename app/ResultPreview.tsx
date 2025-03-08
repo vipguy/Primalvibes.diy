@@ -192,6 +192,126 @@ const cleanCodeBeforeImport = (codeString: string) => {
   return codeString.replace(/^[\s\S]*?(import|export)/, '$1');
 };
 
+// A focused scroll controller that prioritizes staying at the bottom
+function SandpackScrollController() {
+  // Keep track of scroll state to avoid unnecessary scrolling
+  const lastScrollHeight = useRef(0);
+  const lastScrollPosition = useRef(0);
+  const isScrolling = useRef(false);
+  const hasUserScrolled = useRef(false); // Track if user has manually scrolled
+  
+  useEffect(() => {
+    let primaryScroller: HTMLElement | null = null;
+    
+    // Function to scroll to bottom
+    const scrollToBottom = () => {
+      if (!primaryScroller) return;
+      isScrolling.current = true;
+      
+      requestAnimationFrame(() => {
+        if (primaryScroller) {
+          primaryScroller.scrollTop = primaryScroller.scrollHeight;
+          lastScrollHeight.current = primaryScroller.scrollHeight;
+          lastScrollPosition.current = primaryScroller.scrollTop;
+        }
+        isScrolling.current = false;
+      });
+    };
+    
+    // Repeatedly check for the scroller until we find it
+    const checkForScroller = setInterval(() => {
+      if (primaryScroller) {
+        clearInterval(checkForScroller);
+        return;
+      }
+      
+      const newScroller = document.querySelector('.cm-scroller');
+      if (newScroller && newScroller instanceof HTMLElement) {
+        primaryScroller = newScroller;
+        
+        // Initial scroll to bottom as soon as we find the scroller
+        scrollToBottom();
+        
+        // Create content observer only after finding the scroller
+        setupContentObserver();
+      }
+    }, 100);
+    
+    // Setup the content observer after we've found the scroller
+    const setupContentObserver = () => {
+      if (!primaryScroller) return;
+      
+      // Create an observer for content changes
+      const contentObserver = new MutationObserver(() => {
+        // Check if content has changed
+        if (!primaryScroller) return;
+        
+        const newHeight = primaryScroller.scrollHeight;
+        if (newHeight === lastScrollHeight.current) return;
+        
+        // Calculate if user is near the bottom (within 100px)
+        const isNearBottom = (primaryScroller.scrollTop + primaryScroller.clientHeight) > 
+                            (lastScrollHeight.current - 100);
+        
+        // Always scroll to bottom if we haven't scrolled manually OR we're near the bottom
+        if (!hasUserScrolled.current || isNearBottom) {
+          scrollToBottom();
+        }
+        
+        // Update height reference even if we didn't scroll
+        lastScrollHeight.current = newHeight;
+      });
+      
+      // Track user scroll events
+      const handleScroll = () => {
+        if (isScrolling.current || !primaryScroller) return;
+        
+        // Detect if this is a user-initiated scroll
+        const currentPosition = primaryScroller.scrollTop;
+        if (Math.abs(currentPosition - lastScrollPosition.current) > 10) {
+          hasUserScrolled.current = true;
+          lastScrollPosition.current = currentPosition;
+          
+          // If user scrolls to near bottom, consider it a "reset"
+          if ((primaryScroller.scrollTop + primaryScroller.clientHeight) >= 
+              (primaryScroller.scrollHeight - 50)) {
+            hasUserScrolled.current = false;
+          }
+        }
+      };
+      
+      // Start observing for content changes
+      if (primaryScroller) {
+        contentObserver.observe(primaryScroller, {
+          childList: true,
+          subtree: true,
+          characterData: true
+        });
+        
+        // Add scroll listener
+        primaryScroller.addEventListener('scroll', handleScroll);
+      }
+      
+      // Cleanup function
+      return () => {
+        clearInterval(checkForScroller);
+        contentObserver.disconnect();
+        primaryScroller?.removeEventListener('scroll', handleScroll);
+      };
+    };
+    
+    // Extra precaution: force scroll to bottom when streaming starts
+    scrollToBottom();
+    
+    // Cleanup all intervals on unmount
+    return () => {
+      clearInterval(checkForScroller);
+    };
+  }, []);
+  
+  return null;
+}
+
 function ResultPreview({
   code,
   streamingCode = '',
@@ -212,6 +332,21 @@ function ResultPreview({
   const [showWelcome, setShowWelcome] = useState(true);
   // Add state to track the current theme
   const [isDarkMode, setIsDarkMode] = useState(false);
+  // Add ref for the code editor container
+  const codeEditorRef = useRef<HTMLDivElement>(null);
+  // Add state to prevent auto-switching to preview during streaming
+  const [lockCodeView, setLockCodeView] = useState(false);
+  // Add a ref to store the files to prevent unnecessary re-renders
+  const filesRef = useRef({
+    '/index.html': {
+      code: indexHtml,
+      hidden: true,
+    },
+    '/App.jsx': {
+      code: code || defaultCode,
+      active: true,
+    },
+  });
 
   // Detect system theme preference
   useEffect(() => {
@@ -232,7 +367,22 @@ function ResultPreview({
   // Update displayed code when code changes or streaming ends
   useEffect(() => {
     if (!isStreaming) {
-      setDisplayCode(cleanCodeBeforeImport(code || defaultCode));
+      // Add exactly 20 lines of whitespace and a very visible end marker
+      const codeWithWhitespace = cleanCodeBeforeImport(code || defaultCode) + 
+        '\n\n\n\n\n\n\n\n\n\n' + 
+        '\n\n\n\n\n\n\n\n\n\n' + 
+        '\n';
+      setDisplayCode(codeWithWhitespace);
+      
+      // Update the files ref without causing re-render
+      filesRef.current = {
+        ...filesRef.current,
+        '/App.jsx': {
+          code: codeWithWhitespace,
+          active: true,
+        },
+      };
+      
       // If we have actual code (not default), hide welcome screen
       if (code) {
         setShowWelcome(false);
@@ -242,18 +392,42 @@ function ResultPreview({
 
   // Update displayed code during streaming
   useEffect(() => {
-    if (isStreaming && streamingCode) {
-      setDisplayCode(cleanCodeBeforeImport(streamingCode));
-      // Hide welcome screen when streaming starts
-      setShowWelcome(false);
+    if (isStreaming) {
+      if (streamingCode) {
+        // Add exactly 20 lines of whitespace and a very visible end marker
+        const codeWithWhitespace = cleanCodeBeforeImport(streamingCode) + 
+          '\n\n\n\n\n\n\n\n\n\n';
+        setDisplayCode(codeWithWhitespace);
+        
+        // Update the files ref without causing re-render
+        filesRef.current = {
+          ...filesRef.current,
+          '/App.jsx': {
+            code: codeWithWhitespace,
+            active: true,
+          },
+        };
+        
+        // Hide welcome screen when streaming starts
+        setShowWelcome(false);
+        // Always show code view when streaming and lock it
+        setActiveView('code');
+        setLockCodeView(true);
+      }
     }
   }, [streamingCode, isStreaming]);
+
+  // When streaming stops, unlock the view
+  useEffect(() => {
+    if (!isStreaming) {
+      setLockCodeView(false);
+    }
+  }, [isStreaming]);
 
   // Track when streaming ends
   useEffect(() => {
     if (isStreaming && streamingCode) {
       justFinishedStreamingRef.current = true;
-      setActiveView('code');
     }
   }, [isStreaming, streamingCode]);
 
@@ -273,6 +447,9 @@ function ResultPreview({
 
   // CSS for the spinning animation
   const spinningIconClass = shouldSpin ? 'animate-spin-slow' : '';
+
+  // Use a stable key for SandpackProvider
+  const sandpackKey = useRef('stable-sandpack-key').current;
 
   return (
     <div className="h-full" style={{ overflow: 'hidden' }}>
@@ -422,7 +599,7 @@ function ResultPreview({
         // Show sandbox
         <div data-testid="sandpack-provider">
           <SandpackProvider
-            key={displayCode}
+            key={sandpackKey}
             template="vite-react"
             options={{
               externalResources: ['https://cdn.tailwindcss.com'],
@@ -433,22 +610,21 @@ function ResultPreview({
                 ...sandpackDependencies,
               },
             }}
-            files={{
-              '/index.html': {
-                code: indexHtml,
-                hidden: true,
-              },
-              '/App.jsx': {
-                code: displayCode,
-                active: true,
-              },
-            }}
+            files={filesRef.current}
             theme={isDarkMode ? 'dark' : 'light'}
           >
             <SandpackEventListener
-              setActiveView={setActiveView}
+              setActiveView={(view) => {
+                // Only allow switching to preview if code view isn't locked
+                if (view === 'preview' && !lockCodeView) {
+                  setActiveView(view);
+                } else if (view === 'code') {
+                  setActiveView(view);
+                }
+              }}
               setBundlingComplete={setBundlingComplete}
             />
+            {isStreaming && <SandpackScrollController />}
             <SandpackLayout className="h-full" style={{ height: 'calc(100vh - 49px)' }}>
               <div
                 style={{
@@ -473,8 +649,14 @@ function ResultPreview({
                   height: '100%',
                   width: '100%',
                 }}
+                ref={codeEditorRef}
               >
-                <SandpackCodeEditor style={{ height: '100%' }} />
+                <SandpackCodeEditor 
+                  style={{ height: '100%' }} 
+                  showLineNumbers={false}
+                  wrapContent
+                  showInlineErrors
+                />
               </div>
             </SandpackLayout>
           </SandpackProvider>
