@@ -187,6 +187,11 @@ function SandpackEventListener({
   return null;
 }
 
+// Helper function to clean code by removing anything before the first import
+const cleanCodeBeforeImport = (codeString: string) => {
+  return codeString.replace(/^[\s\S]*?(import|export)/, '$1');
+};
+
 function ResultPreview({
   code,
   streamingCode = '',
@@ -227,7 +232,7 @@ function ResultPreview({
   // Update displayed code when code changes or streaming ends
   useEffect(() => {
     if (!isStreaming) {
-      setDisplayCode(code || defaultCode);
+      setDisplayCode(cleanCodeBeforeImport(code || defaultCode));
       // If we have actual code (not default), hide welcome screen
       if (code) {
         setShowWelcome(false);
@@ -238,7 +243,7 @@ function ResultPreview({
   // Update displayed code during streaming
   useEffect(() => {
     if (isStreaming && streamingCode) {
-      setDisplayCode(streamingCode);
+      setDisplayCode(cleanCodeBeforeImport(streamingCode));
       // Hide welcome screen when streaming starts
       setShowWelcome(false);
     }
