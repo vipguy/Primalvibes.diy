@@ -208,7 +208,12 @@ describe('RegexParser', () => {
         { input: '```javascript   \nconst x = 1;\n```', expectedLang: 'javascript' },
         
         // Test with trailing colon and whitespace
-        { input: '```javascript:   \nconst x = 1;\n```', expectedLang: 'javascript' }
+        { input: '```javascript:   \nconst x = 1;\n```', expectedLang: 'javascript' },
+        
+        // Test with just 'js' as language identifier
+        { input: '```js\nconst x = 1;\n```', expectedLang: 'js' },
+        
+
       ];
       
       for (const testCase of testCases) {
