@@ -175,7 +175,7 @@ function SandpackEventListener({
       } else if (message.type === 'urlchange') {
         // Mark bundling as complete
         setBundlingComplete(true);
-        
+
         // Only switch to preview if we're not currently streaming
         if (!isStreaming) {
           setActiveView('preview');
@@ -204,10 +204,10 @@ function SandpackScrollController({ isStreaming }: { isStreaming: boolean }) {
   const isScrolling = useRef(false);
   const hasUserScrolled = useRef(false); // Track if user has manually scrolled
   const highlightIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  
+
   useEffect(() => {
     let primaryScroller: HTMLElement | null = null;
-    
+
     // Create a persistent style element that won't be removed/replaced
     if (!document.getElementById('highlight-style')) {
       const style = document.createElement('style');
@@ -248,12 +248,12 @@ function SandpackScrollController({ isStreaming }: { isStreaming: boolean }) {
       `;
       document.head.appendChild(style);
     }
-    
+
     // Function to scroll to bottom - using the original effective approach
     const scrollToBottom = () => {
       if (!primaryScroller) return;
       isScrolling.current = true;
-      
+
       requestAnimationFrame(() => {
         if (primaryScroller) {
           primaryScroller.scrollTop = primaryScroller.scrollHeight;
@@ -263,20 +263,20 @@ function SandpackScrollController({ isStreaming }: { isStreaming: boolean }) {
         isScrolling.current = false;
       });
     };
-    
+
     // Simpler function to just apply the highlight to the last line
     const highlightLastLine = () => {
       if (!primaryScroller || !isStreaming) return;
-      
+
       // First, remove all existing highlights to start fresh
-      document.querySelectorAll('.cm-line-highlighted').forEach(el => {
+      document.querySelectorAll('.cm-line-highlighted').forEach((el) => {
         el.classList.remove('cm-line-highlighted');
       });
-      
+
       // Then find the last non-empty line
       const lines = Array.from(document.querySelectorAll('.cm-line'));
       let lastLine = null;
-      
+
       for (let i = lines.length - 1; i >= 0; i--) {
         const line = lines[i];
         const content = line.textContent || '';
@@ -285,111 +285,113 @@ function SandpackScrollController({ isStreaming }: { isStreaming: boolean }) {
           break;
         }
       }
-      
+
       // Apply highlight if we found a valid line
       if (lastLine) {
         lastLine.classList.add('cm-line-highlighted');
         console.log('Highlighted line:', lastLine.textContent);
       }
     };
-    
+
     // Repeatedly check for the scroller until we find it
     const checkForScroller = setInterval(() => {
       if (primaryScroller) {
         clearInterval(checkForScroller);
         return;
       }
-      
+
       const newScroller = document.querySelector('.cm-scroller');
       if (newScroller && newScroller instanceof HTMLElement) {
         primaryScroller = newScroller;
-        
+
         // Initial scroll to bottom as soon as we find the scroller
         scrollToBottom();
-        
+
         // Create content observer only after finding the scroller
         setupContentObserver();
       }
     }, 100);
-    
+
     // Setup the content observer after we've found the scroller
     const setupContentObserver = () => {
       if (!primaryScroller) return;
-      
+
       // Create an observer for content changes
       const contentObserver = new MutationObserver(() => {
         // Check if content has changed
         if (!primaryScroller) return;
-        
+
         const newHeight = primaryScroller.scrollHeight;
-        
+
         // Only highlight the last line if streaming is active
         if (isStreaming) {
           highlightLastLine();
         } else {
           // Remove all highlights when not streaming
-          document.querySelectorAll('.cm-line-highlighted').forEach(el => {
+          document.querySelectorAll('.cm-line-highlighted').forEach((el) => {
             el.classList.remove('cm-line-highlighted');
           });
         }
-        
+
         // Only proceed with scrolling if height changed
         if (newHeight === lastScrollHeight.current) return;
-        
+
         // Calculate if user is near the bottom (within 100px)
-        const isNearBottom = (primaryScroller.scrollTop + primaryScroller.clientHeight) > 
-                            (lastScrollHeight.current - 100);
-        
+        const isNearBottom =
+          primaryScroller.scrollTop + primaryScroller.clientHeight > lastScrollHeight.current - 100;
+
         // Always scroll to bottom if we haven't scrolled manually OR we're near the bottom
         if (!hasUserScrolled.current || isNearBottom) {
           scrollToBottom();
         }
-        
+
         // Update height reference even if we didn't scroll
         lastScrollHeight.current = newHeight;
       });
-      
+
       // Track user scroll events
       const handleScroll = () => {
         if (isScrolling.current || !primaryScroller) return;
-        
+
         // Detect if this is a user-initiated scroll
         const currentPosition = primaryScroller.scrollTop;
         if (Math.abs(currentPosition - lastScrollPosition.current) > 10) {
           hasUserScrolled.current = true;
           lastScrollPosition.current = currentPosition;
-          
+
           // If user scrolls to near bottom, consider it a "reset"
-          if ((primaryScroller.scrollTop + primaryScroller.clientHeight) >= 
-              (primaryScroller.scrollHeight - 50)) {
+          if (
+            primaryScroller.scrollTop + primaryScroller.clientHeight >=
+            primaryScroller.scrollHeight - 50
+          ) {
             hasUserScrolled.current = false;
           }
         }
       };
-      
+
       // Start observing for content changes
       if (primaryScroller) {
         contentObserver.observe(primaryScroller, {
           childList: true,
           subtree: true,
-          characterData: true
+          characterData: true,
         });
-        
+
         // Add scroll listener
         primaryScroller.addEventListener('scroll', handleScroll);
-        
+
         // Initial highlight if streaming
         if (isStreaming) {
           highlightLastLine();
         }
       }
-      
+
       // Set up a fallback timer to periodically check for and highlight new lines
       // Only if streaming is active
       if (isStreaming) {
         highlightIntervalRef.current = setInterval(highlightLastLine, 10);
       }
-      
+
       // Cleanup function
       return () => {
         clearInterval(checkForScroller);
@@ -401,10 +403,10 @@ function SandpackScrollController({ isStreaming }: { isStreaming: boolean }) {
         primaryScroller?.removeEventListener('scroll', handleScroll);
       };
     };
-    
+
     // Extra precaution: force scroll to bottom when streaming starts
     setTimeout(scrollToBottom, 100);
-    
+
     // Cleanup all intervals on unmount
     return () => {
       clearInterval(checkForScroller);
@@ -415,21 +417,21 @@ function SandpackScrollController({ isStreaming }: { isStreaming: boolean }) {
       // We'll leave the style element to avoid flickering if component remounts
     };
   }, [isStreaming]);
-  
+
   // Effect to handle changes in streaming state
   useEffect(() => {
     // If streaming stops, clear the highlight interval
     if (!isStreaming && highlightIntervalRef.current) {
       clearInterval(highlightIntervalRef.current);
       highlightIntervalRef.current = null;
-      
+
       // Remove all highlights
-      document.querySelectorAll('.cm-line-highlighted').forEach(el => {
+      document.querySelectorAll('.cm-line-highlighted').forEach((el) => {
         el.classList.remove('cm-line-highlighted');
       });
     }
   }, [isStreaming]);
-  
+
   return null;
 }
 
@@ -489,12 +491,13 @@ function ResultPreview({
   useEffect(() => {
     if (!isStreaming) {
       // Add exactly 20 lines of whitespace and a very visible end marker
-      const codeWithWhitespace = cleanCodeBeforeImport(code || defaultCode) + 
-        '\n\n\n\n\n\n\n\n\n\n' + 
-        '\n\n\n\n\n\n\n\n\n\n' + 
+      const codeWithWhitespace =
+        cleanCodeBeforeImport(code || defaultCode) +
+        '\n\n\n\n\n\n\n\n\n\n' +
+        '\n\n\n\n\n\n\n\n\n\n' +
         '\n';
       setDisplayCode(codeWithWhitespace);
-      
+
       // Update the files ref without causing re-render
       filesRef.current = {
         ...filesRef.current,
@@ -503,7 +506,7 @@ function ResultPreview({
           active: true,
         },
       };
-      
+
       // If we have actual code (not default), hide welcome screen
       if (code) {
         setShowWelcome(false);
@@ -516,10 +519,9 @@ function ResultPreview({
     if (isStreaming) {
       if (streamingCode) {
         // Add exactly 20 lines of whitespace and a very visible end marker
-        const codeWithWhitespace = cleanCodeBeforeImport(streamingCode) + 
-          '\n\n\n\n\n\n\n\n\n\n';
+        const codeWithWhitespace = cleanCodeBeforeImport(streamingCode) + '\n\n\n\n\n\n\n\n\n\n';
         setDisplayCode(codeWithWhitespace);
-        
+
         // Update the files ref without causing re-render
         filesRef.current = {
           ...filesRef.current,
@@ -528,7 +530,7 @@ function ResultPreview({
             active: true,
           },
         };
-        
+
         // Hide welcome screen when streaming starts
         setShowWelcome(false);
         // Always show code view when streaming
@@ -774,8 +776,8 @@ function ResultPreview({
                 }}
                 ref={codeEditorRef}
               >
-                <SandpackCodeEditor 
-                  style={{ height: '100%' }} 
+                <SandpackCodeEditor
+                  style={{ height: '100%' }}
                   showLineNumbers={false}
                   wrapContent
                   showInlineErrors
