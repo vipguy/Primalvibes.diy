@@ -192,7 +192,7 @@ const cleanCodeBeforeImport = (codeString: string) => {
   return codeString.replace(/^[\s\S]*?(import|export)/, '$1');
 };
 
-// A focused scroll controller that prioritizes staying at the bottom
+// A scroll controller that prioritizes staying at the bottom with line highlighting
 function SandpackScrollController() {
   // Keep track of scroll state to avoid unnecessary scrolling
   const lastScrollHeight = useRef(0);
@@ -203,7 +203,48 @@ function SandpackScrollController() {
   useEffect(() => {
     let primaryScroller: HTMLElement | null = null;
     
-    // Function to scroll to bottom
+    // Create a persistent style element that won't be removed/replaced
+    if (!document.getElementById('highlight-style')) {
+      const style = document.createElement('style');
+      style.id = 'highlight-style';
+      style.textContent = `
+        /* Fixed highlighting style that won't be overridden */
+        .cm-line-highlighted {
+          position: relative !important;
+          border-left: 3px solid rgba(0, 137, 249, 0.27) !important;
+          color: inherit !important;
+        }
+        
+        .cm-line-highlighted::before {
+          content: "" !important;
+          position: absolute !important;
+          top: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          bottom: 0 !important;
+          background: linear-gradient(60deg, rgba(0, 128, 255, 0.15), rgba(224, 255, 255, 0.25), rgba(0, 183, 255, 0.15)) !important;
+          background-size: 200% 200% !important;
+          animation: sparkleAppear 2s ease-out !important;
+          pointer-events: none !important;
+          z-index: -1 !important;
+        }
+        
+        @keyframes sparkleGradient {
+          0% { background-position: 0% 50% }
+          50% { background-position: 100% 50% }
+          100% { background-position: 0% 50% }
+        }
+        
+        @keyframes sparkleAppear {
+          0% { opacity: 0.8; }
+          50% { opacity: 0.8; }
+          100% { opacity: 0.1; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
+    // Function to scroll to bottom - using the original effective approach
     const scrollToBottom = () => {
       if (!primaryScroller) return;
       isScrolling.current = true;
@@ -216,6 +257,35 @@ function SandpackScrollController() {
         }
         isScrolling.current = false;
       });
+    };
+    
+    // Simpler function to just apply the highlight to the last line
+    const highlightLastLine = () => {
+      if (!primaryScroller) return;
+      
+      // First, remove all existing highlights to start fresh
+      document.querySelectorAll('.cm-line-highlighted').forEach(el => {
+        el.classList.remove('cm-line-highlighted');
+      });
+      
+      // Then find the last non-empty line
+      const lines = Array.from(document.querySelectorAll('.cm-line'));
+      let lastLine = null;
+      
+      for (let i = lines.length - 1; i >= 0; i--) {
+        const line = lines[i];
+        const content = line.textContent || '';
+        if (content.trim() && !content.includes('END OF CODE')) {
+          lastLine = line;
+          break;
+        }
+      }
+      
+      // Apply highlight if we found a valid line
+      if (lastLine) {
+        lastLine.classList.add('cm-line-highlighted');
+        console.log('Highlighted line:', lastLine.textContent);
+      }
     };
     
     // Repeatedly check for the scroller until we find it
@@ -247,6 +317,11 @@ function SandpackScrollController() {
         if (!primaryScroller) return;
         
         const newHeight = primaryScroller.scrollHeight;
+        
+        // Always try to highlight the last line
+        highlightLastLine();
+        
+        // Only proceed with scrolling if height changed
         if (newHeight === lastScrollHeight.current) return;
         
         // Calculate if user is near the bottom (within 100px)
@@ -290,22 +365,31 @@ function SandpackScrollController() {
         
         // Add scroll listener
         primaryScroller.addEventListener('scroll', handleScroll);
+        
+        // Initial highlight
+        highlightLastLine();
       }
+      
+      // Also set up a fallback timer to periodically check for and highlight new lines
+      // Using a very frequent interval (10ms) to catch every line change
+      const highlightInterval = setInterval(highlightLastLine, 10);
       
       // Cleanup function
       return () => {
         clearInterval(checkForScroller);
+        clearInterval(highlightInterval);
         contentObserver.disconnect();
         primaryScroller?.removeEventListener('scroll', handleScroll);
       };
     };
     
     // Extra precaution: force scroll to bottom when streaming starts
-    scrollToBottom();
+    setTimeout(scrollToBottom, 100);
     
     // Cleanup all intervals on unmount
     return () => {
       clearInterval(checkForScroller);
+      // We'll leave the style element to avoid flickering if component remounts
     };
   }, []);
   
