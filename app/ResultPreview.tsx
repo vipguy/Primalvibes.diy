@@ -3,14 +3,21 @@ import {
   SandpackLayout,
   SandpackPreview,
   SandpackProvider,
+  useSandpack,
 } from '@codesandbox/sandpack-react';
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { sandpackDependencies } from './utils/versions';
 
 interface ResultPreviewProps {
   code: string;
+  streamingCode?: string;
+  isStreaming?: boolean;
   dependencies?: Record<string, string>;
   onShare?: () => void;
   shareStatus?: string;
+  completedMessage?: string;
+  currentMessage?: { content: string };
+  currentStreamContent?: string;
 }
 
 const indexHtml = `<!DOCTYPE html>
@@ -61,6 +68,46 @@ const indexHtml = `<!DOCTYPE html>
   </body>
 </html>`;
 
+// Welcome component to show instead of sandbox on initial load
+function WelcomeScreen() {
+  return (
+    <div className="bg-light-background-01 dark:bg-dark-background-01 flex h-full items-center justify-center flex-col">
+      <img
+        src="/lightup.png"
+        alt="Lightup"
+        className="h-auto w-full max-w-xs pulsing"
+        style={{
+          width: '100%',
+          height: 'auto',
+          transform: 'rotate(-5deg)',
+          animation: 'pulse 8s infinite',
+        }}
+      />
+
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+          @keyframes pulse {
+            0% {
+              transform: rotate(-5deg) scale(1);
+            }
+            50% {
+              transform: rotate(0deg) scale(1.05);
+            }
+            100% {
+              transform: rotate(-5deg) scale(1);
+            }
+          }
+          img.pulsing {
+            animation: pulse 8s infinite;
+          }
+        `,
+        }}
+      />
+    </div>
+  );
+}
+
 const defaultCode = `export default function App() {
   return (
     <div className="h-screen flex flex-col items-center justify-center bg-light-background-01 dark:bg-dark-background-01 gap-6">
@@ -102,21 +149,143 @@ const defaultCode = `export default function App() {
           </g>
         </svg>
       </div>
-      <div className="text-center px-4">
-        <h1 className="text-3xl font-semibold text-light-primary dark:text-dark-primary">
-          Send a message to generate your app.
-        </h1>
-      </div>
     </div>
   );
 }`;
 
-function ResultPreview({ code, dependencies = {}, onShare, shareStatus }: ResultPreviewProps) {
-  const [activeView, setActiveView] = useState<'preview' | 'code'>('preview');
+// Component to listen for Sandpack events
+function SandpackEventListener({
+  setActiveView,
+  setBundlingComplete,
+}: {
+  setActiveView: (view: 'preview' | 'code') => void;
+  setBundlingComplete: (complete: boolean) => void;
+}) {
+  const { listen } = useSandpack();
 
-  console.log(dependencies);
+  useEffect(() => {
+    // Set bundling as not complete when the component mounts
+    setBundlingComplete(false);
+
+    const unsubscribe = listen((message) => {
+      if (message.type === 'start') {
+        setBundlingComplete(false);
+        // } else if (message.type === 'status') {
+      } else if (message.type === 'urlchange') {
+        // Mark bundling as complete
+        setBundlingComplete(true);
+        // Switch to preview when bundling is complete
+        setActiveView('preview');
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [listen, setActiveView, setBundlingComplete]);
+
+  return null;
+}
+
+function ResultPreview({
+  code,
+  streamingCode = '',
+  isStreaming = false,
+  dependencies = {},
+  onShare,
+  shareStatus,
+  completedMessage,
+  currentMessage,
+  currentStreamContent,
+}: ResultPreviewProps) {
+  const [activeView, setActiveView] = useState<'preview' | 'code'>('preview');
+  const [displayCode, setDisplayCode] = useState(code || defaultCode);
+  const [appStartedCount, setAppStartedCount] = useState(0);
+  const [bundlingComplete, setBundlingComplete] = useState(true);
+  const justFinishedStreamingRef = useRef(false);
+  // Add state to control whether to show welcome screen or sandbox
+  const [showWelcome, setShowWelcome] = useState(true);
+  // Add state to track the current theme
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Detect system theme preference
+  useEffect(() => {
+    // Check initial preference
+    const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setIsDarkMode(prefersDarkMode);
+
+    // Listen for changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      setIsDarkMode(e.matches);
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
+  // Update displayed code when code changes or streaming ends
+  useEffect(() => {
+    if (!isStreaming) {
+      setDisplayCode(code || defaultCode);
+      // If we have actual code (not default), hide welcome screen
+      if (code) {
+        setShowWelcome(false);
+      }
+    }
+  }, [code, isStreaming]);
+
+  // Update displayed code during streaming
+  useEffect(() => {
+    if (isStreaming && streamingCode) {
+      setDisplayCode(streamingCode);
+      // Hide welcome screen when streaming starts
+      setShowWelcome(false);
+    }
+  }, [streamingCode, isStreaming]);
+
+  // Track when streaming ends
+  useEffect(() => {
+    if (isStreaming && streamingCode) {
+      justFinishedStreamingRef.current = true;
+      setActiveView('code');
+    }
+  }, [isStreaming, streamingCode]);
+
+  // Reset justFinishedStreamingRef when bundling completes
+  useEffect(() => {
+    if (bundlingComplete) {
+      justFinishedStreamingRef.current = false;
+    }
+  }, [bundlingComplete]);
+
+  // Determine if the preview icon should spin
+  const shouldSpin = !isStreaming && justFinishedStreamingRef.current && !bundlingComplete;
+
+  useEffect(() => {
+    console.log('dependencies', dependencies);
+  }, [dependencies]);
+
+  // CSS for the spinning animation
+  const spinningIconClass = shouldSpin ? 'animate-spin-slow' : '';
+
   return (
     <div className="h-full" style={{ overflow: 'hidden' }}>
+      <style>
+        {`
+          @keyframes spin-slow {
+            from {
+              transform: rotate(0deg);
+            }
+            to {
+              transform: rotate(360deg);
+            }
+          }
+          .animate-spin-slow {
+            animation: spin-slow 1s linear infinite;
+          }
+        `}
+      </style>
       <div className="border-light-decorative-00 dark:border-dark-decorative-00 bg-light-background-00 dark:bg-dark-background-00 flex items-center justify-between border-b p-4">
         <div className="bg-light-decorative-00 dark:bg-dark-decorative-00 flex space-x-1 rounded-lg p-1 shadow-sm">
           <button
@@ -131,7 +300,7 @@ function ResultPreview({ code, dependencies = {}, onShare, shareStatus }: Result
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4"
+              className={`h-4 w-4 ${spinningIconClass}`}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -154,7 +323,11 @@ function ResultPreview({ code, dependencies = {}, onShare, shareStatus }: Result
           </button>
           <button
             type="button"
-            onClick={() => setActiveView('code')}
+            onClick={() => {
+              setActiveView('code');
+              // Hide welcome screen when switching to code view
+              setShowWelcome(false);
+            }}
             className={`flex items-center space-x-1.5 rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
               activeView === 'code'
                 ? 'bg-light-background-00 dark:bg-dark-background-00 text-light-primary dark:text-dark-primary shadow-sm'
@@ -215,61 +388,98 @@ function ResultPreview({ code, dependencies = {}, onShare, shareStatus }: Result
             </div>
           </div>
         )}
+
+        {isStreaming && (
+          <div className="text-accent-03-light dark:text-accent-03-dark ml-2 w-10 animate-pulse text-sm">
+            {streamingCode.split('\n').length > 2 ? streamingCode.split('\n').length : ''}
+          </div>
+        )}
       </div>
-      <SandpackProvider
-        key={code}
-        template="vite-react"
-        options={{
-          externalResources: ['https://cdn.tailwindcss.com'],
-        }}
-        customSetup={{
-          dependencies: {
-            ...dependencies,
-            'use-fireproof': '0.20.0-dev-preview-41',
-            '@adviser/cement': 'latest',
-          },
-        }}
-        files={{
-          '/index.html': {
-            code: indexHtml,
-            hidden: true,
-          },
-          '/App.jsx': {
-            code: code || defaultCode,
-            active: true,
-          },
-        }}
-        theme="light"
-      >
-        <SandpackLayout className="h-full" style={{ height: 'calc(100vh - 49px)' }}>
-          <div
-            style={{
-              display: activeView === 'preview' ? 'block' : 'none',
-              height: '100%',
-              width: '100%',
+
+      {showWelcome ? (
+        // Show welcome screen
+        <div className="h-full" style={{ height: 'calc(100vh - 49px)' }}>
+          <WelcomeScreen />
+        </div>
+      ) : (
+        // Show sandbox
+        <div data-testid="sandpack-provider">
+          <SandpackProvider
+            key={displayCode}
+            template="vite-react"
+            options={{
+              externalResources: ['https://cdn.tailwindcss.com'],
             }}
+            customSetup={{
+              dependencies: {
+                ...dependencies,
+                ...sandpackDependencies,
+              },
+            }}
+            files={{
+              '/index.html': {
+                code: indexHtml,
+                hidden: true,
+              },
+              '/App.jsx': {
+                code: displayCode,
+                active: true,
+              },
+            }}
+            theme={isDarkMode ? "dark" : "light"}
           >
-            <SandpackPreview
-              showNavigator={false}
-              showOpenInCodeSandbox={false}
-              showRefreshButton={true}
-              showRestartButton={false}
-              showOpenNewtab={false}
-              className="h-full w-full"
-              style={{ height: '100%' }}
+            <SandpackEventListener
+              setActiveView={setActiveView}
+              setBundlingComplete={setBundlingComplete}
             />
-          </div>
-          <div
-            style={{
-              display: activeView === 'code' ? 'block' : 'none',
-              height: '100%',
-              width: '100%',
-            }}
+            <SandpackLayout className="h-full" style={{ height: 'calc(100vh - 49px)' }}>
+              <div
+                style={{
+                  display: activeView === 'preview' ? 'block' : 'none',
+                  height: '100%',
+                  width: '100%',
+                }}
+              >
+                <SandpackPreview
+                  showNavigator={false}
+                  showOpenInCodeSandbox={false}
+                  showRefreshButton={true}
+                  showRestartButton={false}
+                  showOpenNewtab={false}
+                  className="h-full w-full"
+                  style={{ height: '100%' }}
+                />
+              </div>
+              <div
+                style={{
+                  display: activeView === 'code' ? 'block' : 'none',
+                  height: '100%',
+                  width: '100%',
+                }}
+              >
+                <SandpackCodeEditor style={{ height: '100%' }} />
+              </div>
+            </SandpackLayout>
+          </SandpackProvider>
+        </div>
+      )}
+
+      <div className="result-content">
+        {!showWelcome && (
+          <button
+            data-testid="copy-button"
+            onClick={() => navigator.clipboard.writeText(displayCode)}
+            className="text-light-primary dark:text-dark-primary hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 rounded-md px-4 py-1.5 text-sm font-medium transition-colors"
           >
-            <SandpackCodeEditor style={{ height: '100%' }} />
-          </div>
-        </SandpackLayout>
-      </SandpackProvider>
+            Copy to Clipboard
+          </button>
+        )}
+        {streamingCode ? (
+          <div>{currentStreamContent}</div>
+        ) : (
+          <div>{completedMessage || currentMessage?.content || ''}</div>
+        )}
+      </div>
     </div>
   );
 }
