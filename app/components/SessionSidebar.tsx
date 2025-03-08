@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, memo } from 'react';
 import { useFireproof } from 'use-fireproof';
 
 // Define the session type
@@ -23,7 +23,7 @@ interface SessionSidebarProps {
 /**
  * Component that displays a collapsible sidebar with chat session history
  */
-export default function SessionSidebar({
+function SessionSidebar({
   isVisible,
   onToggle,
   onSelectSession,
@@ -65,10 +65,20 @@ export default function SessionSidebar({
     }
   };
 
+  // Only render content when the sidebar is visible
+  if (!isVisible) {
+    return (
+      <div
+        ref={sidebarRef}
+        className="fixed top-0 left-0 z-10 h-full w-0 -translate-x-full transition-all duration-300"
+      />
+    );
+  }
+
   return (
     <div
       ref={sidebarRef}
-      className={`bg-light-background-00 dark:bg-dark-background-00 fixed top-0 left-0 z-10 h-full shadow-lg transition-all duration-300 ${isVisible ? 'w-64 translate-x-0' : 'w-0 -translate-x-full'}`}
+      className="bg-light-background-00 dark:bg-dark-background-00 fixed top-0 left-0 z-10 h-full shadow-lg transition-all duration-300 w-64 translate-x-0"
     >
       {/* Sidebar content */}
       <div className="h-full overflow-y-auto">
@@ -135,3 +145,6 @@ export default function SessionSidebar({
     </div>
   );
 }
+
+// Export a memoized version of the component to prevent unnecessary re-renders
+export default memo(SessionSidebar);
