@@ -205,6 +205,24 @@ function ResultPreview({
   const justFinishedStreamingRef = useRef(false);
   // Add state to control whether to show welcome screen or sandbox
   const [showWelcome, setShowWelcome] = useState(true);
+  // Add state to track the current theme
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Detect system theme preference
+  useEffect(() => {
+    // Check initial preference
+    const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setIsDarkMode(prefersDarkMode);
+
+    // Listen for changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      setIsDarkMode(e.matches);
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
 
   // Update displayed code when code changes or streaming ends
   useEffect(() => {
@@ -408,7 +426,7 @@ function ResultPreview({
                 active: true,
               },
             }}
-            theme="light"
+            theme={isDarkMode ? "dark" : "light"}
           >
             <SandpackEventListener
               setActiveView={setActiveView}

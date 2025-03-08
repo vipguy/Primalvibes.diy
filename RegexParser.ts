@@ -17,6 +17,7 @@ export class RegexParser {
   public dependencies: Record<string, string> = {};
   public displayText: string = '';
   public codeBlockContent: string = ''; // Make code content public
+  public codeBlockValid: boolean = true; // Track if code block starts with import
 
   // Event handling
   private eventHandlers: Record<string, Function[]> = {
@@ -26,6 +27,7 @@ export class RegexParser {
     match: [],
     codeUpdate: [], // Add codeUpdate event type
     codeBlockStart: [], // Add codeBlockStart event type
+    codeBlockValidation: [], // Add validation event type
   };
 
   /**
@@ -231,6 +233,19 @@ export class RegexParser {
             this.inCodeBlock = false;
             this.backtickCount = 0;
 
+            // Ensure code block starts with import
+            if (this.codeBlockContent && !this.codeBlockContent.trim().startsWith('import')) {
+              // Find the first occurrence of 'import' in the code block
+              const importIndex = this.codeBlockContent.indexOf('import');
+              if (importIndex !== -1) {
+                // Keep only the content starting from 'import'
+                this.codeBlockContent = this.codeBlockContent.substring(importIndex);
+                console.debug('Code block adjusted to start with import statement');
+              } else {
+                console.debug('Warning: Code block does not contain any import statement');
+              }
+            }
+
             // Emit the completed code block
             this.emit('code', this.codeBlockContent, this.languageId);
           }
@@ -297,5 +312,6 @@ export class RegexParser {
     this.dependencyContent = '';
     this.dependencies = {};
     this.displayText = ''; // Reset displayText as well
+    this.codeBlockValid = true; // Reset code block validation
   }
 }

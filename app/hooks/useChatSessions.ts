@@ -38,6 +38,7 @@ export function useChatSessions() {
           ...(currentSessionId ? { _id: currentSessionId } : {}),
         };
 
+        console.log('Saving session:', sessionData);
         const result = await database.put(sessionData);
         if (!currentSessionId) {
           setCurrentSessionId(result.id);

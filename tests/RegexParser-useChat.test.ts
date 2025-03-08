@@ -47,4 +47,44 @@ describe('RegexParser in useChat context', () => {
     // Verify the code content is stored in the parser (useChat would access this)
     expect(parser.codeBlockContent).toContain('function HelloWorld()');
   });
+
+  it('should ensure code blocks start with import statement', () => {
+    // Create a parser instance
+    const parser = new RegexParser();
+    
+    // Create a spy for the code event
+    const codeSpy = vi.fn();
+    const codeBlockStartSpy = vi.fn();
+    
+    // Register event handlers
+    parser.on('code', codeSpy);
+    parser.on('codeBlockStart', codeBlockStartSpy);
+    
+    // Disable console.debug during test
+    const originalConsoleDebug = console.debug;
+    console.debug = vi.fn();
+    
+    // Simulate a chat response with a code block that has content before import
+    parser.write('{"dependencies": {}}');
+    parser.write('# Pomodoro Timer App\n\n');
+    parser.write('```jsx\nfunction PomodoroApp() {\n  // Some code\n}\n\nimport React, { useState, useEffect } from "react";\nimport { useFireproof } from "use-fireproof";\n\nexport default function App() {\n  // Code here\n}\n```');
+    parser.end();
+    
+    // Restore console.debug
+    console.debug = originalConsoleDebug;
+    
+    // Verify code was emitted
+    expect(codeSpy).toHaveBeenCalled();
+    
+    // Verify the code content starts with import (parser should have adjusted it)
+    const codeContent = codeSpy.mock.calls[0][0];
+    expect(codeContent.trim().startsWith('import')).toBe(true);
+    
+    // Verify the content before import was removed
+    expect(codeContent).not.toContain('function PomodoroApp()');
+    
+    // Verify the content after import was preserved
+    expect(codeContent).toContain('import React');
+    expect(codeContent).toContain('export default function App()');
+  });
 });

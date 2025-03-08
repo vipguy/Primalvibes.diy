@@ -75,12 +75,13 @@ function ChatInterface({ chatState }: ChatInterfaceProps) {
     autoResizeTextarea();
   }, [autoResizeTextarea]);
 
-  // Save messages to Fireproof whenever they change
+  // Save messages to Fireproof whenever they change, but only when not streaming
   useEffect(() => {
-    if (messages.length > 0) {
+    if (messages.length > 0 && !isGenerating) {
+      console.log('Saving completed session to Fireproof');
       saveSession(messages);
     }
-  }, [messages, saveSession]);
+  }, [messages, saveSession, isGenerating]);
 
   // Load a session from the sidebar
   const handleLoadSession = async (session: any) => {
