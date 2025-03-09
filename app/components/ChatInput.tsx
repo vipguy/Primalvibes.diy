@@ -1,31 +1,47 @@
 import type { ChangeEvent, KeyboardEvent } from 'react';
+import { useRef, memo, useEffect } from 'react';
+import { useChatContext } from '../context/ChatContext';
 
+// Only keep the inputRef prop which has specific functionality that can't be handled by context
 interface ChatInputProps {
-  input: string;
-  setInput: (input: string) => void;
-  isGenerating: boolean;
-  onSend: () => void;
-  autoResizeTextarea: () => void;
-  inputRef: React.RefObject<HTMLTextAreaElement | null>;
+  inputRef?: React.RefObject<HTMLTextAreaElement | null>;
 }
 
-function ChatInput({
-  input,
-  setInput,
-  isGenerating,
-  onSend,
-  autoResizeTextarea,
-  inputRef,
-}: ChatInputProps) {
+function ChatInput({ inputRef: externalInputRef }: ChatInputProps = {}) {
+  // Use context directly - we can assume it's available
+  const { input, setInput, isGenerating, handleSendMessage } = useChatContext();
+
+  // Use our own ref if external ref not provided
+  const localInputRef = useRef<HTMLTextAreaElement | null>(null);
+
+  // Use provided input ref or local ref
+  const inputRef = externalInputRef || localInputRef;
+
+  // Function to auto-resize textarea
+  const autoResizeTextarea = () => {
+    const textarea = inputRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  };
+
+  // Initial auto-resize
+  useEffect(() => {
+    autoResizeTextarea();
+  }, []);
+
+  // Handler for input changes
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
     autoResizeTextarea();
   };
 
+  // Handler for key presses
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey && !isGenerating) {
       e.preventDefault();
-      onSend();
+      handleSendMessage();
     }
   };
 
@@ -44,7 +60,7 @@ function ChatInput({
         />
         <button
           type="button"
-          onClick={onSend}
+          onClick={handleSendMessage}
           disabled={isGenerating}
           className={`absolute right-2 bottom-2 flex items-center justify-center rounded-full p-2 text-sm font-medium transition-colors duration-200 ${
             isGenerating
@@ -92,4 +108,5 @@ function ChatInput({
   );
 }
 
-export default ChatInput;
+// Use memo to optimize rendering
+export default memo(ChatInput);

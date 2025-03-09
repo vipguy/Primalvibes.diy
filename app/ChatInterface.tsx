@@ -6,6 +6,7 @@ import ChatHeader from './components/ChatHeader';
 import MessageList from './components/MessageList';
 import ChatInput from './components/ChatInput';
 import QuickSuggestions from './components/QuickSuggestions';
+import { useChatContext } from './context/ChatContext';
 
 interface ChatInterfaceProps {
   chatState: {
@@ -50,7 +51,6 @@ function ChatInterface({
   onNewChat,
   onCodeGenerated,
 }: ChatInterfaceProps) {
-  const [isSidebarVisible, setIsSidebarVisible] = useState(false);
   const [isShrinking, setIsShrinking] = useState(false);
   const [isExpanding, setIsExpanding] = useState(false);
   const { database, useLiveQuery } = useFireproof('fireproof-chat-history');
@@ -75,10 +75,24 @@ function ChatInterface({
     descending: true,
   });
 
+  // Get values from context when available
+  const chatContext = useChatContext();
+
+  // Create a ref to store setMessages function to avoid dependency cycles
+  const setMessagesRef = useRef(setMessages);
+
+  // Keep the ref updated with the latest setMessages function
+  useEffect(() => {
+    setMessagesRef.current = setMessages;
+  }, [setMessages]);
+
   // Memoize handler functions to prevent re-renders
   const handleSelectSuggestion = useCallback(
     (suggestion: string) => {
+      // Update both the local state and ChatContext state
       setInput(suggestion);
+      chatContext.setInput(suggestion);
+
       // Focus the input after setting the value
       setTimeout(() => {
         if (inputRef.current) {
@@ -90,12 +104,8 @@ function ChatInterface({
         }
       }, 0);
     },
-    [inputRef, setInput]
+    [inputRef, setInput, chatContext.setInput]
   );
-
-  const toggleSidebar = useCallback(() => {
-    setIsSidebarVisible((prev) => !prev);
-  }, []);
 
   // Focus input on mount
   useEffect(() => {
@@ -113,17 +123,18 @@ function ChatInterface({
       if (sessionId) {
         try {
           const sessionData = (await database.get(sessionId)) as SessionDocument;
-          if (sessionData?.messages && Array.isArray(sessionData.messages)) {
-            setMessages(sessionData.messages);
-          }
-        } catch (err) {
-          console.error('Error loading session:', err);
+          // Normalize session data to guarantee messages array exists
+          const messages = Array.isArray(sessionData.messages) ? sessionData.messages : [];
+          // Use the ref to access the latest setMessages function
+          setMessagesRef.current(messages);
+        } catch (error) {
+          console.error('Error loading session:', error);
         }
       }
     }
 
     loadSessionData();
-  }, [sessionId, database, setMessages]);
+  }, [sessionId, database]); // Removed setMessages from the dependency array
 
   // Track streaming state to detect when streaming completes
   const wasGeneratingRef = useRef(isGenerating);
@@ -139,13 +150,11 @@ function ChatInterface({
 
         // Extract title from first user message
         const firstUserMessage = messages.find((msg) => msg.type === 'user');
-        const title = firstUserMessage
-          ? `${firstUserMessage.text.substring(0, 50)}${firstUserMessage.text.length > 50 ? '...' : ''}`
-          : 'Untitled Chat';
+        const title = firstUserMessage?.text || 'Untitled Chat';
 
         try {
-          // If we have a session ID, update it; otherwise create a new one
           const sessionData = {
+            type: 'session',
             title,
             messages,
             timestamp: Date.now(),
@@ -154,9 +163,9 @@ function ChatInterface({
 
           const result = await database.put(sessionData);
 
-          // If this was a new session, notify the parent component
-          if (!sessionId && onSessionCreated) {
-            onSessionCreated(result.id);
+          // If this was a new session, notify the parent component using optional chaining
+          if (!sessionId) {
+            onSessionCreated?.(result.id);
           }
         } catch (error) {
           console.error('Error saving session to Fireproof:', error);
@@ -173,50 +182,48 @@ function ChatInterface({
   // Load a session from the sidebar
   const handleLoadSession = useCallback(
     async (session: SessionDocument) => {
-      if (!session?._id) return;
+      // Ensure session has an _id - this is guaranteed by the component API
+      const sessionId = session._id;
 
       try {
-        const sessionData = (await database.get(session._id)) as SessionDocument;
-        if (sessionData?.messages && Array.isArray(sessionData.messages)) {
-          setMessages(sessionData.messages);
+        const sessionData = (await database.get(sessionId)) as SessionDocument;
+        // Normalize session data to guarantee messages array exists
+        const messages = Array.isArray(sessionData.messages) ? sessionData.messages : [];
+        // Use the ref to access the latest setMessages function
+        setMessagesRef.current(messages);
 
-          // Find the last AI message with code to update the editor
-          const lastAiMessageWithCode = [...sessionData.messages]
-            .reverse()
-            .find((msg: ChatMessage) => msg.type === 'ai' && msg.code);
+        // Find the last AI message with code to update the editor
+        const lastAiMessageWithCode = [...messages]
+          .reverse()
+          .find((msg: ChatMessage) => msg.type === 'ai' && msg.code);
 
-          // If we found an AI message with code, update the code view
-          if (lastAiMessageWithCode?.code) {
-            const dependencies = lastAiMessageWithCode.dependencies || {};
-            console.log('Loading code from session:', lastAiMessageWithCode.code);
+        // If we found an AI message with code, update the code view
+        if (lastAiMessageWithCode?.code) {
+          const dependencies = lastAiMessageWithCode.dependencies || {};
+          console.log('Loading code from session:', lastAiMessageWithCode.code);
 
-            // 1. Update local chatState
-            chatState.streamingCode = lastAiMessageWithCode.code;
-            chatState.completedCode = lastAiMessageWithCode.code;
-            chatState.parserState.current.dependencies = dependencies;
-            chatState.isStreaming = false;
-            chatState.isGenerating = false;
+          // 1. Update local chatState
+          chatState.streamingCode = lastAiMessageWithCode.code;
+          chatState.completedCode = lastAiMessageWithCode.code;
+          chatState.parserState.current.dependencies = dependencies;
+          chatState.isStreaming = false;
+          chatState.isGenerating = false;
 
-            // Manually extract the UI code for app preview
-            chatState.completedMessage = lastAiMessageWithCode.text || "Here's your app:";
+          // Manually extract the UI code for app preview
+          chatState.completedMessage = lastAiMessageWithCode.text || "Here's your app:";
 
-            // 2. Call the onCodeGenerated callback to update parent state
-            if (onCodeGenerated) {
-              onCodeGenerated(lastAiMessageWithCode.code, dependencies);
-              console.log('Called onCodeGenerated to update parent component');
-            }
-          }
-
-          // Notify parent component of session change
-          if (onSessionCreated) {
-            onSessionCreated(session._id);
-          }
+          // 2. Call the onCodeGenerated callback to update parent state
+          onCodeGenerated?.(lastAiMessageWithCode.code, dependencies);
+          console.log('Called onCodeGenerated to update parent component');
         }
-      } catch (err) {
-        console.error('Error loading session:', err);
+
+        // Notify parent component of session change
+        onSessionCreated?.(sessionId);
+      } catch (error) {
+        console.error('Error loading session:', error);
       }
     },
-    [database, setMessages, onSessionCreated, chatState, onCodeGenerated]
+    [database, chatState, onCodeGenerated, onSessionCreated]
   );
 
   // Function to handle starting a new chat
@@ -227,14 +234,12 @@ function ChatInterface({
     // After animation completes, reset the state
     setTimeout(
       () => {
-        // Use parent's onNewChat if provided
-        if (onNewChat) {
-          onNewChat();
-        } else {
-          setMessages([]);
-          setInput('');
-        }
+        // Use parent's onNewChat if provided, with optional chaining
+        onNewChat?.();
 
+        // Always reset local state
+        setMessagesRef.current([]);
+        setInput('');
         setIsShrinking(false);
 
         // Add a small bounce effect when the new chat appears
@@ -244,31 +249,22 @@ function ChatInterface({
         }, 300);
       },
       500 + messages.length * 50
-    ); // Account for staggered animation of messages
-  }, [onNewChat, messages.length, setInput, setMessages, setIsShrinking, setIsExpanding]);
+    );
+  }, [onNewChat, messages.length, setInput, setIsShrinking, setIsExpanding]);
 
   // Memoize child components to prevent unnecessary re-renders
   const sessionSidebar = useMemo(
     () => (
       <SessionSidebar
-        isVisible={isSidebarVisible}
-        onToggle={toggleSidebar}
+        isVisible={chatContext.isSidebarVisible}
+        onClose={chatContext.closeSidebar}
         onSelectSession={handleLoadSession}
       />
     ),
-    [isSidebarVisible, toggleSidebar, handleLoadSession]
+    [chatContext.isSidebarVisible, chatContext.closeSidebar, handleLoadSession]
   );
 
-  const chatHeader = useMemo(
-    () => (
-      <ChatHeader
-        onToggleSidebar={toggleSidebar}
-        onNewChat={handleNewChat}
-        isGenerating={isGenerating}
-      />
-    ),
-    [toggleSidebar, handleNewChat, isGenerating]
-  );
+  const chatHeader = useMemo(() => <ChatHeader />, []);
 
   const messageList = useMemo(
     () => (
@@ -288,19 +284,26 @@ function ChatInterface({
     [messages.length, handleSelectSuggestion]
   );
 
-  const chatInput = useMemo(
-    () => (
-      <ChatInput
-        input={input}
-        setInput={setInput}
-        isGenerating={isGenerating}
-        onSend={sendMessage}
-        autoResizeTextarea={autoResizeTextarea}
-        inputRef={inputRef}
-      />
-    ),
-    [input, setInput, isGenerating, sendMessage, autoResizeTextarea, inputRef]
-  );
+  const chatInput = useMemo(() => <ChatInput inputRef={inputRef} />, [inputRef]);
+
+  // Sync from context to props when context input changes
+  useEffect(() => {
+    if (chatContext.input !== chatState.input) {
+      setInput(chatContext.input);
+    }
+  }, [chatContext.input, chatState.input, setInput]);
+
+  // Sync between props and context bidirectionally
+  useEffect(() => {
+    // Sync from props to context
+    if (chatState.input !== chatContext.input) {
+      chatContext.setInput(chatState.input);
+    }
+
+    if (chatState.isGenerating !== chatContext.isGenerating) {
+      chatContext.setIsGenerating(chatState.isGenerating);
+    }
+  }, [chatContext, chatState.input, chatState.isGenerating]);
 
   return (
     <div className="flex h-full flex-col" style={{ overflow: 'hidden' }}>

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import ChatHeader from '../app/components/ChatHeader';
 import SessionSidebar from '../app/components/SessionSidebar';
@@ -17,23 +17,34 @@ vi.mock('use-fireproof', () => ({
   }),
 }));
 
+// Mock the ChatContext for ChatHeader tests
+const openSidebar = vi.fn();
+const handleNewChat = vi.fn();
+let isGeneratingValue = false;
+
+vi.mock('../app/context/ChatContext', () => ({
+  useChatContext: () => ({
+    isGenerating: isGeneratingValue,
+    openSidebar,
+    closeSidebar: vi.fn(),
+    handleNewChat,
+  }),
+}));
+
 describe('Component Rendering', () => {
   describe('ChatHeader', () => {
+    beforeEach(() => {
+      vi.resetAllMocks();
+      isGeneratingValue = false;
+    });
+
     it('renders without crashing', () => {
-      const onToggleSidebar = vi.fn();
-      const onNewChat = vi.fn();
-      render(
-        <ChatHeader onToggleSidebar={onToggleSidebar} onNewChat={onNewChat} isGenerating={false} />
-      );
+      render(<ChatHeader />);
       expect(screen.getByLabelText('New Chat')).toBeInTheDocument();
     });
 
     it('applies tooltip classes correctly', () => {
-      const onToggleSidebar = vi.fn();
-      const onNewChat = vi.fn();
-      const { container } = render(
-        <ChatHeader onToggleSidebar={onToggleSidebar} onNewChat={onNewChat} isGenerating={false} />
-      );
+      const { container } = render(<ChatHeader />);
 
       // Check if the button has the peer class
       const button = screen.getByLabelText('New Chat');
@@ -45,32 +56,28 @@ describe('Component Rendering', () => {
     });
 
     it('disables new chat button when generating', () => {
-      const onToggleSidebar = vi.fn();
-      const onNewChat = vi.fn();
-      render(
-        <ChatHeader onToggleSidebar={onToggleSidebar} onNewChat={onNewChat} isGenerating={true} />
-      );
-
+      isGeneratingValue = true;
+      render(<ChatHeader />);
       expect(screen.getByLabelText('New Chat')).toBeDisabled();
     });
   });
 
   describe('SessionSidebar', () => {
     it('renders in hidden state', () => {
-      const onToggle = vi.fn();
+      const onClose = vi.fn();
       const onSelectSession = vi.fn();
       const { container } = render(
-        <SessionSidebar isVisible={false} onToggle={onToggle} onSelectSession={onSelectSession} />
+        <SessionSidebar isVisible={false} onClose={onClose} onSelectSession={onSelectSession} />
       );
       // Check that it has the hidden class
       expect(container.firstChild).toHaveClass('-translate-x-full');
     });
 
     it('renders in visible state', () => {
-      const onToggle = vi.fn();
+      const onClose = vi.fn();
       const onSelectSession = vi.fn();
       const { container } = render(
-        <SessionSidebar isVisible={true} onToggle={onToggle} onSelectSession={onSelectSession} />
+        <SessionSidebar isVisible={true} onClose={onClose} onSelectSession={onSelectSession} />
       );
       expect(container.firstChild).toHaveClass('translate-x-0');
 
@@ -79,10 +86,10 @@ describe('Component Rendering', () => {
     });
 
     it('shows empty state when no sessions', () => {
-      const onToggle = vi.fn();
+      const onClose = vi.fn();
       const onSelectSession = vi.fn();
       render(
-        <SessionSidebar isVisible={true} onToggle={onToggle} onSelectSession={onSelectSession} />
+        <SessionSidebar isVisible={true} onClose={onClose} onSelectSession={onSelectSession} />
       );
       expect(screen.getByText('No saved sessions yet')).toBeInTheDocument();
     });
