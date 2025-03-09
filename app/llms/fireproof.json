@@ -1,7 +1,7 @@
 {
   "name": "fireproof",
+  "label": "useFireproof",
   "llmsTxtUrl": "https://use-fireproof.com/llms-full.txt",
   "module": "use-fireproof",
-  "description": "local-first database with encrypted live sync",
-  "label": "useFireproof"
+  "description": "local-first database with encrypted live sync"
 }

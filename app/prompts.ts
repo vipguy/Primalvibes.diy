@@ -1,17 +1,18 @@
 const llmsModules = import.meta.glob('./llms/*.json', { eager: true });
-
-const llmsList = Object.values(llmsModules).map((module) => module.default);
+const llmsList = Object.values(llmsModules).map(
+  (mod) => (mod as { default: { llmsTxtUrl: string; label: string } }).default
+);
 
 // Base system prompt for the AI
 export async function makeBaseSystemPrompt(model: string) {
-  let concatenatedLlmsText = '';
+  let concatenatedLlmsTxt = '';
 
   for (const llm of llmsList) {
-    const llmsText = await fetch(llm.llmsTextUrl).then((res) => res.text());
-    concatenatedLlmsText += `
-<${llm.codeLabel}-docs>
-${llmsText}
-</${llm.codeLabel}-docs>
+    const llmsTxt = await fetch(llm.llmsTxtUrl).then((res) => res.text());
+    concatenatedLlmsTxt += `
+<${llm.label}-docs>
+${llmsTxt}
+</${llm.label}-docs>
 `;
   }
 
