@@ -18,6 +18,7 @@ interface ResultPreviewProps {
   completedMessage?: string;
   currentMessage?: { content: string };
   currentStreamContent?: string;
+  onScreenshotCaptured?: (screenshotData: string) => void;
 }
 
 const indexHtml = `<!DOCTYPE html>
@@ -68,11 +69,16 @@ const indexHtml = `<!DOCTYPE html>
           window.parent.postMessage({ screenshot: dataURI }, '*');
         });
       }
+      
+      // Automatically capture screenshot when page is fully loaded
+      window.addEventListener('load', function() {
+        // Wait a short moment for any final rendering
+        setTimeout(captureScreenshot, 500);
+      });
     </script>
   </head>
   <body>
     <div id="root"></div>
-    <button onclick="captureScreenshot()">Capture Screenshot</button>
     <script type="module" src="/index.jsx"></script>
   </body>
 </html>`;
@@ -411,6 +417,7 @@ function ResultPreview({
   completedMessage,
   currentMessage,
   currentStreamContent,
+  onScreenshotCaptured,
 }: ResultPreviewProps) {
   const [activeView, setActiveView] = useState<'preview' | 'code'>('preview');
   const [displayCode, setDisplayCode] = useState(code || defaultCode);
@@ -452,6 +459,24 @@ function ResultPreview({
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
+
+  // Listen for screenshot messages from the iframe
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && event.data.screenshot) {
+        const screenshotData = event.data.screenshot;
+        console.log('Received screenshot from iframe, length:', screenshotData.length);
+        
+        // Call the callback if provided
+        if (onScreenshotCaptured) {
+          onScreenshotCaptured(screenshotData);
+        }
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [onScreenshotCaptured]);
 
   // Update displayed code when code changes or streaming ends
   useEffect(() => {
