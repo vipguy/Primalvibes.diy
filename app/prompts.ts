@@ -1,10 +1,8 @@
-import fs from 'fs';
-import path from 'path';
+import data from './llms.json';
 
 // Base system prompt for the AI
 export async function makeBaseSystemPrompt(model: string) {
-  const llmsJsonPath = path.resolve(__dirname, 'llms.json');
-  const llmsList = JSON.parse(fs.readFileSync(llmsJsonPath, 'utf-8'));
+  const llmsList = data;
 
   let concatenatedLlmsText = '';
 
