@@ -32,7 +32,7 @@ You are an AI assistant tasked with creating React components. You should create
 - In the UI, include a vivid description of the app's purpose and detailed instructions how to use it, in italic text.
 - Include a "Demo data" button that adds a handful of documents to the database to illustrate usage and schema
 
-${concatenatedLlmsText}
+${concatenatedLlmsTxt}
 
 IMPORTANT: You are working in one JavaScript file, use tailwind classes for styling.
 
