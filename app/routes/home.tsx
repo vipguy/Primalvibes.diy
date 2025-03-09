@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router';
 import ChatInterface from '../ChatInterface';
 import ResultPreview from '../components/ResultPreview/ResultPreview';
 import { useChat } from '../hooks/useChat';
@@ -48,6 +49,7 @@ export default function Home() {
   const [isSharedApp, setIsSharedApp] = useState<boolean>(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const { database } = useFireproof('fireproof-chat-history');
+  const navigate = useNavigate();
 
   // Hoist the useChat hook to this component
   const chatState = useChat((code: string, dependencies?: Record<string, string>) => {
@@ -76,15 +78,18 @@ export default function Home() {
   // Handle new session creation
   const handleSessionCreated = (newSessionId: string) => {
     setSessionId(newSessionId);
-    console.log('New session created:', newSessionId);
+    // We don't need to navigate here, as the ChatInterface will do that
   };
 
   // Handle new chat (reset session)
   const handleNewChat = () => {
     setSessionId(null);
-    setState({ generatedCode: '', dependencies: {} });
+    setShareStatus('');
+    setState({
+      generatedCode: '',
+      dependencies: {},
+    });
     chatState.setMessages([]);
-    window.location.href = '/';
   };
 
   function handleShare() {
@@ -165,13 +170,24 @@ export default function Home() {
       <div style={{ flex: '0 0 33.333%', overflow: 'hidden', position: 'relative' }}>
         <ChatProvider
           initialState={{
-            input: chatState.input,
-            isGenerating: chatState.isGenerating,
+            input: '',
+            isGenerating: false,
             isSidebarVisible: false,
           }}
           onSendMessage={(input) => {
-            chatState.setInput(input);
-            chatState.sendMessage();
+            if (input.trim()) {
+              if (!sessionId) {
+                // If no session exists, create one
+                const newSession = {
+                  timestamp: Date.now(),
+                  title: input.length > 50 ? `${input.substring(0, 50)}...` : input,
+                };
+
+                database.put(newSession).then((doc) => {
+                  handleSessionCreated(doc.id);
+                });
+              }
+            }
           }}
           onNewChat={handleNewChat}
         >
@@ -205,6 +221,7 @@ export default function Home() {
               : undefined
           }
           onScreenshotCaptured={handleScreenshotCaptured}
+          {...(sessionId ? { sessionId } : {})}
         />
       </div>
     </div>
