@@ -22,15 +22,15 @@ function ChatInput({ value, onChange, onSend, onKeyDown, disabled, inputRef }: C
   }, [value, inputRef]);
 
   return (
-    <div className="input-area border-light-decorative-00 dark:border-dark-decorative-00 bg-light-background-00 dark:bg-dark-background-00 border-t px-4 py-3">
-      <div className="relative flex items-start">
+    <div className="border-light-decorative-00 dark:border-dark-decorative-00 bg-light-background-00 dark:bg-dark-background-00 border-t px-4 py-3">
+      <div className="relative">
         <textarea
           ref={inputRef}
           value={value}
           onChange={onChange}
           onKeyDown={onKeyDown}
-          className="border-light-decorative-00 dark:border-dark-decorative-00 text-light-primary dark:text-dark-primary bg-light-background-00 dark:bg-dark-background-00 focus:ring-accent-01-light dark:focus:ring-accent-01-dark max-h-[200px] min-h-[90px] w-full flex-1 resize-y rounded-xl border p-2.5 pr-12 text-sm transition-all focus:border-transparent focus:ring-2 focus:outline-none"
-          placeholder="Describe the app you want to create..."
+          className="border-light-decorative-00 dark:border-dark-decorative-00 text-light-primary dark:text-dark-primary bg-light-background-00 dark:bg-dark-background-00 focus:ring-accent-01-light dark:focus:ring-accent-01-dark max-h-[200px] min-h-[90px] w-full resize-y rounded-xl border p-2.5 text-sm focus:border-transparent focus:ring-2 focus:outline-none"
+          placeholder="Vibe coding? Just Fireproof it."
           disabled={disabled}
           rows={2}
         />
@@ -38,46 +38,29 @@ function ChatInput({ value, onChange, onSend, onKeyDown, disabled, inputRef }: C
           type="button"
           onClick={onSend}
           disabled={disabled}
-          className={`absolute right-2 bottom-2 flex items-center justify-center rounded-full p-2 text-sm font-medium transition-colors duration-200 ${
+          className={`light-gradient dark:dark-gradient absolute right-0 bottom-0 -mr-2 -mb-1 flex w-[110px] items-center justify-center overflow-hidden rounded-lg border px-1 py-2 shadow-sm transition-all duration-300 hover:border-gray-300 hover:shadow-md active:shadow-inner dark:hover:border-gray-600 ${
             disabled
-              ? 'bg-light-decorative-01 dark:bg-dark-decorative-01 text-light-primary dark:text-dark-primary cursor-not-allowed opacity-50'
-              : 'bg-accent-01-light dark:bg-accent-01-dark hover:bg-accent-02-light dark:hover:bg-accent-02-dark cursor-pointer text-white'
+              ? 'border-gray-300 dark:border-gray-500'
+              : 'border-gray-200 dark:border-gray-700'
           }`}
+          style={{
+            backdropFilter: 'blur(1px)',
+          }}
           aria-label={disabled ? 'Generating' : 'Send message'}
         >
-          {disabled ? (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 animate-spin"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <title>Generating message</title>
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-          ) : (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <title>Send message</title>
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 5l0 14M12 5l-4 4M12 5l4 4"
-              />
-            </svg>
-          )}
+          {disabled && <div className="glimmer-overlay" />}
+          <div className="relative z-10">
+            <img
+              src="/fp-logo.svg"
+              alt="Fireproof"
+              className="block h-5 transition-all hover:brightness-110 active:brightness-125 dark:hidden"
+            />
+            <img
+              src="/fp-logo-white.svg"
+              alt="Fireproof"
+              className="hidden h-5 transition-all hover:brightness-110 active:brightness-125 dark:block"
+            />
+          </div>
         </button>
       </div>
     </div>
