@@ -63,11 +63,8 @@ function ChatInterface({
     isGenerating,
     currentStreamedText,
     inputRef,
-    messagesEndRef,
     autoResizeTextarea,
-    scrollToBottom,
     sendMessage,
-    completedMessage,
   } = chatState;
 
   // Query chat sessions ordered by timestamp (newest first)
@@ -247,6 +244,9 @@ function ChatInterface({
         setTimeout(() => {
           setIsExpanding(false);
         }, 300);
+
+        // Refresh the page and navigate to the root URL
+        // window.location.href = '/';
       },
       500 + messages.length * 50
     );
