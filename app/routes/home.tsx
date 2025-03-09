@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import ChatInterface from '../ChatInterface';
-import ResultPreview from '../ResultPreview';
+import ResultPreview from '../components/ResultPreview/ResultPreview';
 import { useChat } from '../hooks/useChat';
 import { useFireproof } from 'use-fireproof';
 
