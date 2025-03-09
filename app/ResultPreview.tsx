@@ -18,6 +18,7 @@ interface ResultPreviewProps {
   completedMessage?: string;
   currentMessage?: { content: string };
   currentStreamContent?: string;
+  onScreenshotCaptured?: (screenshotData: string) => void;
 }
 
 const indexHtml = `<!DOCTYPE html>
@@ -26,6 +27,7 @@ const indexHtml = `<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
       tailwind.config = {
         darkMode: 'class',
@@ -60,6 +62,19 @@ const indexHtml = `<!DOCTYPE html>
           }
         }
       }
+
+      function captureScreenshot() {
+        html2canvas(document.body).then(canvas => {
+          const dataURI = canvas.toDataURL();
+          window.parent.postMessage({ screenshot: dataURI }, '*');
+        });
+      }
+      
+      // Automatically capture screenshot when page is fully loaded
+      window.addEventListener('load', function() {
+        // Wait a short moment for any final rendering
+        setTimeout(captureScreenshot, 500);
+      });
     </script>
   </head>
   <body>
@@ -402,6 +417,7 @@ function ResultPreview({
   completedMessage,
   currentMessage,
   currentStreamContent,
+  onScreenshotCaptured,
 }: ResultPreviewProps) {
   const [activeView, setActiveView] = useState<'preview' | 'code'>('preview');
   const [displayCode, setDisplayCode] = useState(code || defaultCode);
@@ -443,6 +459,24 @@ function ResultPreview({
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
+
+  // Listen for screenshot messages from the iframe
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && event.data.screenshot) {
+        const screenshotData = event.data.screenshot;
+        console.log('Received screenshot from iframe, length:', screenshotData.length);
+
+        // Call the callback if provided
+        if (onScreenshotCaptured) {
+          onScreenshotCaptured(screenshotData);
+        }
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [onScreenshotCaptured]);
 
   // Update displayed code when code changes or streaming ends
   useEffect(() => {
