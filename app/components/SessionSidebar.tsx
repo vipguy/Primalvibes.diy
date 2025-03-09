@@ -1,8 +1,16 @@
 import { useEffect, useRef, memo, useMemo, useState } from 'react';
 import { useFireproof } from 'use-fireproof';
 
-function ImgFile({ file, alt, className }: { file: {file: () => Promise<File>, type: string}, alt: string, className: string }) {
-  const [imgDataUrl, setImgDataUrl] = useState("");
+function ImgFile({
+  file,
+  alt,
+  className,
+}: {
+  file: { file: () => Promise<File>; type: string };
+  alt: string;
+  className: string;
+}) {
+  const [imgDataUrl, setImgDataUrl] = useState('');
   useEffect(() => {
     if (file.type && /image/.test(file.type)) {
       file.file().then((file: File) => {
@@ -12,7 +20,9 @@ function ImgFile({ file, alt, className }: { file: {file: () => Promise<File>, t
       });
     }
   }, [file]);
-  return imgDataUrl ? <img className={`${className} max-w-full max-h-60 object-contain`} alt={alt} src={imgDataUrl} /> : null;
+  return imgDataUrl ? (
+    <img className={`${className} max-h-60 max-w-full object-contain`} alt={alt} src={imgDataUrl} />
+  ) : null;
 }
 
 // Add these type definitions at the top of the file
@@ -24,13 +34,13 @@ interface ScreenshotDocument extends DocBase {
   type: 'screenshot';
   session_id: string;
   _files?: {
-    screenshot: {file: () => Promise<File>, type: string};
+    screenshot: { file: () => Promise<File>; type: string };
   };
 }
 
 // Modify SessionDocument to include optional type
 interface SessionDocument extends DocBase {
-  type?: 'session';  // Make it optional since existing docs might not have it
+  type?: 'session'; // Make it optional since existing docs might not have it
   title?: string;
   timestamp: number;
   messages?: Array<{
@@ -69,27 +79,30 @@ function SessionSidebar({ isVisible, onToggle, onSelectSession }: SessionSidebar
   //   descending: true,
   // });
 
-  const { docs: sessionAndScreenshots } = useLiveQuery<SessionOrScreenshot>((doc) => 
-    (doc.type && doc.type === 'screenshot') ? doc.session_id : doc._id
+  const { docs: sessionAndScreenshots } = useLiveQuery<SessionOrScreenshot>((doc) =>
+    doc.type && doc.type === 'screenshot' ? doc.session_id : doc._id
   );
 
   // Group sessions and screenshots together
   const groupedSessions = useMemo(() => {
-    const groups = new Map<string, {session?: SessionDocument, screenshots: ScreenshotDocument[]}>();
+    const groups = new Map<
+      string,
+      { session?: SessionDocument; screenshots: ScreenshotDocument[] }
+    >();
 
-    sessionAndScreenshots.forEach(doc => {
+    sessionAndScreenshots.forEach((doc) => {
       if ('type' in doc && doc.type === 'screenshot') {
         // Handle screenshot
         const sessionId = doc.session_id;
         if (!groups.has(sessionId)) {
           // Initialize with empty ScreenshotDocument array
-          groups.set(sessionId, {session: undefined, screenshots: []});
+          groups.set(sessionId, { session: undefined, screenshots: [] });
         }
         groups.get(sessionId)!.screenshots.push(doc as ScreenshotDocument);
       } else {
         // Handle session
         if (!groups.has(doc._id)) {
-          groups.set(doc._id, {session: undefined, screenshots: []});
+          groups.set(doc._id, { session: undefined, screenshots: [] });
         }
         groups.get(doc._id)!.session = doc as SessionDocument;
       }
@@ -97,11 +110,10 @@ function SessionSidebar({ isVisible, onToggle, onSelectSession }: SessionSidebar
 
     // Convert map to array and sort by session timestamp
     return Array.from(groups.values())
-      .filter(group => group.session) // Only include groups with sessions
+      .filter((group) => group.session) // Only include groups with sessions
       .sort((a, b) => (b.session!.timestamp || 0) - (a.session!.timestamp || 0));
-  }, [sessionAndScreenshots]) as {session: SessionDocument, screenshots: ScreenshotDocument[]}[];
+  }, [sessionAndScreenshots]) as { session: SessionDocument; screenshots: ScreenshotDocument[] }[];
 
-  
   // Handle clicks outside the sidebar to close it
   useEffect(() => {
     // Only add listener if sidebar is visible
@@ -179,8 +191,8 @@ function SessionSidebar({ isVisible, onToggle, onSelectSession }: SessionSidebar
               </p>
             ) : (
               <ul className="space-y-2">
-                {groupedSessions.map(({session, screenshots}) => (
-                  <li 
+                {groupedSessions.map(({ session, screenshots }) => (
+                  <li
                     key={session._id}
                     onClick={() => handleSelectSession(session as SessionDocument)}
                     onKeyDown={(e) =>
@@ -198,12 +210,17 @@ function SessionSidebar({ isVisible, onToggle, onSelectSession }: SessionSidebar
                       {new Date((session as SessionDocument).timestamp).toLocaleDateString()} -
                       {new Date((session as SessionDocument).timestamp).toLocaleTimeString()}
                     </div>
-                    {screenshots.map(screenshot => (
-                      screenshot._files?.screenshot && (
-                        <ImgFile key={screenshot._id} file={screenshot._files?.screenshot} 
-                        alt={`Screenshot from ${session.title}`} className="max-w-full max-h-60 object-contain" />
-                      )
-                    ))}
+                    {screenshots.map(
+                      (screenshot) =>
+                        screenshot._files?.screenshot && (
+                          <ImgFile
+                            key={screenshot._id}
+                            file={screenshot._files?.screenshot}
+                            alt={`Screenshot from ${session.title}`}
+                            className="max-h-60 max-w-full object-contain"
+                          />
+                        )
+                    )}
                   </li>
                 ))}
               </ul>

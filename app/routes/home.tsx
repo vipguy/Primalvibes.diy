@@ -129,24 +129,29 @@ export default function Home() {
   }
 
   // Add screenshot handling in home.tsx
-  const handleScreenshotCaptured = useCallback(async (screenshotData: string) => {
-    if (sessionId) {
-      console.log(`Saving screenshot to session: ${sessionId}, screenshot length: ${screenshotData.length}`);
-      
-      const response = await fetch(screenshotData);
-      const blob = await response.blob();
-      const file = new File([blob], 'screenshot.png', { type: 'image/png' });
+  const handleScreenshotCaptured = useCallback(
+    async (screenshotData: string) => {
+      if (sessionId) {
+        console.log(
+          `Saving screenshot to session: ${sessionId}, screenshot length: ${screenshotData.length}`
+        );
 
-      const ok = await database.put({
-        type: 'screenshot',
-        session_id: sessionId,
-        _files: {
-          screenshot: file,
-        },
-      });
-      console.log('ok', ok);
-    }
-  }, [sessionId]);
+        const response = await fetch(screenshotData);
+        const blob = await response.blob();
+        const file = new File([blob], 'screenshot.png', { type: 'image/png' });
+
+        const ok = await database.put({
+          type: 'screenshot',
+          session_id: sessionId,
+          _files: {
+            screenshot: file,
+          },
+        });
+        console.log('ok', ok);
+      }
+    },
+    [sessionId]
+  );
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>

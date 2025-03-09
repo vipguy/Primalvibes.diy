@@ -466,7 +466,7 @@ function ResultPreview({
       if (event.data && event.data.screenshot) {
         const screenshotData = event.data.screenshot;
         console.log('Received screenshot from iframe, length:', screenshotData.length);
-        
+
         // Call the callback if provided
         if (onScreenshotCaptured) {
           onScreenshotCaptured(screenshotData);
