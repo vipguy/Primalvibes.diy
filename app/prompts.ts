@@ -1,9 +1,9 @@
-import data from './llms.json';
+const llmsModules = import.meta.glob('./llms/*.json', { eager: true });
+
+const llmsList = Object.values(llmsModules).map((module) => module.default);
 
 // Base system prompt for the AI
 export async function makeBaseSystemPrompt(model: string) {
-  const llmsList = data;
-
   let concatenatedLlmsText = '';
 
   for (const llm of llmsList) {
