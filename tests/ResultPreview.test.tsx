@@ -1,6 +1,6 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import ResultPreview from '../app/ResultPreview';
+import ResultPreview from '../app/components/ResultPreview/ResultPreview';
 
 // Mock clipboard API
 Object.assign(navigator, {
