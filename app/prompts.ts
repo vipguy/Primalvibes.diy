@@ -1,6 +1,21 @@
+import fs from 'fs';
+import path from 'path';
+
 // Base system prompt for the AI
 export async function makeBaseSystemPrompt(model: string) {
-  const llmsText = await fetch('https://use-fireproof.com/llms-full.txt').then((res) => res.text());
+  const llmsJsonPath = path.resolve(__dirname, 'llms.json');
+  const llmsList = JSON.parse(fs.readFileSync(llmsJsonPath, 'utf-8'));
+
+  let concatenatedLlmsText = '';
+
+  for (const llm of llmsList) {
+    const llmsText = await fetch(llm.llmsTextUrl).then((res) => res.text());
+    concatenatedLlmsText += `
+<${llm.codeLabel}-docs>
+${llmsText}
+</${llm.codeLabel}-docs>
+`;
+  }
 
   return `
 You are an AI assistant tasked with creating React components. You should create components that:
@@ -18,9 +33,7 @@ You are an AI assistant tasked with creating React components. You should create
 - In the UI, include a vivid description of the app's purpose and detailed instructions how to use it, in italic text.
 - Include a "Demo data" button that adds a handful of documents to the database to illustrate usage and schema
 
-<useFireproof-docs>
-${llmsText}
-</useFireproof-docs>
+${concatenatedLlmsText}
 
 IMPORTANT: You are working in one JavaScript file, use tailwind classes for styling.
 
