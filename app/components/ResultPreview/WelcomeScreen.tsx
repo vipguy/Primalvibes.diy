@@ -6,34 +6,7 @@ const WelcomeScreen = () => {
       <img
         src="/lightup.png"
         alt="Lightup"
-        className="pulsing h-auto w-full max-w-xs"
-        style={{
-          width: '100%',
-          height: 'auto',
-          transform: 'rotate(-5deg)',
-          animation: 'pulse 8s infinite',
-        }}
-      />
-
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-          @keyframes pulse {
-            0% {
-              transform: rotate(-5deg) scale(1);
-            }
-            50% {
-              transform: rotate(0deg) scale(1.05);
-            }
-            100% {
-              transform: rotate(-5deg) scale(1);
-            }
-          }
-          img.pulsing {
-            animation: pulse 8s infinite;
-          }
-        `,
-        }}
+        className="logo-pulse h-auto w-full max-w-xs"
       />
     </div>
   );

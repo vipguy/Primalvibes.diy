@@ -259,3 +259,40 @@ a,
     );
   }
 }
+
+.pulsing {
+  width: 100%;
+  height: auto;
+  transform: rotate(-5deg) scale(4);
+  animation: pulse 8s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: rotate(-5deg) scale(1);
+  }
+  50% {
+    transform: rotate(0deg) scale(1.05);
+  }
+  100% {
+    transform: rotate(-5deg) scale(1);
+  }
+}
+.logo-pulse {
+  transform: rotate(-5deg) scale(4);
+  animation: logo-rotate 30s ease-in-out infinite;
+}
+
+@keyframes logo-rotate {
+
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  66% {
+    transform: rotate(45deg) scale(2.5);
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+}
+

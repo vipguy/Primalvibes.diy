@@ -131,13 +131,10 @@ function ChatInterface({
   useEffect(() => {
     async function loadSessionData() {
       if (sessionId) {
-        console.log('ChatInterface: Loading session data for ID:', sessionId);
         try {
           const sessionData = (await databaseRef.current.get(sessionId)) as SessionDocument;
-          console.log('ChatInterface: Successfully loaded session data for ID:', sessionId);
           // Normalize session data to guarantee messages array exists
           const messages = Array.isArray(sessionData.messages) ? sessionData.messages : [];
-          console.log('ChatInterface: Loaded messages count:', messages.length);
           // Use the ref to access the latest setMessages function
           setMessagesRef.current(messages);
         } catch (error) {
@@ -166,7 +163,6 @@ function ChatInterface({
       const streamingJustCompleted = wasGeneratingRef.current && !isGenerating;
 
       if (messages.length > 0 && streamingJustCompleted) {
-        console.log('Saving completed session to Fireproof - streaming completed');
 
         // Extract title from first user message
         const firstUserMessage = messages.find((msg) => msg.type === 'user');
@@ -210,17 +206,11 @@ function ChatInterface({
     async (session: SessionDocument) => {
       // Ensure session has an _id - this is guaranteed by the component API
       const sessionId = session._id;
-      console.log('ChatInterface.handleLoadSession: Loading session ID:', sessionId);
 
       try {
         const sessionData = (await databaseRef.current.get(sessionId)) as SessionDocument;
-        console.log(
-          'ChatInterface.handleLoadSession: Successfully loaded session data for ID:',
-          sessionId
-        );
         // Normalize session data to guarantee messages array exists
         const messages = Array.isArray(sessionData.messages) ? sessionData.messages : [];
-        console.log('ChatInterface.handleLoadSession: Messages count:', messages.length);
         // Use the ref to access the latest setMessages function
         setMessagesRef.current(messages);
 

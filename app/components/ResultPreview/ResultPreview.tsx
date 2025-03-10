@@ -176,8 +176,6 @@ function ResultPreview({
       if (code) {
         setShowWelcome(false);
       }
-
-      console.log('ResultPreview: Updated files with new code, length:', (code || '').length);
     }
   }, [code, isStreaming, sessionId]);
 
@@ -240,17 +238,8 @@ function ResultPreview({
     // Using Date.now() causes unnecessary remounts on every render
     // Instead, use the actual content that should trigger a remount
     const key = `${sessionId || 'default'}-${isStreaming ? 'streaming' : 'static'}-${code.length}`;
-    console.log('ResultPreview: Generated new sandpackKey:', key, 'for sessionId:', sessionId);
     return key;
   }, [sessionId, isStreaming, code]);
-
-  // Log when sessionId changes
-  useEffect(() => {
-    if (sessionId) {
-      console.log('ResultPreview: sessionId changed to:', sessionId);
-      console.log('ResultPreview: current code length:', (code || '').length);
-    }
-  }, [sessionId, code]);
 
   return (
     <div className="h-full" style={{ overflow: 'hidden' }}>
