@@ -40,7 +40,6 @@ export function useChatSessions(
           ...(sessionId ? { _id: sessionId } : {}),
         };
 
-        console.log('Saving session:', sessionData);
         const result = await database.put(sessionData);
 
         // If this was a new session, notify via callback

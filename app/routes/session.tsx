@@ -16,7 +16,6 @@ export function meta() {
 
 export default function Session() {
   const { sessionId, title } = useParams();
-  console.log('Session component rendering with sessionId:', sessionId);
 
   const [state, setState] = useState({
     generatedCode: '',
@@ -26,27 +25,29 @@ export default function Session() {
 
   // Maintain a stable ref to the database to prevent re-renders
   const databaseRef = useRef(database);
-  
+
   // Update database ref when it changes
   useEffect(() => {
     databaseRef.current = database;
   }, [database]);
 
   // Handle code generation from chat interface with stable callback reference
-  const handleCodeGenerated = useCallback((code: string, dependencies: Record<string, string> = {}) => {
-    console.log('Session.handleCodeGenerated called with code length:', code.length);
-    setState({
-      generatedCode: code,
-      dependencies,
-    });
-  }, []);
+  const handleCodeGenerated = useCallback(
+    (code: string, dependencies: Record<string, string> = {}) => {
+      setState({
+        generatedCode: code,
+        dependencies,
+      });
+    },
+    []
+  );
 
   // Set up chat state with the code generation handler
   const chatState = useChat(handleCodeGenerated);
-  
+
   // Create a ref to chatState to avoid dependency cycles
   const chatStateRef = useRef(chatState);
-  
+
   // Update the ref when chatState changes
   useEffect(() => {
     chatStateRef.current = chatState;
@@ -57,11 +58,9 @@ export default function Session() {
     // Load session data and extract code for the ResultPreview
     const loadSessionData = async () => {
       if (sessionId) {
-        console.log('Session route: Loading session data for ID:', sessionId);
         try {
           // Load the session document
           const sessionData = (await databaseRef.current.get(sessionId)) as SessionDocument;
-          console.log('Session route: Successfully loaded data for session:', sessionId);
 
           // Normalize session data to guarantee messages array exists
           const messages = Array.isArray(sessionData.messages) ? sessionData.messages : [];
@@ -77,12 +76,6 @@ export default function Session() {
           // If we found an AI message with code, update the code view
           if (lastAiMessageWithCode?.code) {
             const dependencies = lastAiMessageWithCode.dependencies || {};
-            console.log(
-              'Session route: Found code in session:',
-              sessionId.substring(0, 8),
-              'code length:',
-              lastAiMessageWithCode.code.length
-            );
 
             // Update state for ResultPreview
             setState({
@@ -93,9 +86,8 @@ export default function Session() {
             // Use the ref to update chat state properties
             chatStateRef.current.completedCode = lastAiMessageWithCode.code;
             chatStateRef.current.streamingCode = lastAiMessageWithCode.code;
-            chatStateRef.current.completedMessage = lastAiMessageWithCode.text || "Here's your app:";
-          } else {
-            console.log('Session route: No code found in session:', sessionId.substring(0, 8));
+            chatStateRef.current.completedMessage =
+              lastAiMessageWithCode.text || "Here's your app:";
           }
         } catch (error) {
           console.error('Error loading session:', error);

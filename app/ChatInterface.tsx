@@ -64,7 +64,7 @@ function ChatInterface({
 
   // Maintain a stable ref to the database to prevent re-renders
   const databaseRef = useRef(database);
-  
+
   // Update database ref when it changes
   useEffect(() => {
     databaseRef.current = database;
@@ -100,7 +100,7 @@ function ChatInterface({
 
   // Track if we are manually setting input to prevent feedback loops
   const isSettingInput = useRef(false);
-  
+
   // Memoize handler functions to prevent re-renders
   const handleSelectSuggestion = useCallback(
     (suggestion: string) => {
@@ -163,7 +163,6 @@ function ChatInterface({
       const streamingJustCompleted = wasGeneratingRef.current && !isGenerating;
 
       if (messages.length > 0 && streamingJustCompleted) {
-
         // Extract title from first user message
         const firstUserMessage = messages.find((msg) => msg.type === 'user');
         const title = firstUserMessage?.text || 'Untitled Chat';
@@ -222,10 +221,6 @@ function ChatInterface({
         // If we found an AI message with code, update the code view
         if (lastAiMessageWithCode?.code) {
           const dependencies = lastAiMessageWithCode.dependencies || {};
-          console.log(
-            'ChatInterface.handleLoadSession: Found code in session, length:',
-            lastAiMessageWithCode.code.length
-          );
 
           // 1. Update local chatState
           chatState.streamingCode = lastAiMessageWithCode.code;
@@ -239,19 +234,12 @@ function ChatInterface({
 
           // 2. Call the onCodeGenerated callback to update parent state
           onCodeGenerated?.(lastAiMessageWithCode.code, dependencies);
-          console.log(
-            'ChatInterface.handleLoadSession: Called onCodeGenerated to update parent component'
-          );
         } else {
-          console.log('ChatInterface.handleLoadSession: No code found in session:', sessionId);
+          // No code found in session
         }
 
         // Notify parent component of session change
         onSessionCreated?.(sessionId);
-        console.log(
-          'ChatInterface.handleLoadSession: Notified parent of session change:',
-          sessionId
-        );
       } catch (error) {
         console.error('ChatInterface.handleLoadSession: Error loading session:', error);
       }
@@ -279,7 +267,6 @@ function ChatInterface({
         // Navigate to the root path
         // window.history.pushState({ sessionId: null }, '', '/');
         window.location.href = '/';
-
 
         // // Reset animation states
         // setIsShrinking(false);

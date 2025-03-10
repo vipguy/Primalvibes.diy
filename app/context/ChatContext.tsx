@@ -55,7 +55,6 @@ export function ChatProvider({
   // Wrap setInput with debugging
   const setInputWithDebug = useCallback(
     (newInput: string) => {
-      console.log('ChatContext.setInput', { oldValue: input, newValue: newInput });
       setInput(newInput);
     },
     [input]

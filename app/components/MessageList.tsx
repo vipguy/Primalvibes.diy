@@ -35,8 +35,9 @@ const Message = memo(
   }) => {
     return (
       <div
-        className={`flex flex-col transition-all duration-500 ${isShrinking ? 'origin-top-left scale-0 opacity-0' : 'scale-100 opacity-100'
-          } ${isExpanding ? 'animate-bounce-in' : ''}`}
+        className={`flex flex-col transition-all duration-500 ${
+          isShrinking ? 'origin-top-left scale-0 opacity-0' : 'scale-100 opacity-100'
+        } ${isExpanding ? 'animate-bounce-in' : ''}`}
         style={{
           transitionDelay: isShrinking ? `${index * 50}ms` : '0ms',
         }}
@@ -50,10 +51,11 @@ const Message = memo(
             </div>
           )}
           <div
-            className={`message rounded-2xl p-3 ${message.type === 'user'
+            className={`message rounded-2xl p-3 ${
+              message.type === 'user'
                 ? 'bg-accent-02-light dark:bg-accent-02-dark rounded-tr-sm text-white'
                 : 'bg-light-decorative-00 dark:bg-dark-decorative-00 text-light-primary dark:text-dark-primary rounded-tl-sm'
-              } max-w-[85%] shadow-sm`}
+            } max-w-[85%] shadow-sm`}
           >
             {renderMarkdownContent(message.text)}
           </div>
@@ -131,15 +133,35 @@ function MessageList({
       style={{ maxHeight: 'calc(100vh - 140px)' }}
     >
       {messages.length === 0 && !isGenerating ? (
-        <div className="text-center text-accent-02 italic max-w-2xl mx-auto space-y-4 px-12 pt-8">
+        <div className="text-accent-02 mx-auto max-w-2xl space-y-4 px-12 pt-8 text-center italic">
           <p>
-            Quickly create React apps in your browser, no setup required.            Apps are sharable, or eject them to GitHub for easy deploys. <a href="https://github.com/fireproof-storage/ai-app-builder" target="_blank" rel="noopener noreferrer" className="text-accent-00    hover:underline">Fork and customize this app builder</a>, no backend required.
+            Quickly create React apps in your browser, no setup required. Apps are sharable, or
+            eject them to GitHub for easy deploys.{' '}
+            <a
+              href="https://github.com/fireproof-storage/ai-app-builder"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-accent-00 hover:underline"
+            >
+              Fork and customize this app builder
+            </a>
+            , no backend required.
           </p>
 
-          <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold py-2">About Fireproof</h3>
+          <div className="mt-6 border-t border-gray-200 pt-4 dark:border-gray-700">
+            <h3 className="py-2 text-lg font-semibold">About Fireproof</h3>
             <p className="text-sm">
-              Fireproof enables secure saving and sharing of your data, providing encrypted live synchronization and offline-first capabilities. Learn more about <a href="https://use-fireproof.com/" target="_blank" rel="noopener noreferrer" className="text-accent-00 hover:underline">Fireproof</a>.
+              Fireproof enables secure saving and sharing of your data, providing encrypted live
+              synchronization and offline-first capabilities. Learn more about{' '}
+              <a
+                href="https://use-fireproof.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent-00 hover:underline"
+              >
+                Fireproof
+              </a>
+              .
             </p>
           </div>
         </div>

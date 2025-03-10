@@ -284,7 +284,6 @@ a,
 }
 
 @keyframes logo-rotate {
-
   0% {
     transform: rotate(0deg) scale(1);
   }
@@ -295,4 +294,3 @@ a,
     transform: rotate(0deg) scale(1);
   }
 }
-

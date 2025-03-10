@@ -35,9 +35,7 @@ export function useChat(
   // Add debug logging whenever messages change, but with a more descriptive context
   useEffect(() => {
     // Only log when there's actually a meaningful change, not on initial render
-    if (messages.length > 0) {
-      console.log('useChat: Messages updated:', messages.length, messages);
-    }
+    // No logging needed
   }, [messages]);
 
   // Initialize system prompt
@@ -61,29 +59,30 @@ export function useChat(
   }, []);
 
   // Create a wrapped setMessages function that includes logging
-  const setMessagesWithLogging = useCallback((newMessages: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => {
-    // Only log when there's an actual change
-    if (typeof newMessages === 'function') {
-      console.log('useChat: setMessages called with: function updater');
-      setMessages((prev) => {
-        const result = (newMessages as Function)(prev);
-        // Only update if the result is actually different
-        if (JSON.stringify(result) !== JSON.stringify(prev)) {
-          return result;
-        }
-        return prev;
-      });
-    } else {
-      // Only update if the new messages are different
-      setMessages((prev) => {
-        if (JSON.stringify(newMessages) !== JSON.stringify(prev)) {
-          console.log('useChat: setMessages called with:', `array of ${Array.isArray(newMessages) ? newMessages.length : 'unknown'} messages`);
-          return newMessages;
-        }
-        return prev;
-      });
-    }
-  }, []);
+  const setMessagesWithLogging = useCallback(
+    (newMessages: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => {
+      // Only log when there's an actual change
+      if (typeof newMessages === 'function') {
+        setMessages((prev) => {
+          const result = (newMessages as Function)(prev);
+          // Only update if the result is actually different
+          if (JSON.stringify(result) !== JSON.stringify(prev)) {
+            return result;
+          }
+          return prev;
+        });
+      } else {
+        // Only update if the new messages are different
+        setMessages((prev) => {
+          if (JSON.stringify(newMessages) !== JSON.stringify(prev)) {
+            return newMessages;
+          }
+          return prev;
+        });
+      }
+    },
+    [setMessages]
+  );
 
   // Function to build conversation history for the prompt
   function buildMessageHistory() {
@@ -106,18 +105,16 @@ export function useChat(
   const initParser = useCallback(() => {
     // Reset the parser state
     parserState.current.reset();
-    
+
     // Add event listeners
     parserState.current.on('text', (textChunk: string, fullText: string) => {
-      console.log('Text event received:', textChunk.substring(0, 50) + '...');
       setCurrentStreamedText(fullText); // Update with the full displayText from parser
     });
-    
+
     parserState.current.on('code', (code: string, language: string) => {
-      console.log('Code received, language:', language, 'length:', code.length);
       setCompletedCode(code);
     });
-    
+
     parserState.current.on('codeUpdate', (code: string) => {
       // Only update streamingCode for significant changes to reduce re-renders
       if (Math.abs(code.length - streamingCode.length) > 5) {
@@ -126,7 +123,7 @@ export function useChat(
     });
 
     parserState.current.on('dependencies', (dependencies: Record<string, string>) => {
-      console.log('Dependencies detected:', dependencies);
+      // Dependencies detected
     });
 
     return parserState.current;
@@ -241,9 +238,6 @@ export function useChat(
         // End the parser stream
         parser.end();
 
-        console.log('rawStreamBuffer.current', rawStreamBuffer.current);
-        console.log('parser.displayText', parser.displayText);
-
         // Clean up the message text - use parser's displayText instead of currentStreamedText
         let cleanedMessage = parser.displayText || currentStreamedText;
 
@@ -252,12 +246,10 @@ export function useChat(
 
         // Additional cleanup for any JSON artifacts
         cleanedMessage = cleanedMessage
-          .replace(/^\s*{"dependencies":.*?}}\s*/i, '')  // Remove JSON blocks
-          .replace(/^\s*:""[}\s]*/i, '')  // Remove artifacts
-          .replace(/^\s*""\s*:\s*""[}\s]*/i, '')  // Remove artifacts
+          .replace(/^\s*{"dependencies":.*?}}\s*/i, '') // Remove JSON blocks
+          .replace(/^\s*:""[}\s]*/i, '') // Remove artifacts
+          .replace(/^\s*""\s*:\s*""[}\s]*/i, '') // Remove artifacts
           .trim();
-
-        console.log('cleanedMessage', cleanedMessage);
 
         // If cleanedMessage is still empty but we have code, add a default message
         if (!cleanedMessage && parser.codeBlockContent) {
@@ -314,7 +306,6 @@ export function useChat(
             if (response.ok) {
               const data = await response.json();
               const title = data.choices[0]?.message?.content?.trim() || 'New Chat';
-              console.log('Generated title:', title, cleanedMessage);
               onGeneratedTitle(title);
             } else {
               onGeneratedTitle('New Chat');
@@ -324,16 +315,6 @@ export function useChat(
             onGeneratedTitle('New Chat');
           }
         }
-
-        // Add this before setting the final message
-        console.log('Debug values:', {
-          currentStreamedText,
-          cleanedMessage,
-          parser,
-        });
-
-        // Add this debug log to confirm parser state
-        console.log('Parser state at stream end:', parser);
 
         // Use parser's displayText property instead of the non-existent fullResponseBuffer
         const finalMessage =
@@ -357,7 +338,7 @@ export function useChat(
               streaming: false,
               completed: true,
             };
-            
+
             // Check if the update would actually change anything
             if (
               currentLastMessage.text !== newLastMessage.text ||

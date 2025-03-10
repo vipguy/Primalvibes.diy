@@ -52,7 +52,7 @@ export default function Home() {
   const [isCreatingSession, setIsCreatingSession] = useState(false);
   const { database } = useFireproof('fireproof-chat-history');
   const navigate = useNavigate();
-  
+
   // Keep tracking streaming props with refs to avoid re-renders
   const streamingPropsRef = useRef({
     streamingCode: '',
@@ -63,12 +63,12 @@ export default function Home() {
 
   // Maintain a stable ref to the database to prevent re-renders
   const databaseRef = useRef(database);
-  
+
   // Update database ref when it changes
   useEffect(() => {
     databaseRef.current = database;
   }, [database]);
-  
+
   // Hoist the useChat hook to this component with stable callback reference
   const handleCodeGenerated = useCallback((code: string, dependencies?: Record<string, string>) => {
     setState({
@@ -76,47 +76,48 @@ export default function Home() {
       dependencies: dependencies || {},
     });
   }, []);
-  
+
   // Handle the generated title callback
-  const handleGeneratedTitle = useCallback(async (generatedTitle: string) => {
-    // Handle the generated title
-    console.log('Title generated:', sessionId, generatedTitle, 'isCreatingSession:', isCreatingSession);
+  const handleGeneratedTitle = useCallback(
+    async (generatedTitle: string) => {
+      // Handle the generated title
 
-    // Safety check - don't proceed if title is undefined
-    if (!generatedTitle) {
-      console.warn('Skipping title update - received undefined title');
-      return;
-    }
-
-    if (sessionId) {
-      try {
-        // Get the current session document
-        const sessionDoc = await databaseRef.current.get(sessionId);
-        
-        // Validate sessionDoc before updating
-        if (!sessionDoc) {
-          console.error('Cannot update title: session document is missing');
-          return;
-        }
-
-        // Create a safe update object without undefined values
-        const updatedDoc = {
-          ...sessionDoc,
-          title: generatedTitle || 'Untitled Chat', // Ensure title is never undefined
-        };
-
-        // Save the updated document
-        await databaseRef.current.put(updatedDoc);
-        console.log('Updated session title to:', generatedTitle);
-      } catch (error) {
-        console.error('Error updating session title:', error);
+      // Safety check - don't proceed if title is undefined
+      if (!generatedTitle) {
+        console.warn('Skipping title update - received undefined title');
+        return;
       }
-    } else {
-      // If no sessionId yet, store the title for later use
-      setPendingTitle(generatedTitle);
-    }
-  }, [sessionId, isCreatingSession]);
-  
+
+      if (sessionId) {
+        try {
+          // Get the current session document
+          const sessionDoc = await databaseRef.current.get(sessionId);
+
+          // Validate sessionDoc before updating
+          if (!sessionDoc) {
+            console.error('Cannot update title: session document is missing');
+            return;
+          }
+
+          // Create a safe update object without undefined values
+          const updatedDoc = {
+            ...sessionDoc,
+            title: generatedTitle || 'Untitled Chat', // Ensure title is never undefined
+          };
+
+          // Save the updated document
+          await databaseRef.current.put(updatedDoc);
+        } catch (error) {
+          console.error('Error updating session title:', error);
+        }
+      } else {
+        // If no sessionId yet, store the title for later use
+        setPendingTitle(generatedTitle);
+      }
+    },
+    [sessionId, isCreatingSession]
+  );
+
   const chatState = useChat(handleCodeGenerated, handleGeneratedTitle);
 
   // Only update refs when values actually change with deep equality check
@@ -127,36 +128,47 @@ export default function Home() {
       currentStreamedText: chatState.currentStreamedText,
       messages: chatState.messages,
     };
-    
+
     // Deep comparison to avoid unnecessary updates
     const hasStreamingChanged = chatState.isStreaming !== streamingPropsRef.current.isStreaming;
-    const hasStreamingCodeChanged = chatState.streamingCode !== streamingPropsRef.current.streamingCode;
-    const hasCurrentStreamedTextChanged = chatState.currentStreamedText !== streamingPropsRef.current.currentStreamedText;
-    const hasMessagesChanged = 
+    const hasStreamingCodeChanged =
+      chatState.streamingCode !== streamingPropsRef.current.streamingCode;
+    const hasCurrentStreamedTextChanged =
+      chatState.currentStreamedText !== streamingPropsRef.current.currentStreamedText;
+    const hasMessagesChanged =
       chatState.messages.length !== streamingPropsRef.current.messages.length ||
       JSON.stringify(chatState.messages) !== JSON.stringify(streamingPropsRef.current.messages);
 
     // Only update if something changed
-    if (hasStreamingChanged || hasStreamingCodeChanged || hasCurrentStreamedTextChanged || hasMessagesChanged) {
+    if (
+      hasStreamingChanged ||
+      hasStreamingCodeChanged ||
+      hasCurrentStreamedTextChanged ||
+      hasMessagesChanged
+    ) {
       streamingPropsRef.current = currentProps;
     }
-  }, [chatState.streamingCode, chatState.isStreaming, chatState.currentStreamedText, chatState.messages]);
+  }, [
+    chatState.streamingCode,
+    chatState.isStreaming,
+    chatState.currentStreamedText,
+    chatState.messages,
+  ]);
 
   // Apply pending title when sessionId becomes available
   useEffect(() => {
     if (!sessionId || !pendingTitle) return;
-    
+
     // Skip update if we're in the process of creating a session
     if (isCreatingSession) {
-      console.log('Session creation in progress, title will be set during creation');
       return;
     }
-    
+
     const updateTitleWhenReady = async () => {
       try {
         // Get the current session document
         const sessionDoc = await databaseRef.current.get(sessionId);
-        
+
         // Create a safe update object without undefined values
         const updatedDoc = {
           ...sessionDoc,
@@ -165,8 +177,7 @@ export default function Home() {
 
         // Save the updated document
         await databaseRef.current.put(updatedDoc);
-        console.log('Successfully updated session title to:', pendingTitle);
-        
+
         // Clear the pending title after successful update
         setPendingTitle(null);
       } catch (error) {
@@ -257,22 +268,17 @@ export default function Home() {
   const handleScreenshotCaptured = useCallback(
     async (screenshotData: string) => {
       if (sessionId) {
-        console.log(
-          `Saving screenshot to session: ${sessionId}, screenshot length: ${screenshotData.length}`
-        );
-
         const response = await fetch(screenshotData);
         const blob = await response.blob();
         const file = new File([blob], 'screenshot.png', { type: 'image/png' });
 
-        const ok = await databaseRef.current.put({
+        await databaseRef.current.put({
           type: 'screenshot',
           session_id: sessionId,
           _files: {
             screenshot: file,
           },
         });
-        console.log('ok', ok);
       }
     },
     [sessionId]
@@ -302,13 +308,16 @@ export default function Home() {
                 title: input.length > 50 ? `${input.substring(0, 50)}...` : input,
               };
 
-              databaseRef.current.put(newSession).then((doc: { id: string }) => {
-                handleSessionCreated(doc.id);
-                setIsCreatingSession(false);
-              }).catch((err: Error) => {
-                console.error('Error creating session:', err);
-                setIsCreatingSession(false);
-              });
+              databaseRef.current
+                .put(newSession)
+                .then((doc: { id: string }) => {
+                  handleSessionCreated(doc.id);
+                  setIsCreatingSession(false);
+                })
+                .catch((err: Error) => {
+                  console.error('Error creating session:', err);
+                  setIsCreatingSession(false);
+                });
             }
           }
         }}
@@ -349,7 +358,11 @@ export default function Home() {
         currentStreamContent={streamingPropsRef.current.currentStreamedText}
         currentMessage={
           streamingPropsRef.current.messages.length > 0
-            ? { content: streamingPropsRef.current.messages[streamingPropsRef.current.messages.length - 1].text }
+            ? {
+                content:
+                  streamingPropsRef.current.messages[streamingPropsRef.current.messages.length - 1]
+                    .text,
+              }
             : undefined
         }
         onScreenshotCaptured={handleScreenshotCaptured}
