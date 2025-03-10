@@ -30,7 +30,7 @@ function ChatInput({ value, onChange, onSend, onKeyDown, disabled, inputRef }: C
           onChange={onChange}
           onKeyDown={onKeyDown}
           className="border-light-decorative-00 dark:border-dark-decorative-00 text-light-primary dark:text-dark-primary bg-light-background-00 dark:bg-dark-background-00 focus:ring-accent-01-light dark:focus:ring-accent-01-dark max-h-[200px] min-h-[90px] w-full resize-y rounded-xl border p-2.5 text-sm focus:border-transparent focus:ring-2 focus:outline-none"
-          placeholder="Vibe coding? Just Fireproof it."
+          placeholder="Vibe coding? Use Fireproof."
           disabled={disabled}
           rows={2}
         />
