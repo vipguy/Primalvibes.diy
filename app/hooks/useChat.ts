@@ -7,7 +7,8 @@ const CHOSEN_MODEL = 'anthropic/claude-3.7-sonnet';
 // const CHOSEN_MODEL = 'qwen/qwq-32b:free';
 
 export function useChat(
-  onCodeGenerated: (code: string, dependencies?: Record<string, string>) => void
+  onCodeGenerated: (code: string, dependencies?: Record<string, string>) => void,
+  onGeneratedTitle?: (title: string) => void
 ) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState<string>('');
@@ -23,6 +24,13 @@ export function useChat(
   const parserState = useRef<RegexParser>(new RegexParser());
   // Add a ref to store the raw stream data for debugging
   const rawStreamBuffer = useRef<string>('');
+
+  // Initialize parser when the component mounts
+  useEffect(() => {
+    if (!parserState.current) {
+      parserState.current = new RegexParser();
+    }
+  }, []);
 
   // Add debug logging whenever messages change, but with a more descriptive context
   useEffect(() => {
@@ -94,68 +102,27 @@ export function useChat(
     }));
   }
 
-  // Initialize the parser
+  // Initialize parser with event listeners
   const initParser = useCallback(() => {
-    // Reset the existing parser
-    if (parserState.current) {
-      parserState.current.removeAllListeners();
-      parserState.current.reset();
-    } else {
-      parserState.current = new RegexParser();
-    }
-
-    // Listen for code block start
-    parserState.current.on('codeBlockStart', () => {
-      // Debug log to see the raw stream content when code block starts
-      console.log('Raw stream at code block start:', parserState.current.displayText);
-      // Log the completely unmodified raw stream data
-      setTimeout(() => {
-        console.log('Unmodified raw stream buffer:', rawStreamBuffer.current);
-      }, 200);
-
-      setCurrentStreamedText((prevText) => {
-        // Add the "Writing code..." message with newlines before and after
-        const updatedText = prevText + '\n\n> Writing code...\n\n';
-        return updatedText;
-      });
-    });
-
-    // Set up event listeners
+    // Reset the parser state
+    parserState.current.reset();
+    
+    // Add event listeners
     parserState.current.on('text', (textChunk: string, fullText: string) => {
-      // Clean up any JSON artifacts at the beginning
-      let cleanedText = fullText;
-      if (cleanedText.startsWith('{"dependencies":')) {
-        cleanedText = cleanedText.replace(/^{"dependencies":.*?}}/, '');
-      }
-      cleanedText = cleanedText.replace(/^\s*:""[}\s]*/, '');
-      cleanedText = cleanedText.replace(/^\s*""\s*:\s*""[}\s]*/, '');
-      cleanedText = cleanedText.trimStart();
-
-      // Check if we're in a code block and preserve the "Writing code..." message
-      if (parserState.current.inCodeBlock) {
-        // Only update if the text doesn't already contain our message
-        if (!currentStreamedText.includes('\n\n> Writing code...\n\n')) {
-          setCurrentStreamedText((prevText) => {
-            if (!prevText.includes('\n\n> Writing code...\n\n')) {
-              return prevText + '\n\n> Writing code...\n\n';
-            }
-            return prevText;
-          });
-        }
-      } else {
-        setCurrentStreamedText(cleanedText);
-      }
+      console.log('Text event received:', textChunk.substring(0, 50) + '...');
+      setCurrentStreamedText(fullText); // Update with the full displayText from parser
     });
-
-    // Listen for both complete code blocks and incremental updates
-    parserState.current.on('code', (code: string, languageId: string) => {
-      setStreamingCode(code);
+    
+    parserState.current.on('code', (code: string, language: string) => {
+      console.log('Code received, language:', language, 'length:', code.length);
       setCompletedCode(code);
     });
-
-    // Add a listener for incremental code updates
+    
     parserState.current.on('codeUpdate', (code: string) => {
-      setStreamingCode(code);
+      // Only update streamingCode for significant changes to reduce re-renders
+      if (Math.abs(code.length - streamingCode.length) > 5) {
+        setStreamingCode(code);
+      }
     });
 
     parserState.current.on('dependencies', (dependencies: Record<string, string>) => {
@@ -163,7 +130,7 @@ export function useChat(
     });
 
     return parserState.current;
-  }, []);
+  }, [streamingCode]);
 
   async function sendMessage() {
     if (input.trim()) {
@@ -274,25 +241,89 @@ export function useChat(
         // End the parser stream
         parser.end();
 
-        // Clean up the message text - remove any leading noise
-        let cleanedMessage = currentStreamedText;
+        console.log('rawStreamBuffer.current', rawStreamBuffer.current);
+        console.log('parser.displayText', parser.displayText);
+
+        // Clean up the message text - use parser's displayText instead of currentStreamedText
+        let cleanedMessage = parser.displayText || currentStreamedText;
 
         // Clean up any extra whitespace at the beginning
         cleanedMessage = cleanedMessage.trimStart();
+
+        // Additional cleanup for any JSON artifacts
+        cleanedMessage = cleanedMessage
+          .replace(/^\s*{"dependencies":.*?}}\s*/i, '')  // Remove JSON blocks
+          .replace(/^\s*:""[}\s]*/i, '')  // Remove artifacts
+          .replace(/^\s*""\s*:\s*""[}\s]*/i, '')  // Remove artifacts
+          .trim();
+
+        console.log('cleanedMessage', cleanedMessage);
+
+        // If cleanedMessage is still empty but we have code, add a default message
+        if (!cleanedMessage && parser.codeBlockContent) {
+          cleanedMessage = "Here's your code:";
+        }
 
         // Add AI response with code and dependencies
         setMessages((prev) => [
           ...prev,
           {
-            text: cleanedMessage || "Here's your generated app:",
+            text: cleanedMessage,
             type: 'ai',
-            code: completedCode || parser.codeBlockContent,
+            code: parser.codeBlockContent,
             dependencies: parser.dependencies,
           },
         ]);
 
-        // Update the editor with code and dependencies
-        onCodeGenerated(completedCode || parser.codeBlockContent, parser.dependencies);
+        // Store the completed message
+        setCompletedMessage(cleanedMessage);
+
+        // Execute callback with generated code if available
+        if (parser.codeBlockContent) {
+          onCodeGenerated(parser.codeBlockContent, parser.dependencies);
+        }
+
+        // Generate a title from the final response
+        if (onGeneratedTitle) {
+          try {
+            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
+                'Content-Type': 'application/json',
+                'HTTP-Referer': window.location.origin,
+                'X-Title': 'Fireproof App Builder',
+              },
+              body: JSON.stringify({
+                model: CHOSEN_MODEL,
+                stream: false,
+                messages: [
+                  {
+                    role: 'system',
+                    content:
+                      'You are a helpful assistant that generates short, descriptive titles. Create a concise title (3-5 words) that captures the essence of the content. Return only the title, no other text or markup.',
+                  },
+                  {
+                    role: 'user',
+                    content: `Generate a short, descriptive title (3-5 words) for this app, use the React JSX <h1> tag's value if you can find it:\n\n${rawStreamBuffer.current}`,
+                  },
+                ],
+              }),
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              const title = data.choices[0]?.message?.content?.trim() || 'New Chat';
+              console.log('Generated title:', title, cleanedMessage);
+              onGeneratedTitle(title);
+            } else {
+              onGeneratedTitle('New Chat');
+            }
+          } catch (error) {
+            console.error('Error generating title:', error);
+            onGeneratedTitle('New Chat');
+          }
+        }
 
         // Add this before setting the final message
         console.log('Debug values:', {

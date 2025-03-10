@@ -48,6 +48,8 @@ export default function Home() {
   const [shareStatus, setShareStatus] = useState<string>('');
   const [isSharedApp, setIsSharedApp] = useState<boolean>(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [pendingTitle, setPendingTitle] = useState<string | null>(null);
+  const [isCreatingSession, setIsCreatingSession] = useState(false);
   const { database } = useFireproof('fireproof-chat-history');
   const navigate = useNavigate();
   
@@ -62,6 +64,11 @@ export default function Home() {
   // Maintain a stable ref to the database to prevent re-renders
   const databaseRef = useRef(database);
   
+  // Update database ref when it changes
+  useEffect(() => {
+    databaseRef.current = database;
+  }, [database]);
+  
   // Hoist the useChat hook to this component with stable callback reference
   const handleCodeGenerated = useCallback((code: string, dependencies?: Record<string, string>) => {
     setState({
@@ -70,7 +77,47 @@ export default function Home() {
     });
   }, []);
   
-  const chatState = useChat(handleCodeGenerated);
+  // Handle the generated title callback
+  const handleGeneratedTitle = useCallback(async (generatedTitle: string) => {
+    // Handle the generated title
+    console.log('Title generated:', sessionId, generatedTitle, 'isCreatingSession:', isCreatingSession);
+
+    // Safety check - don't proceed if title is undefined
+    if (!generatedTitle) {
+      console.warn('Skipping title update - received undefined title');
+      return;
+    }
+
+    if (sessionId) {
+      try {
+        // Get the current session document
+        const sessionDoc = await databaseRef.current.get(sessionId);
+        
+        // Validate sessionDoc before updating
+        if (!sessionDoc) {
+          console.error('Cannot update title: session document is missing');
+          return;
+        }
+
+        // Create a safe update object without undefined values
+        const updatedDoc = {
+          ...sessionDoc,
+          title: generatedTitle || 'Untitled Chat', // Ensure title is never undefined
+        };
+
+        // Save the updated document
+        await databaseRef.current.put(updatedDoc);
+        console.log('Updated session title to:', generatedTitle);
+      } catch (error) {
+        console.error('Error updating session title:', error);
+      }
+    } else {
+      // If no sessionId yet, store the title for later use
+      setPendingTitle(generatedTitle);
+    }
+  }, [sessionId, isCreatingSession]);
+  
+  const chatState = useChat(handleCodeGenerated, handleGeneratedTitle);
 
   // Only update refs when values actually change with deep equality check
   useEffect(() => {
@@ -94,6 +141,41 @@ export default function Home() {
       streamingPropsRef.current = currentProps;
     }
   }, [chatState.streamingCode, chatState.isStreaming, chatState.currentStreamedText, chatState.messages]);
+
+  // Apply pending title when sessionId becomes available
+  useEffect(() => {
+    if (!sessionId || !pendingTitle) return;
+    
+    // Skip update if we're in the process of creating a session
+    if (isCreatingSession) {
+      console.log('Session creation in progress, title will be set during creation');
+      return;
+    }
+    
+    const updateTitleWhenReady = async () => {
+      try {
+        // Get the current session document
+        const sessionDoc = await databaseRef.current.get(sessionId);
+        
+        // Create a safe update object without undefined values
+        const updatedDoc = {
+          ...sessionDoc,
+          title: pendingTitle || 'Untitled Chat',
+        };
+
+        // Save the updated document
+        await databaseRef.current.put(updatedDoc);
+        console.log('Successfully updated session title to:', pendingTitle);
+        
+        // Clear the pending title after successful update
+        setPendingTitle(null);
+      } catch (error) {
+        console.error('Error updating session title:', error);
+      }
+    };
+
+    updateTitleWhenReady();
+  }, [sessionId, pendingTitle, isCreatingSession]);
 
   // Check for state in URL on component mount
   useEffect(() => {
@@ -193,7 +275,7 @@ export default function Home() {
         console.log('ok', ok);
       }
     },
-    [sessionId, databaseRef]
+    [sessionId]
   );
 
   // Memoize dependencies to prevent unnecessary re-renders
@@ -214,13 +296,18 @@ export default function Home() {
           if (input.trim()) {
             if (!sessionId) {
               // If no session exists, create one
+              setIsCreatingSession(true);
               const newSession = {
                 timestamp: Date.now(),
                 title: input.length > 50 ? `${input.substring(0, 50)}...` : input,
               };
 
-              databaseRef.current.put(newSession).then((doc) => {
+              databaseRef.current.put(newSession).then((doc: { id: string }) => {
                 handleSessionCreated(doc.id);
+                setIsCreatingSession(false);
+              }).catch((err: Error) => {
+                console.error('Error creating session:', err);
+                setIsCreatingSession(false);
               });
             }
           }
@@ -241,6 +328,7 @@ export default function Home() {
     handleSessionCreated,
     handleNewChat,
     handleCodeGenerated,
+    setIsCreatingSession,
     // Avoid including the entire chatState to prevent unnecessary re-renders
     // Only include specific parts that affect the UI
     chatState.sendMessage,
