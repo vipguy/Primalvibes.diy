@@ -162,8 +162,10 @@ describe('Component Rendering', () => {
     it('renders empty list', () => {
       render(<MessageList messages={[]} isStreaming={false} />);
 
-      // Update to check for text that actually exists in the WelcomeScreen component
-      expect(screen.getByText(/Quickly create React apps in your browser/i)).toBeInTheDocument();
+      // Verify the container is rendered but empty
+      const messageContainer = document.querySelector('.flex-col.space-y-4');
+      expect(messageContainer).toBeInTheDocument();
+      expect(messageContainer?.children.length).toBe(0);
     });
 
     it('renders messages correctly', () => {

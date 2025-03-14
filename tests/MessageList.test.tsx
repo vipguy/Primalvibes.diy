@@ -37,8 +37,12 @@ describe('MessageList', () => {
   });
 
   test('renders empty state correctly', () => {
-    render(<MessageList messages={[]} isStreaming={false} />);
-    expect(screen.getByTestId('welcome-screen')).toBeInTheDocument();
+    const { container } = render(<MessageList messages={[]} isStreaming={false} />);
+    
+    // Get the specific element we want to check
+    const messageContainer = container.querySelector('.flex-col.space-y-4');
+    expect(messageContainer).toBeInTheDocument();
+    expect(messageContainer?.children.length).toBe(0);
   });
 
   test('renders streaming message correctly', () => {

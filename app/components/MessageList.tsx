@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react';
-import Message, { WelcomeScreen } from './Message';
+import Message from './Message';
 import type { ChatMessageDocument } from '../types/chat';
 
 interface MessageListProps {
