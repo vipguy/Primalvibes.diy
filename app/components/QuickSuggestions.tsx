@@ -5,15 +5,15 @@ interface QuickSuggestionsProps {
 function QuickSuggestions({ onSelectSuggestion }: QuickSuggestionsProps) {
   const suggestions = [
     {
-      label: 'Todo App',
-      text: 'Create a todo app with freeform textarea entry, that sends the text to AI to create todo list items using json.',
+      label: 'Todos',
+      text: 'Create a todo app with freeform textarea entry, that sends the text to AI to create todo list items using json, and tag them into the selected list.',
     },
     {
       label: 'Pomodoro',
       text: 'Create a pomodoro timer app with multiple timers work/break intervals and session tracking.',
     },
     {
-      label: 'Drawing App',
+      label: 'Drawing',
       text: 'Create a simple drawing app with a canvas where users can draw with different colors and save their drawings.',
     },
     {
@@ -21,20 +21,28 @@ function QuickSuggestions({ onSelectSuggestion }: QuickSuggestionsProps) {
       text: 'Create a calculator app with basic arithmetic operations.',
     },
     {
-      label: 'Photo Gallery',
+      label: 'Photos',
       text: 'Create a photo gallery app with a grid of images and a modal for each image.',
     },
     {
-      label: 'Quiz App',
+      label: 'Quiz',
       text: "Write a trivia app that lets me pick a topic, and uses AI to make the next question while I'm answering the current one. It should make 3 at first. Ai should also judge the answer. It can either be right or wrong and funny.",
+    },
+    {
+      label: 'Music',
+      text: 'I send messages and Ai responds with a playlist for me, with YouTube search links for each song.',
+    },
+    {
+      label: 'Similarity',
+      text: 'I make a list of 2 or 3 items and then ai expands the list from the example.',
+    },
+    {
+      label: 'Scheduling',
+      text: 'Two text areas, paste the availability for each person, and AI finds the best time to meet.',
     },
     {
       label: 'Wildcard',
       text: "Generate a wildcard app, something I wouldn't expect.",
-    },
-    {
-      label: 'Music',
-      text: 'Make a fan app where I can type in a textarea of songs and artists and Ai will organize them into a playlist for me.',
     },
   ];
 
