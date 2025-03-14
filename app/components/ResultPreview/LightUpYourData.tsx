@@ -1,4 +1,4 @@
-const WelcomeScreen = () => {
+const LightUpYourData = () => {
   return (
     <div className="bg-light-background-00 dark:bg-dark-background-00 flex h-full flex-col items-center justify-center">
       <img
@@ -10,4 +10,4 @@ const WelcomeScreen = () => {
   );
 };
 
-export default WelcomeScreen;
+export default LightUpYourData;

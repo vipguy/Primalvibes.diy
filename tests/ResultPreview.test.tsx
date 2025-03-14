@@ -72,7 +72,7 @@ describe('ResultPreview', () => {
   it('displays welcome screen when code is empty', () => {
     render(<ResultPreview code={''} {...mockResultPreviewProps} />);
 
-    expect(screen.getByTestId('welcome-screen')).toBeDefined();
+    expect(screen.getByAltText('Lightup')).toBeDefined();
   });
 
   it('handles streaming state correctly', () => {
@@ -106,7 +106,7 @@ describe('ResultPreview', () => {
   it('shows welcome screen with empty code', () => {
     render(<ResultPreview code="" {...mockResultPreviewProps} />);
 
-    expect(screen.getByTestId('welcome-screen')).toBeDefined();
+    expect(screen.getByAltText('Lightup')).toBeDefined();
   });
 
   it('shows a share button when onShare is provided and code is not empty', () => {
@@ -161,7 +161,7 @@ describe('ResultPreview', () => {
     render(<ResultPreview code="" {...mockResultPreviewProps} />);
 
     // Skip button checks since toolbar has been removed
-    expect(screen.getByTestId('welcome-screen')).toBeDefined();
+    expect(screen.getByAltText('Lightup')).toBeDefined();
   });
 
   it('renders empty state correctly', () => {
@@ -192,7 +192,7 @@ describe('ResultPreview', () => {
 
   it('shows welcome screen for empty code', () => {
     render(<ResultPreview code="" {...mockResultPreviewProps} />);
-    expect(screen.getByTestId('welcome-screen')).toBeInTheDocument();
+    expect(screen.getByAltText('Lightup')).toBeInTheDocument();
   });
 
   it('renders code properly', () => {
@@ -274,7 +274,7 @@ describe('ResultPreview', () => {
 
   it('shows welcome screen when no code is provided', () => {
     render(<ResultPreview code="" {...mockResultPreviewProps} />);
-    expect(screen.getByTestId('welcome-screen')).toBeInTheDocument();
+    expect(screen.getByAltText('Lightup')).toBeInTheDocument();
   });
 
   it('renders with a simple code snippet', () => {

@@ -3,7 +3,7 @@ import type { ResultPreviewProps } from './ResultPreviewTypes';
 import type { SandpackFiles } from './ResultPreviewTypes';
 import { indexHtml, animationStyles } from './ResultPreviewTemplates';
 import { processCodeForDisplay } from './ResultPreviewUtils';
-import WelcomeScreen from './WelcomeScreen';
+import LightUpYourData from './LightUpYourData';
 import SandpackContent from './SandpackContent';
 import { OPENROUTER_API_KEY } from '../../config/env';
 
@@ -132,7 +132,7 @@ function ResultPreview({
 
   const previewArea = showWelcome ? (
     <div className="h-full">
-      <WelcomeScreen />
+      <LightUpYourData />
     </div>
   ) : (
     (() => {
