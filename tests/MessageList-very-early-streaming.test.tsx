@@ -1,14 +1,16 @@
 import { render, screen } from '@testing-library/react';
 import MessageList from '../app/components/MessageList';
 import { vi, describe, test, expect, beforeEach } from 'vitest';
-import {
-  resetStreamingUpdateCount,
-} from '../app/utils/debugLogging';
 import type { UserChatMessage, AiChatMessage } from '../app/types/chat';
 
 // For direct stdout logging that bypasses Node's buffering
 function writeToStdout(message: string) {
   process.stdout.write(`\n${message}\n`);
+}
+
+// Mock resetStreamingUpdateCount function since we removed debugLogging.ts
+function resetStreamingUpdateCount() {
+  // This is now a no-op mock function
 }
 
 // Mock scrollIntoView

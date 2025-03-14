@@ -5,8 +5,8 @@
 import packageJson from '../../package.json';
 
 // Extract the versions we need
-export const fireproofVersion = packageJson.dependencies['use-fireproof'];
-export const cementVersion = 'latest'; // Keep this as latest or extract from package.json if added there
+const fireproofVersion = packageJson.dependencies['use-fireproof'];
+const cementVersion = 'latest'; // Keep this as latest or extract from package.json if added there
 
 // Export a dependencies object ready for sandpack
 export const sandpackDependencies = {

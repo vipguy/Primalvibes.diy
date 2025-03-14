@@ -5,6 +5,7 @@ import { indexHtml, animationStyles } from './ResultPreviewTemplates';
 import { processCodeForDisplay } from './ResultPreviewUtils';
 import WelcomeScreen from './WelcomeScreen';
 import SandpackContent from './SandpackContent';
+import { OPENROUTER_API_KEY } from '../../config/env';
 
 function ResultPreview({
   code,
@@ -21,7 +22,6 @@ function ResultPreview({
   const [, setPreviewReady] = useState(false);
   const isStreamingRef = useRef(isStreaming);
   const hasGeneratedStreamingKeyRef = useRef(false);
-  const streamingKeyRef = useRef<string>('');
 
   const filesRef = useRef<SandpackFiles>({});
   const showWelcome = !isStreaming && (!code || code.length === 0);
@@ -58,7 +58,7 @@ function ResultPreview({
           // respond with the API key
           const iframe = document.querySelector('.sp-preview-iframe') as HTMLIFrameElement;
           iframe?.contentWindow?.postMessage(
-            { type: 'openrouter-api-key', key: import.meta.env.VITE_OPENROUTER_API_KEY },
+            { type: 'openrouter-api-key', key: OPENROUTER_API_KEY },
             '*'
           );
 
