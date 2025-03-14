@@ -63,11 +63,11 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
   }, [filteredDocs, isStreaming, aiMessage.text]);
 
   const buildMessageHistory = useCallback(() => {
-    return messages.map((msg) => ({
+    return filteredDocs.map((msg: any) => ({
       role: msg.type === 'user' ? ('user' as const) : ('assistant' as const),
       content: msg.text || '',
     }));
-  }, [messages]);
+  }, [filteredDocs]);
 
   const { segments: selectedSegments, dependenciesString: selectedDependenciesString } =
     selectedResponseDoc
