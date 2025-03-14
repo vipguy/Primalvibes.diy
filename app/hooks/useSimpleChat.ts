@@ -81,10 +81,10 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     ? parseDependencies(selectedDependenciesString)
     : {};
 
-  // Throttled update function with fixed 10ms delay
+  // Throttled update function with fixed delay and debouncing
   const throttledMergeAiMessage = useCallback(
     (content: string) => {
-      // Store content in ref
+      // Store content in ref to ensure latest content is always available
       streamBufferRef.current = content;
 
       // If we're already processing a database operation, don't trigger more updates
@@ -92,20 +92,42 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
         return;
       }
 
-      // Clear any pending timeout
+      // Clear any pending timeout to implement proper debouncing
       if (updateTimeoutRef.current) {
         clearTimeout(updateTimeoutRef.current);
         updateTimeoutRef.current = null;
       }
 
-      // Use a fixed 10ms throttle delay
-      const THROTTLE_DELAY = 10;
-
-      // Schedule update with fixed delay
+      // Throttle parameters
+      const THROTTLE_DELAY = 30; // Increased from 10ms for better stability
+      const MIN_UPDATE_INTERVAL = 100; // Minimum time between updates
+      
+      // Add minimum time between updates check
+      const now = Date.now();
+      const timeSinceLastUpdate = now - lastUpdateTimeRef.current;
+      
+      // Calculate delay - use a longer delay if we've updated recently
+      let delay = THROTTLE_DELAY;
+      
+      if (timeSinceLastUpdate < MIN_UPDATE_INTERVAL) {
+        // If we've updated too recently, use adaptive delay
+        delay = Math.max(
+          MIN_UPDATE_INTERVAL - timeSinceLastUpdate + THROTTLE_DELAY,
+          MIN_UPDATE_INTERVAL
+        );
+      }
+      
+      // Schedule update with calculated delay
       updateTimeoutRef.current = setTimeout(() => {
+        // Capture the current content at time of execution
+        const currentContent = streamBufferRef.current;
+        
+        // Record update time before the actual update
         lastUpdateTimeRef.current = Date.now();
-        mergeAiMessage({ text: streamBufferRef.current });
-      }, THROTTLE_DELAY);
+        
+        // Only update if the content has actually changed
+        mergeAiMessage({ text: currentContent });
+      }, delay);
     },
     [mergeAiMessage]
   );
