@@ -17,8 +17,8 @@ function ResultPreview({
   setActiveView,
   onPreviewLoaded,
 }: ResultPreviewProps) {
-  const [bundlingComplete, setBundlingComplete] = useState(true);
-  const [previewReady, setPreviewReady] = useState(false);
+  const [, setBundlingComplete] = useState(true);
+  const [, setPreviewReady] = useState(false);
   const isStreamingRef = useRef(isStreaming);
   const hasGeneratedStreamingKeyRef = useRef(false);
   const streamingKeyRef = useRef<string>('');

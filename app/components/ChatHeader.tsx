@@ -1,5 +1,4 @@
 import { memo } from 'react';
-import { useNavigate } from 'react-router';
 
 interface ChatHeaderProps {
   onOpenSidebar: () => void;
@@ -7,8 +6,6 @@ interface ChatHeaderProps {
 }
 
 function ChatHeader({ onOpenSidebar, title }: ChatHeaderProps) {
-  const navigate = useNavigate();
-
   return (
     <div className="border-light-decorative-00 dark:border-dark-decorative-00 bg-light-background-00 dark:bg-dark-background-00 flex h-[4rem] items-center justify-between border-b px-6 py-4">
       <div className="flex items-center">

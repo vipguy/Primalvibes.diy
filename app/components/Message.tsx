@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import StructuredMessage from './StructuredMessage';
-import type { ChatMessageDocument, AiChatMessageDocument, AiChatMessage } from '../types/chat';
+import type { ChatMessageDocument, AiChatMessageDocument } from '../types/chat';
 import { parseContent } from '~/utils/segmentParser';
 
 interface MessageProps {

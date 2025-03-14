@@ -27,8 +27,8 @@ function ChatInterface({
   setSelectedResponseId,
 }: ChatInterfaceProps) {
   // State for UI transitions and sharing
-  const [isShrinking, setIsShrinking] = useState(false);
-  const [isExpanding, setIsExpanding] = useState(false);
+  const [isShrinking] = useState(false);
+  const [isExpanding] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   // Sidebar visibility function

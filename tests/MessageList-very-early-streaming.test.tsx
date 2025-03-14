@@ -2,10 +2,6 @@ import { render, screen } from '@testing-library/react';
 import MessageList from '../app/components/MessageList';
 import { vi, describe, test, expect, beforeEach } from 'vitest';
 import {
-  debugLog,
-  logStreamingUpdate,
-  logSegmentDetails,
-  logDOMVerification,
   resetStreamingUpdateCount,
 } from '../app/utils/debugLogging';
 import type { UserChatMessage, AiChatMessage } from '../app/types/chat';

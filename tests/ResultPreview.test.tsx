@@ -1,5 +1,5 @@
 import { vi, describe, it, expect, beforeEach, afterAll } from 'vitest';
-import { render, screen, act, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, act, waitFor } from '@testing-library/react';
 import ResultPreview from '../app/components/ResultPreview/ResultPreview';
 import { mockResultPreviewProps } from './mockData';
 
@@ -59,7 +59,7 @@ afterAll(() => {
 describe('ResultPreview', () => {
   it('renders without crashing', () => {
     // Use non-empty code to ensure the editor is shown
-    const { container } = render(
+    render(
       <ResultPreview code="const test = 'Hello';" {...mockResultPreviewProps} />
     );
 
@@ -275,5 +275,26 @@ describe('ResultPreview', () => {
   it('shows welcome screen when no code is provided', () => {
     render(<ResultPreview code="" {...mockResultPreviewProps} />);
     expect(screen.getByTestId('welcome-screen')).toBeInTheDocument();
+  });
+
+  it('renders with a simple code snippet', () => {
+    const code = 'const test = "Hello";';
+    const setActiveView = vi.fn();
+
+    // Render the component with a simple code snippet
+    render(
+      <ResultPreview
+        code={code}
+        dependencies={{}}
+        isStreaming={false}
+        codeReady={true}
+        activeView="code"
+        setActiveView={setActiveView}
+        onPreviewLoaded={() => {}}
+      />
+    );
+
+    // Now the sandpack editor should be visible
+    expect(screen.getByTestId('sandpack-editor')).toBeDefined();
   });
 });

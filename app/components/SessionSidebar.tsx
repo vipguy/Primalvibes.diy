@@ -1,8 +1,8 @@
-import { useEffect, useRef, memo, useMemo } from 'react';
+import { useEffect, useRef, memo } from 'react';
 import { useSessionList } from '../hooks/sidebar/useSessionList';
 import { ImgFile } from './SessionSidebar/ImgFile';
 import { encodeTitle } from './SessionSidebar/utils';
-import type { SessionSidebarProps, SessionOrScreenshot, SessionDocument } from '../types/chat';
+import type { SessionSidebarProps } from '../types/chat';
 
 /**
  * Component that displays a collapsible sidebar with chat session history
@@ -31,13 +31,6 @@ function SessionSidebar({ isVisible, onClose }: SessionSidebarProps) {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isVisible, onClose]);
-
-  // Memoize the sidebar classes to prevent recalculations on every render
-  const sidebarClasses = useMemo(() => {
-    return `bg-light-background-00 dark:bg-dark-background-00 fixed top-0 left-0 z-10 h-full shadow-lg transition-all duration-300 ${
-      isVisible ? 'w-64 translate-x-0' : 'w-0 -translate-x-full'
-    }`;
-  }, [isVisible]);
 
   // Render session items with Link components
   const renderSessionItems = () => {
@@ -90,11 +83,11 @@ function SessionSidebar({ isVisible, onClose }: SessionSidebarProps) {
 
   // Conditionally render content but keep animation classes
   return (
-    <div
+    <div 
       ref={sidebarRef}
-      className={`transition-all duration-300 ease-in-out ${
-        isVisible ? 'translate-x-0 opacity-100' : 'pointer-events-none -translate-x-full opacity-0'
-      } absolute inset-y-0 left-0 z-10 flex w-80 flex-col border-r border-gray-200 bg-white shadow-md dark:border-gray-700 dark:bg-gray-800`}
+      className={`bg-light-background-00 dark:bg-dark-background-00 fixed top-0 left-0 z-10 h-full shadow-lg transition-all duration-300 ${
+        isVisible ? 'w-64 translate-x-0' : 'w-0 -translate-x-full'
+      }`}
     >
       <div className="flex h-full flex-col overflow-hidden">
         <div className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">

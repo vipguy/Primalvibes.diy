@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { vi, describe, test, expect, beforeEach } from 'vitest';
+import { describe, test, expect } from 'vitest';
 import StructuredMessage from '../app/components/StructuredMessage';
 
 describe('Streaming Content Display', () => {

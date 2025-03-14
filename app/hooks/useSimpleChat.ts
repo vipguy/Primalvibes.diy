@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
-import type { Segment, ChatMessageDocument, ChatState, ScreenshotDocument } from '../types/chat';
+import type { Segment, ChatMessageDocument, ChatState } from '../types/chat';
 import { makeBaseSystemPrompt } from '../prompts';
 import { parseContent, parseDependencies } from '../utils/segmentParser';
 import { useSession } from './useSession';
@@ -163,7 +163,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
           }
 
           // Then persist to database
-          const ok = await database.put(aiMessage);
+          await database.put(aiMessage);
 
           // Finally, generate title if needed
           const { segments } = parseContent(aiMessage.text);
@@ -197,17 +197,19 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     updateTitle,
   ]);
 
-  const addFirstScreenshot = useCallback(
-    async (screenshotData: string) => {
-      const { rows: screenshots } = await database.query((doc: any) => [doc.session_id, doc.type], {
-        key: [session._id, 'screenshot'],
-      });
-      if (screenshots.length === 0) {
-        addScreenshot(screenshotData);
-      }
-    },
-    [session._id, database, addScreenshot]
-  );
+  // TODO: make a version of this that only saves the first 
+  // for the given message source. so one each message.
+  // const addFirstScreenshot = useCallback(
+  //   async (screenshotData: string) => {
+  //     const { rows: screenshots } = await database.query((doc: any) => [doc.session_id, doc.type], {
+  //       key: [session._id, 'screenshot'],
+  //     });
+  //     if (screenshots.length === 0) {
+  //       addScreenshot(screenshotData);
+  //     }
+  //   },
+  //   [session._id, database, addScreenshot]
+  // );
 
   const codeReady = useMemo(() => {
     return !isStreaming || selectedSegments.length > 2;

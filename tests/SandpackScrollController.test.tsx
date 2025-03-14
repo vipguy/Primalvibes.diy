@@ -1,5 +1,5 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { render, screen, act } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import SandpackScrollController from '../app/components/ResultPreview/SandpackScrollController';
 
 // Mock ResizeObserver since it's not available in the test environment

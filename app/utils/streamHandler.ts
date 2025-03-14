@@ -1,8 +1,3 @@
-// Debug logging function
-function logDebug(message: string) {
-  console.debug(`🔍 STREAM_HANDLER: ${message}`);
-}
-
 /**
  * Utility functions for working with the OpenRouter API
  */

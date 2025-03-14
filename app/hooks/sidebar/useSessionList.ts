@@ -29,7 +29,7 @@ export type GroupedSession = {
  * @returns An object containing the grouped sessions and loading state
  */
 export function useSessionList() {
-  const { database, useLiveQuery } = useFireproof(FIREPROOF_CHAT_HISTORY);
+  const { useLiveQuery } = useFireproof(FIREPROOF_CHAT_HISTORY);
 
   // Use a single query to fetch both sessions and screenshots with a custom index function
   // For session docs: returns doc._id

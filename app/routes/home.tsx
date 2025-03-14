@@ -25,7 +25,7 @@ export default function UnifiedSession() {
   // State for view management
   const [activeView, setActiveView] = useState<'code' | 'preview'>('code');
   const [previewReady, setPreviewReady] = useState(false);
-  const [bundlingComplete, setBundlingComplete] = useState(true);
+  const [bundlingComplete] = useState(true);
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
 
   // Directly create an openSidebar function

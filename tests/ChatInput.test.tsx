@@ -2,28 +2,21 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import ChatInput from '../app/components/ChatInput';
 
-// Create mock state and functions we can control
-let inputValue = '';
-const onChange = vi.fn((e) => {
-  inputValue = e.target.value;
-});
+// Create mock functions we can control
 const onSend = vi.fn();
-const onKeyDown = vi.fn((e) => {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    onSend();
-  }
-});
+const onChange = vi.fn();
+const onKeyDown = vi.fn();
+
+// Create a ref we can use
 const inputRef = { current: null };
 
-describe('ChatInput', () => {
+describe('ChatInput Component', () => {
   beforeEach(() => {
     // Reset mocks and values before each test
     vi.resetAllMocks();
-    inputValue = '';
   });
 
-  it('renders correctly', () => {
+  it('renders without crashing', () => {
     render(
       <ChatInput
         value=""

@@ -1,12 +1,10 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useCallback } from 'react';
 import { useFireproof } from 'use-fireproof';
 import { FIREPROOF_CHAT_HISTORY } from '../config/env';
 import type {
   UserChatMessageDocument,
   AiChatMessageDocument,
   SessionDocument,
-  Segment,
-  ScreenshotDocument,
 } from '../types/chat';
 
 export function useSession(routedSessionId: string | undefined) {
@@ -30,7 +28,6 @@ export function useSession(routedSessionId: string | undefined) {
   const {
     doc: userMessage,
     merge: mergeUserMessage,
-    save: saveUserMessage,
     submit: submitUserMessage,
   } = useDocument<UserChatMessageDocument>({
     type: 'user',
@@ -86,19 +83,15 @@ export function useSession(routedSessionId: string | undefined) {
     [session._id, database]
   );
 
-  // const { docs: screenshots } = useLiveQuery<ScreenshotDocument>((doc) => [doc.session_id, doc.type], { prefix: [ 'screenshot' ] });
-
   return {
     session,
     docs,
-    // screenshots,
     database,
     updateTitle,
     addScreenshot,
     userMessage,
     submitUserMessage,
     mergeUserMessage,
-    // updateAiMessage,
     aiMessage,
     submitAiMessage,
     mergeAiMessage,

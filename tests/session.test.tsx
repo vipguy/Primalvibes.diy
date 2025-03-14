@@ -4,7 +4,7 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import UnifiedSession from '../app/routes/home';
 import * as segmentParser from '../app/utils/segmentParser';
 import * as useSimpleChatModule from '../app/hooks/useSimpleChat';
-import type { ChatMessage, Segment, UserChatMessage, AiChatMessage } from '../app/types/chat';
+import type { AiChatMessage } from '../app/types/chat';
 import { mockChatStateProps } from './mockData';
 
 // Mock useParams hook from react-router

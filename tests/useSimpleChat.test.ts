@@ -3,8 +3,6 @@ import { renderHook, act, cleanup } from '@testing-library/react';
 import { useSimpleChat } from '../app/hooks/useSimpleChat';
 import { parseContent, parseDependencies } from '../app/utils/segmentParser';
 import type { ChatMessage, AiChatMessage } from '../app/types/chat';
-import fs from 'fs';
-import path from 'path';
 
 // Helper function to convert chunks into SSE format
 function formatAsSSE(chunks: string[]): string[] {
@@ -129,7 +127,7 @@ vi.mock('../app/hooks/useSessionMessages', () => {
         }),
         addAiMessage: vi.fn().mockImplementation(async (rawContent, timestamp) => {
           const created_at = timestamp || Date.now();
-          const { segments } = parseContent(rawContent);
+          parseContent(rawContent); // Call parseContent but don't use the result
 
           messagesStore[sessionKey].push({
             _id: `ai-${created_at}`,
@@ -632,9 +630,6 @@ You can use this component in your application.`,
     act(() => {
       result.current.setInput('');
     });
-
-    // Check AI message segments
-    const aiMessage = result.current.docs[1] as AiChatMessage;
 
     // Verify segments
     expect(result.current.selectedSegments?.length).toBe(3);

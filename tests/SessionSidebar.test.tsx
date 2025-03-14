@@ -1,5 +1,5 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { render, screen, fireEvent, within, act } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import SessionSidebar from '../app/components/SessionSidebar';
 import { mockSessionSidebarProps } from './mockData';
 
@@ -176,12 +176,12 @@ describe('SessionSidebar', () => {
       <SessionSidebar isVisible={false} onClose={onClose} {...mockSessionSidebarProps} />
     );
 
-    // Check that the sidebar has classes indicating it's not visible
-    const invisibleSidebar = container.querySelector('.pointer-events-none');
+    // Check that the sidebar has the -translate-x-full class to move it off screen
+    const invisibleSidebar = container.querySelector('.-translate-x-full');
     expect(invisibleSidebar).not.toBeNull();
 
-    // Also check that it has -translate-x-full class to move it off screen
-    expect(invisibleSidebar?.classList.toString()).toContain('-translate-x-full');
+    // Also check that it has w-0 class to hide it
+    expect(invisibleSidebar?.classList.toString()).toContain('w-0');
   });
 
   it('renders screenshots associated with sessions', () => {

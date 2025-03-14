@@ -5,7 +5,6 @@ import UnifiedSession from '../app/routes/home';
 import * as segmentParser from '../app/utils/segmentParser';
 import * as useSimpleChatModule from '../app/hooks/useSimpleChat';
 import type { ChatMessage, UserChatMessage, AiChatMessage, Segment } from '../app/types/chat';
-import { useLocation } from 'react-router';
 import { mockChatStateProps } from './mockData';
 
 // We need to define the mock before importing any modules that might use it
@@ -77,7 +76,6 @@ Object.defineProperty(navigator, 'clipboard', {
 });
 
 // Mock window.location
-const originalLocation = window.location;
 Object.defineProperty(window, 'location', {
   value: {
     // Use only the properties we want to override
@@ -312,12 +310,16 @@ describe('Home Route in completed state', () => {
     };
 
     // Mock just what we need for this specific test
-    const mockSegments = [
-      { type: 'markdown', content: 'Explanation from hash' } as Segment,
-      { type: 'code', content: hashCode } as Segment,
-    ];
+    vi.mocked(segmentParser.parseContent).mockReturnValue({
+      segments: [
+        { type: 'markdown', content: 'Explanation from hash' } as Segment,
+        { type: 'code', content: hashCode } as Segment,
+      ],
+      dependenciesString: '',
+    });
 
-    const mockChatState = {
+    // Mock useSimpleChat to return a chat state with the hash code
+    vi.spyOn(useSimpleChatModule, 'useSimpleChat').mockReturnValue({
       ...mockChatStateProps,
       docs: [],
       input: '',
@@ -329,49 +331,6 @@ describe('Home Route in completed state', () => {
       sessionId: null,
       selectedSegments: [],
       selectedCode: { type: 'code' as const, content: '' },
-      selectedDependencies: {},
-    };
-
-    vi.spyOn(useSimpleChatModule, 'useSimpleChat').mockReturnValue({
-      ...mockChatStateProps,
-      docs: [
-        {
-          _id: 'msg1',
-          session_id: 'session123',
-          type: 'user',
-          text: 'Hello AI',
-          created_at: Date.now() - 10000,
-        },
-        {
-          _id: 'msg2',
-          session_id: 'session123',
-          type: 'ai',
-          text: '{"dependencies": {}}\n\nHello human! How can I help you today?',
-          created_at: Date.now() - 5000,
-        },
-      ],
-      input: 'test input',
-      setInput: vi.fn(),
-      isStreaming: false,
-      inputRef: { current: null },
-      sendMessage: vi.fn(),
-      title: 'Shared Code Example',
-      sessionId: 'session123',
-      selectedResponseDoc: {
-        _id: 'msg2',
-        session_id: 'session123',
-        type: 'ai',
-        text: '{"dependencies": {}}\n\nHello human! How can I help you today?',
-        created_at: Date.now() - 5000,
-        timestamp: Date.now() - 5000,
-        segments: [{ type: 'markdown', content: 'Hello human! How can I help you today?' }],
-        dependenciesString: '{"dependencies": {}}',
-      } as AiChatMessage,
-      selectedSegments: [{ type: 'markdown', content: 'Hello human! How can I help you today?' }],
-      selectedCode: {
-        type: 'code',
-        content: 'console.log("from hash")',
-      },
       selectedDependencies: {},
     });
 

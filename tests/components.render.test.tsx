@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import ChatHeader from '../app/components/ChatHeader';
 import SessionSidebar from '../app/components/SessionSidebar';
 import MessageList from '../app/components/MessageList';
-import type { ChatMessage, UserChatMessage, AiChatMessage } from '../app/types/chat';
+import type { UserChatMessage, AiChatMessage } from '../app/types/chat';
 import { mockSessionSidebarProps } from './mockData';
 
 // Mock dependencies
@@ -86,15 +86,11 @@ vi.mock('../app/hooks/useSessionMessages', () => {
 
 // Create mock functions we can control
 const onOpenSidebar = vi.fn();
-const onToggleSidebar = vi.fn();
-const onNewChat = vi.fn();
 const onClose = vi.fn();
-let isGeneratingValue = false;
 
 describe('Component Rendering', () => {
   beforeEach(() => {
     vi.resetAllMocks();
-    isGeneratingValue = false;
   });
 
   describe('ChatHeader', () => {
@@ -164,7 +160,7 @@ describe('Component Rendering', () => {
 
   describe('MessageList', () => {
     it('renders empty list', () => {
-      const { container } = render(<MessageList messages={[]} isStreaming={false} />);
+      render(<MessageList messages={[]} isStreaming={false} />);
 
       // Update to check for text that actually exists in the WelcomeScreen component
       expect(screen.getByText(/Quickly create React apps in your browser/i)).toBeInTheDocument();

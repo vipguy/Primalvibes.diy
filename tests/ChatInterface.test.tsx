@@ -1,7 +1,6 @@
-import React from 'react';
 import { render } from '@testing-library/react';
+import { vi, describe, it, expect } from 'vitest';
 import ChatInterface from '../app/components/ChatInterface';
-import { vi, describe, test, expect } from 'vitest';
 import type { ChatState } from '../app/types/chat';
 import { mockChatStateProps } from './mockData';
 
@@ -41,8 +40,8 @@ const mockChatState: ChatState = {
   setSelectedResponseId: vi.fn(),
 };
 
-describe('ChatInterface', () => {
-  test('renders without error after fixing input destructuring', () => {
+describe('ChatInterface Component', () => {
+  it('renders without crashing', () => {
     // This test passes now that we've fixed the 'input is not defined' error
     // by properly destructuring input from chatState
     const { container } = render(

@@ -1,5 +1,5 @@
 import { render, screen, cleanup } from '@testing-library/react';
-import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest';
+import { vi, describe, test, expect, afterEach } from 'vitest';
 import StructuredMessage from '../app/components/StructuredMessage';
 
 // Mock the window.location for any URL operations

@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { vi, describe, test, expect, beforeEach } from 'vitest';
+import { vi, describe, test, expect } from 'vitest';
 import MessageList from '../app/components/MessageList';
 import type { UserChatMessage, AiChatMessage } from '../app/types/chat';
 
