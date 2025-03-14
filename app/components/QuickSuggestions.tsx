@@ -26,7 +26,7 @@ function QuickSuggestions({ onSelectSuggestion }: QuickSuggestionsProps) {
     },
     {
       label: 'Quiz App',
-      text: 'Create a quiz app with a timer and score tracking',
+      text: "Write a trivia app that lets me pick a topic, and uses AI to make the next question while I'm answering the current one. It should make 3 at first. Ai should also judge the answer. It can either be right or wrong and funny",
     },
     {
       label: 'Wildcard',
@@ -34,7 +34,7 @@ function QuickSuggestions({ onSelectSuggestion }: QuickSuggestionsProps) {
     },
     {
       label: 'Music',
-      text: 'Make a fan app where I can rate my favorite pop music lyrics',
+      text: 'Make a fan app where I can type in a textarea of songs and artists and Ai will organize them into a playlist for me',
     },
   ];
 

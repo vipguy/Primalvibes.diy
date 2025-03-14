@@ -6,6 +6,9 @@ export const indexHtml = `<!DOCTYPE html>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
+      // Global variable to store the API key
+      window.API_KEY = null;
+      
       tailwind.config = {
         darkMode: 'class',
         theme: {
@@ -55,6 +58,10 @@ export const indexHtml = `<!DOCTYPE html>
       window.addEventListener('message', function(event) {        
         if (event.data && event.data.type === 'command' && event.data.command === 'reload-preview') {
           window.location.reload();
+        }
+        // Handle API key message
+        if (event.data && event.data.type === 'openrouter-api-key' && event.data.key) {
+          window.OPENROUTER_API_KEY = event.data.key;
         }
       });
 

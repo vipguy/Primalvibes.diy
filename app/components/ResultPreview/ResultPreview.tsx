@@ -68,6 +68,13 @@ function ResultPreview({
     const handleMessage = ({ data }: MessageEvent) => {
       if (data) {
         if (data.type === 'preview-loaded') {
+          // respond with the API key
+          const iframe = document.querySelector('.sp-preview-iframe') as HTMLIFrameElement;
+          iframe?.contentWindow?.postMessage(
+            { type: 'openrouter-api-key', key: import.meta.env.VITE_OPENROUTER_API_KEY },
+            '*'
+          );
+
           setPreviewReady(true);
           // Automatically switch to preview view when it's ready
           setActiveView('preview');

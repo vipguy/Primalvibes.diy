@@ -40,7 +40,7 @@ const SandpackScrollController: React.FC<SandpackScrollControllerProps> = ({
   // Immediately scroll to the bottom with no animations
   const scrollToBottom = () => {
     if (!staticRefs.scroller) return;
-    
+
     // Hard scroll to bottom with no animation
     staticRefs.scroller.scrollTop = staticRefs.scroller.scrollHeight;
     staticRefs.lastScrollHeight = staticRefs.scroller.scrollHeight;
