@@ -298,6 +298,10 @@ a,
   }
 }
 
+.ai-markdown p {
+  margin-bottom: 0.5rem;
+}
+
 .ai-markdown ul {
   list-style-type: disc;
   padding-left: 1rem;
