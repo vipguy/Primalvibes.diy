@@ -60,7 +60,7 @@ const StructuredMessage = memo(
                 return (
                   <div
                     key={`code-${index}`}
-                    className="my-4 cursor-pointer rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700"
+                    className="my-4 cursor-pointer rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600"
                     onClick={handleCodeClick}
                   >
                     <div className="mb-2 flex items-center justify-between">
@@ -73,7 +73,7 @@ const StructuredMessage = memo(
                           e.stopPropagation(); // Prevent triggering the parent's onClick
                           navigator.clipboard.writeText(content);
                         }}
-                        className="rounded bg-gray-200 px-2 py-1 text-xs transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+                        className="rounded bg-gray-200 px-2 py-1 text-xs transition-colors hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700"
                       >
                         <code className="mr-3 font-mono text-gray-400 dark:text-gray-600">
                           App.jsx
