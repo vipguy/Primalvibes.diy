@@ -5,6 +5,7 @@ import SessionSidebar from './SessionSidebar';
 import MessageList from './MessageList';
 import ChatInput from './ChatInput';
 import QuickSuggestions from './QuickSuggestions';
+import { WelcomeScreen } from './Message';
 
 interface ChatInterfaceProps extends ChatState {
   isSidebarVisible: boolean;
@@ -110,7 +111,9 @@ function ChatInterface({
         </div>
       ) : (
         <div className="flex flex-grow flex-col justify-between">
-          <div className="flex-grow"></div>
+          <div className="flex-grow">
+            <WelcomeScreen />
+          </div>
           <QuickSuggestions onSelectSuggestion={handleSelectSuggestion} />
         </div>
       )}

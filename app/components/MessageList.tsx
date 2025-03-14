@@ -31,7 +31,7 @@ function MessageList({
       );
     });
   }, [messages, isShrinking, isExpanding, isStreaming, setSelectedResponseId]);
-
+  
   return (
     <div
       className={`flex-1 ${
@@ -39,11 +39,7 @@ function MessageList({
       }`}
     >
       <div className="mx-auto flex min-h-full max-w-5xl flex-col py-4">
-        {messages.length === 0 && !isStreaming ? (
-          <WelcomeScreen />
-        ) : (
           <div className="flex flex-col space-y-4">{messageElements}</div>
-        )}
       </div>
     </div>
   );
