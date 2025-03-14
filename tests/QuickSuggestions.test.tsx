@@ -22,7 +22,7 @@ describe('QuickSuggestions', () => {
     fireEvent.click(suggestionButton);
 
     expect(onSelectSuggestion).toHaveBeenCalledWith(
-      'Create a todo app with due dates and the ability to mark tasks as complete'
+      'Create a todo app with freeform textarea entry, that sends the text to AI to create todo list items using json.'
     );
   });
 });
