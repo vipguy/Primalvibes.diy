@@ -74,7 +74,6 @@ function ChatInterface({
 
   // Callback for setting the selected response ID
   const handleSetSelectedResponseId = useCallback((id: string) => {
-    console.log('handleSetSelectedResponseId', id);
     setSelectedResponseId(id);
   }, []);
 

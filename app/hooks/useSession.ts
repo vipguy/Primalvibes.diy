@@ -81,7 +81,6 @@ export function useSession(routedSessionId: string | undefined) {
           screenshot: file,
         },
       };
-      console.log('add screenshot', screenshot);
       await database.put(screenshot);
     },
     [session._id, database]

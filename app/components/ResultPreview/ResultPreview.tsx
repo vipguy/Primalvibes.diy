@@ -67,7 +67,6 @@ function ResultPreview({
   useEffect(() => {
     const handleMessage = ({ data }: MessageEvent) => {
       if (data) {
-        console.log('Received from iframe', data);
         if (data.type === 'preview-loaded') {
           // respond with the API key
           const iframe = document.querySelector('.sp-preview-iframe') as HTMLIFrameElement;
@@ -82,7 +81,6 @@ function ResultPreview({
           // Notify parent component that preview is loaded
           onPreviewLoaded();
         } else if (data.type === 'screenshot' && data.data) {
-          console.log('ResultPreview: Received screenshot');
           if (onScreenshotCaptured) {
             onScreenshotCaptured(data.data);
           }

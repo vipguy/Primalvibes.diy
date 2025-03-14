@@ -30,7 +30,6 @@ const StructuredMessage = memo(
     // Handle click on code segments to select the response
     const handleCodeClick = () => {
       if (setSelectedResponseId && messageId) {
-        console.log('handleCodeClick', messageId);
         setSelectedResponseId(messageId);
       }
     };
