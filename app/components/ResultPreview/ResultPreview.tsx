@@ -39,23 +39,10 @@ function ResultPreview({
   }, [isStreaming]);
 
   const sandpackKey = useMemo(() => {
-    if (showWelcome) return `${sessionId || 'default'}-welcome`;
-
-    // During streaming, use a stable key that doesn't include the changing code
-    if (isStreaming) {
-      // Only generate a new streaming key once per streaming session
-      if (!hasGeneratedStreamingKeyRef.current) {
-        // Use timestamp to ensure unique key between different streaming sessions
-        streamingKeyRef.current = `${sessionId || 'default'}-streaming`;
-        hasGeneratedStreamingKeyRef.current = true;
-      }
-      return streamingKeyRef.current;
-    }
-
-    // For non-streaming mode, we can include the code in the key (content is stable)
-    // But to prevent the key from being too long, just use a hash of the code
-    return `${sessionId || 'default'}-static-${codeReady}}`;
-  }, [sessionId, isStreaming, codeReady, showWelcome]);
+    // if (showWelcome) return 'welcome';
+    if (!codeReady) return 'streaming';
+    return 'static';
+  }, [codeReady]);
 
   useEffect(() => {
     if (isStreaming) {
