@@ -7,6 +7,7 @@ import {
   ScrollRestoration,
   isRouteErrorResponse,
 } from 'react-router';
+import type { MetaFunction } from 'react-router';
 
 import type { Route } from './+types/root';
 import './app.css';
@@ -23,6 +24,29 @@ export const links: Route.LinksFunction = () => [
     href: 'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap',
   },
 ];
+
+// Define metadata for the app including Open Graph and Twitter cards
+export const meta: MetaFunction = () => {
+  return [
+    // Basic metadata
+    { title: "Vibe Coding" },
+    { name: "description", content: "The easiest AI App Builder" },
+    
+    // Open Graph tags
+    { property: "og:title", content: "Vibe Coding" },
+    { property: "og:description", content: "The easiest AI App Builder" },
+    { property: "og:image", content: "https://vibe-coding.use-fireproof.com/card2.png" },
+    { property: "og:url", content: "https://vibe-coding.use-fireproof.com" },
+    { property: "og:type", content: "website" },
+    
+    // Twitter Card tags
+    { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:title", content: "Vibe Coding" },
+    { name: "twitter:description", content: "The easiest AI App Builder" },
+    { name: "twitter:image", content: "https://vibe-coding.use-fireproof.com/card2.png" },
+    { name: "twitter:url", content: "https://vibe-coding.use-fireproof.com" },
+  ];
+};
 
 /**
  * Sets up theme detection based on system preferences
