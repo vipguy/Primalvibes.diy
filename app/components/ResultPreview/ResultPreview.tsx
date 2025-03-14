@@ -67,6 +67,7 @@ function ResultPreview({
   useEffect(() => {
     const handleMessage = ({ data }: MessageEvent) => {
       if (data) {
+        console.log('Received from iframe', data);
         if (data.type === 'preview-loaded') {
           // respond with the API key
           const iframe = document.querySelector('.sp-preview-iframe') as HTMLIFrameElement;
