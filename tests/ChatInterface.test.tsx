@@ -1,8 +1,9 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import ChatInterface from '../ChatInterface';
+import ChatInterface from '../app/components/ChatInterface';
 import { vi, describe, test, expect } from 'vitest';
-import { ChatProvider } from '../context/ChatContext';
+import type { ChatState } from '../app/types/chat';
+import { mockChatStateProps } from './mockData';
 
 /**
  * Tests for the ChatInterface component
@@ -18,35 +19,26 @@ vi.mock('use-fireproof', () => ({
 }));
 
 // Prepare mock data
-const mockChatState = {
-  messages: [],
-  setMessages: vi.fn(),
-  input: 'test input',
+const mockChatState: ChatState = {
+  ...mockChatStateProps,
+  docs: [],
+  input: '',
   setInput: vi.fn(),
-  isGenerating: false,
-  currentStreamedText: '',
-  streamingCode: '',
-  completedCode: '',
   isStreaming: false,
   inputRef: { current: null },
-  messagesEndRef: { current: null },
-  autoResizeTextarea: vi.fn(),
-  scrollToBottom: vi.fn(),
   sendMessage: vi.fn(),
-  parserState: {
-    current: {
-      inCodeBlock: false,
-      codeBlockContent: '',
-      dependencies: {},
-      displayText: '',
-      on: vi.fn(),
-      removeAllListeners: vi.fn(),
-      write: vi.fn(),
-      end: vi.fn(),
-      reset: vi.fn(),
-    },
+  title: 'test title',
+  sessionId: 'test-session-id',
+  selectedResponseDoc: undefined,
+  selectedSegments: [],
+  selectedCode: {
+    type: 'code',
+    content: 'console.log("test")',
   },
-  completedMessage: '',
+  selectedDependencies: {},
+  codeReady: false,
+  addScreenshot: () => Promise.resolve(),
+  setSelectedResponseId: vi.fn(),
 };
 
 describe('ChatInterface', () => {
@@ -54,9 +46,7 @@ describe('ChatInterface', () => {
     // This test passes now that we've fixed the 'input is not defined' error
     // by properly destructuring input from chatState
     const { container } = render(
-      <ChatProvider>
-        <ChatInterface chatState={mockChatState} />
-      </ChatProvider>
+      <ChatInterface {...mockChatState} isSidebarVisible={false} setIsSidebarVisible={vi.fn()} />
     );
     expect(container).toBeDefined();
   });

@@ -1,27 +1,42 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import Home from '../app/routes/home';
-import { useChatContext } from '../app/context/ChatContext';
+import UnifiedSession from '../app/routes/home';
 
 // Mock dependencies
-vi.mock('../app/hooks/useChat', () => ({
-  useChat: () => ({
-    messages: [],
-    setMessages: vi.fn(),
+vi.mock('../app/hooks/useSimpleChat', () => ({
+  useSimpleChat: () => ({
+    docs: [],
     input: '',
     setInput: vi.fn(),
-    isGenerating: false,
-    currentStreamedText: '',
-    streamingCode: '',
-    completedCode: '',
     isStreaming: false,
     inputRef: { current: null },
-    messagesEndRef: { current: null },
-    autoResizeTextarea: vi.fn(),
-    scrollToBottom: vi.fn(),
     sendMessage: vi.fn(),
-    parserState: { current: { dependencies: {} } },
-    completedMessage: '',
+    selectedSegments: [],
+    selectedCode: null,
+    selectedDependencies: {},
+    title: '',
+    sessionId: null,
+    selectedResponseDoc: undefined,
+    codeReady: false,
+    addScreenshot: vi.fn(),
+  }),
+}));
+
+// Mock the useSession hook
+vi.mock('../app/hooks/useSession', () => ({
+  useSession: () => ({
+    session: null,
+    loading: false,
+    error: null,
+    loadSession: vi.fn(),
+    updateTitle: vi.fn(),
+    updateMetadata: vi.fn(),
+    addScreenshot: vi.fn(),
+    createSession: vi.fn().mockResolvedValue('new-session-id'),
+    database: {
+      put: vi.fn().mockResolvedValue({ ok: true }),
+    },
+    mergeSession: vi.fn(),
   }),
 }));
 
@@ -30,39 +45,78 @@ vi.mock('use-fireproof', () => ({
     database: {
       put: vi.fn().mockResolvedValue({ ok: true }),
     },
+    useDocument: () => ({
+      doc: {},
+      merge: vi.fn(),
+      save: vi.fn().mockResolvedValue({ id: 'test-id' }),
+    }),
+    useLiveQuery: () => ({ docs: [] }),
   }),
 }));
 
-// Mock our ChatInterface to detect context errors
-vi.mock('../app/ChatInterface', () => {
-  // Import the actual component to detect errors
-  const actualComponent = vi.importActual('../app/ChatInterface');
+// Mock React Router hooks
+vi.mock('react-router', () => ({
+  useParams: () => ({}),
+  useNavigate: () => vi.fn(),
+  useLocation: () => ({ search: '', pathname: '/' }),
+}));
 
+// Mock for the utility functions
+vi.mock('../app/utils/sharing', () => ({
+  decodeStateFromUrl: () => ({ code: '', dependencies: {} }),
+}));
+
+vi.mock('../app/components/SessionSidebar/utils', () => ({
+  encodeTitle: (title: string) => title,
+}));
+
+// Mock AppLayout component to make testing easier
+vi.mock('../app/components/AppLayout', () => {
+  return {
+    __esModule: true,
+    default: ({ chatPanel, previewPanel }: { chatPanel: any; previewPanel: any }) => {
+      return (
+        <div data-testid="app-layout">
+          <div data-testid="chat-panel">{chatPanel}</div>
+          <div data-testid="preview-panel">{previewPanel}</div>
+        </div>
+      );
+    },
+  };
+});
+
+// Mock our ChatInterface
+vi.mock('../app/components/ChatInterface', () => {
   return {
     __esModule: true,
     default: (props: any) => {
-      try {
-        // This should throw if ChatProvider is missing
-        useChatContext();
-        return <div data-testid="chat-interface">Chat Interface</div>;
-      } catch (error) {
-        // Capture the error for our test to verify
-        return <div data-testid="context-error">{String(error)}</div>;
-      }
+      return <div data-testid="chat-interface">Chat Interface</div>;
+    },
+  };
+});
+
+// Mock ResultPreview
+vi.mock('../app/components/ResultPreview/ResultPreview', () => {
+  return {
+    __esModule: true,
+    default: (props: any) => {
+      return <div data-testid="result-preview">Result Preview</div>;
     },
   };
 });
 
 describe('Home Route', () => {
-  it('should properly provide ChatContext to child components', () => {
-    // Render the home component
-    render(<Home />);
+  it('should render the chat interface and result preview', () => {
+    // Render the unified session component
+    render(<UnifiedSession />);
 
-    // If the context is missing, we'll see the error message
-    const contextError = screen.queryByTestId('context-error');
+    // Check that the components are rendered in the AppLayout
+    expect(screen.getByTestId('app-layout')).toBeInTheDocument();
+    expect(screen.getByTestId('chat-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('preview-panel')).toBeInTheDocument();
 
-    // This test should initially fail, showing that ChatContext is missing
-    expect(contextError).toBeNull();
+    // Check for the content inside the panels
     expect(screen.getByTestId('chat-interface')).toBeInTheDocument();
+    expect(screen.getByTestId('result-preview')).toBeInTheDocument();
   });
 });

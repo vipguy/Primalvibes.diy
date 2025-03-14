@@ -263,7 +263,7 @@ a,
 .pulsing {
   width: 100%;
   height: auto;
-  transform: rotate(-5deg) scale(4);
+  transform: rotate(-5deg) scale(6);
   animation: pulse 8s infinite;
 }
 
@@ -280,7 +280,9 @@ a,
 }
 .logo-pulse {
   transform: rotate(-5deg) scale(4);
-  animation: logo-rotate 30s ease-in-out infinite;
+  animation:
+    logo-rotate 33s ease-in-out infinite,
+    logo-pulse-height 21s ease-in-out infinite;
 }
 
 @keyframes logo-rotate {
@@ -293,4 +295,53 @@ a,
   100% {
     transform: rotate(0deg) scale(1);
   }
+}
+
+@keyframes logo-pulse-height {
+  0% {
+    width: 80%;
+  }
+  50% {
+    width: 120%;
+  }
+  100% {
+    width: 80%;
+  }
+}
+
+.ai-markdown ul {
+  list-style-type: disc;
+  padding-left: 1rem;
+  padding-top: 0.5rem;
+}
+
+.ai-markdown ol {
+  list-style-type: decimal;
+  padding-left: 1rem;
+  padding-top: 0.5rem;
+}
+
+.ai-markdown li {
+  margin-bottom: 0.5rem;
+}
+
+.ai-markdown h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.ai-markdown h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.ai-markdown h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 0.75rem;
+  margin-bottom: 0.5rem;
 }

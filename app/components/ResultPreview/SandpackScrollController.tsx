@@ -1,27 +1,105 @@
 import { useEffect, useRef } from 'react';
 
+// Create static refs that persist across component remounts
+// These will maintain state even when the component is unmounted and remounted
+const staticRefs = {
+  scroller: null as HTMLElement | null,
+  contentObserver: null as MutationObserver | null,
+  checkForScrollerInterval: null as NodeJS.Timeout | null,
+  lastScrollHeight: 0,
+};
+
 interface SandpackScrollControllerProps {
   isStreaming: boolean;
+  shouldEnableScrolling?: boolean;
+  codeReady?: boolean;
+  activeView?: 'preview' | 'code';
 }
 
-const SandpackScrollController: React.FC<SandpackScrollControllerProps> = ({ isStreaming }) => {
-  const lastScrollHeight = useRef(0);
-  const lastScrollPosition = useRef(0);
-  const isScrolling = useRef(false);
-  const hasUserScrolled = useRef(false);
-  const highlightIntervalRef = useRef<NodeJS.Timeout | null>(null);
+const SandpackScrollController: React.FC<SandpackScrollControllerProps> = ({
+  isStreaming,
+  shouldEnableScrolling = isStreaming, // Default to isStreaming if not provided
+  codeReady = false,
+  activeView = 'preview', // Default to preview view
+}) => {
+  // Keep component-level refs for React's hook rules
+  const componentMounted = useRef(false);
+  const propsRef = useRef({ isStreaming, codeReady, activeView });
 
+  // Update props ref when they change
   useEffect(() => {
-    let primaryScroller: HTMLElement | null = null;
+    propsRef.current = { isStreaming, codeReady, activeView };
+  }, [isStreaming, codeReady, activeView]);
 
+  // Simple check if we should be auto-scrolling
+  const shouldAutoScroll = () => {
+    const { isStreaming, codeReady, activeView } = propsRef.current;
+    return isStreaming && !codeReady && activeView === 'code';
+  };
+
+  // Immediately scroll to the bottom with no animations
+  const scrollToBottom = () => {
+    if (!staticRefs.scroller) return;
+    
+    // Hard scroll to bottom with no animation
+    staticRefs.scroller.scrollTop = staticRefs.scroller.scrollHeight;
+    staticRefs.lastScrollHeight = staticRefs.scroller.scrollHeight;
+  };
+
+  // Setup the scroller observer
+  const setupScroller = (scroller: HTMLElement) => {
+    if (!scroller) return;
+
+    staticRefs.scroller = scroller;
+
+    // Clean up any previous observers
+    if (staticRefs.contentObserver) {
+      staticRefs.contentObserver.disconnect();
+    }
+
+    // Setup content observer with simplified mutation handling
+    const contentObserver = new MutationObserver(() => {
+      // Skip if component not mounted or no scroller
+      if (!componentMounted.current || !staticRefs.scroller) return;
+
+      // Check if content height has changed
+      const newHeight = staticRefs.scroller.scrollHeight;
+      if (newHeight !== staticRefs.lastScrollHeight && shouldAutoScroll()) {
+        scrollToBottom();
+      }
+
+      staticRefs.lastScrollHeight = newHeight;
+    });
+
+    // Observe all relevant content changes
+    contentObserver.observe(scroller, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+
+    staticRefs.contentObserver = contentObserver;
+
+    // Do initial scroll if needed
+    if (shouldAutoScroll()) {
+      scrollToBottom();
+    }
+  };
+
+  // Main effect to handle mounting and setup
+  useEffect(() => {
+    componentMounted.current = true;
+
+    // Add the highlight styles if they don't exist (for test compatibility)
     if (!document.getElementById('highlight-style')) {
       const style = document.createElement('style');
       style.id = 'highlight-style';
       style.textContent = `
         .cm-line-highlighted {
           position: relative !important;
-          border-left: 3px solid rgba(0, 137, 249, 0.27) !important;
+          border-left: 3px solid rgba(0, 137, 249, 0.6) !important;
           color: inherit !important;
+          transition: border-color 0.4s ease-in-out !important;
         }
         
         .cm-line-highlighted::before {
@@ -31,177 +109,94 @@ const SandpackScrollController: React.FC<SandpackScrollControllerProps> = ({ isS
           left: 0 !important;
           right: 0 !important;
           bottom: 0 !important;
-          background: linear-gradient(60deg, rgba(0, 128, 255, 0.15), rgba(224, 255, 255, 0.25), rgba(0, 183, 255, 0.15)) !important;
-          background-size: 200% 200% !important;
-          animation: sparkleAppear 2s ease-out !important;
+          background: linear-gradient(
+            90deg, 
+            rgba(0, 128, 255, 0.12) 0%, 
+            rgba(224, 255, 255, 0.2) 50%, 
+            rgba(0, 183, 255, 0.12) 100%
+          ) !important;
+          background-size: 200% 100% !important;
           pointer-events: none !important;
           z-index: -1 !important;
+          opacity: 0 !important;
+          transition: opacity 1ms ease-in-out !important;
         }
         
-        @keyframes sparkleGradient {
-          0% { background-position: 0% 50% }
-          50% { background-position: 100% 50% }
-          100% { background-position: 0% 50% }
+        /* Simple animation for all document sizes */
+        .cm-line-highlighted.active::before {
+          opacity: 1 !important;
+          animation: sparkleFlow 2s ease-in-out infinite !important;
         }
         
-        @keyframes sparkleAppear {
-          0% { opacity: 0.8; }
-          50% { opacity: 0.8; }
-          100% { opacity: 0.1; }
+        /* Simple animation keyframes */
+        @keyframes sparkleFlow {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        
+        /* Fade out class with transition */
+        .cm-line-fade-out {
+          transition: border-color 1.5s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
+          border-left-color: rgba(0, 137, 249, 0.2) !important;
+        }
+        
+        .cm-line-fade-out::before {
+          opacity: 0 !important;
+          transition: opacity 1.5s cubic-bezier(0.25, 0.1, 0.1, 1) !important;
         }
       `;
       document.head.appendChild(style);
     }
 
-    const scrollToBottom = () => {
-      if (!primaryScroller) return;
-      isScrolling.current = true;
-
-      requestAnimationFrame(() => {
-        if (primaryScroller) {
-          primaryScroller.scrollTop = primaryScroller.scrollHeight;
-          lastScrollHeight.current = primaryScroller.scrollHeight;
-          lastScrollPosition.current = primaryScroller.scrollTop;
-        }
-        isScrolling.current = false;
-      });
+    // Find the scroller element
+    const findAndSetupScroller = () => {
+      const scroller = document.querySelector('.cm-scroller');
+      if (scroller && scroller instanceof HTMLElement) {
+        setupScroller(scroller);
+        return true;
+      }
+      return false;
     };
 
-    const highlightLastLine = () => {
-      if (!primaryScroller || !isStreaming) return;
-
-      document.querySelectorAll('.cm-line-highlighted').forEach((el) => {
-        el.classList.remove('cm-line-highlighted');
-      });
-
-      const lines = Array.from(document.querySelectorAll('.cm-line'));
-      let lastLine = null;
-
-      for (let i = lines.length - 1; i >= 0; i--) {
-        const line = lines[i];
-        const content = line.textContent || '';
-        if (content.trim() && !content.includes('END OF CODE')) {
-          lastLine = line;
-          break;
-        }
-      }
-
-      if (lastLine) {
-        lastLine.classList.add('cm-line-highlighted');
-      }
-    };
-
-    const checkForScroller = setInterval(() => {
-      if (primaryScroller) {
-        clearInterval(checkForScroller);
-        return;
-      }
-
-      const newScroller = document.querySelector('.cm-scroller');
-      if (newScroller && newScroller instanceof HTMLElement) {
-        primaryScroller = newScroller;
-
-        scrollToBottom();
-
-        setupContentObserver();
-      }
-    }, 100);
-
-    const setupContentObserver = () => {
-      if (!primaryScroller) return;
-
-      const contentObserver = new MutationObserver(() => {
-        if (!primaryScroller) return;
-
-        const newHeight = primaryScroller.scrollHeight;
-
-        if (isStreaming) {
-          highlightLastLine();
-        } else {
-          document.querySelectorAll('.cm-line-highlighted').forEach((el) => {
-            el.classList.remove('cm-line-highlighted');
-          });
-        }
-
-        if (newHeight === lastScrollHeight.current) return;
-
-        const isNearBottom =
-          primaryScroller.scrollTop + primaryScroller.clientHeight > lastScrollHeight.current - 100;
-
-        if (!hasUserScrolled.current || isNearBottom) {
-          scrollToBottom();
-        }
-
-        lastScrollHeight.current = newHeight;
-      });
-
-      const handleScroll = () => {
-        if (isScrolling.current || !primaryScroller) return;
-
-        const currentPosition = primaryScroller.scrollTop;
-        if (Math.abs(currentPosition - lastScrollPosition.current) > 10) {
-          hasUserScrolled.current = true;
-          lastScrollPosition.current = currentPosition;
-
-          if (
-            primaryScroller.scrollTop + primaryScroller.clientHeight >=
-            primaryScroller.scrollHeight - 50
-          ) {
-            hasUserScrolled.current = false;
+    // Try to find scroller immediately
+    if (!findAndSetupScroller()) {
+      // If not found, set up an interval to keep trying
+      staticRefs.checkForScrollerInterval = setInterval(() => {
+        if (findAndSetupScroller()) {
+          // Once found, clear the interval
+          if (staticRefs.checkForScrollerInterval) {
+            clearInterval(staticRefs.checkForScrollerInterval);
+            staticRefs.checkForScrollerInterval = null;
           }
         }
-      };
-
-      if (primaryScroller) {
-        contentObserver.observe(primaryScroller, {
-          childList: true,
-          subtree: true,
-          characterData: true,
-        });
-
-        primaryScroller.addEventListener('scroll', handleScroll);
-
-        if (isStreaming) {
-          highlightLastLine();
-        }
-      }
-
-      if (isStreaming) {
-        highlightIntervalRef.current = setInterval(highlightLastLine, 10);
-      }
-
-      return () => {
-        clearInterval(checkForScroller);
-        if (highlightIntervalRef.current) {
-          clearInterval(highlightIntervalRef.current);
-          highlightIntervalRef.current = null;
-        }
-        contentObserver.disconnect();
-        primaryScroller?.removeEventListener('scroll', handleScroll);
-      };
-    };
-
-    setTimeout(scrollToBottom, 100);
-
-    return () => {
-      clearInterval(checkForScroller);
-      if (highlightIntervalRef.current) {
-        clearInterval(highlightIntervalRef.current);
-        highlightIntervalRef.current = null;
-      }
-    };
-  }, [isStreaming]);
-
-  useEffect(() => {
-    if (!isStreaming && highlightIntervalRef.current) {
-      clearInterval(highlightIntervalRef.current);
-      highlightIntervalRef.current = null;
-
-      document.querySelectorAll('.cm-line-highlighted').forEach((el) => {
-        el.classList.remove('cm-line-highlighted');
-      });
+      }, 100);
     }
-  }, [isStreaming]);
+
+    // Cleanup function
+    return () => {
+      componentMounted.current = false;
+
+      // Clear intervals
+      if (staticRefs.checkForScrollerInterval) {
+        clearInterval(staticRefs.checkForScrollerInterval);
+        staticRefs.checkForScrollerInterval = null;
+      }
+
+      // Disconnect observer
+      if (staticRefs.contentObserver) {
+        staticRefs.contentObserver.disconnect();
+      }
+    };
+  }, []);
+
+  // Effect for responding to prop changes
+  useEffect(() => {
+    // If conditions change and we should auto-scroll now, do it
+    if (shouldAutoScroll() && staticRefs.scroller) {
+      scrollToBottom();
+    }
+  }, [isStreaming, codeReady, activeView]);
 
   return null;
 };

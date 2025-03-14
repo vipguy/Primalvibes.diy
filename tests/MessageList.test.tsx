@@ -1,28 +1,120 @@
-import { vi, describe, it, expect, beforeAll } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { vi, describe, test, expect, beforeEach } from 'vitest';
 import MessageList from '../app/components/MessageList';
-import type { ChatMessage } from '../app/types/chat';
+import type { UserChatMessage, AiChatMessage } from '../app/types/chat';
 
-beforeAll(() => {
-  window.HTMLElement.prototype.scrollIntoView = vi.fn();
-});
+// Mock the Message component
+vi.mock('../app/components/Message', () => ({
+  default: ({ message }: any) => <div data-testid="mock-message">{message.text}</div>,
+  WelcomeScreen: () => <div data-testid="welcome-screen">Welcome Screen</div>,
+}));
 
 describe('MessageList', () => {
-  it('renders messages correctly', () => {
-    const messages: ChatMessage[] = [
-      { type: 'user', text: 'Hello' },
-      { type: 'ai', text: 'Hi there!' },
+  test('renders messages correctly', () => {
+    const messages = [
+      {
+        type: 'user',
+        text: 'Hello',
+        _id: 'user-1',
+        session_id: 'test',
+        created_at: Date.now(),
+      } as UserChatMessage,
+      {
+        type: 'ai',
+        text: 'Hi there!',
+        _id: 'ai-1',
+        segments: [{ type: 'markdown', content: 'Hi there!' }],
+        session_id: 'test',
+        created_at: Date.now(),
+      } as AiChatMessage,
     ];
 
-    render(<MessageList messages={messages} isGenerating={false} currentStreamedText="" />);
+    render(<MessageList messages={messages} isStreaming={false} />);
 
-    expect(screen.getByText('Hello')).toBeDefined();
-    expect(screen.getByText('Hi there!')).toBeDefined();
+    expect(screen.getAllByTestId('mock-message').length).toBe(2);
+    expect(screen.getByText('Hello')).toBeInTheDocument();
+    expect(screen.getByText('Hi there!')).toBeInTheDocument();
   });
 
-  it('renders streaming text correctly', () => {
-    render(<MessageList messages={[]} isGenerating={true} currentStreamedText="Thinking..." />);
+  test('renders empty state correctly', () => {
+    render(<MessageList messages={[]} isStreaming={false} />);
+    expect(screen.getByTestId('welcome-screen')).toBeInTheDocument();
+  });
 
-    expect(screen.getByText('Thinking...')).toBeDefined();
+  test('renders streaming message correctly', () => {
+    const messages = [
+      {
+        type: 'user',
+        text: 'Hello',
+        _id: 'user-1',
+        session_id: 'test',
+        created_at: Date.now(),
+      } as UserChatMessage,
+      {
+        type: 'ai',
+        text: 'Streaming response...',
+        _id: 'ai-1',
+        segments: [{ type: 'markdown', content: 'Streaming response...' }],
+        isStreaming: true,
+        session_id: 'test',
+        created_at: Date.now(),
+      } as AiChatMessage,
+    ];
+
+    render(<MessageList messages={messages} isStreaming={true} />);
+
+    expect(screen.getAllByTestId('mock-message').length).toBe(2);
+    expect(screen.getByText('Hello')).toBeInTheDocument();
+    expect(screen.getByText('Streaming response...')).toBeInTheDocument();
+  });
+
+  test('should show content instead of placeholder when streaming message has content', () => {
+    const messages = [
+      {
+        type: 'user',
+        text: 'Create a React app',
+        _id: 'user-2',
+        session_id: 'test',
+        created_at: Date.now(),
+      } as UserChatMessage,
+      {
+        type: 'ai',
+        text: 'Here is a React app',
+        _id: 'ai-2',
+        segments: [{ type: 'markdown', content: 'Here is a React app' }],
+        isStreaming: true,
+        session_id: 'test',
+        created_at: Date.now(),
+      } as AiChatMessage,
+    ];
+
+    render(<MessageList messages={messages} isStreaming={true} />);
+
+    expect(screen.getByText('Here is a React app')).toBeInTheDocument();
+  });
+
+  test('should show "Processing response..." when streaming message has no content', () => {
+    const messages = [
+      {
+        type: 'user',
+        text: 'Create a React app',
+        _id: 'user-3',
+        session_id: 'test',
+        created_at: Date.now(),
+      } as UserChatMessage,
+      {
+        type: 'ai',
+        text: '',
+        _id: 'ai-3',
+        segments: [],
+        isStreaming: true,
+        session_id: 'test',
+        created_at: Date.now(),
+      } as AiChatMessage,
+    ];
+
+    render(<MessageList messages={messages} isStreaming={true} />);
+
+    expect(screen.getByText('Create a React app')).toBeInTheDocument();
   });
 });

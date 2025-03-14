@@ -13,7 +13,7 @@ describe('Routes', () => {
     const indexRoute = routes[0];
     expect(indexRoute).toBeDefined();
 
-    // Check that the route has a file property that includes home.tsx
+    // Check that the route has a file property that includes unified-session.tsx
     expect(indexRoute).toHaveProperty('file');
     expect(indexRoute.file).toContain('home.tsx');
   });

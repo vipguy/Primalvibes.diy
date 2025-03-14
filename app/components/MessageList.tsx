@@ -1,193 +1,72 @@
-import { useEffect, useRef, memo, useCallback, useMemo } from 'react';
-import type { ChatMessage } from '../types/chat';
-import ReactMarkdown from 'react-markdown';
+import { memo, useMemo } from 'react';
+import Message, { WelcomeScreen } from './Message';
+import type { ChatMessageDocument } from '../types/chat';
 
 interface MessageListProps {
-  messages: ChatMessage[];
-  isGenerating: boolean;
-  currentStreamedText: string;
+  messages: ChatMessageDocument[];
+  isStreaming: boolean;
   isShrinking?: boolean;
   isExpanding?: boolean;
+  setSelectedResponseId?: (id: string) => void;
 }
 
-// Shared utility function for rendering markdown content
-// Extracted outside the component to prevent recreation on each render
-const renderMarkdownContent = (text: string) => {
+function MessageList({
+  messages,
+  isStreaming,
+  isShrinking = false,
+  isExpanding = false,
+  setSelectedResponseId,
+}: MessageListProps) {
+  const messageElements = useMemo(() => {
+    return messages.map((msg, i) => {
+      return (
+        <Message
+          key={msg._id || 'streaming' + i}
+          message={msg}
+          isStreaming={isStreaming}
+          isShrinking={isShrinking}
+          isExpanding={isExpanding}
+          setSelectedResponseId={setSelectedResponseId}
+        />
+      );
+    });
+  }, [messages, isShrinking, isExpanding, isStreaming, setSelectedResponseId]);
+
   return (
-    <div className="prose prose-sm dark:prose-invert max-w-none">
-      <ReactMarkdown>{text}</ReactMarkdown>
-    </div>
-  );
-};
-
-// Individual message component to optimize rendering
-const Message = memo(
-  ({
-    message,
-    index,
-    isShrinking,
-    isExpanding,
-  }: {
-    message: ChatMessage;
-    index: number;
-    isShrinking: boolean;
-    isExpanding: boolean;
-  }) => {
-    return (
-      <div
-        className={`flex flex-col transition-all duration-500 ${isShrinking ? 'origin-top-left scale-0 opacity-0' : 'scale-100 opacity-100'
-          } ${isExpanding ? 'animate-bounce-in' : ''}`}
-        style={{
-          transitionDelay: isShrinking ? `${index * 50}ms` : '0ms',
-        }}
-      >
-        <div className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-          {message.type === 'ai' && (
-            <div className="bg-light-background-00 dark:bg-dark-background-00 mr-2 flex h-8 w-8 items-center justify-center rounded-full">
-              <span className="text-light-primary dark:text-dark-primary text-sm font-medium">
-                AI
-              </span>
-            </div>
-          )}
-          <div
-            className={`message rounded-2xl p-3 ${message.type === 'user'
-                ? 'bg-accent-02-light dark:bg-accent-02-dark rounded-tr-sm text-white'
-                : 'bg-light-background-00 dark:bg-dark-decorative-00 text-light-primary dark:text-dark-primary rounded-tl-sm'
-              } max-w-[85%] shadow-sm`}
-          >
-            {renderMarkdownContent(message.text)}
-          </div>
-        </div>
-      </div>
-    );
-  }
-);
-
-// Optimized AI Typing component
-const AITyping = memo(({ currentStreamedText }: { currentStreamedText: string }) => {
-  return (
-    <div className="flex justify-start">
-      <div className="bg-light-background-00 dark:bg-dark-background-00 mr-2 flex h-8 w-8 items-center justify-center rounded-full">
-
-        <span className="text-light-primary dark:text-dark-primary text-sm font-medium">AI</span>
-      </div>
-      <div className="message bg-light-background-00 dark:bg-dark-background-00 text-light-primary dark:text-dark-primary max-w-[85%] rounded-2xl rounded-tl-sm p-3 shadow-sm">
-        {currentStreamedText ? (
-          <>
-            {renderMarkdownContent(currentStreamedText)}
-            <span className="bg-light-primary dark:bg-dark-primary ml-1 inline-block h-4 w-2 animate-pulse" />
-          </>
+    <div
+      className={`flex-1 ${
+        isShrinking ? 'animate-width-shrink' : isExpanding ? 'animate-width-expand' : ''
+      }`}
+    >
+      <div className="mx-auto flex min-h-full max-w-5xl flex-col py-4">
+        {messages.length === 0 && !isStreaming ? (
+          <WelcomeScreen />
         ) : (
-          <div className="flex items-center gap-2">
-            Thinking
-            <span className="flex gap-1">
-              <span className="bg-light-primary dark:bg-dark-primary h-1.5 w-1.5 animate-bounce rounded-full [animation-delay:-0.3s]" />
-              <span className="bg-light-primary dark:bg-dark-primary h-1.5 w-1.5 animate-bounce rounded-full [animation-delay:-0.15s]" />
-              <span className="bg-light-primary dark:bg-dark-primary h-1.5 w-1.5 animate-bounce rounded-full" />
-            </span>
-          </div>
+          <div className="flex flex-col space-y-4">{messageElements}</div>
         )}
       </div>
     </div>
   );
-});
-
-function MessageList({
-  messages,
-  isGenerating,
-  currentStreamedText,
-  isShrinking = false,
-  isExpanding = false,
-}: MessageListProps) {
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Scroll to bottom when messages change
-  useEffect(() => {
-    try {
-      // Only run scrollIntoView if the element exists and the function is available
-      if (messagesEndRef.current && typeof messagesEndRef.current.scrollIntoView === 'function') {
-        messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-      }
-    } catch (error) {
-      console.error('Error scrolling into view:', error);
-    }
-  }, [messages, currentStreamedText]);
-
-  // Memoize the message list to prevent unnecessary re-renders
-  const messageElements = useMemo(() => {
-    return messages.map((msg, i) => (
-      <Message
-        key={`${msg.type}-${i}`}
-        message={msg}
-        index={i}
-        isShrinking={isShrinking}
-        isExpanding={isExpanding}
-      />
-    ));
-  }, [messages, isShrinking, isExpanding]);
-
-  return (
-    <div
-      className="messages bg-light-background-01 dark:bg-dark-background-01 flex-1 space-y-4 overflow-y-auto p-4"
-      style={{ maxHeight: 'calc(100vh - 140px)' }}
-    >
-      {messages.length === 0 && !isGenerating ? (
-        <div className="text-accent-02 mx-auto max-w-2xl space-y-4 px-12 pt-8 text-center italic">
-          <p>
-            Quickly create React apps in your browser, no setup required. Apps are sharable, or
-            eject them to GitHub for easy deploys.{' '}
-            <a
-              href="https://github.com/fireproof-storage/ai-app-builder"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-accent-00 hover:underline"
-            >
-              Fork and customize this app builder
-            </a>
-            , no backend required.
-          </p>
-
-          <div className="mt-6 border-t border-gray-200 pt-4 dark:border-gray-700">
-            <h3 className="py-2 text-lg font-semibold">About Fireproof</h3>
-            <p className="text-sm">
-              Fireproof enables secure saving and sharing of your data, providing encrypted live
-              synchronization and offline-first capabilities. Learn more about{' '}
-              <a
-                href="https://use-fireproof.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-accent-00 hover:underline"
-              >
-                Fireproof
-              </a>
-              .
-            </p>
-          </div>
-        </div>
-      ) : (
-        <>
-          {messageElements}
-          {isGenerating && <AITyping currentStreamedText={currentStreamedText} />}
-        </>
-      )}
-      <div ref={messagesEndRef} />
-    </div>
-  );
 }
-
-// Export a memoized version of the component to prevent unnecessary re-renders
 export default memo(MessageList, (prevProps, nextProps) => {
-  // Simplified equality check focusing on the essential changed values
-  const messagesEqual =
-    prevProps.messages === nextProps.messages ||
-    (prevProps.messages.length === nextProps.messages.length &&
-      JSON.stringify(prevProps.messages) === JSON.stringify(nextProps.messages));
-
-  return (
-    messagesEqual &&
-    prevProps.isGenerating === nextProps.isGenerating &&
-    prevProps.currentStreamedText === nextProps.currentStreamedText &&
+  // Reference equality check for animation flags
+  const animationStateEqual =
+    prevProps.isStreaming === nextProps.isStreaming &&
     prevProps.isShrinking === nextProps.isShrinking &&
-    prevProps.isExpanding === nextProps.isExpanding
-  );
+    prevProps.isExpanding === nextProps.isExpanding;
+
+  // Check if setSelectedResponseId changed
+  const setSelectedResponseIdEqual =
+    prevProps.setSelectedResponseId === nextProps.setSelectedResponseId;
+
+  // Content equality check for messages - must compare text content
+  const messagesEqual =
+    prevProps.messages.length === nextProps.messages.length &&
+    prevProps.messages.every((msg, i) => {
+      const nextMsg = nextProps.messages[i];
+      // Check message ID and text content
+      return msg._id === nextMsg._id && msg.text === nextMsg.text;
+    });
+
+  return animationStateEqual && messagesEqual && setSelectedResponseIdEqual;
 });

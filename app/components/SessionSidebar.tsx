@@ -1,129 +1,17 @@
-import { useEffect, useRef, memo, useMemo, useState } from 'react';
-import { useFireproof } from 'use-fireproof';
-import { Link } from 'react-router';
-
-function ImgFile({
-  file,
-  alt,
-  className,
-}: {
-  file: { file: () => Promise<File>; type: string };
-  alt: string;
-  className: string;
-}) {
-  const [imgDataUrl, setImgDataUrl] = useState('');
-  useEffect(() => {
-    if (file.type && /image/.test(file.type)) {
-      file.file().then((file: File) => {
-        const src = URL.createObjectURL(file);
-        setImgDataUrl(src);
-        return () => URL.revokeObjectURL(src);
-      });
-    }
-  }, [file]);
-  return imgDataUrl ? (
-    <img className={`${className} max-h-60 max-w-full object-contain`} alt={alt} src={imgDataUrl} />
-  ) : null;
-}
-
-// Add these type definitions at the top of the file
-interface DocBase {
-  _id: string;
-}
-
-interface ScreenshotDocument extends DocBase {
-  type: 'screenshot';
-  session_id: string;
-  _files?: {
-    screenshot: { file: () => Promise<File>; type: string };
-  };
-}
-
-// Modify SessionDocument to include optional type
-interface SessionDocument extends DocBase {
-  type?: 'session'; // Make it optional since existing docs might not have it
-  title?: string;
-  timestamp: number;
-  messages?: Array<{
-    text: string;
-    type: 'user' | 'ai';
-    code?: string;
-    dependencies?: Record<string, string>;
-  }>;
-}
-
-// Union type for documents returned by query
-type SessionOrScreenshot = SessionDocument | ScreenshotDocument;
-
-// Helper function to encode titles for URLs
-function encodeTitle(title: string): string {
-  return encodeURIComponent(title || 'untitled-session')
-    .toLowerCase()
-    .replace(/%20/g, '-');
-}
-
-interface SessionSidebarProps {
-  isVisible: boolean;
-  onClose: () => void;
-  onSelectSession: (session: SessionDocument) => void;
-}
+import { useEffect, useRef, memo, useMemo } from 'react';
+import { useSessionList } from '../hooks/sidebar/useSessionList';
+import { ImgFile } from './SessionSidebar/ImgFile';
+import { encodeTitle } from './SessionSidebar/utils';
+import type { SessionSidebarProps, SessionOrScreenshot, SessionDocument } from '../types/chat';
 
 /**
  * Component that displays a collapsible sidebar with chat session history
  */
-function SessionSidebar({ isVisible, onClose, onSelectSession }: SessionSidebarProps) {
-  const { database, useLiveQuery } = useFireproof('fireproof-chat-history');
+function SessionSidebar({ isVisible, onClose }: SessionSidebarProps) {
   const sidebarRef = useRef<HTMLDivElement>(null);
 
-  // // Query chat sessions ordered by timestamp (newest first)
-  // const { docs: sessions } = useLiveQuery('type', {
-  //   key: 'session',
-  //   descending: true,
-  // });
-
-  // // Query chat sessions ordered by timestamp (newest first)
-  // const { docs: screenshots } = useLiveQuery('type', {
-  //   key: 'screenshot',
-  //   descending: true,
-  // });
-
-  const { docs: sessionAndScreenshots } = useLiveQuery<SessionOrScreenshot>((doc) =>
-    doc.type && doc.type === 'screenshot' ? doc.session_id : doc._id
-  );
-
-  // Group sessions and screenshots together
-  const groupedSessions = useMemo(() => {
-    const groups = new Map<
-      string,
-      { session?: SessionDocument; screenshots: ScreenshotDocument[] }
-    >();
-
-    sessionAndScreenshots.forEach((doc) => {
-      if ('type' in doc && doc.type === 'screenshot') {
-        // Handle screenshot
-        const sessionId = doc.session_id;
-        let group = groups.get(sessionId);
-        if (!group) {
-          group = { session: undefined, screenshots: [] };
-          groups.set(sessionId, group);
-        }
-        group.screenshots.push(doc as ScreenshotDocument);
-      } else {
-        // Handle session
-        let group = groups.get(doc._id);
-        if (!group) {
-          group = { session: undefined, screenshots: [] };
-          groups.set(doc._id, group);
-        }
-        group.session = doc as SessionDocument;
-      }
-    });
-
-    // Convert map to array and sort by session timestamp
-    return Array.from(groups.values())
-      .filter((group) => group.session) // Only include groups with sessions
-      .sort((a, b) => (b.session!.timestamp || 0) - (a.session!.timestamp || 0));
-  }, [sessionAndScreenshots]) as { session: SessionDocument; screenshots: ScreenshotDocument[] }[];
+  // Use the custom hook instead of direct database queries
+  const { groupedSessions } = useSessionList();
 
   // Handle clicks outside the sidebar to close it
   useEffect(() => {
@@ -144,16 +32,6 @@ function SessionSidebar({ isVisible, onClose, onSelectSession }: SessionSidebarP
     };
   }, [isVisible, onClose]);
 
-  // Select a session and notify parent component
-  const handleSelectSession = (session: SessionDocument) => {
-    // Call the provided onSelectSession handler
-    onSelectSession(session);
-    // Close the sidebar on mobile
-    if (window.innerWidth < 768) {
-      onClose();
-    }
-  };
-
   // Memoize the sidebar classes to prevent recalculations on every render
   const sidebarClasses = useMemo(() => {
     return `bg-light-background-00 dark:bg-dark-background-00 fixed top-0 left-0 z-10 h-full shadow-lg transition-all duration-300 ${
@@ -163,53 +41,51 @@ function SessionSidebar({ isVisible, onClose, onSelectSession }: SessionSidebarP
 
   // Render session items with Link components
   const renderSessionItems = () => {
-    return groupedSessions
-      .map(({ session, screenshots }) => {
-        // Skip if this isn't a session document
-        if (!session || !('_id' in session)) {
-          return null;
-        }
+    return groupedSessions.map(({ session, screenshots }) => {
+      // Skip if this isn't a session document
+      if (!session || !('_id' in session)) {
+        return null;
+      }
 
-        // Cast to SessionDocument to access title
-        const sessionDoc = session as SessionDocument;
-        const title = sessionDoc.title || 'New Chat';
-        const encodedTitle = encodeTitle(title);
+      const title = session.title || 'New Chat';
+      const encodedTitle = encodeTitle(title);
 
-        return (
-          <li
-            key={sessionDoc._id}
-            className="cursor-pointer border-b border-gray-200 p-3 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
-            data-testid="session-item"
-          >
-            <Link
-              to={`/session/${sessionDoc._id}/${encodedTitle}`}
-              className="block"
-              onClick={(e) => {
-                // Don't navigate, just use the handler
-                e.preventDefault();
-                handleSelectSession(sessionDoc);
-              }}
-            >
-              <div className="text-sm font-semibold text-gray-900 dark:text-white">{title}</div>
-              <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                {new Date(sessionDoc.timestamp).toLocaleString()}
-              </div>
-              {screenshots.map(
-                (screenshot) =>
-                  screenshot._files?.screenshot && (
-                    <ImgFile
-                      key={screenshot._id}
-                      file={screenshot._files.screenshot}
-                      alt={`Screenshot from ${title}`}
-                      className="mt-2"
-                    />
-                  )
-              )}
-            </Link>
-          </li>
+      // first and last screenshots, if they exist, and unique
+      const shownScreenshots = [screenshots[0], screenshots[screenshots.length - 1]]
+        .filter((screenshot) => screenshot !== undefined)
+        .filter(
+          (screenshot, index, self) => self.findIndex((t) => t._id === screenshot._id) === index
         );
-      })
-      .filter(Boolean);
+
+      return (
+        <li
+          key={session._id}
+          className="cursor-pointer border-b border-gray-200 p-3 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
+        >
+          <a
+            href={`/chat/${session._id}/${encodedTitle}`}
+            className="block"
+            onClick={() => onClose()}
+          >
+            <div className="text-sm font-semibold text-gray-900 dark:text-white">{title}</div>
+            <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              {new Date(session.created_at).toLocaleString()}
+            </div>
+            {shownScreenshots.map(
+              (screenshot) =>
+                screenshot._files?.screenshot && (
+                  <ImgFile
+                    key={screenshot._id}
+                    file={screenshot._files.screenshot}
+                    alt={`Screenshot from ${title}`}
+                    className="mt-2"
+                  />
+                )
+            )}
+          </a>
+        </li>
+      );
+    });
   };
 
   // Conditionally render content but keep animation classes
@@ -267,9 +143,5 @@ function SessionSidebar({ isVisible, onClose, onSelectSession }: SessionSidebarP
 export default memo(SessionSidebar, (prevProps, nextProps) => {
   // Only re-render if isVisible changes
   // Note: Functions should be memoized by parent components
-  return (
-    prevProps.isVisible === nextProps.isVisible &&
-    prevProps.onClose === nextProps.onClose &&
-    prevProps.onSelectSession === nextProps.onSelectSession
-  );
+  return prevProps.isVisible === nextProps.isVisible && prevProps.onClose === nextProps.onClose;
 });
