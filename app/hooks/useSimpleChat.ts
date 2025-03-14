@@ -56,9 +56,11 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
   // Process docs into messages for the UI
   const filteredDocs = docs.filter((doc: any) => doc.type === 'ai' || doc.type === 'user');
 
-  const messages = (isStreaming && aiMessage.text.length > 0
-    ? [...filteredDocs, aiMessage]
-    : filteredDocs) as unknown as ChatMessageDocument[];
+  const messages = useMemo(() => {
+    return (isStreaming && aiMessage.text.length > 0
+      ? [...filteredDocs, aiMessage]
+      : filteredDocs) as unknown as ChatMessageDocument[];
+  }, [filteredDocs, isStreaming, aiMessage.text]);
 
   const buildMessageHistory = useCallback(() => {
     return messages.map((msg) => ({
