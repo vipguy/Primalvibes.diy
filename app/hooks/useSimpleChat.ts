@@ -197,7 +197,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     updateTitle,
   ]);
 
-  // TODO: make a version of this that only saves the first 
+  // TODO: make a version of this that only saves the first
   // for the given message source. so one each message.
   // const addFirstScreenshot = useCallback(
   //   async (screenshotData: string) => {

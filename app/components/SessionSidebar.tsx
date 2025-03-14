@@ -83,7 +83,7 @@ function SessionSidebar({ isVisible, onClose }: SessionSidebarProps) {
 
   // Conditionally render content but keep animation classes
   return (
-    <div 
+    <div
       ref={sidebarRef}
       className={`bg-light-background-00 dark:bg-dark-background-00 fixed top-0 left-0 z-10 h-full shadow-lg transition-all duration-300 ${
         isVisible ? 'w-64 translate-x-0' : 'w-0 -translate-x-full'

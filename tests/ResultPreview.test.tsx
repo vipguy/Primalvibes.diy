@@ -59,9 +59,7 @@ afterAll(() => {
 describe('ResultPreview', () => {
   it('renders without crashing', () => {
     // Use non-empty code to ensure the editor is shown
-    render(
-      <ResultPreview code="const test = 'Hello';" {...mockResultPreviewProps} />
-    );
+    render(<ResultPreview code="const test = 'Hello';" {...mockResultPreviewProps} />);
 
     // Now the sandpack editor should be visible
     expect(screen.getByTestId('sandpack-editor')).toBeDefined();

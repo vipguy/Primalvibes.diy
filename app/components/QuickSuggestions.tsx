@@ -13,6 +13,10 @@ function QuickSuggestions({ onSelectSuggestion }: QuickSuggestionsProps) {
       text: 'Create a pomodoro timer app with multiple timers work/break intervals and session tracking.',
     },
     {
+      label: 'Sports',
+      text: 'Chat with sports legends.',
+    },
+    {
       label: 'Drawing',
       text: 'Create a simple drawing app with a canvas where users can draw with different colors and save their drawings.',
     },
