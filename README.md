@@ -2,7 +2,7 @@
 
 Your **ideas** become **apps** instantly. [Try the hosted version](https://vibe-coding.use-fireproof.com/) or fork it on [GitHub](https://github.com/vibe-coding/vibe-coding) and bring your own API keys.
 
-![Vibe Coding App Builder](./public/fireproof-logo.png)
+[![Vibe Coding App Builder](./public/fireproof-logo.png)](https://fireproof.storage/)
 
 This tool lets you build React components with zero setup. With built-in Fireproof data persistence and OpenRouter API access, your creations are powerful and easy to share.
 
