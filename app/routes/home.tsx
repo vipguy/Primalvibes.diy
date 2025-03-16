@@ -92,9 +92,7 @@ export default function UnifiedSession() {
   return (
     <>
       <AppLayout
-        headerLeft={
-          <ChatHeaderContent onOpenSidebar={openSidebar} title={chatState.title || ''} />
-        }
+        headerLeft={<ChatHeaderContent onOpenSidebar={openSidebar} title={chatState.title || ''} />}
         headerRight={
           <ResultPreviewHeaderContent
             previewReady={previewReady}

@@ -164,7 +164,16 @@ export const WelcomeScreen = memo(() => {
 
       <p>
         Describe your app and let AI write the code. If you need ideas, try the quick suggestions
-        below or join our <a href="https://discord.gg/DbSXGqvxFc" target="_blank" rel="noopener noreferrer" className="text-accent-00 hover:underline">Discord community</a>.
+        below or join our{' '}
+        <a
+          href="https://discord.gg/DbSXGqvxFc"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-accent-00 hover:underline"
+        >
+          Discord community
+        </a>
+        .
       </p>
 
       <p>
