@@ -63,6 +63,7 @@ const AIMessage = memo(
             setSelectedResponseId={setSelectedResponseId}
             selectedResponseId={selectedResponseId}
             setMobilePreviewShown={setMobilePreviewShown}
+            rawText={message.text}
           />
         </div>
       </div>

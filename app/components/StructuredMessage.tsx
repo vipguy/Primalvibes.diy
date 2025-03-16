@@ -9,6 +9,7 @@ interface StructuredMessageProps {
   setSelectedResponseId: (id: string) => void;
   selectedResponseId: string;
   setMobilePreviewShown: (shown: boolean) => void;
+  rawText?: string; // Raw message text to be copied on shift+click
 }
 
 // Extracted CodeSegment as a separate component to avoid hooks in render functions
@@ -21,6 +22,7 @@ interface CodeSegmentProps {
   setSelectedResponseId: (id: string) => void;
   setMobilePreviewShown: (shown: boolean) => void;
   codeLines: number;
+  rawText?: string; // Raw message text to be copied on shift+click
 }
 
 const CodeSegment = memo(
@@ -33,6 +35,7 @@ const CodeSegment = memo(
     setSelectedResponseId,
     setMobilePreviewShown,
     codeLines,
+    rawText,
   }: CodeSegmentProps) => {
     const content = segment.content || '';
     const codeSegmentRef = useRef<HTMLDivElement>(null);
@@ -161,7 +164,9 @@ const CodeSegment = memo(
           <button
             onClick={(e: React.MouseEvent) => {
               e.stopPropagation(); // Prevent triggering the parent's onClick
-              navigator.clipboard.writeText(content);
+              // If shift key is pressed, copy the raw message text instead of just the code
+              const textToCopy = e.shiftKey && rawText ? rawText : content;
+              navigator.clipboard.writeText(textToCopy);
             }}
             className="rounded bg-gray-200 px-2 py-1 text-sm text-gray-500 transition-colors hover:bg-gray-300 hover:text-gray-600 active:bg-orange-400 active:text-orange-800 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300 dark:active:bg-orange-600 dark:active:text-orange-200"
           >
@@ -223,6 +228,7 @@ const StructuredMessage = memo(
     setSelectedResponseId,
     selectedResponseId,
     setMobilePreviewShown,
+    rawText,
   }: StructuredMessageProps) => {
     // Ensure segments is an array (defensive)
     const validSegments = Array.isArray(segments) ? segments : [];
@@ -310,6 +316,7 @@ const StructuredMessage = memo(
                     setSelectedResponseId={setSelectedResponseId}
                     setMobilePreviewShown={setMobilePreviewShown}
                     codeLines={codeLines}
+                    rawText={rawText}
                   />
                 );
               }
@@ -337,6 +344,11 @@ const StructuredMessage = memo(
 
     // Return false if streaming state changes
     if (prevProps.isStreaming !== nextProps.isStreaming) {
+      return false;
+    }
+
+    // Return false if rawText changes
+    if (prevProps.rawText !== nextProps.rawText) {
       return false;
     }
 
