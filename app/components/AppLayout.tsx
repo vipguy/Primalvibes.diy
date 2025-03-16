@@ -1,34 +1,59 @@
 import type { ReactNode } from 'react';
+import LightUpYourData from './ResultPreview/LightUpYourData';
 
 interface AppLayoutProps {
   chatPanel: ReactNode;
   previewPanel: ReactNode;
   headerLeft?: ReactNode;
   headerRight?: ReactNode;
+  chatInput?: ReactNode;
+  suggestionsComponent?: ReactNode;
+  mobilePreviewShown?: boolean;
+  appInfo?: ReactNode;
 }
 
-/**
- * AppLayout - Common layout component for the application
- * Provides consistent structure with 1:3 ratio between chat panel and preview panel
- * Can optionally render header components above the content panels
- */
 export default function AppLayout({
   chatPanel,
   previewPanel,
   headerLeft,
   headerRight,
+  chatInput,
+  suggestionsComponent,
+  mobilePreviewShown = false,
+  appInfo,
 }: AppLayoutProps) {
   return (
-    <div className="flex h-dvh flex-col overflow-hidden">
-      <div className="border-light-decorative-00 dark:border-dark-decorative-00 flex h-[4rem] w-full border-b">
-        <div className="border-light-decorative-00 dark:border-dark-decorative-00 w-1/3">
-          {headerLeft}
-        </div>
-        <div className="w-2/3">{headerRight}</div>
+    <div className="flex h-dvh flex-col md:flex-row md:overflow-hidden relative">
+      {/* Background component that covers the entire viewport */}
+      <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
+        <LightUpYourData />
       </div>
-      <div className="flex flex-1 overflow-hidden">
-        <div className="flex h-full w-1/3 flex-col">{chatPanel}</div>
-        <div className="relative w-2/3">{previewPanel}</div>
+      
+      {/* Content with relative positioning to appear above the background */}
+      <div
+        className={`flex w-full flex-col md:w-1/3 ${
+          mobilePreviewShown ? 'hidden md:flex md:h-full' : 'h-full'
+        } relative z-10`}
+      >
+        <div className="flex h-[4rem] items-center p-2">{headerLeft}</div>
+
+        <div className="flex-grow overflow-auto">{chatPanel}</div>
+          
+        {suggestionsComponent && <div className="w-full">{suggestionsComponent}</div>}
+
+        <div className="w-full">{chatInput}</div>
+      </div>
+
+      <div
+        className={`flex w-full flex-col md:w-2/3 ${
+          mobilePreviewShown ? 'h-full' : 'h-0 opacity-0 overflow-hidden md:h-full md:opacity-100 md:overflow-visible'
+        } relative z-10`}
+      >
+        <div className="flex h-[4rem] items-center p-2">{headerRight}</div>
+
+        <div className="flex-grow overflow-auto">{previewPanel}</div>
+
+        <div className="w-full">{appInfo}</div>
       </div>
     </div>
   );

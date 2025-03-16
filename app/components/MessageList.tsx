@@ -5,17 +5,17 @@ import type { ChatMessageDocument } from '../types/chat';
 interface MessageListProps {
   messages: ChatMessageDocument[];
   isStreaming: boolean;
-  isShrinking?: boolean;
-  isExpanding?: boolean;
-  setSelectedResponseId?: (id: string) => void;
+  setSelectedResponseId: (id: string) => void;
+  selectedResponseId: string;
+  setMobilePreviewShown: (shown: boolean) => void;
 }
 
 function MessageList({
   messages,
   isStreaming,
-  isShrinking = false,
-  isExpanding = false,
   setSelectedResponseId,
+  selectedResponseId,
+  setMobilePreviewShown,
 }: MessageListProps) {
   const messageElements = useMemo(() => {
     return messages.map((msg, i) => {
@@ -24,20 +24,16 @@ function MessageList({
           key={msg._id || 'streaming' + i}
           message={msg}
           isStreaming={isStreaming}
-          isShrinking={isShrinking}
-          isExpanding={isExpanding}
           setSelectedResponseId={setSelectedResponseId}
+          selectedResponseId={selectedResponseId}
+          setMobilePreviewShown={setMobilePreviewShown}
         />
       );
     });
-  }, [messages, isShrinking, isExpanding, isStreaming, setSelectedResponseId]);
+  }, [messages, isStreaming, setSelectedResponseId, selectedResponseId, setMobilePreviewShown]);
 
   return (
-    <div
-      className={`flex-1 ${
-        isShrinking ? 'animate-width-shrink' : isExpanding ? 'animate-width-expand' : ''
-      }`}
-    >
+    <div className="flex-1">
       <div className="mx-auto flex min-h-full max-w-5xl flex-col py-4">
         <div className="flex flex-col space-y-4">{messageElements}</div>
       </div>
@@ -45,15 +41,19 @@ function MessageList({
   );
 }
 export default memo(MessageList, (prevProps, nextProps) => {
-  // Reference equality check for animation flags
-  const animationStateEqual =
-    prevProps.isStreaming === nextProps.isStreaming &&
-    prevProps.isShrinking === nextProps.isShrinking &&
-    prevProps.isExpanding === nextProps.isExpanding;
+  // Reference equality check for isStreaming flag
+  const streamingStateEqual = prevProps.isStreaming === nextProps.isStreaming;
 
   // Check if setSelectedResponseId changed
   const setSelectedResponseIdEqual =
     prevProps.setSelectedResponseId === nextProps.setSelectedResponseId;
+
+  // Check if selectedResponseId changed
+  const selectedResponseIdEqual = prevProps.selectedResponseId === nextProps.selectedResponseId;
+
+  // Check if setMobilePreviewShown changed
+  const setMobilePreviewShownEqual =
+    prevProps.setMobilePreviewShown === nextProps.setMobilePreviewShown;
 
   // Content equality check for messages - must compare text content
   const messagesEqual =
@@ -64,5 +64,11 @@ export default memo(MessageList, (prevProps, nextProps) => {
       return msg._id === nextMsg._id && msg.text === nextMsg.text;
     });
 
-  return animationStateEqual && messagesEqual && setSelectedResponseIdEqual;
+  return (
+    streamingStateEqual &&
+    messagesEqual &&
+    setSelectedResponseIdEqual &&
+    selectedResponseIdEqual &&
+    setMobilePreviewShownEqual
+  );
 });

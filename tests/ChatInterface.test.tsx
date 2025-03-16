@@ -18,7 +18,7 @@ vi.mock('use-fireproof', () => ({
 }));
 
 // Prepare mock data
-const mockChatState: ChatState = {
+const mockChatState: ChatState & { setMobilePreviewShown: (shown: boolean) => void } = {
   ...mockChatStateProps,
   docs: [],
   input: '',
@@ -38,15 +38,14 @@ const mockChatState: ChatState = {
   codeReady: false,
   addScreenshot: () => Promise.resolve(),
   setSelectedResponseId: vi.fn(),
+  setMobilePreviewShown: vi.fn(),
 };
 
 describe('ChatInterface Component', () => {
   it('renders without crashing', () => {
     // This test passes now that we've fixed the 'input is not defined' error
     // by properly destructuring input from chatState
-    const { container } = render(
-      <ChatInterface {...mockChatState} isSidebarVisible={false} setIsSidebarVisible={vi.fn()} />
-    );
+    const { container } = render(<ChatInterface {...mockChatState} />);
     expect(container).toBeDefined();
   });
 });

@@ -116,6 +116,7 @@ function SearchResults({ searches }) {
       'easy-message2.txt': ['markdown', 'code', 'markdown'],
       'easy-message3.txt': ['markdown', 'code', 'markdown'],
       'easy-message4.txt': ['markdown', 'code', 'markdown'],
+      'easy-message5.txt': ['markdown', 'code', 'markdown'],
       'hard-message.txt': ['markdown', 'code', 'markdown'],
       'long-message.txt': ['markdown', 'code', 'markdown'],
       'long-message2.txt': ['markdown', 'code', 'markdown'],
@@ -133,5 +134,18 @@ function SearchResults({ searches }) {
 
       expect([filename, ...actualTypes]).toEqual([filename, ...expectedTypes]);
     });
+  });
+
+  it('correctly parses dependencies from easy-message5.txt fixture', () => {
+    // Read the fixture file
+    const fixturePath = path.join(__dirname, 'fixtures', 'easy-message5.txt');
+    expect(fs.existsSync(fixturePath)).toBe(true);
+
+    const content = fs.readFileSync(fixturePath, 'utf-8');
+    const result = parseContent(content);
+
+    // Verify that the dependencies string exists
+    expect(result.dependenciesString).toBeDefined();
+    expect(result.dependenciesString).toMatch(/react-modal/);
   });
 });

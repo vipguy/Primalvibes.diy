@@ -6,16 +6,11 @@ import { parseContent } from '~/utils/segmentParser';
 
 interface MessageProps {
   message: ChatMessageDocument;
-  isShrinking: boolean;
-  isExpanding: boolean;
   isStreaming: boolean;
-  setSelectedResponseId?: (id: string) => void;
+  setSelectedResponseId: (id: string) => void;
+  selectedResponseId: string;
+  setMobilePreviewShown: (shown: boolean) => void;
 }
-
-// Helper function to get animation classes
-const getAnimationClasses = (isShrinking: boolean, isExpanding: boolean): string => {
-  return isShrinking ? 'animate-width-shrink' : isExpanding ? 'animate-width-expand' : '';
-};
 
 // AI Message component (simplified without animation handling)
 const AIMessage = memo(
@@ -23,10 +18,14 @@ const AIMessage = memo(
     message,
     isStreaming,
     setSelectedResponseId,
+    selectedResponseId,
+    setMobilePreviewShown,
   }: {
     message: AiChatMessageDocument;
     isStreaming: boolean;
-    setSelectedResponseId?: (id: string) => void;
+    setSelectedResponseId: (id: string) => void;
+    selectedResponseId: string;
+    setMobilePreviewShown: (shown: boolean) => void;
   }) => {
     const { segments } = parseContent(message.text);
     return (
@@ -62,6 +61,8 @@ const AIMessage = memo(
             isStreaming={isStreaming}
             messageId={message._id}
             setSelectedResponseId={setSelectedResponseId}
+            selectedResponseId={selectedResponseId}
+            setMobilePreviewShown={setMobilePreviewShown}
           />
         </div>
       </div>
@@ -73,7 +74,9 @@ const AIMessage = memo(
     if (
       prevProps.message.text !== nextProps.message.text ||
       prevProps.isStreaming !== nextProps.isStreaming ||
-      prevProps.setSelectedResponseId !== nextProps.setSelectedResponseId
+      prevProps.setSelectedResponseId !== nextProps.setSelectedResponseId ||
+      prevProps.selectedResponseId !== nextProps.selectedResponseId ||
+      prevProps.setMobilePreviewShown !== nextProps.setMobilePreviewShown
     ) {
       return false;
     }
@@ -97,16 +100,22 @@ const UserMessage = memo(({ message }: { message: ChatMessageDocument }) => {
 
 // Main Message component that handles animation and decides which subcomponent to render
 const Message = memo(
-  ({ message, isShrinking, isExpanding, isStreaming, setSelectedResponseId }: MessageProps) => {
+  ({
+    message,
+    isStreaming,
+    setSelectedResponseId,
+    selectedResponseId,
+    setMobilePreviewShown,
+  }: MessageProps) => {
     return (
-      <div
-        className={`transition-all duration-150 ease-in hover:opacity-95 ${getAnimationClasses(isShrinking, isExpanding)}`}
-      >
+      <div className="transition-all duration-150 ease-in hover:opacity-95">
         {message.type === 'ai' ? (
           <AIMessage
             message={message as AiChatMessageDocument}
             isStreaming={isStreaming}
             setSelectedResponseId={setSelectedResponseId}
+            selectedResponseId={selectedResponseId}
+            setMobilePreviewShown={setMobilePreviewShown}
           />
         ) : (
           <UserMessage message={message} />
@@ -120,18 +129,24 @@ const Message = memo(
       return false; // Text changed, need to re-render
     }
 
-    // Check for animation or streaming state changes
-    if (
-      prevProps.isShrinking !== nextProps.isShrinking ||
-      prevProps.isExpanding !== nextProps.isExpanding ||
-      prevProps.isStreaming !== nextProps.isStreaming
-    ) {
+    // Check for streaming state changes
+    if (prevProps.isStreaming !== nextProps.isStreaming) {
       return false; // State changed, need to re-render
     }
 
     // Check if the setSelectedResponseId function reference changed
     if (prevProps.setSelectedResponseId !== nextProps.setSelectedResponseId) {
       return false; // Function reference changed, need to re-render
+    }
+
+    // Check if selectedResponseId changed
+    if (prevProps.selectedResponseId !== nextProps.selectedResponseId) {
+      return false; // Selection changed, need to re-render
+    }
+
+    // Check if setMobilePreviewShown changed
+    if (prevProps.setMobilePreviewShown !== nextProps.setMobilePreviewShown) {
+      return false; // Mobile preview function changed, need to re-render
     }
 
     // If we get here, props are equal enough to skip re-render
@@ -159,8 +174,8 @@ export const WelcomeScreen = memo(() => {
         , no backend required.
       </p>
 
-      <div className="mt-6 border-t border-gray-200 pt-4 dark:border-gray-700">
-        <h3 className="py-2 text-lg font-semibold">About Fireproof</h3>
+      <div className="mt-8">
+        <h3 className="py-2 font-semibold">About Fireproof</h3>
         <p className="text-sm">
           Fireproof enables secure saving and sharing of your data, providing encrypted live
           synchronization and offline-first capabilities. Learn more about{' '}

@@ -45,7 +45,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     ? aiMessage
     : docs.find((doc: any) => doc.type === 'ai' && doc._id === selectedResponseId) ||
       docs.filter((doc: any) => doc.type === 'ai').reverse()[0]) as unknown as ChatMessageDocument;
-
+      
   const setInput = useCallback(
     (input: string) => {
       mergeUserMessage({ text: input });
@@ -69,17 +69,27 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     }));
   }, [filteredDocs]);
 
-  const { segments: selectedSegments, dependenciesString: selectedDependenciesString } =
-    selectedResponseDoc
-      ? parseContent(selectedResponseDoc.text)
-      : { segments: [], dependenciesString: '' };
+  const { selectedSegments, selectedCode, selectedDependencies } = useMemo(() => {
+    const { segments, dependenciesString } =
+      selectedResponseDoc
+        ? parseContent(selectedResponseDoc.text)
+        : { segments: [], dependenciesString: '' };
 
-  const selectedCode =
-    selectedSegments.find((segment) => segment.type === 'code') || ({ content: '' } as Segment);
+    const code =
+      segments.find((segment) => segment.type === 'code') || ({ content: '' } as Segment);
 
-  const selectedDependencies = selectedDependenciesString
-    ? parseDependencies(selectedDependenciesString)
-    : {};
+    const dependencies = dependenciesString
+      ? parseDependencies(dependenciesString)
+      : {};
+
+    return {
+      selectedSegments: segments,
+      selectedCode: code,
+      selectedDependencies: dependencies
+    };
+  }, [selectedResponseDoc]);
+
+
 
   // Throttled update function with fixed delay and debouncing
   const throttledMergeAiMessage = useCallback(
@@ -99,16 +109,16 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
       }
 
       // Throttle parameters
-      const THROTTLE_DELAY = 30; // Increased from 10ms for better stability
-      const MIN_UPDATE_INTERVAL = 100; // Minimum time between updates
-      
+      const THROTTLE_DELAY = 10; // Increased from 10ms for better stability
+      const MIN_UPDATE_INTERVAL = 50; // Minimum time between updates
+
       // Add minimum time between updates check
       const now = Date.now();
       const timeSinceLastUpdate = now - lastUpdateTimeRef.current;
-      
+
       // Calculate delay - use a longer delay if we've updated recently
       let delay = THROTTLE_DELAY;
-      
+
       if (timeSinceLastUpdate < MIN_UPDATE_INTERVAL) {
         // If we've updated too recently, use adaptive delay
         delay = Math.max(
@@ -116,15 +126,15 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
           MIN_UPDATE_INTERVAL
         );
       }
-      
+
       // Schedule update with calculated delay
       updateTimeoutRef.current = setTimeout(() => {
         // Capture the current content at time of execution
         const currentContent = streamBufferRef.current;
-        
+
         // Record update time before the actual update
         lastUpdateTimeRef.current = Date.now();
-        
+
         // Only update if the content has actually changed
         mergeAiMessage({ text: currentContent });
       }, delay);

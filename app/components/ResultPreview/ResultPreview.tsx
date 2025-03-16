@@ -3,7 +3,6 @@ import type { ResultPreviewProps } from './ResultPreviewTypes';
 import type { SandpackFiles } from './ResultPreviewTypes';
 import { indexHtml, animationStyles } from './ResultPreviewTemplates';
 import { processCodeForDisplay } from './ResultPreviewUtils';
-import LightUpYourData from './LightUpYourData';
 import SandpackContent from './SandpackContent';
 import { OPENROUTER_API_KEY } from '../../config/env';
 
@@ -17,6 +16,7 @@ function ResultPreview({
   activeView,
   setActiveView,
   onPreviewLoaded,
+  setMobilePreviewShown,
 }: ResultPreviewProps) {
   const [, setBundlingComplete] = useState(true);
   const [, setPreviewReady] = useState(false);
@@ -62,9 +62,11 @@ function ResultPreview({
             '*'
           );
 
+          setMobilePreviewShown(true);
           setPreviewReady(true);
           // Automatically switch to preview view when it's ready
           setActiveView('preview');
+
           // Notify parent component that preview is loaded
           onPreviewLoaded();
         } else if (data.type === 'screenshot' && data.data) {
@@ -132,7 +134,7 @@ function ResultPreview({
 
   const previewArea = showWelcome ? (
     <div className="h-full">
-      <LightUpYourData />
+      {/* empty div to prevent layout shift */}
     </div>
   ) : (
     (() => {
