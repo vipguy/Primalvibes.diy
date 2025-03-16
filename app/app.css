@@ -194,6 +194,66 @@ a,
   }
 }
 
+/* Glimmer effect for borders */
+.border-glimmer {
+  position: relative;
+  overflow: visible;
+  border: none;
+}
+
+.border-glimmer::before {
+  content: "";
+  position: absolute;
+  inset: -2px; /* Slightly larger than the button */
+  border-radius: inherit;
+  padding: 2px; /* Border thickness */
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    transparent 10%,
+    rgba(255, 145, 0, 0.6) 15%,
+    rgba(255, 166, 0, 0.6) 20%,
+    rgba(255, 185, 30, 0.6) 34%,
+    rgba(255, 216, 107, 0.6) 35%,
+    rgba(255, 255, 255, 0.6) 40%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  background-position: -100% 0;
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: buttonGlimmer 4.5s infinite;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+/* Dark mode adjustment */
+@media (prefers-color-scheme: dark) {
+  .border-glimmer::before {
+    background: linear-gradient(
+      120deg,
+      transparent 0%,
+      transparent 10%,
+      rgba(255, 140, 0, 0.6) 20%,
+      rgba(253, 158, 6, 0.6) 33%,
+      rgba(255, 185, 30, 0.6) 34%,
+      rgba(255, 186, 0, 0.6) 36%,
+      rgba(255, 136, 0, 0.6) 40%,
+      transparent 70%
+    );
+    background-size: 200% 100%;
+    background-repeat: no-repeat;
+    background-position: -100% 0;
+    animation: buttonGlimmer 4.5s infinite;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+} 
+
+/* Keep the original glimmer-overlay class */
 .glimmer-overlay {
   position: absolute;
   inset: 0;

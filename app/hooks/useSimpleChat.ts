@@ -45,7 +45,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     ? aiMessage
     : docs.find((doc: any) => doc.type === 'ai' && doc._id === selectedResponseId) ||
       docs.filter((doc: any) => doc.type === 'ai').reverse()[0]) as unknown as ChatMessageDocument;
-      
+
   const setInput = useCallback(
     (input: string) => {
       mergeUserMessage({ text: input });
@@ -70,26 +70,21 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
   }, [filteredDocs]);
 
   const { selectedSegments, selectedCode, selectedDependencies } = useMemo(() => {
-    const { segments, dependenciesString } =
-      selectedResponseDoc
-        ? parseContent(selectedResponseDoc.text)
-        : { segments: [], dependenciesString: '' };
+    const { segments, dependenciesString } = selectedResponseDoc
+      ? parseContent(selectedResponseDoc.text)
+      : { segments: [], dependenciesString: '' };
 
     const code =
       segments.find((segment) => segment.type === 'code') || ({ content: '' } as Segment);
 
-    const dependencies = dependenciesString
-      ? parseDependencies(dependenciesString)
-      : {};
+    const dependencies = dependenciesString ? parseDependencies(dependenciesString) : {};
 
     return {
       selectedSegments: segments,
       selectedCode: code,
-      selectedDependencies: dependencies
+      selectedDependencies: dependencies,
     };
   }, [selectedResponseDoc]);
-
-
 
   // Throttled update function with fixed delay and debouncing
   const throttledMergeAiMessage = useCallback(

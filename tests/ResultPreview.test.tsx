@@ -192,7 +192,7 @@ describe('ResultPreview', () => {
 
   it('shows welcome screen for empty code', () => {
     const { container } = render(<ResultPreview code="" {...mockResultPreviewProps} />);
-    
+
     // Instead of finding by role, check that the container has the expected structure
     expect(container.querySelector('div.h-full > div.h-full')).toBeInTheDocument();
   });
@@ -276,7 +276,7 @@ describe('ResultPreview', () => {
 
   it('shows welcome screen when no code is provided', () => {
     const { container } = render(<ResultPreview code="" {...mockResultPreviewProps} />);
-    
+
     // Instead of finding by role, check that the container has the expected structure
     expect(container.querySelector('div.h-full > div.h-full')).toBeInTheDocument();
   });

@@ -133,9 +133,7 @@ function ResultPreview({
   }, [code, showWelcome, codeReady]);
 
   const previewArea = showWelcome ? (
-    <div className="h-full">
-      {/* empty div to prevent layout shift */}
-    </div>
+    <div className="h-full">{/* empty div to prevent layout shift */}</div>
   ) : (
     (() => {
       // Initialize files content here, right before SandpackContent is rendered

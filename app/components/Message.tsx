@@ -161,33 +161,24 @@ export const WelcomeScreen = memo(() => {
   return (
     <div className="text-accent-02 mx-auto max-w-2xl space-y-4 px-12 pt-8 text-center italic">
       <p>
-        Quickly create React apps in your browser, no setup required. Apps are sharable, or eject
-        them to GitHub for easy deploys.{' '}
-        <a
-          href="https://github.com/fireproof-storage/ai-app-builder"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-accent-00 hover:underline"
-        >
-          Fork and customize this app builder
-        </a>
-        , no backend required.
+        Describe the app you want to build, and let AI generate the code. Everything runs in your
+        browser, no setup required. Apps are sharable, or eject them to GitHub for easy
+        deploys.{' '}
       </p>
 
       <div className="mt-8">
-        <h3 className="py-2 font-semibold">About Fireproof</h3>
-        <p className="text-sm">
-          Fireproof enables secure saving and sharing of your data, providing encrypted live
-          synchronization and offline-first capabilities. Learn more about{' '}
+        <h3 className="py-2 font-semibold">Open Source</h3>
+        <p>
+          Anyone can{' '}
           <a
-            href="https://use-fireproof.com/"
+            href="https://github.com/fireproof-storage/ai-app-builder"
             target="_blank"
             rel="noopener noreferrer"
             className="text-accent-00 hover:underline"
           >
-            Fireproof
+            fork and customize this app builder
           </a>
-          .
+          . It's the easiest way to put a tool like this onto your site, no backend required.
         </p>
       </div>
     </div>

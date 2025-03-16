@@ -23,12 +23,12 @@ export default function AppLayout({
   appInfo,
 }: AppLayoutProps) {
   return (
-    <div className="flex h-dvh flex-col md:flex-row md:overflow-hidden relative">
+    <div className="relative flex h-dvh flex-col md:flex-row md:overflow-hidden">
       {/* Background component that covers the entire viewport */}
-      <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
+      <div className="absolute inset-0 z-0 h-full w-full overflow-hidden">
         <LightUpYourData />
       </div>
-      
+
       {/* Content with relative positioning to appear above the background */}
       <div
         className={`flex w-full flex-col md:w-1/3 ${
@@ -38,7 +38,7 @@ export default function AppLayout({
         <div className="flex h-[4rem] items-center p-2">{headerLeft}</div>
 
         <div className="flex-grow overflow-auto">{chatPanel}</div>
-          
+
         {suggestionsComponent && <div className="w-full">{suggestionsComponent}</div>}
 
         <div className="w-full">{chatInput}</div>
@@ -46,7 +46,9 @@ export default function AppLayout({
 
       <div
         className={`flex w-full flex-col md:w-2/3 ${
-          mobilePreviewShown ? 'h-full' : 'h-0 opacity-0 overflow-hidden md:h-full md:opacity-100 md:overflow-visible'
+          mobilePreviewShown
+            ? 'h-full'
+            : 'h-0 overflow-hidden opacity-0 md:h-full md:overflow-visible md:opacity-100'
         } relative z-10`}
       >
         <div className="flex h-[4rem] items-center p-2">{headerRight}</div>
