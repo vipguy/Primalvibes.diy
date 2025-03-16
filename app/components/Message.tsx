@@ -176,8 +176,8 @@ export const WelcomeScreen = memo(() => {
         .
       </p>
 
-      <p>
-        Apps can eject to Github, and this app builder is{' '}
+      <p className="text-xs mt-10">
+        This{' '}
         <a
           href="https://github.com/fireproof-storage/ai-app-builder"
           target="_blank"
@@ -185,8 +185,8 @@ export const WelcomeScreen = memo(() => {
           className="text-accent-00 hover:underline"
         >
           open source
-        </a>
-        . It runs in the browser, no setup required.
+        </a>{' '}
+        app builder runs in the browser, no setup required.
       </p>
     </div>
   );

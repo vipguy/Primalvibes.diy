@@ -33,7 +33,7 @@ function QuickSuggestions({ onSelectSuggestion }: QuickSuggestionsProps) {
       text: 'Create a pomodoro timer app with multiple timers work/break intervals and session tracking.',
     },
     {
-      label: 'Music',
+      label: 'Playlist',
       text: 'I send messages and Ai responds with a playlist for me, with YouTube search links for each song.',
     },
     {
