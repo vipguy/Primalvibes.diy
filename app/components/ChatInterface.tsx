@@ -1,10 +1,7 @@
-import { useMemo, useCallback, useRef, useEffect } from 'react';
-import type { ChangeEvent } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
 import type { ChatState } from '../types/chat';
 import MessageList from './MessageList';
-import ChatInput from './ChatInput';
-import QuickSuggestions from './QuickSuggestions';
-import { WelcomeScreen } from './Message';
+import WelcomeScreen from './WelcomeScreen';
 
 interface ChatInterfaceProps extends ChatState {
   setMobilePreviewShown: (shown: boolean) => void;
@@ -64,59 +61,3 @@ function ChatInterface({
 
 // Export the component
 export default ChatInterface;
-
-// Also export a function to get just the chat input component
-export function getChatInputComponent({
-  input,
-  setInput,
-  sendMessage,
-  isStreaming,
-  inputRef,
-}: Pick<ChatState, 'input' | 'setInput' | 'sendMessage' | 'isStreaming' | 'inputRef'>) {
-  const handleInputChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey && !isStreaming) {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
-
-  return (
-    <ChatInput
-      value={input}
-      onChange={handleInputChange}
-      onKeyDown={handleKeyDown}
-      onSend={sendMessage}
-      disabled={isStreaming}
-      inputRef={inputRef}
-    />
-  );
-}
-
-// Export a function to get suggestions component
-export function getSuggestionsComponent({
-  setInput,
-  inputRef,
-}: Pick<ChatState, 'setInput' | 'inputRef'>) {
-  // Function to handle suggestion selection
-  const handleSelectSuggestion = useCallback(
-    (suggestion: string) => {
-      setInput(suggestion);
-
-      // Focus the input and position cursor at the end
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.focus();
-          // Move cursor to end of text
-          inputRef.current.selectionStart = inputRef.current.selectionEnd = suggestion.length;
-        }
-      }, 0);
-    },
-    [setInput, inputRef]
-  );
-
-  return <QuickSuggestions onSelectSuggestion={handleSelectSuggestion} />;
-}

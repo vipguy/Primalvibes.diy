@@ -1,9 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router';
-import ChatInterface, {
-  getChatInputComponent,
-  getSuggestionsComponent,
-} from '../components/ChatInterface';
+import ChatInterface from '../components/ChatInterface';
+import ChatInput from '../components/ChatInput';
+import QuickSuggestions from '../components/QuickSuggestions';
 import ResultPreview from '../components/ResultPreview/ResultPreview';
 import ChatHeaderContent from '../components/ChatHeaderContent';
 import ResultPreviewHeaderContent from '../components/ResultPreview/ResultPreviewHeaderContent';
@@ -70,20 +69,41 @@ export default function UnifiedSession() {
     }
   }, [location.search]);
 
-  // Get the chat input component to pass separately to AppLayout
-  const chatInputComponent = getChatInputComponent({
-    input: chatState.input,
-    setInput: chatState.setInput,
-    sendMessage: chatState.sendMessage,
-    isStreaming: chatState.isStreaming,
-    inputRef: chatState.inputRef,
-  });
+  // Create chat input event handlers
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      chatState.setInput(e.target.value);
+    },
+    [chatState.setInput]
+  );
 
-  // Get the suggestions component to pass separately to AppLayout
-  const suggestionsComponent = getSuggestionsComponent({
-    setInput: chatState.setInput,
-    inputRef: chatState.inputRef,
-  });
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === 'Enter' && !e.shiftKey && !chatState.isStreaming) {
+        e.preventDefault();
+        chatState.sendMessage();
+      }
+    },
+    [chatState.isStreaming, chatState.sendMessage]
+  );
+
+  // Handle suggestion selection directly
+  const handleSelectSuggestion = useCallback(
+    (suggestion: string) => {
+      chatState.setInput(suggestion);
+
+      // Focus the input and position cursor at the end
+      setTimeout(() => {
+        if (chatState.inputRef.current) {
+          chatState.inputRef.current.focus();
+          // Move cursor to end of text
+          chatState.inputRef.current.selectionStart = chatState.inputRef.current.selectionEnd =
+            suggestion.length;
+        }
+      }, 0);
+    },
+    [chatState.setInput, chatState.inputRef]
+  );
 
   // useEffect(() => {
   //   console.log('chatState.sessionId', chatState.sessionId);
@@ -120,8 +140,21 @@ export default function UnifiedSession() {
             setMobilePreviewShown={setMobilePreviewShown}
           />
         }
-        chatInput={chatInputComponent}
-        suggestionsComponent={chatState.docs.length === 0 ? suggestionsComponent : undefined}
+        chatInput={
+          <ChatInput
+            value={chatState.input}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            onSend={chatState.sendMessage}
+            disabled={chatState.isStreaming}
+            inputRef={chatState.inputRef}
+          />
+        }
+        suggestionsComponent={
+          chatState.docs.length === 0 ? (
+            <QuickSuggestions onSelectSuggestion={handleSelectSuggestion} />
+          ) : undefined
+        }
         mobilePreviewShown={mobilePreviewShown}
       />
       <SessionSidebar
