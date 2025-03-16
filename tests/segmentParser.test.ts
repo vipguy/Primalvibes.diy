@@ -149,3 +149,14 @@ function SearchResults({ searches }) {
     expect(result.dependenciesString).toMatch(/react-modal/);
   });
 });
+
+it('correctly parses dependencies from hard-message2.txt fixture', () => {
+  const fixturePath = path.join(__dirname, 'fixtures', 'hard-message2.txt');
+  expect(fs.existsSync(fixturePath)).toBe(true);
+
+  const content = fs.readFileSync(fixturePath, 'utf-8');
+  const result = parseContent(content);
+
+  expect(result.dependenciesString).toBeDefined();
+  expect(result.dependenciesString).toMatch(/react-dropzone/);
+});

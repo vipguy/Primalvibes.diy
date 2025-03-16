@@ -1,0 +1,445 @@
+{"dependencies": {
+  "react-dropzone": "^14.2.3"
+}}
+
+# Dream Journal with AI Reflection
+
+This app lets you record your dreams and get AI-powered interpretations. Keep track of your subconscious thoughts and discover potential meanings behind them.
+
+```jsx
+import React, { useState, useCallback } from "react";
+import { useFireproof } from "use-fireproof";
+import { useDropzone } from "react-dropzone";
+
+export default function DreamJournal() {
+  const { useDocument, useLiveQuery, database } = useFireproof("dream-journal");
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedDreamId, setSelectedDreamId] = useState(null);
+  const [activeTab, setActiveTab] = useState("journal");
+
+  // New dream entry
+  const { doc: newDream, merge: mergeNewDream, submit: submitDream, save: saveDream } = useDocument({
+    title: "",
+    description: "",
+    date: new Date().toISOString().split("T")[0],
+    mood: "neutral",
+    _files: {},
+    type: "dream"
+  });
+
+  // Get dreams ordered by date (most recent first)
+  const { docs: dreams } = useLiveQuery(
+    (doc) => doc.type === "dream" ? [doc.type, doc.date] : null,
+    { descending: true }
+  );
+
+  // Selected dream for viewing
+  const { doc: selectedDream } = useDocument(
+    selectedDreamId ? { _id: selectedDreamId } : { _id: "placeholder" }
+  );
+
+  // Dropzone setup for image uploads
+  const onDrop = useCallback(files => {
+    if (files && files.length > 0) {
+      const filesCopy = { ...newDream._files };
+      files.forEach(file => {
+        filesCopy[file.name] = file;
+      });
+      mergeNewDream({ _files: filesCopy });
+    }
+  }, [newDream._files, mergeNewDream]);
+
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop,
+    accept: { 'image/*': [] }
+  });
+
+  // AI dream analysis
+  async function analyzeDream() {
+    if (newDream.description.length < 10) return;
+    
+    setIsLoading(true);
+    try {
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${window.OPENROUTER_API_KEY || ""}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "anthropic/claude-3-haiku",
+          messages: [
+            { 
+              role: "user", 
+              content: `Analyze this dream from a psychological perspective: "${newDream.description}". 
+              Consider Jungian archetypes, common dream symbolism, and potential meanings.` 
+            }
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "dream_analysis",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  symbols: { type: "array", items: { type: "string" } },
+                  possibleMeanings: { type: "array", items: { type: "string" } },
+                  reflection: { type: "string" }
+                },
+                required: ["symbols", "possibleMeanings", "reflection"],
+                additionalProperties: false
+              }
+            }
+          }
+        }),
+      });
+
+      const data = await response.json();
+      const analysis = JSON.parse(data.choices[0].message.content);
+      
+      mergeNewDream({ analysis });
+      await saveDream();
+      
+    } catch (error) {
+      console.error("Error analyzing dream:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  // Load demo data
+  const loadDemoData = async () => {
+    const demoData = [
+      {
+        title: "Flying Over the Ocean",
+        description: "I was flying over a vast ocean. The water was crystal clear and I could see islands below. I felt free and powerful, but suddenly started falling when I saw a storm approaching.",
+        date: "2023-05-15",
+        mood: "excited",
+        type: "dream",
+        analysis: {
+          symbols: ["Flying", "Ocean", "Storm", "Islands"],
+          possibleMeanings: [
+            "Desire for freedom and escape from constraints",
+            "Anxiety about losing control in your life",
+            "Ambition and perspective-taking being threatened by approaching problems"
+          ],
+          reflection: "This dream suggests you're experiencing a sense of freedom and exploration in your life, but may have underlying anxieties about losing control or facing upcoming challenges. The flying represents transcendence and perspective, while the approaching storm symbolizes fears or concerns on your horizon."
+        }
+      },
+      {
+        title: "Lost in a Maze",
+        description: "I was trapped in an endless maze with mirrored walls. Every turn I took led me back to the same spot. I heard familiar voices calling me but couldn't find them. The maze kept shifting and changing.",
+        date: "2023-05-10",
+        mood: "anxious",
+        type: "dream",
+        analysis: {
+          symbols: ["Maze", "Mirrors", "Familiar Voices", "Being Lost"],
+          possibleMeanings: [
+            "Feeling confused about your identity or life direction",
+            "Struggling with making decisions or feeling stuck in repetitive patterns",
+            "Desire to connect with loved ones despite feeling disoriented"
+          ],
+          reflection: "This dream reflects feelings of being stuck in confusing situations or repetitive patterns in your waking life. The mirrored walls suggest self-reflection and identity questions. The familiar voices indicate connections to people you value but may feel separated from in some way."
+        }
+      }
+    ];
+
+    for (const dream of demoData) {
+      await database.put(dream);
+    }
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto p-4 bg-gradient-to-br from-orange-50 to-amber-100 min-h-screen">
+      <header className="text-center mb-6">
+        <h1 className="text-3xl font-bold text-orange-800">Dream Journal</h1>
+        <p className="text-orange-700 italic mt-2">
+          *Record your dreams and receive AI-powered insights into your subconscious mind. 
+          Document recurring themes, symbols, and emotions to better understand your inner world.*
+        </p>
+      </header>
+
+      <div className="flex mb-4 border-b border-orange-300">
+        <button 
+          className={`py-2 px-4 ${activeTab === "journal" ? "bg-orange-200 font-medium" : "bg-orange-100"} rounded-t-lg mr-2`}
+          onClick={() => setActiveTab("journal")}
+        >
+          Journal Entry
+        </button>
+        <button 
+          className={`py-2 px-4 ${activeTab === "history" ? "bg-orange-200 font-medium" : "bg-orange-100"} rounded-t-lg`}
+          onClick={() => setActiveTab("history")}
+        >
+          Dream History
+        </button>
+        <button
+          className="ml-auto py-2 px-4 bg-orange-300 rounded-lg hover:bg-orange-400"
+          onClick={loadDemoData}
+        >
+          Demo Data
+        </button>
+      </div>
+
+      {activeTab === "journal" && (
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h2 className="text-xl font-semibold mb-4 text-orange-800">Record Your Dream</h2>
+              <form onSubmit={e => { e.preventDefault(); submitDream(); }}>
+                <div className="mb-4">
+                  <label className="block text-orange-700 mb-2">Dream Title</label>
+                  <input 
+                    type="text" 
+                    value={newDream.title || ""} 
+                    onChange={e => mergeNewDream({ title: e.target.value })} 
+                    className="w-full p-2 border border-orange-300 rounded"
+                    placeholder="Give your dream a title..."
+                    required
+                  />
+                </div>
+                
+                <div className="mb-4">
+                  <label className="block text-orange-700 mb-2">Date</label>
+                  <input 
+                    type="date" 
+                    value={newDream.date} 
+                    onChange={e => mergeNewDream({ date: e.target.value })} 
+                    className="w-full p-2 border border-orange-300 rounded"
+                  />
+                </div>
+                
+                <div className="mb-4">
+                  <label className="block text-orange-700 mb-2">Mood</label>
+                  <select 
+                    value={newDream.mood} 
+                    onChange={e => mergeNewDream({ mood: e.target.value })} 
+                    className="w-full p-2 border border-orange-300 rounded"
+                  >
+                    <option value="happy">Happy</option>
+                    <option value="sad">Sad</option>
+                    <option value="anxious">Anxious</option>
+                    <option value="peaceful">Peaceful</option>
+                    <option value="confused">Confused</option>
+                    <option value="excited">Excited</option>
+                    <option value="scared">Scared</option>
+                    <option value="neutral">Neutral</option>
+                  </select>
+                </div>
+                
+                <div className="mb-4">
+                  <label className="block text-orange-700 mb-2">Dream Description</label>
+                  <textarea 
+                    value={newDream.description || ""} 
+                    onChange={e => mergeNewDream({ description: e.target.value })} 
+                    className="w-full p-2 border border-orange-300 rounded h-32"
+                    placeholder="Describe your dream in detail..."
+                    required
+                  />
+                </div>
+                
+                <div className="mb-4">
+                  <label className="block text-orange-700 mb-2">Dream Imagery (Optional)</label>
+                  <div 
+                    {...getRootProps()} 
+                    className="p-4 border-2 border-dashed border-orange-300 rounded cursor-pointer hover:bg-orange-50"
+                  >
+                    <input {...getInputProps()} />
+                    <p className="text-center text-orange-700">
+                      Drag & drop images related to your dream, or click to select files
+                    </p>
+                    {Object.keys(newDream._files).length > 0 && (
+                      <p className="mt-2 text-center text-green-600">
+                        {Object.keys(newDream._files).length} file(s) selected
+                      </p>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="flex justify-between">
+                  <button 
+                    type="button"
+                    onClick={analyzeDream}
+                    className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 disabled:opacity-50"
+                    disabled={isLoading || newDream.description.length < 10}
+                  >
+                    {isLoading ? "Analyzing..." : "Analyze with AI"}
+                  </button>
+                  
+                  <button 
+                    type="submit" 
+                    className="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700"
+                  >
+                    Save Dream
+                  </button>
+                </div>
+              </form>
+            </div>
+            
+            <div>
+              <h2 className="text-xl font-semibold mb-4 text-orange-800">Dream Analysis</h2>
+              {isLoading ? (
+                <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                  <p className="text-center text-orange-700">Analyzing your dream...</p>
+                </div>
+              ) : newDream.analysis ? (
+                <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                  <h3 className="font-medium text-orange-800 mb-2">Symbols Identified:</h3>
+                  <ul className="list-disc pl-5 mb-4">
+                    {newDream.analysis.symbols.map((symbol, i) => (
+                      <li key={i} className="text-orange-700">{symbol}</li>
+                    ))}
+                  </ul>
+                  
+                  <h3 className="font-medium text-orange-800 mb-2">Possible Meanings:</h3>
+                  <ul className="list-disc pl-5 mb-4">
+                    {newDream.analysis.possibleMeanings.map((meaning, i) => (
+                      <li key={i} className="text-orange-700">{meaning}</li>
+                    ))}
+                  </ul>
+                  
+                  <h3 className="font-medium text-orange-800 mb-2">Reflection:</h3>
+                  <p className="text-orange-700">{newDream.analysis.reflection}</p>
+                </div>
+              ) : (
+                <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                  <p className="text-center text-orange-700">
+                    Enter your dream description and click "Analyze with AI" for an interpretation
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "history" && (
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-xl font-semibold mb-4 text-orange-800">Dream History</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="col-span-1 border-r border-orange-200 pr-4 overflow-y-auto max-h-[600px]">
+              <h3 className="font-medium text-orange-800 mb-2">Your Dreams</h3>
+              {dreams.length === 0 ? (
+                <p className="text-orange-700">No dreams recorded yet</p>
+              ) : (
+                <ul className="space-y-2">
+                  {dreams.map(dream => (
+                    <li 
+                      key={dream._id} 
+                      className={`p-2 rounded cursor-pointer ${selectedDreamId === dream._id ? 'bg-orange-200' : 'hover:bg-orange-100'}`}
+                      onClick={() => setSelectedDreamId(dream._id)}
+                    >
+                      <div className="font-medium">{dream.title}</div>
+                      <div className="text-sm text-orange-700">{dream.date}</div>
+                      <div className="text-xs inline-block mt-1 px-2 py-1 bg-orange-100 rounded-full">
+                        {dream.mood}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            
+            <div className="col-span-2">
+              {selectedDreamId ? (
+                <div>
+                  <div className="mb-4">
+                    <h3 className="text-lg font-semibold text-orange-800">{selectedDream.title}</h3>
+                    <div className="text-sm text-orange-700">{selectedDream.date}</div>
+                    <div className="text-xs inline-block mt-1 px-2 py-1 bg-orange-100 rounded-full">
+                      {selectedDream.mood}
+                    </div>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <h4 className="font-medium text-orange-800 mb-2">Dream Description:</h4>
+                    <p className="text-orange-700 bg-orange-50 p-3 rounded">{selectedDream.description}</p>
+                  </div>
+                  
+                  {selectedDream.analysis && (
+                    <div>
+                      <h4 className="font-medium text-orange-800 mb-2">Dream Analysis:</h4>
+                      <div className="bg-orange-50 p-3 rounded">
+                        <h5 className="font-medium text-orange-800 mb-1">Symbols:</h5>
+                        <ul className="list-disc pl-5 mb-2">
+                          {selectedDream.analysis.symbols.map((symbol, i) => (
+                            <li key={i} className="text-orange-700">{symbol}</li>
+                          ))}
+                        </ul>
+                        
+                        <h5 className="font-medium text-orange-800 mb-1">Possible Meanings:</h5>
+                        <ul className="list-disc pl-5 mb-2">
+                          {selectedDream.analysis.possibleMeanings.map((meaning, i) => (
+                            <li key={i} className="text-orange-700">{meaning}</li>
+                          ))}
+                        </ul>
+                        
+                        <h5 className="font-medium text-orange-800 mb-1">Reflection:</h5>
+                        <p className="text-orange-700">{selectedDream.analysis.reflection}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-orange-700 italic">Select a dream to view details</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+## About Dream Journal with AI Reflection
+
+*Dream Journal with AI Reflection is a personal dream tracking application that helps you document and understand your dreams through AI-powered psychological analysis. Dreams often contain meaningful symbols and patterns that reflect our subconscious thoughts, fears, desires, and unresolved issues. By recording and analyzing these dreams, you can gain valuable insights into your inner world.*
+
+### Key Features
+
+1. **Dream Recording**: Document your dreams with titles, descriptions, dates, and associated emotions to build a comprehensive dream history.
+
+2. **AI Dream Analysis**: Receive instant psychological interpretations of your dreams powered by AI. The analysis identifies key symbols, suggests possible meanings, and provides a thoughtful reflection that connects to psychological concepts.
+
+3. **Dream Imagery**: Upload images that remind you of your dreams or represent key elements from them for more visual documentation.
+
+4. **Searchable History**: Access your complete dream archive to identify patterns, recurring themes, or track how your dreams evolve over time.
+
+### How to Use the App
+
+1. **Recording a Dream**:
+   - *Navigate to the "Journal Entry" tab*
+   - *Enter a title that captures the essence of your dream*
+   - *Select the date when you had the dream*
+   - *Choose the primary emotion you felt during the dream*
+   - *Write a detailed description of your dream, including as many details as you can remember*
+   - *Optionally upload images related to your dream*
+
+2. **Getting AI Analysis**:
+   - *After entering your dream description, click the "Analyze with AI" button*
+   - *The AI will process your dream and provide:*
+     - **Symbols**: Key archetypal elements identified in your dream
+     - **Possible Meanings**: Different interpretations of what these symbols might represent
+     - **Reflection**: A broader analysis connecting to psychological concepts
+
+3. **Reviewing Past Dreams**:
+   - *Switch to the "Dream History" tab to see all your recorded dreams*
+   - *Click on any dream entry to view its full details and analysis*
+   - *Look for patterns or recurring themes across multiple dreams*
+
+4. **Try the Demo Data**:
+   - *Click the "Demo Data" button to load sample dream entries*
+   - *Explore how the app works with pre-populated content*
+
+### Understanding Dream Analysis
+
+The AI analysis uses concepts from various psychological traditions, including:
+
+- **Jungian Archetypes**: Universal symbols and patterns from the collective unconscious
+- **Freudian Interpretation**: Connections to repressed desires and unconscious conflicts
+- **Contemporary Dream Research**: Modern understanding of dream functions and meanings
+
+Remember that dream interpretations are subjective, and the AI analysis is meant to provide perspectives rather than definitive meanings. Your own intuition about your dreams is equally valuable!

@@ -26,6 +26,8 @@ function ResultPreview({
   const filesRef = useRef<SandpackFiles>({});
   const showWelcome = !isStreaming && (!code || code.length === 0);
 
+
+  
   // Track streaming state changes to reset key generation only when streaming starts/stops
   useEffect(() => {
     if (isStreaming !== isStreamingRef.current) {

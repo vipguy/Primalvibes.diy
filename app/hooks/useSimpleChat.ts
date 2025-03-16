@@ -53,6 +53,12 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     [mergeUserMessage]
   );
 
+  // Log selectedResponseDoc when it changes
+  useEffect(() => {
+    console.log('selectedResponseDoc changed:', selectedResponseDoc);
+  }, [selectedResponseDoc]);
+
+  
   // Process docs into messages for the UI
   const filteredDocs = docs.filter((doc: any) => doc.type === 'ai' || doc.type === 'user');
 
