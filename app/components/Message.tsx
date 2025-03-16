@@ -176,7 +176,7 @@ export const WelcomeScreen = memo(() => {
         .
       </p>
 
-      <p className="text-xs mt-10">
+      <p className="mt-10 text-xs">
         This{' '}
         <a
           href="https://github.com/fireproof-storage/ai-app-builder"
