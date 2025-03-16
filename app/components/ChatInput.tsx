@@ -44,7 +44,7 @@ function ChatInput({ value, onChange, onSend, onKeyDown, disabled, inputRef }: C
           type="button"
           onClick={onSend}
           disabled={disabled}
-          className={`light-gradient border-glimmer absolute flex items-center justify-center overflow-hidden rounded-lg border shadow-sm transition-all duration-300 hover:border-gray-300 hover:shadow-md active:shadow-inner dark:hover:border-gray-600 ${
+          className={`light-gradient border-glimmer absolute flex items-center justify-center overflow-hidden rounded-xl border shadow-sm transition-all duration-300 hover:border-gray-300 hover:shadow-md active:shadow-inner dark:hover:border-gray-600 ${
             disabled
               ? 'border-gray-300 dark:border-gray-500'
               : 'border-gray-200 dark:border-gray-700'
@@ -58,12 +58,12 @@ function ChatInput({ value, onChange, onSend, onKeyDown, disabled, inputRef }: C
             <img
               src="/fp-logo.svg"
               alt="Fireproof"
-              className="block h-5 transition-all hover:brightness-110 active:brightness-125 dark:hidden"
+              className="block h-6 transition-all hover:brightness-110 active:brightness-125 dark:hidden"
             />
             <img
               src="/fp-logo-white.svg"
               alt="Fireproof"
-              className="hidden h-5 transition-all hover:brightness-110 active:brightness-125 dark:block"
+              className="hidden h-6 transition-all hover:brightness-110 active:brightness-125 dark:block"
             />
           </div>
         </button>
