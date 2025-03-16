@@ -160,3 +160,19 @@ it('correctly parses dependencies from hard-message2.txt fixture', () => {
   expect(result.dependenciesString).toBeDefined();
   expect(result.dependenciesString).toMatch(/react-dropzone/);
 });
+
+it('correctly parses markdown and code from hard-message4.txt fixture', () => {
+  const fixturePath = path.join(__dirname, 'fixtures', 'hard-message3.txt');
+  expect(fs.existsSync(fixturePath)).toBe(true);
+
+  const content = fs.readFileSync(fixturePath, 'utf-8');
+  const result = parseContent(content);
+
+  expect(result.segments.length).toBe(3);
+  expect(result.segments[0].type).toBe('markdown');
+  expect(result.segments[1].type).toBe('code');
+  expect(result.segments[2].type).toBe('markdown');
+
+  // code should match Loading questions
+  expect(result.segments[1].content).toMatch(/Loading questions/);
+});

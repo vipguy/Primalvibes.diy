@@ -41,16 +41,17 @@ export function parseContent(text: string): {
   }
 
   // First look for complete code blocks delimited by ```js or ```jsx and a closing ```
-  const completeCodeBlockMatch = text.match(/(.*?)\s*```(?:js|jsx)\s*\n([\s\S]*?)```\s*([\s\S]*)/s);
+  // In proper markdown, delimiters need to be at the start of a line (with optional whitespace)
+  const completeCodeBlockMatch = text.match(/([\s\S]*?)(?:^|\n)[ \t]*```(?:js|jsx|javascript|)[ \t]*\n([\s\S]*?)(?:^|\n)[ \t]*```[ \t]*(?:\n|$)([\s\S]*)/);
 
   // Then check for incomplete code blocks with just the opening delimiter
-  const incompleteCodeBlockMatch = text.match(/(.*?)\s*```(?:js|jsx)\s*\n([\s\S]*?)$/s);
+  const incompleteCodeBlockMatch = text.match(/([\s\S]*?)(?:^|\n)[ \t]*```(?:js|jsx|javascript|)[ \t]*\n([\s\S]*?)$/s);
 
   if (completeCodeBlockMatch) {
     const beforeCode = completeCodeBlockMatch[1]?.trim();
     const codeContent = completeCodeBlockMatch[2]?.trim();
     const afterCode = completeCodeBlockMatch[3]?.trim();
-
+    
     // Add the markdown content before the code block if it exists
     if (beforeCode) {
       segments.push({

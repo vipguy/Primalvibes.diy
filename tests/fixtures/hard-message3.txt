@@ -1,0 +1,298 @@
+{"dependencies": {}}
+
+# AI Trivia Challenge
+
+A fast-paced trivia game with AI-generated questions and judgments.
+
+```js
+import React, { useState, useEffect } from "react";
+import { useFireproof } from "use-fireproof";
+
+export default function TriviaApp() {
+  const { database, useLiveQuery, useDocument } = useFireproof("trivia-game");
+  const [topic, setTopic] = useState("");
+  const [userAnswer, setUserAnswer] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [showJudgment, setShowJudgment] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false);
+  
+  const { docs: questions } = useLiveQuery("type", { 
+    key: "question",
+    descending: false
+  });
+  
+  const { docs: judgments } = useLiveQuery("type", {
+    key: "judgment",
+    descending: true
+  });
+
+  // Reset game
+  const resetGame = async () => {
+    // Delete all existing documents
+    for (const doc of [...questions, ...judgments]) {
+      await database.del(doc._id);
+    }
+    setCurrentQuestionIndex(0);
+    setShowJudgment(false);
+    setGameStarted(false);
+    setUserAnswer("");
+  };
+
+  // Start game with a new topic
+  const startGame = async () => {
+    if (!topic.trim()) return;
+    
+    setIsLoading(true);
+    setGameStarted(true);
+    
+    try {
+      // Generate initial 3 questions
+      for (let i = 0; i < 3; i++) {
+        await generateQuestion(topic, i);
+      }
+    } catch (error) {
+      console.error("Error starting game:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Generate a new question
+  const generateQuestion = async (currentTopic, position) => {
+    try {
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${window.OPENROUTER_API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "anthropic/claude-3-haiku",
+          messages: [
+            {
+              role: "user", 
+              content: `Create a challenging but fun trivia question about ${currentTopic}. Format as JSON with "question" and "correctAnswer" fields. Make it challenging but solvable.`
+            }
+          ]
+        })
+      });
+      
+      const data = await response.json();
+      const content = data.choices[0].message.content;
+      
+      // Extract JSON from the response
+      const match = content.match(/```json\n([\s\S]*?)\n```/) || content.match(/\{[\s\S]*\}/);
+      const jsonStr = match ? match[1] || match[0] : content;
+      
+      let parsedQuestion;
+      try {
+        parsedQuestion = JSON.parse(jsonStr);
+      } catch (e) {
+        console.error("Failed to parse AI response:", e);
+        // Fallback parsing
+        const questionMatch = content.match(/question"?\s*:\s*"([^"]+)/);
+        const answerMatch = content.match(/correctAnswer"?\s*:\s*"([^"]+)/);
+        parsedQuestion = {
+          question: questionMatch ? questionMatch[1] : "What is the capital of France?",
+          correctAnswer: answerMatch ? answerMatch[1] : "Paris"
+        };
+      }
+      
+      await database.put({
+        type: "question",
+        position: position,
+        question: parsedQuestion.question,
+        correctAnswer: parsedQuestion.correctAnswer,
+        timestamp: Date.now()
+      });
+      
+    } catch (error) {
+      console.error("Error generating question:", error);
+    }
+  };
+
+  // Judge user's answer
+  const judgeAnswer = async () => {
+    if (!userAnswer.trim()) return;
+    
+    const currentQuestion = questions[currentQuestionIndex];
+    if (!currentQuestion) return;
+    
+    setIsLoading(true);
+    setShowJudgment(true);
+    
+    try {
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${window.OPENROUTER_API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "anthropic/claude-3-haiku",
+          messages: [
+            {
+              role: "user", 
+              content: `Question: "${currentQuestion.question}"\nCorrect answer: "${currentQuestion.correctAnswer}"\nUser answer: "${userAnswer}"\n\nJudge if the user is right or wrong. Be funny and a bit sassy in your response. Keep it brief (1-3 sentences). Also include whether it was CORRECT or INCORRECT at the end in parentheses.`
+            }
+          ]
+        })
+      });
+      
+      const data = await response.json();
+      const judgment = data.choices[0].message.content;
+      
+      await database.put({
+        type: "judgment",
+        questionId: currentQuestion._id,
+        judgment: judgment,
+        userAnswer: userAnswer,
+        timestamp: Date.now()
+      });
+      
+      // Generate next question if not at the end
+      if (currentQuestionIndex + 2 < questions.length) {
+        // No need to generate more
+      } else {
+        generateQuestion(topic, questions.length);
+      }
+      
+      // Reset user answer
+      setUserAnswer("");
+      
+    } catch (error) {
+      console.error("Error judging answer:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Move to next question
+  const nextQuestion = () => {
+    setCurrentQuestionIndex(prev => prev + 1);
+    setShowJudgment(false);
+  };
+
+  // Current question and judgment
+  const currentQuestion = questions[currentQuestionIndex];
+  const currentJudgment = judgments.find(j => 
+    currentQuestion && j.questionId === currentQuestion._id
+  );
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-orange-800 to-orange-900 text-white flex flex-col items-center p-4">
+      <div className="w-full max-w-md">
+        <h1 className="text-4xl font-bold text-center mb-6 text-orange-300">AI Trivia Challenge</h1>
+        
+        {!gameStarted ? (
+          <div className="bg-orange-950 rounded-lg p-6 shadow-lg">
+            <p className="italic text-orange-300 mb-4">
+              Welcome to AI Trivia Challenge! Choose any topic you're passionate about, and our AI will generate custom trivia questions for you. Answer them correctly to increase your score, but beware - our AI judge has a sassy sense of humor!
+            </p>
+            <input
+              type="text"
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              placeholder="Enter a topic (e.g., space, movies, history)"
+              className="w-full p-3 mb-4 rounded bg-orange-900 text-white placeholder-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
+            />
+            <button
+              onClick={startGame}
+              disabled={!topic.trim() || isLoading}
+              className="w-full py-3 rounded bg-orange-500 hover:bg-orange-600 font-bold transition-colors disabled:opacity-50"
+            >
+              {isLoading ? "Loading..." : "Start Game"}
+            </button>
+          </div>
+        ) : (
+          <div className="bg-orange-950 rounded-lg p-6 shadow-lg">
+            <div className="flex justify-between mb-4">
+              <span className="text-sm bg-orange-800 px-2 py-1 rounded">Question {currentQuestionIndex + 1}/{questions.length}</span>
+              <button 
+                onClick={resetGame} 
+                className="text-sm bg-orange-700 px-2 py-1 rounded hover:bg-orange-600"
+              >
+                Reset Game
+              </button>
+            </div>
+            
+            {currentQuestion ? (
+              <>
+                <h2 className="text-xl font-bold mb-4">{currentQuestion.question}</h2>
+                
+                {!showJudgment ? (
+                  <div>
+                    <input
+                      type="text"
+                      value={userAnswer}
+                      onChange={(e) => setUserAnswer(e.target.value)}
+                      placeholder="Type your answer..."
+                      className="w-full p-3 mb-4 rounded bg-orange-900 text-white placeholder-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                    />
+                    <button
+                      onClick={judgeAnswer}
+                      disabled={!userAnswer.trim() || isLoading}
+                      className="w-full py-3 rounded bg-orange-500 hover:bg-orange-600 font-bold transition-colors disabled:opacity-50"
+                    >
+                      {isLoading ? "Judging..." : "Submit Answer"}
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="bg-orange-900 p-4 rounded mb-4">
+                      <p className="text-sm text-orange-300 mb-1">Your answer:</p>
+                      <p className="font-bold">{currentJudgment?.userAnswer}</p>
+                    </div>
+                    
+                    <div className="bg-orange-900 p-4 rounded mb-4">
+                      <p className="text-sm text-orange-300 mb-1">Judgment:</p>
+                      <p>{currentJudgment?.judgment}</p>
+                    </div>
+                    
+                    <button
+                      onClick={nextQuestion}
+                      disabled={currentQuestionIndex >= questions.length - 1}
+                      className="w-full py-3 rounded bg-orange-500 hover:bg-orange-600 font-bold transition-colors disabled:opacity-50"
+                    >
+                      Next Question
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <p>Loading questions...</p>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+```
+
+## About AI Trivia Challenge
+
+*AI Trivia Challenge is an interactive trivia game that creates custom questions based on any topic you choose. The app leverages AI to generate challenging questions, evaluate your answers with witty commentary, and keep you entertained throughout your trivia journey.*
+
+### How to Use the App
+
+1. **Choose a Topic**: Start by entering any topic you're interested in - from "ancient Egyptian mythology" to "90s sitcoms" or "quantum physics".
+
+2. **Answer Questions**: Once you start the game, the AI will generate three initial questions. Read each question carefully and type your answer in the input box.
+
+3. **Get Judged**: After submitting your answer, the AI will evaluate it with a touch of sass and humor. You'll see whether you were right or wrong, along with a witty comment.
+
+4. **Continue Playing**: Click "Next Question" to move on. The app intelligently generates new questions in the background while you're playing, so you'll always have a fresh challenge ahead.
+
+5. **Reset Anytime**: If you want to try a different topic or start over, just click the "Reset Game" button.
+
+### Features
+
+- **Custom Topics**: Play trivia on literally any subject you can think of
+- **Real-time Question Generation**: New questions are generated while you play
+- **Sassy AI Judge**: Get entertaining feedback on your answers
+- **Persistent Game State**: Your game progress is saved automatically
+- **Mobile-Friendly Design**: Play on any device with the responsive interface
+
+*Challenge yourself, learn new facts, and enjoy the uniquely entertaining AI commentary as you test your knowledge across an infinite variety of topics!*
