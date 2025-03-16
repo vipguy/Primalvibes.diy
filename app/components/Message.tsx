@@ -160,27 +160,25 @@ export default Message;
 export const WelcomeScreen = memo(() => {
   return (
     <div className="text-accent-02 mx-auto max-w-2xl space-y-4 px-12 pt-8 text-center italic">
+      <h3 className="py-10 text-2xl font-semibold">Vibe coding just got easier</h3>
+
       <p>
-        Describe the app you want to build, and let AI generate the code. Everything runs in your
-        browser, no setup required. Apps are sharable, or eject them to GitHub for easy
-        deploys.{' '}
+        Describe your app and let AI write the code. If you need ideas, try the quick suggestions
+        below or join our <a href="https://discord.gg/DbSXGqvxFc" target="_blank" rel="noopener noreferrer" className="text-accent-00 hover:underline">Discord community</a>.
       </p>
 
-      <div className="mt-8">
-        <h3 className="py-2 font-semibold">Open Source</h3>
-        <p>
-          Anyone can{' '}
-          <a
-            href="https://github.com/fireproof-storage/ai-app-builder"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-accent-00 hover:underline"
-          >
-            fork and customize this app builder
-          </a>
-          . It's the easiest way to put a tool like this onto your site, no backend required.
-        </p>
-      </div>
+      <p>
+        Apps can eject to Github, and this app builder is{' '}
+        <a
+          href="https://github.com/fireproof-storage/ai-app-builder"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-accent-00 hover:underline"
+        >
+          open source
+        </a>
+        . It runs in the browser, no setup required.
+      </p>
     </div>
   );
 });

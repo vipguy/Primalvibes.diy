@@ -196,13 +196,13 @@ a,
 
 /* Glimmer effect for borders */
 .border-glimmer {
-  position: relative;
+  position: absolute;
   overflow: visible;
   border: none;
 }
 
 .border-glimmer::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: -2px; /* Slightly larger than the button */
   border-radius: inherit;
@@ -221,12 +221,12 @@ a,
   background-size: 200% 100%;
   background-repeat: no-repeat;
   background-position: -100% 0;
-  -webkit-mask: 
-    linear-gradient(#fff 0 0) content-box, 
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
-  animation: buttonGlimmer 4.5s infinite;
+  animation: buttonGlimmer 8.5s infinite;
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
 }
@@ -248,10 +248,10 @@ a,
     background-size: 200% 100%;
     background-repeat: no-repeat;
     background-position: -100% 0;
-    animation: buttonGlimmer 4.5s infinite;
+    animation: buttonGlimmer 11s infinite;
     animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
-} 
+}
 
 /* Keep the original glimmer-overlay class */
 .glimmer-overlay {

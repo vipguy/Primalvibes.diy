@@ -36,7 +36,7 @@ function ChatInput({ value, onChange, onSend, onKeyDown, disabled, inputRef }: C
           onChange={onChange}
           onKeyDown={onKeyDown}
           className="border-light-decorative-00 dark:border-dark-decorative-00 text-light-primary dark:text-dark-primary bg-light-background-01 dark:bg-dark-background-01 focus:ring-accent-01-light dark:focus:ring-accent-01-dark max-h-[200px] min-h-[90px] w-full resize-y rounded-xl border p-2.5 text-sm focus:border-transparent focus:ring-2 focus:outline-none"
-          placeholder={'Vibe coding? Use Fireproof.'}
+          placeholder={'I want to build...'}
           disabled={disabled}
           rows={2}
         />
@@ -44,7 +44,7 @@ function ChatInput({ value, onChange, onSend, onKeyDown, disabled, inputRef }: C
           type="button"
           onClick={onSend}
           disabled={disabled}
-          className={`light-gradient border-glimmer relative flex items-center justify-center overflow-hidden rounded-lg border shadow-sm transition-all duration-300 hover:border-gray-300 hover:shadow-md active:shadow-inner dark:hover:border-gray-600 ${
+          className={`light-gradient border-glimmer absolute flex items-center justify-center overflow-hidden rounded-lg border shadow-sm transition-all duration-300 hover:border-gray-300 hover:shadow-md active:shadow-inner dark:hover:border-gray-600 ${
             disabled
               ? 'border-gray-300 dark:border-gray-500'
               : 'border-gray-200 dark:border-gray-700'

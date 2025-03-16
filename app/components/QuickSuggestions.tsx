@@ -9,10 +9,6 @@ function QuickSuggestions({ onSelectSuggestion }: QuickSuggestionsProps) {
       text: 'Create a todo app with freeform textarea entry, that sends the text to AI to create todo list items using json, and tag them into the selected list.',
     },
     {
-      label: 'Pomodoro',
-      text: 'Create a pomodoro timer app with multiple timers work/break intervals and session tracking.',
-    },
-    {
       label: 'Sports',
       text: 'Chat with sports legends.',
     },
@@ -31,6 +27,10 @@ function QuickSuggestions({ onSelectSuggestion }: QuickSuggestionsProps) {
     {
       label: 'Quiz',
       text: "Write a trivia app that lets me pick a topic, and uses AI to make the next question while I'm answering the current one. It should make 3 at first. Ai should also judge the answer. It can either be right or wrong and funny.",
+    },
+    {
+      label: 'Pomodoro',
+      text: 'Create a pomodoro timer app with multiple timers work/break intervals and session tracking.',
     },
     {
       label: 'Music',

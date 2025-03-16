@@ -40,7 +40,7 @@ function SessionSidebar({ isVisible, onClose }: SessionSidebarProps) {
         return null;
       }
 
-      const title = session.title || 'New Chat';
+      const title = session.title || 'Untitled Chat';
       const encodedTitle = encodeTitle(title);
 
       // first and last screenshots, if they exist, and unique
