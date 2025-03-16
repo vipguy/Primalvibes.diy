@@ -15,8 +15,8 @@ import SessionSidebar from '../components/SessionSidebar';
 
 export function meta() {
   return [
-    { title: 'Fireproof App Builder' },
-    { name: 'description', content: 'Build React components with AI' },
+    { title: 'AI App Builder' },
+    { name: 'description', content: 'Write apps in one prompt' },
   ];
 }
 

@@ -27,7 +27,7 @@ describe('ChatInput Component', () => {
         inputRef={inputRef}
       />
     );
-    expect(screen.getByPlaceholderText('Vibe coding? Use Fireproof.')).toBeDefined();
+    expect(screen.getByPlaceholderText('I want to build...')).toBeDefined();
   });
 
   it('calls onChange when text is entered', () => {
@@ -42,7 +42,7 @@ describe('ChatInput Component', () => {
       />
     );
 
-    const textArea = screen.getByPlaceholderText('Vibe coding? Use Fireproof.');
+    const textArea = screen.getByPlaceholderText('I want to build...');
     fireEvent.change(textArea, { target: { value: 'Hello world' } });
 
     expect(onChange).toHaveBeenCalled();
@@ -78,7 +78,7 @@ describe('ChatInput Component', () => {
       />
     );
 
-    const textArea = screen.getByPlaceholderText('Vibe coding? Use Fireproof.');
+    const textArea = screen.getByPlaceholderText('I want to build...');
     const sendButton = screen.getByLabelText('Generating');
 
     expect(textArea).toBeDisabled();
@@ -100,7 +100,7 @@ describe('ChatInput Component', () => {
       />
     );
 
-    const textArea = screen.getByPlaceholderText('Vibe coding? Use Fireproof.');
+    const textArea = screen.getByPlaceholderText('I want to build...');
     fireEvent.keyDown(textArea, { key: 'Enter', shiftKey: false });
 
     expect(onKeyDown).toHaveBeenCalled();
