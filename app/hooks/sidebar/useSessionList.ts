@@ -28,8 +28,8 @@ export type GroupedSession = {
  * Uses a single efficient query that gets both data types together
  * @returns An object containing the grouped sessions and loading state
  */
-export function useSessionList() {
-  const { useLiveQuery } = useFireproof(FIREPROOF_CHAT_HISTORY);
+export function useSessionList(justFavorites = false) {
+  const { database, useLiveQuery } = useFireproof(FIREPROOF_CHAT_HISTORY);
 
   // Use a single query to fetch both sessions and screenshots with a custom index function
   // For session docs: returns doc._id
@@ -83,15 +83,24 @@ export function useSessionList() {
       }
     });
 
+    // remove the groups that are not favorites
+    if (justFavorites) {
+      groups.forEach((group) => {
+        if (!group.session.favorite) {
+          groups.delete(group.session._id!);
+        }
+      });
+    }
     // Convert map to array and sort by created_at (newest first)
     return Array.from(groups.values()).sort((a, b) => {
       const timeA = a.session.created_at || 0;
       const timeB = b.session.created_at || 0;
       return timeB - timeA;
     });
-  }, [sessionAndScreenshots]);
+  }, [sessionAndScreenshots, justFavorites]);
 
   return {
+    database,
     groupedSessions,
     count: groupedSessions.length,
   };

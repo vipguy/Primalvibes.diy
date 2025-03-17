@@ -50,6 +50,7 @@ export interface SessionDocument extends DocTypes {
   type: 'session'; // Document type for Fireproof queries
   title?: string;
   created_at: number;
+  favorite?: boolean; // Added favorite property for starring sessions
   messages?: Array<{
     text: string;
     type: 'user' | 'ai';

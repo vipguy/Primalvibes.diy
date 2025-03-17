@@ -47,16 +47,16 @@ const WebContainerContent: React.FC<WebContainerContentProps> = ({
         // Boot WebContainer for preview
         const instance = await WebContainer.boot();
         webContainerRef.current = instance;
-        
+
         // Mount the files
         await instance.mount(convertSandpackToWebContainerFiles(filesContent));
-        
+
         // Install dependencies
         await installDependencies(instance, dependencies);
-        
+
         // Start a dev server
         await instance.spawn('npm', ['run', 'dev']);
-        
+
         // Notify that bundling is complete
         setBundlingComplete(true);
       } catch (error) {
@@ -67,7 +67,7 @@ const WebContainerContent: React.FC<WebContainerContentProps> = ({
     if (!isStreaming && codeReady) {
       initWebContainer();
     }
-    
+
     // Listen for dark mode changes
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {
@@ -91,7 +91,7 @@ const WebContainerContent: React.FC<WebContainerContentProps> = ({
   // Convert Sandpack files format to WebContainer format
   const convertSandpackToWebContainerFiles = (files: SandpackFiles) => {
     const webContainerFiles: Record<string, any> = {};
-    
+
     Object.entries(files).forEach(([path, fileContent]) => {
       webContainerFiles[path] = {
         file: {
@@ -99,10 +99,10 @@ const WebContainerContent: React.FC<WebContainerContentProps> = ({
         }
       };
     });
-    
+
     return webContainerFiles;
   };
-  
+
   // Install dependencies from the dependencies object
   const installDependencies = async (instance: WebContainer, deps: Record<string, string>) => {
     // Create a package.json with the dependencies
@@ -116,9 +116,9 @@ const WebContainerContent: React.FC<WebContainerContentProps> = ({
       },
       dependencies: deps
     };
-    
+
     await instance.fs.writeFile('package.json', JSON.stringify(packageJson, null, 2));
-    
+
     // Run npm install
     const installProcess = await instance.spawn('npm', ['install']);
     return installProcess.exit;
@@ -175,16 +175,18 @@ export default WebContainerContent;
 Based on the project structure, here's where the implementation needs to happen:
 
 1. **Main Files to Modify**:
+
    - `app/components/ResultPreview/ResultPreview.tsx`: Replace SandpackContent with WebContainerContent
    - Create new file: `app/components/ResultPreview/WebContainerContent.tsx` (as shown above)
 
 2. **Related Files in the project structure**:
+
    - `app/components/ResultPreview/ResultPreviewTypes.ts`: May need to update types
    - `app/components/ResultPreview/ResultPreviewUtils.ts`: May need updates for WebContainer conversion
    - `app/components/ResultPreview/ResultPreviewTemplates.ts`: Update for WebContainer compatibility
 
 3. **Integration Points**:
-   - The existing SandpackContent implementation at `app/components/ResultPreview/SandpackContent.tsx` 
+   - The existing SandpackContent implementation at `app/components/ResultPreview/SandpackContent.tsx`
    - The ResultPreview component at `app/components/ResultPreview/ResultPreview.tsx` currently has this critical integration point:
      ```typescript
      <SandpackContent
@@ -289,12 +291,12 @@ export function useWebContainer() {
   return context;
 }
 
-export default function WebContainerProvider({ 
-  template, 
-  children 
-}: { 
-  template: Template; 
-  children: React.ReactNode 
+export default function WebContainerProvider({
+  template,
+  children
+}: {
+  template: Template;
+  children: React.ReactNode
 }) {
   const [webContainer, setWebContainer] = useState<WebContainer | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -302,31 +304,31 @@ export default function WebContainerProvider({
 
   useEffect(() => {
     let instance: WebContainer | null = null;
-    
+
     const initWebContainer = async () => {
       try {
         setIsLoading(true);
-        
+
         // Boot WebContainer - this is the most resource-intensive step
         instance = await WebContainer.boot();
-        
+
         // Mount the template files to the filesystem
         await instance.mount(template.files);
         setWebContainer(instance);
-        
+
         // Install dependencies - showing the editor as read-only during this phase
         // keeps users engaged while heavy operations complete
         const installProcess = await instance.spawn('npm', ['install']);
         const installExitCode = await installProcess.exit;
-        
+
         if (installExitCode !== 0) {
           console.error('Failed to install dependencies');
           return;
         }
-        
+
         // Start dev server - Vite provides HMR out of the box
         await instance.spawn('npm', ['run', 'dev']);
-        
+
         // Code is ready for editing - this transitions the editor from read-only mode
         setCodeReady(true);
       } catch (error) {
@@ -337,7 +339,7 @@ export default function WebContainerProvider({
     };
 
     initWebContainer();
-    
+
     return () => {
       // Note: WebContainer teardown is problematic - known issue with the WebContainer API
       // https://github.com/stackblitz/webcontainer-core/issues/1125
@@ -474,13 +476,13 @@ function getLanguageFromFileName(fileName: string): string {
 }
 
 // Simple file tabs component
-function FileTabs({ 
-  files, 
-  activeFile, 
-  onFileChange 
-}: { 
-  files: string[]; 
-  activeFile: string; 
+function FileTabs({
+  files,
+  activeFile,
+  onFileChange
+}: {
+  files: string[];
+  activeFile: string;
   onFileChange: (file: string) => void;
 }) {
   return (
@@ -490,8 +492,8 @@ function FileTabs({
           key={file}
           onClick={() => onFileChange(file)}
           className={`px-3 py-1 ${
-            activeFile === file 
-              ? 'bg-gray-200 font-medium' 
+            activeFile === file
+              ? 'bg-gray-200 font-medium'
               : 'hover:bg-gray-100'
           }`}
         >
@@ -511,7 +513,7 @@ export default function CodeEditor() {
 
   const handleCodeChange = async (value: string | undefined) => {
     if (!webContainer || !codeReady || !value) return;
-    
+
     // Write changes directly to WebContainer filesystem
     // This triggers Vite's HMR to update the preview automatically
     await webContainer.fs.writeFile(activeFile, value);
@@ -634,41 +636,45 @@ Create a simple loading page to display in the iframe initially:
 <!-- public/loading.html -->
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Loading...</title>
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      background-color: #f3f4f6;
-    }
-    .loader {
-      border: 4px solid #e5e7eb;
-      border-top: 4px solid #3b82f6;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin-bottom: 16px;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  </style>
-</head>
-<body>
-  <div style="text-align: center;">
-    <div class="loader"></div>
-    <p>Loading preview...</p>
-  </div>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loading...</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #f3f4f6;
+      }
+      .loader {
+        border: 4px solid #e5e7eb;
+        border-top: 4px solid #3b82f6;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin-bottom: 16px;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div style="text-align: center;">
+      <div class="loader"></div>
+      <p>Loading preview...</p>
+    </div>
+  </body>
 </html>
 ```
 
@@ -691,12 +697,14 @@ app/
 ### Data Flow
 
 1. **Initialization**:
+
    - WebContainerProvider boots WebContainer
    - Default template is mounted to virtual filesystem
    - Dependencies are installed
    - Dev server is started
 
 2. **Editor Interaction**:
+
    - User edits code in Monaco editor
    - Changes are written to WebContainer filesystem
    - Vite dev server detects changes and hot-reloads
@@ -751,4 +759,3 @@ While our focus is on simplicity, here are a few enhancements that could be cons
 4. **Optional AI Completion**: If desired, integrate with [AI completion services](https://spencerporter2.medium.com/building-copilot-on-the-web-f090ceb9b20b) for code suggestions, while keeping this as a toggleable feature.
 
 These potential enhancements should only be pursued if they truly add value without compromising the clean, focused experience that is the core strength of this implementation.
-
