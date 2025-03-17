@@ -56,8 +56,12 @@ export const indexHtml = `<!DOCTYPE html>
       }
 
       window.addEventListener('message', function(event) {        
-        if (event.data && event.data.type === 'command' && event.data.command === 'reload-preview') {
-          window.location.reload();
+        if (event.data && event.data.type === 'command') {
+          if (event.data.command === 'reload-preview') {
+            window.location.reload();
+          } else if (event.data.command === 'capture-screenshot') {
+            captureScreenshot();
+          }
         }
         // Handle API key message
         if (event.data && event.data.type === 'openrouter-api-key' && event.data.key) {

@@ -40,6 +40,22 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
     }
   }
 
+  function handleCaptureScreenshot() {
+    if (!code || !previewReady) {
+      alert('Generate an app and wait for the preview to be ready before capturing a screenshot!');
+      return;
+    }
+
+    const iframe = document.querySelector('.sp-preview-iframe') as HTMLIFrameElement;
+    iframe?.contentWindow?.postMessage(
+      {
+        type: 'command',
+        command: 'capture-screenshot',
+      },
+      '*'
+    );
+  }
+
   const showSwitcher = code.length > 0;
 
   return (
@@ -146,6 +162,34 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
             <span className="text-sm text-green-600 dark:text-green-400">{shareStatus}</span>
           )}
           <div className="bg-light-decorative-00 dark:bg-dark-decorative-00 flex space-x-1 rounded-lg p-1 shadow-sm">
+            <button
+              type="button"
+              onClick={handleCaptureScreenshot}
+              className="text-light-primary dark:text-dark-primary hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 flex items-center space-x-1.5 rounded-md px-4 py-1.5 text-sm font-medium transition-colors"
+              aria-label="Capture screenshot"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <title>Screenshot</title>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+            </button>
             <button
               type="button"
               onClick={handleShare}
