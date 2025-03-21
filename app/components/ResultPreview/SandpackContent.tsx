@@ -55,7 +55,7 @@ const SandpackContent: React.FC<SandpackContentProps> = ({
         customSetup={{
           dependencies: {
             'use-fireproof': '0.20.0-dev-preview-52',
-            'call-ai': '0.2.1',
+            'call-ai': '0.3.1',
             ...(dependencies || {}),
           },
         }}
