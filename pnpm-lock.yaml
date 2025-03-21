@@ -22,6 +22,9 @@ importers:
       '@tailwindcss/typography':
         specifier: ^0.5.16
         version: 0.5.16(tailwindcss@4.0.6)
+      call-ai:
+        specifier: 0.2.1
+        version: 0.2.1
       isbot:
         specifier: ^5.1.17
         version: 5.1.22
@@ -2300,6 +2303,13 @@ packages:
         integrity: sha512-b6Ilus+c3RrdDk+JhLKUAQfzzgLEPy6wcXqS7f/xe1EETvsDP6GORG7SFuOs6cID5YkqchW/LXZbX5bc8j7ZcQ==,
       }
     engines: { node: '>=8' }
+
+  call-ai@0.2.1:
+    resolution:
+      {
+        integrity: sha512-WUYnxU5mbZpLLJNFz/YFK5Y+lHkHnwhFPH9urL3nXYq9Tmox0eO7Nc8XYtD4CRHvoPeLP+5vxZECcVWIFDr/7w==,
+      }
+    engines: { node: '>=14.0.0' }
 
   call-bind-apply-helpers@1.0.2:
     resolution:
@@ -7529,6 +7539,8 @@ snapshots:
   bytes@3.1.2: {}
 
   cac@6.7.14: {}
+
+  call-ai@0.2.1: {}
 
   call-bind-apply-helpers@1.0.2:
     dependencies:

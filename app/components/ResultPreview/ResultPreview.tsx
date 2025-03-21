@@ -4,7 +4,7 @@ import type { SandpackFiles } from './ResultPreviewTypes';
 import { indexHtml, animationStyles } from './ResultPreviewTemplates';
 import { processCodeForDisplay } from './ResultPreviewUtils';
 import SandpackContent from './SandpackContent';
-import { OPENROUTER_API_KEY } from '../../config/env';
+import { CALLAI_API_KEY } from '../../config/env';
 
 function ResultPreview({
   code,
@@ -57,10 +57,7 @@ function ResultPreview({
         if (data.type === 'preview-loaded') {
           // respond with the API key
           const iframe = document.querySelector('.sp-preview-iframe') as HTMLIFrameElement;
-          iframe?.contentWindow?.postMessage(
-            { type: 'openrouter-api-key', key: OPENROUTER_API_KEY },
-            '*'
-          );
+          iframe?.contentWindow?.postMessage({ type: 'callai-api-key', key: CALLAI_API_KEY }, '*');
 
           setMobilePreviewShown(true);
           setPreviewReady(true);

@@ -7,7 +7,7 @@ export const indexHtml = `<!DOCTYPE html>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
       // Global variable to store the API key
-      window.API_KEY = null;
+      window.CALLAI_API_KEY = null;
       
       tailwind.config = {
         darkMode: 'class',
@@ -63,9 +63,9 @@ export const indexHtml = `<!DOCTYPE html>
             captureScreenshot();
           }
         }
-        // Handle API key message
-        if (event.data && event.data.type === 'openrouter-api-key' && event.data.key) {
-          window.OPENROUTER_API_KEY = event.data.key;
+        // Handle call-ai API key message
+        if (event.data && event.data.type === 'callai-api-key' && event.data.key) {
+          window.CALLAI_API_KEY = event.data.key;
         }
       });
 
