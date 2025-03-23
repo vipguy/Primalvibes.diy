@@ -24,8 +24,8 @@ importers:
         specifier: ^0.5.16
         version: 0.5.16(tailwindcss@4.0.6)
       call-ai:
-        specifier: 0.3.1
-        version: 0.3.1
+        specifier: 0.5.0
+        version: 0.5.0
       isbot:
         specifier: ^5.1.17
         version: 5.1.22
@@ -1484,8 +1484,8 @@ packages:
     resolution: {integrity: sha512-b6Ilus+c3RrdDk+JhLKUAQfzzgLEPy6wcXqS7f/xe1EETvsDP6GORG7SFuOs6cID5YkqchW/LXZbX5bc8j7ZcQ==}
     engines: {node: '>=8'}
 
-  call-ai@0.3.1:
-    resolution: {integrity: sha512-04tz1BPhWNrKhA+/ThlsbAzVLp9OfdPOPJVtHB9lsCOjRbnVkBOmZTdyCGHk1kVjmjo4OKEEepZRvUAfgX5vrQ==}
+  call-ai@0.5.0:
+    resolution: {integrity: sha512-pM9TsP9jtz0RTt11locRa250Ndalv9scYCLzu5Tp7EytCsjmeCdVr5gd+M1DUCMnjrztVSQ4/ZsICv1pPjvq3A==}
     engines: {node: '>=14.0.0'}
 
   call-bind-apply-helpers@1.0.2:
@@ -5143,7 +5143,7 @@ snapshots:
 
   cac@6.7.14: {}
 
-  call-ai@0.3.1: {}
+  call-ai@0.5.0: {}
 
   call-bind-apply-helpers@1.0.2:
     dependencies:
