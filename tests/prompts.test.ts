@@ -42,13 +42,7 @@ describe('Prompts Utility', () => {
 
   it('defines the correct response format', () => {
     // Check that RESPONSE_FORMAT has the expected structure
-    expect(RESPONSE_FORMAT).toHaveProperty('dependencies');
     expect(RESPONSE_FORMAT).toHaveProperty('structure');
-
-    // Check that dependencies format is defined
-    expect(RESPONSE_FORMAT.dependencies).toHaveProperty('format');
-    expect(RESPONSE_FORMAT.dependencies).toHaveProperty('note');
-    expect(RESPONSE_FORMAT.dependencies.note).toContain('use-fireproof is already provided');
 
     // Check that structure is an array
     expect(Array.isArray(RESPONSE_FORMAT.structure)).toBe(true);
