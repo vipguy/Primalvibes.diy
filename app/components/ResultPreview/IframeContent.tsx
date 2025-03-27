@@ -108,7 +108,11 @@ const IframeContent: React.FC<IframeContentProps> = ({
           (match, importPath) => {
             // Skip transforming imports that are already handled in the importmap
             // Only skip the core libraries we have in our importmap
-            if (['react', 'react-dom', 'react-dom/client', 'use-fireproof', 'call-ai'].includes(importPath)) {
+            if (
+              ['react', 'react-dom', 'react-dom/client', 'use-fireproof', 'call-ai'].includes(
+                importPath
+              )
+            ) {
               return match;
             }
             // Transform the import to use basic esm.sh URL

@@ -122,16 +122,18 @@ export default function UnifiedSession() {
       <AppLayout
         headerLeft={<ChatHeaderContent onOpenSidebar={openSidebar} title={chatState.title || ''} />}
         headerRight={
-          <ResultPreviewHeaderContent
-            previewReady={previewReady}
-            activeView={activeView}
-            setActiveView={setActiveView}
-            setMobilePreviewShown={setMobilePreviewShown}
-            bundlingComplete={bundlingComplete}
-            isStreaming={chatState.isStreaming}
-            code={chatState.selectedCode?.content || ''}
-            dependencies={chatState.selectedDependencies || {}}
-          />
+          chatState.selectedCode?.content ? (
+            <ResultPreviewHeaderContent
+              previewReady={previewReady}
+              activeView={activeView}
+              setActiveView={setActiveView}
+              setMobilePreviewShown={setMobilePreviewShown}
+              bundlingComplete={bundlingComplete}
+              isStreaming={chatState.isStreaming}
+              code={chatState.selectedCode?.content}
+              dependencies={chatState.selectedDependencies || {}}
+            />
+          ) : null
         }
         chatPanel={<ChatInterface {...chatState} setMobilePreviewShown={setMobilePreviewShown} />}
         previewPanel={
