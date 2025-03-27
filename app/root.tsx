@@ -53,23 +53,38 @@ export const meta: MetaFunction = () => {
  */
 function useThemeDetection() {
   useEffect(() => {
+    // Console log for debugging in production
+    console.log('Theme detection running');
+    
     // Check if user has dark mode preference
     const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    console.log('Dark mode preference detected:', prefersDarkMode);
+
+    // Additional iOS check - iOS might need extra detection
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    console.log('iOS device detected:', isIOS);
 
     // Apply initial theme
     if (prefersDarkMode) {
       document.documentElement.classList.add('dark');
+      // Add a data attribute as an alternative hook for dark mode
+      document.documentElement.dataset.theme = 'dark';
     } else {
       document.documentElement.classList.remove('dark');
+      document.documentElement.dataset.theme = 'light';
     }
 
     // Set up listener for changes
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {
+      console.log('Dark mode preference changed:', e.matches);
       if (e.matches) {
         document.documentElement.classList.add('dark');
+        document.documentElement.dataset.theme = 'dark';
       } else {
         document.documentElement.classList.remove('dark');
+        document.documentElement.dataset.theme = 'light';
       }
     };
 
