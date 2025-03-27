@@ -68,6 +68,17 @@ body {
 
   @media (prefers-color-scheme: dark) {
     color-scheme: dark;
+    /* Ensure iOS Safari applies dark mode background */
+    background-color: var(--color-dark-background-00);
+    color: var(--color-dark-primary);
+  }
+}
+
+/* iOS-specific fix for dark mode */
+@supports (-webkit-touch-callout: none) {
+  .dark {
+    /* Force background color on iOS Safari */
+    background-color: var(--color-dark-background-00) !important;
   }
 }
 
