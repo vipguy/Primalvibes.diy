@@ -1,7 +1,7 @@
 export interface ResultPreviewProps {
   code: string;
   dependencies?: Record<string, string>;
-  onScreenshotCaptured?: (screenshotData: string) => void;
+  onScreenshotCaptured?: (screenshotData: string | null) => void;
   sessionId?: string;
   isStreaming?: boolean;
   codeReady?: boolean;
@@ -11,7 +11,7 @@ export interface ResultPreviewProps {
   setMobilePreviewShown: (shown: boolean) => void;
 }
 
-export type SandpackFiles = {
+export type IframeFiles = {
   [path: string]: {
     code: string;
     hidden?: boolean;

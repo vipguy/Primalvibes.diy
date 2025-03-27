@@ -1,0 +1,158 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Generated App</title>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/html2canvas-pro@1.5.8/dist/html2canvas-pro.js"></script>
+    <!-- html2canvas-pro handles modern CSS color formats like OKLCH natively -->
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      }
+      #container {
+        width: 100%;
+        height: 100vh;
+      }
+    </style>
+    <script>
+      // Screenshot functionality
+      function captureScreenshot() {
+        // Check if html2canvas is loaded
+        if (typeof html2canvas === 'undefined') {
+          console.warn('html2canvas-pro is not loaded, trying to load it dynamically');
+          // Try to load html2canvas-pro dynamically
+          const script = document.createElement('script');
+          script.src = 'https://unpkg.com/html2canvas-pro@1.5.8/dist/html2canvas-pro.js';
+          script.onload = () => {
+            console.log('html2canvas-pro loaded dynamically');
+            captureScreenshotWithFallback();
+          };
+          script.onerror = (e) => {
+            console.error('Failed to load html2canvas-pro:', e);
+            window.parent.postMessage(
+              { type: 'screenshot-error', error: 'Failed to load html2canvas' },
+              '*'
+            );
+          };
+          document.head.appendChild(script);
+          return;
+        }
+
+        captureScreenshotWithFallback();
+      }
+
+      function captureScreenshotWithFallback() {
+        try {
+          // Let html2canvas-pro do its job with modern CSS
+          html2canvas(document.body, {
+            allowTaint: true,
+            useCORS: true,
+            scale: 1,
+            logging: false,
+          })
+            .then((canvas) => {
+              const dataURI = canvas.toDataURL();
+              window.parent.postMessage({ type: 'screenshot', data: dataURI }, '*');
+            })
+            .catch((err) => {
+              console.error('html2canvas-pro error:', err);
+              window.parent.postMessage(
+                {
+                  type: 'screenshot-error',
+                  error: 'Screenshot capture failed: ' + (err.message || 'Unknown error'),
+                },
+                '*'
+              );
+            });
+        } catch (err) {
+          console.error('Unexpected html2canvas-pro error:', err);
+          window.parent.postMessage(
+            {
+              type: 'screenshot-error',
+              error: 'Unexpected error during screenshot capture',
+            },
+            '*'
+          );
+        }
+      }
+
+      function pageIsLoaded() {
+        window.parent.postMessage({ type: 'preview-ready' }, '*');
+        setTimeout(captureScreenshot, 100);
+      }
+
+      // For rapid updates (optional)
+      let currentApp = null;
+      function updateAppComponent(code) {
+        try {
+          // Evaluate new component code
+          eval(code);
+
+          // If we implement rapid updates, we'll need to re-render here
+          if (currentApp && window.ReactDOM) {
+            // Re-render with new component
+          }
+
+          return true;
+        } catch (error) {
+          console.error('Failed to update component:', error);
+          return false;
+        }
+      }
+
+      // Event listeners
+      window.addEventListener('message', function (event) {
+        if (event.data) {
+          if (event.data.type === 'command') {
+            if (event.data.command === 'capture-screenshot') {
+              captureScreenshot();
+            }
+          } else if (event.data.type === 'update-component') {
+            // For rapid updates (optional)
+            updateAppComponent(event.data.code);
+          } else if (event.data.type === 'callai-api-key' && event.data.key) {
+            window.CALLAI_API_KEY = event.data.key;
+          }
+        }
+      });
+
+      window.addEventListener('DOMContentLoaded', function () {
+        pageIsLoaded();
+      });
+    </script>
+  </head>
+  <body>
+    <div id="container"></div>
+    <script>
+      window.CALLAI_API_KEY = '{{API_KEY}}';
+    </script>
+    <script type="importmap">
+      {
+        "imports": {
+          "react": "https://esm.sh/stable/react@19.0.0/es2022/react.mjs",
+          "react-dom": "https://esm.sh/stable/react-dom@19.0.0/es2022/react-dom.mjs",
+          "react-dom/client": "https://esm.sh/stable/react-dom@19.0.0/es2022/client.mjs",
+          "use-fireproof": "https://esm.sh/stable/use-fireproof@0.20.0-dev-preview-57",
+          "call-ai": "https://esm.sh/stable/call-ai@0.5.0"
+        }
+      }
+    </script>
+    <script type="text/babel" data-type="module">
+      import ReactDOMClient from 'react-dom/client';
+
+      // APP_CODE placeholder will be replaced with actual code
+      // prettier-ignore
+      {{APP_CODE}}
+      // prettier-ignore-end
+
+      const rootElement = document.getElementById('container');
+      ReactDOMClient.createRoot(rootElement).render(<App />);
+    </script>
+  </body>
+</html>

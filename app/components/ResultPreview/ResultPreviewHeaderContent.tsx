@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { copyToClipboard, encodeStateToUrl } from '../../utils/sharing';
+import React from 'react';
 
 interface ResultPreviewHeaderContentProps {
   previewReady: boolean;
@@ -22,31 +21,13 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
   dependencies = {},
   setMobilePreviewShown,
 }) => {
-  const [shareStatus, setShareStatus] = useState<string>('');
-
-  function handleShare() {
-    if (!code) {
-      alert('Generate an app first before sharing!');
-      return;
-    }
-
-    const encoded = encodeStateToUrl(code, dependencies);
-    if (encoded) {
-      copyToClipboard(`${window.location.origin}/shared?state=${encoded}`);
-      setShareStatus('Share URL copied to clipboard!');
-      setTimeout(() => {
-        setShareStatus('');
-      }, 3000);
-    }
-  }
-
   function handleCaptureScreenshot() {
     if (!code || !previewReady) {
       alert('Generate an app and wait for the preview to be ready before capturing a screenshot!');
       return;
     }
 
-    const iframe = document.querySelector('.sp-preview-iframe') as HTMLIFrameElement;
+    const iframe = document.querySelector('iframe') as HTMLIFrameElement;
     iframe?.contentWindow?.postMessage(
       {
         type: 'command',
@@ -87,7 +68,6 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
           <div className="bg-light-decorative-00 dark:bg-dark-decorative-00 flex space-x-1 rounded-lg p-1 shadow-sm">
             <button
               type="button"
-              disabled={!previewReady}
               onClick={() => setActiveView('preview')}
               className={`flex items-center space-x-1.5 rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
                 activeView === 'preview'
@@ -125,7 +105,10 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
             <button
               type="button"
               onClick={() => {
-                setActiveView('code');
+                if (activeView !== 'code') {
+                  setActiveView('code');
+                  // codeReady state has been removed as it's no longer needed
+                }
               }}
               className={`flex items-center space-x-1.5 rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
                 activeView === 'code'
@@ -158,9 +141,6 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
       </div>
       {code ? (
         <div className="flex items-center gap-2">
-          {shareStatus && (
-            <span className="text-sm text-green-600 dark:text-green-400">{shareStatus}</span>
-          )}
           <div className="bg-light-decorative-00 dark:bg-dark-decorative-00 flex space-x-1 rounded-lg p-1 shadow-sm">
             <button
               type="button"
@@ -190,11 +170,12 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
                 />
               </svg>
             </button>
-            <button
-              type="button"
-              onClick={handleShare}
+            <a
+              href="https://connect.fireproof.storage/login"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-light-primary dark:text-dark-primary hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 flex items-center space-x-1.5 rounded-md px-4 py-1.5 text-sm font-medium transition-colors"
-              aria-label="Share app"
+              aria-label="Connect"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -203,7 +184,7 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
                 viewBox="0 0 24 24"
                 stroke="currentColor"
               >
-                <title>Share icon</title>
+                <title>Connect icon</title>
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -211,8 +192,8 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
                   d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
                 />
               </svg>
-              <span>Share</span>
-            </button>
+              <span className="hidden sm:inline">Share</span>
+            </a>
           </div>
         </div>
       ) : (

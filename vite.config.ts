@@ -1,7 +1,7 @@
 import { reactRouter } from '@react-router/dev/vite';
 import tailwindcss from '@tailwindcss/vite';
-import { defineConfig } from 'vite';
 import type { ConfigEnv, UserConfig } from 'vite';
+import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig(({ command, mode }: ConfigEnv): UserConfig => {
@@ -15,10 +15,14 @@ export default defineConfig(({ command, mode }: ConfigEnv): UserConfig => {
       ...(!disableReactRouter ? [reactRouter()] : []),
       tsconfigPaths(),
     ],
+    // Define global constants
+    // define: {
+    //   IFRAME__CALLAI_API_KEY: JSON.stringify(env.VITE_OPENROUTER_API_KEY),
+    // },
     // Server configuration for local development
     server: {
       host: '0.0.0.0', // Listen on all local IPs
-      allowedHosts: ['7c94-97-120-74-156.ngrok-free.app'], // Specific ngrok hostname
+      allowedHosts: ['.ngrok-free.app'], // Specific ngrok hostname
       cors: true, // Enable CORS for all origins
       hmr: {
         clientPort: 443, // Use the HTTPS port for HMR when tunneling
