@@ -18,7 +18,7 @@ const WelcomeScreen = () => {
         .
       </p>
 
-      <p className="mt-10 text-xs">
+      <p className="mt-8 text-xs">
         This{' '}
         <a
           href="https://github.com/fireproof-storage/ai-app-builder"
