@@ -27,18 +27,18 @@ export const links: Route.LinksFunction = () => [
 
 export const meta: MetaFunction = () => {
   return [
-    { title: 'Vibe Coding' },
-    { name: 'description', content: 'The easiest AI App Builder' },
-    { property: 'og:title', content: 'Vibe Coding' },
-    { property: 'og:description', content: 'The easiest AI App Builder' },
-    { property: 'og:image', content: 'https://vibe-coding.use-fireproof.com/card2.png' },
-    { property: 'og:url', content: 'https://vibe-coding.use-fireproof.com' },
+    { title: 'Vibes' },
+    { name: 'description', content: 'Vibe coding made easy' },
+    { property: 'og:title', content: 'Vibes' },
+    { property: 'og:description', content: 'Vibe coding made easy' },
+    { property: 'og:image', content: 'https://vibes.diy/card2.png' },
+    { property: 'og:url', content: 'https://vibes.diy' },
     { property: 'og:type', content: 'website' },
     { name: 'twitter:card', content: 'summary_large_image' },
-    { name: 'twitter:title', content: 'Vibe Coding' },
-    { name: 'twitter:description', content: 'The easiest AI App Builder' },
-    { name: 'twitter:image', content: 'https://vibe-coding.use-fireproof.com/card2.png' },
-    { name: 'twitter:url', content: 'https://vibe-coding.use-fireproof.com' },
+    { name: 'twitter:title', content: 'Vibes' },
+    { name: 'twitter:description', content: 'Vibe coding made easy' },
+    { name: 'twitter:image', content: 'https://vibes.diy/card2.png' },
+    { name: 'twitter:url', content: 'https://vibes.diy' },
   ];
 };
 
