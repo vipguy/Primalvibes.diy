@@ -6,7 +6,7 @@
 // Function to get the current database version from local storage
 const getDatabaseVersion = (): number => {
   if (typeof window === 'undefined') return 0;
-  
+
   const storedVersion = localStorage.getItem('vibes-db-version') || '';
   return storedVersion ? JSON.parse(storedVersion) : 0;
 };
@@ -14,10 +14,10 @@ const getDatabaseVersion = (): number => {
 // Function to increment the database version
 export const incrementDatabaseVersion = (): number => {
   if (typeof window === 'undefined') return 0;
-  
+
   const currentVersion = getDatabaseVersion();
   const newVersion = currentVersion === 0 ? 1 : currentVersion + 1;
-  
+
   localStorage.setItem('vibes-db-version', JSON.stringify(newVersion));
   return newVersion;
 };

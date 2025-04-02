@@ -39,20 +39,23 @@ export default function DynamicTable({
                   <th
                     key={header}
                     scope="row"
-                    className="text-xs px-[15px] py-[12px] whitespace-nowrap"
+                    className="px-[15px] py-[12px] text-xs whitespace-nowrap"
                   >
                     {formatTableCellContent(fields[header], header)}
                   </th>
                 ) : (
-                  <td 
-                    key={header} 
-                    className="px-[15px] py-[12px] text-xs" 
-                    title="Click to copy" 
+                  <td
+                    key={header}
+                    className="px-[15px] py-[12px] text-xs"
+                    title="Click to copy"
                     onClick={(e) => {
                       e.stopPropagation(); // Prevent row click handler from firing
-                      const originalValue = fields[header] !== undefined ? 
-                        (typeof fields[header] === 'string' ? fields[header] : JSON.stringify(fields[header])) : 
-                        '';
+                      const originalValue =
+                        fields[header] !== undefined
+                          ? typeof fields[header] === 'string'
+                            ? fields[header]
+                            : JSON.stringify(fields[header])
+                          : '';
                       navigator.clipboard.writeText(originalValue);
                     }}
                   >

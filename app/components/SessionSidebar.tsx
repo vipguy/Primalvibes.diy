@@ -133,21 +133,21 @@ function SessionSidebar({ isVisible, onClose }: SessionSidebarProps) {
     >
       <div className="flex h-full flex-col overflow-scroll">
         <div className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
-          <h2 
-            className="text-light-primary dark:text-dark-primary text-lg font-semibold cursor-pointer"
+          <h2
+            className="text-light-primary dark:text-dark-primary cursor-pointer text-lg font-semibold"
             onClick={() => {
               const now = Date.now();
               const timeSinceLastTap = now - lastTapRef.current;
-              
+
               // Check if it's a double tap (within 300ms)
               if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
                 const newVersion = incrementDatabaseVersion();
                 console.log(`Database version incremented to: ${newVersion}`);
-                
+
                 // Optional: Refresh the page to use the new database version
                 window.location.reload();
               }
-              
+
               // Update last tap time
               lastTapRef.current = now;
             }}
