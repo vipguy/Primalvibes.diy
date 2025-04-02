@@ -13,7 +13,8 @@
     "test": "DISABLE_REACT_ROUTER=true vitest run",
     "test:watch": "vitest",
     "file-issues": "scripts/create-issues.sh",
-    "test:file-issues": "scripts/test-issues.sh"
+    "test:file-issues": "scripts/test-issues.sh",
+    "check": "pnpm format && pnpm typecheck && pnpm test"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.36.3",
@@ -29,7 +30,7 @@
     "react-dom": "^19.0.0",
     "react-markdown": "^10.1.0",
     "react-router": "^7.1.5",
-    "use-fireproof": "0.20.0-dev-preview-52"
+    "use-fireproof": "0.20.0-dev-preview-60"
   },
   "devDependencies": {
     "@react-router/dev": "^7.1.5",

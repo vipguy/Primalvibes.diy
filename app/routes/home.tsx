@@ -25,8 +25,21 @@ export default function UnifiedSession() {
   const location = useLocation();
   const chatState = useSimpleChat(urlSessionId);
 
-  // State for view management
-  const [activeView, setActiveView] = useState<'code' | 'preview'>('code');
+  // State for view management - set initial view based on URL path
+  const [activeView, setActiveView] = useState<'code' | 'preview' | 'data'>(() => {
+    // Directly check the pathname on initial render
+    // Add null check for location to prevent errors in tests
+    const path = location?.pathname || '';
+    if (path.endsWith('/app')) {
+      return 'preview';
+    } else if (path.endsWith('/code')) {
+      return 'code';
+    } else if (path.endsWith('/data')) {
+      return 'data';
+    }
+    // Default to code view if no suffix is found
+    return 'code';
+  });
   const [previewReady, setPreviewReady] = useState(false);
   const [bundlingComplete] = useState(true);
   const [mobilePreviewShown, setMobilePreviewShown] = useState(false);
@@ -47,16 +60,38 @@ export default function UnifiedSession() {
   const handlePreviewLoaded = useCallback(() => {
     setPreviewReady(true);
     setMobilePreviewShown(true);
+
+    // Update the active view locally, but don't force navigation
+    // Let the user stay on their current tab
+    setActiveView('preview');
   }, []);
 
   useEffect(() => {
     if (chatState.title) {
-      const newUrl = `/chat/${chatState.sessionId}/${encodeTitle(chatState.title)}`;
-      if (newUrl !== location.pathname) {
+      // Check if the current path has a tab suffix
+      // Add null check for location to prevent errors in tests
+      const currentPath = location?.pathname || '';
+      let suffix = '';
+
+      // Preserve the tab suffix when updating the URL
+      if (currentPath.endsWith('/app')) {
+        suffix = '/app';
+      } else if (currentPath.endsWith('/code')) {
+        suffix = '/code';
+      } else if (currentPath.endsWith('/data')) {
+        suffix = '/data';
+      } else if (currentPath.includes(`/chat/${chatState.sessionId}`)) {
+        // If it's the base chat URL without suffix, default to /app
+        suffix = '/app';
+      }
+
+      const newUrl = `/chat/${chatState.sessionId}/${encodeTitle(chatState.title)}${suffix}`;
+
+      if (location && newUrl !== location.pathname) {
         navigate(newUrl, { replace: true });
       }
     }
-  }, [chatState.title]);
+  }, [chatState.title, location.pathname, chatState.sessionId, navigate]);
 
   // Check if there's a state parameter in the URL (for shared apps)
   useEffect(() => {
@@ -110,8 +145,35 @@ export default function UnifiedSession() {
   useEffect(() => {
     if (chatState.selectedCode?.content) {
       setMobilePreviewShown(true);
+
+      // Only navigate to /app if we're not already on a specific tab route
+      // This prevents overriding user's manual tab selection
+      // Add null check for location to prevent errors in tests
+      const path = location?.pathname || '';
+      const hasTabSuffix =
+        path.endsWith('/app') || path.endsWith('/code') || path.endsWith('/data');
+
+      if (!hasTabSuffix && chatState.sessionId && chatState.title) {
+        setActiveView('preview');
+        navigate(`/chat/${chatState.sessionId}/${encodeTitle(chatState.title)}/app`, {
+          replace: true,
+        });
+      } else if (path.endsWith('/app')) {
+        setActiveView('preview');
+      } else if (path.endsWith('/code')) {
+        setActiveView('code');
+      } else if (path.endsWith('/data')) {
+        setActiveView('data');
+      }
     }
-  }, [chatState.selectedCode]);
+  }, [
+    chatState.selectedCode,
+    chatState.sessionId,
+    chatState.title,
+    navigate,
+    location.pathname,
+    setActiveView,
+  ]);
 
   // useEffect(() => {
   //   console.log('chatState.sessionId', chatState.sessionId);
@@ -132,6 +194,8 @@ export default function UnifiedSession() {
               isStreaming={chatState.isStreaming}
               code={chatState.selectedCode?.content}
               dependencies={chatState.selectedDependencies || {}}
+              sessionId={chatState.sessionId || undefined}
+              title={chatState.title || undefined}
             />
           ) : null
         }

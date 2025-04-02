@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { CALLAI_API_KEY } from '../../config/env';
-import { animationStyles, indexHtml } from './ResultPreviewTemplates';
+import { animationStyles } from './ResultPreviewTemplates';
 import type { ResultPreviewProps, IframeFiles } from './ResultPreviewTypes';
 // ResultPreview component
 import IframeContent from './IframeContent';
@@ -40,19 +40,18 @@ function ResultPreview({
     }
   }, [isStreaming]);
 
-  const sandpackKey = useMemo(() => {
-    // if (showWelcome) return 'welcome';
-    if (!codeReady) return 'streaming';
-    return 'static';
-  }, [codeReady]);
-
   useEffect(() => {
     if (isStreaming) {
       // Reset to code view when streaming starts
       setActiveView('code');
     } else if (codeReady) {
-      // Switch to preview when streaming ends and code is ready
-      setActiveView('preview');
+      // Check URL path before switching to preview
+      const path = window.location.pathname;
+
+      // Only switch to preview if we're not on a specific route
+      if (!path.endsWith('/code') && !path.endsWith('/data')) {
+        setActiveView('preview');
+      }
     }
   }, [isStreaming, setActiveView, codeReady]);
 
@@ -96,8 +95,12 @@ function ResultPreview({
           iframe?.contentWindow?.postMessage({ type: 'callai-api-key', key: CALLAI_API_KEY }, '*');
 
           setMobilePreviewShown(true);
-          // Automatically switch to preview view when it's ready
-          setActiveView('preview');
+
+          // Only switch to preview view if we're not on /code or /data routes
+          const path = window.location.pathname;
+          if (!path.endsWith('/code') && !path.endsWith('/data')) {
+            setActiveView('preview');
+          }
 
           // Notify parent component that preview is loaded
           onPreviewLoaded();
@@ -123,7 +126,6 @@ function ResultPreview({
 
   // Create refs outside useEffect to track timeout state
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
-  const needsReloadRef = useRef(false);
 
   useEffect(() => {
     if (!showWelcome) {
@@ -135,31 +137,6 @@ function ResultPreview({
           active: true,
         },
       };
-
-      if (codeReady) {
-        // Set the flag that we need to reload
-        needsReloadRef.current = true;
-
-        // Clear any existing timeout to avoid stacking
-        if (timeoutIdRef.current) {
-          clearTimeout(timeoutIdRef.current);
-        }
-
-        timeoutIdRef.current = setTimeout(() => {
-          if (needsReloadRef.current) {
-            const iframe = document.querySelector('iframe') as HTMLIFrameElement;
-            iframe?.contentWindow?.postMessage(
-              {
-                type: 'command',
-                command: 'reload-preview',
-              },
-              '*'
-            );
-            needsReloadRef.current = false;
-            timeoutIdRef.current = null;
-          }
-        }, 200);
-      }
     }
 
     // Clean up timeout on unmount
@@ -176,10 +153,6 @@ function ResultPreview({
     (() => {
       // Initialize files content here, right before SandpackContent is rendered
       filesRef.current = {
-        '/index.html': {
-          code: indexHtml,
-          hidden: true,
-        },
         '/App.jsx': {
           code: code,
           active: true,
@@ -192,7 +165,6 @@ function ResultPreview({
           filesContent={filesRef.current}
           isStreaming={!codeReady}
           codeReady={codeReady}
-          sandpackKey={sandpackKey}
           setActiveView={setActiveView}
           setBundlingComplete={setBundlingComplete}
           dependencies={dependencies}

@@ -84,7 +84,7 @@
 
       function pageIsLoaded() {
         window.parent.postMessage({ type: 'preview-ready' }, '*');
-        setTimeout(captureScreenshot, 1000);
+        setTimeout(captureScreenshot, 2000);
       }
 
       // For rapid updates (optional)
@@ -113,9 +113,6 @@
             if (event.data.command === 'capture-screenshot') {
               captureScreenshot();
             }
-          } else if (event.data.type === 'update-component') {
-            // For rapid updates (optional)
-            updateAppComponent(event.data.code);
           } else if (event.data.type === 'callai-api-key' && event.data.key) {
             window.CALLAI_API_KEY = event.data.key;
           }

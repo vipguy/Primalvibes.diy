@@ -4,17 +4,18 @@ import { CALLAI_API_KEY } from '~/config/env';
 import Editor from '@monaco-editor/react';
 import { shikiToMonaco } from '@shikijs/monaco';
 import { createHighlighter } from 'shiki';
+import { DatabaseListView } from './DataView';
 
 // Import the iframe template using Vite's ?raw import option
 import iframeTemplateRaw from './templates/iframe-template.html?raw';
 
 interface IframeContentProps {
-  activeView: 'preview' | 'code';
+  activeView: 'preview' | 'code' | 'data';
   filesContent: IframeFiles;
   isStreaming: boolean;
   codeReady: boolean;
-  sandpackKey: string;
-  setActiveView: (view: 'preview' | 'code') => void;
+
+  setActiveView: (view: 'preview' | 'code' | 'data') => void;
   setBundlingComplete: (complete: boolean) => void;
   dependencies: Record<string, string>;
   isDarkMode: boolean; // Add isDarkMode prop
@@ -24,7 +25,7 @@ const IframeContent: React.FC<IframeContentProps> = ({
   activeView,
   filesContent,
   isStreaming,
-  sandpackKey,
+
   codeReady,
   dependencies,
   setActiveView,
@@ -38,6 +39,8 @@ const IframeContent: React.FC<IframeContentProps> = ({
 
   // Reference to store the current Monaco editor instance
   const monacoEditorRef = useRef<any>(null);
+  // Reference to store the Monaco API instance
+  const monacoApiRef = useRef<any>(null);
   // Reference to store the current Shiki highlighter
   const highlighterRef = useRef<any>(null);
   // Reference to store disposables for cleanup
@@ -46,7 +49,7 @@ const IframeContent: React.FC<IframeContentProps> = ({
   const userScrolledRef = useRef<boolean>(false);
   // Store the last scroll top position to detect user-initiated scrolls
   const lastScrollTopRef = useRef<number>(0);
-  // Store the last viewport height
+  // Store the last viewport height for auto-scrolling
   const lastViewportHeightRef = useRef<number>(0);
 
   // Theme detection is now handled in the parent component
@@ -62,10 +65,11 @@ const IframeContent: React.FC<IframeContentProps> = ({
 
   // Update theme when dark mode changes
   useEffect(() => {
-    if (monacoEditorRef.current) {
+    if (monacoApiRef.current) {
       // Update the Shiki theme in Monaco when dark mode changes from parent
       const currentTheme = isDarkMode ? 'github-dark' : 'github-light';
-      monacoEditorRef.current.setTheme(currentTheme);
+      // Use monaco editor namespace to set theme
+      monacoApiRef.current.editor.setTheme(currentTheme);
     }
   }, [isDarkMode]);
 
@@ -148,13 +152,25 @@ const IframeContent: React.FC<IframeContentProps> = ({
     }
   }, [isStreaming, codeReady, filesContent, setBundlingComplete]);
 
+  // Determine which view to show based on URL path - gives more stable behavior on refresh
+  const getViewFromPath = () => {
+    const path = window.location.pathname;
+    if (path.endsWith('/code')) return 'code';
+    if (path.endsWith('/data')) return 'data';
+    if (path.endsWith('/app')) return 'preview';
+    return activeView; // Fall back to state if path doesn't have a suffix
+  };
+
+  // Get view from URL path
+  const currentView = getViewFromPath();
+
   return (
     <div data-testid="sandpack-provider" className="h-full">
       <div
         style={{
-          visibility: activeView === 'preview' ? 'visible' : 'hidden',
-          position: activeView === 'preview' ? 'static' : 'absolute',
-          zIndex: activeView === 'preview' ? 1 : 0,
+          visibility: currentView === 'preview' ? 'visible' : 'hidden',
+          position: currentView === 'preview' ? 'static' : 'absolute',
+          zIndex: currentView === 'preview' ? 1 : 0,
           height: '100%',
           width: '100%',
           top: 0,
@@ -175,9 +191,9 @@ const IframeContent: React.FC<IframeContentProps> = ({
       </div>
       <div
         style={{
-          visibility: activeView === 'code' ? 'visible' : 'hidden',
-          position: activeView === 'code' ? 'static' : 'absolute',
-          zIndex: activeView === 'code' ? 1 : 0,
+          visibility: currentView === 'code' ? 'visible' : 'hidden',
+          position: currentView === 'code' ? 'static' : 'absolute',
+          zIndex: currentView === 'code' ? 1 : 0,
           height: '100%',
           width: '100%',
           top: 0,
@@ -201,97 +217,20 @@ const IframeContent: React.FC<IframeContentProps> = ({
             wordWrap: 'on',
             padding: { top: 16 },
           }}
-          onMount={async (editor, monacoInstance: any) => {
-            // Store references for theme updates
-            monacoEditorRef.current = monacoInstance.editor;
-
-            // Set up throttled scrolling to bottom when streaming code
-            if (isStreaming && !codeReady) {
-              let lastScrollTime = 0;
-              const scrollThrottleMs = 30; // Fixed throttle time of 30ms
-
-              // Initialize with current time and positions
-              lastScrollTime = Date.now();
-              const initialScrollTop = editor.getScrollTop();
-              lastScrollTopRef.current = initialScrollTop;
-              lastViewportHeightRef.current = editor.getLayoutInfo().height;
-
-              // Track if editor is fully initialized
-              let editorInitialized = false;
-              // Longer delay to ensure full initialization
-              setTimeout(() => {
-                editorInitialized = true;
-                // Update the baseline scroll position after initialization
-                lastScrollTopRef.current = editor.getScrollTop();
-              }, 1000);
-
-              // Detect only genuine user-initiated scrolling
-              const scrollDisposable = editor.onDidScrollChange((e) => {
-                if (!editorInitialized || userScrolledRef.current) {
-                  // Skip if not initialized or already detected user scroll
-                  return;
-                }
-
-                const currentTime = Date.now();
-                const timeSinceAutoScroll = currentTime - lastScrollTime;
-                const currentScrollTop = e.scrollTop;
-                const currentViewportHeight = editor.getLayoutInfo().height;
-
-                // Check for significant viewport height changes (e.g., window resize)
-                const viewportChanged =
-                  Math.abs(currentViewportHeight - lastViewportHeightRef.current) > 5;
-                if (viewportChanged) {
-                  // If viewport changed, update reference and skip this event
-                  lastViewportHeightRef.current = currentViewportHeight;
-                  return;
-                }
-
-                // Only detect as manual scroll if:
-                // 1. Not too close to our auto-scroll action (at least 200ms after)
-                // 2. Not close to initialization
-                // 3. Scrolled a significant amount from last position
-                const scrollDelta = Math.abs(currentScrollTop - lastScrollTopRef.current);
-                if (timeSinceAutoScroll > 200 && scrollDelta > 20) {
-                  userScrolledRef.current = true;
-                }
-
-                // Update last scroll position for next comparison
-                lastScrollTopRef.current = currentScrollTop;
-              });
-
-              // Auto-scroll on content change, but only if user hasn't manually scrolled
-              const contentDisposable = editor.onDidChangeModelContent(() => {
-                const now = Date.now();
-                if (now - lastScrollTime > scrollThrottleMs && !userScrolledRef.current) {
-                  lastScrollTime = now;
-
-                  // Get the model and scroll to the last line
-                  const model = editor.getModel();
-                  if (model) {
-                    const lineCount = model.getLineCount();
-                    editor.revealLineNearTop(lineCount);
-                  }
-                }
-              });
-
-              // Create a cleanup event listener
-              const editorDisposable = editor.onDidDispose(() => {
-                scrollDisposable.dispose();
-                contentDisposable.dispose();
-              });
-
-              // Store disposables in the ref for cleanup
-              disposablesRef.current.push(scrollDisposable, contentDisposable, editorDisposable);
-            }
+          onMount={async (editor, monaco) => {
+            // Store the editor instance for later reference
+            monacoEditorRef.current = editor;
+            // Store the Monaco API instance for theme changes
+            monacoApiRef.current = monaco;
 
             // Configure JavaScript language to support JSX
-            monacoInstance.languages.typescript.javascriptDefaults.setCompilerOptions({
-              jsx: monacoInstance.languages.typescript.JsxEmit.React,
+            monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+              jsx: monaco.languages.typescript.JsxEmit.React,
               jsxFactory: 'React.createElement',
               reactNamespace: 'React',
               allowNonTsExtensions: true,
               allowJs: true,
-              target: monacoInstance.languages.typescript.ScriptTarget.Latest,
+              target: monaco.languages.typescript.ScriptTarget.Latest,
             });
 
             // Set editor options for better visualization
@@ -301,37 +240,98 @@ const IframeContent: React.FC<IframeContentProps> = ({
               guides: { bracketPairs: true },
             });
 
-            try {
-              // Register the language IDs first
-              monacoInstance.languages.register({ id: 'jsx' });
-              monacoInstance.languages.register({ id: 'javascript' });
+            // Register the language IDs first
+            monaco.languages.register({ id: 'jsx' });
+            monaco.languages.register({ id: 'javascript' });
 
-              // Create the Shiki highlighter with both light and dark themes, prioritize dark
-              const highlighter = await createHighlighter({
-                themes: ['github-dark', 'github-light'],
-                langs: ['javascript', 'jsx'],
+            // Add auto-scrolling for streaming code
+            if (isStreaming && !codeReady) {
+              let lastScrollTime = 0;
+              const scrollThrottleMs = 30;
+
+              // Initialize positions
+              lastScrollTime = Date.now();
+              lastScrollTopRef.current = editor.getScrollTop();
+              lastViewportHeightRef.current = editor.getLayoutInfo().height;
+
+              // Auto-scroll on content change, but only if user hasn't manually scrolled
+              const contentDisposable = editor.onDidChangeModelContent(() => {
+                const now = Date.now();
+                if (now - lastScrollTime > scrollThrottleMs && !userScrolledRef.current) {
+                  lastScrollTime = now;
+                  const model = editor.getModel();
+                  if (model) {
+                    const lineCount = model.getLineCount();
+                    editor.revealLineNearTop(lineCount);
+                  }
+                }
               });
 
+              // Store disposable for cleanup
+              disposablesRef.current.push(contentDisposable);
+            }
+
+            try {
+              // Create the Shiki highlighter with both light and dark themes
+              const highlighter = await createHighlighter({
+                themes: ['github-dark', 'github-light'],
+                langs: ['javascript', 'jsx', 'typescript', 'tsx'],
+              });
               // Store highlighter reference for theme switching
               highlighterRef.current = highlighter;
 
               // Apply Shiki to Monaco
-              shikiToMonaco(highlighter, monacoInstance);
+              await shikiToMonaco(highlighter, monaco);
 
-              // Set theme based on current dark mode state from parent
+              // Set theme based on current dark mode state
               const currentTheme = isDarkMode ? 'github-dark' : 'github-light';
-              monacoInstance.editor.setTheme(currentTheme);
+              monaco.editor.setTheme(currentTheme);
 
               // Make sure the model uses JSX highlighting
               const model = editor.getModel();
               if (model) {
-                monacoInstance.editor.setModelLanguage(model, 'jsx');
+                monaco.editor.setModelLanguage(model, 'jsx');
               }
             } catch (error) {
               console.warn('Shiki highlighter setup failed:', error);
             }
+
+            // Handle scroll events to detect manual user scrolling
+            editor.onDidScrollChange((e) => {
+              const scrollTop = e.scrollTop;
+              // If there's a significant difference, consider it a manual scroll
+              if (Math.abs(scrollTop - lastScrollTopRef.current) > 30) {
+                userScrolledRef.current = true;
+              }
+              lastScrollTopRef.current = scrollTop;
+            });
+          }}
+          onChange={(value) => {
+            // Nothing to do here as we've set readOnly to true
           }}
         />
+      </div>
+      <div
+        style={{
+          visibility: currentView === 'data' ? 'visible' : 'hidden',
+          position: currentView === 'data' ? 'static' : 'absolute',
+          zIndex: currentView === 'data' ? 1 : 0,
+          height: '100%',
+          width: '100%',
+          top: 0,
+          left: 0,
+          padding: '0px',
+          overflow: 'auto',
+        }}
+      >
+        {!isStreaming && (
+          <div className="data-container">
+            <DatabaseListView
+              appCode={filesContent['/App.jsx']?.code || ''}
+              isDarkMode={isDarkMode}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
