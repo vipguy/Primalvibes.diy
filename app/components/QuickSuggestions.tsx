@@ -21,7 +21,7 @@ function QuickSuggestions({ onSelectSuggestion }: QuickSuggestionsProps) {
       text: 'I send messages and AI responds with a playlist for me, with YouTube search links for each song.',
     },
     {
-      label: 'Calculator',
+      label: 'Math',
       text: 'Create a calculator app with basic arithmetic operations.',
     },
     {
