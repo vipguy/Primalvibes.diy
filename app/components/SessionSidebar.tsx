@@ -3,12 +3,14 @@ import { useSessionList } from '../hooks/sidebar/useSessionList';
 import { ImgFile } from './SessionSidebar/ImgFile';
 import { encodeTitle } from './SessionSidebar/utils';
 import type { SessionSidebarProps } from '../types/chat';
+import { incrementDatabaseVersion } from '../config/env';
 
 /**
  * Component that displays a collapsible sidebar with chat session history
  */
 function SessionSidebar({ isVisible, onClose }: SessionSidebarProps) {
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const lastTapRef = useRef<number>(0);
 
   const [justFavorites, setJustFavorites] = useState(false);
 
@@ -131,7 +133,25 @@ function SessionSidebar({ isVisible, onClose }: SessionSidebarProps) {
     >
       <div className="flex h-full flex-col overflow-scroll">
         <div className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
-          <h2 className="text-light-primary dark:text-dark-primary text-lg font-semibold">
+          <h2 
+            className="text-light-primary dark:text-dark-primary text-lg font-semibold cursor-pointer"
+            onClick={() => {
+              const now = Date.now();
+              const timeSinceLastTap = now - lastTapRef.current;
+              
+              // Check if it's a double tap (within 300ms)
+              if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
+                const newVersion = incrementDatabaseVersion();
+                console.log(`Database version incremented to: ${newVersion}`);
+                
+                // Optional: Refresh the page to use the new database version
+                window.location.reload();
+              }
+              
+              // Update last tap time
+              lastTapRef.current = now;
+            }}
+          >
             App History
           </h2>
           <div className="flex items-center space-x-2">
