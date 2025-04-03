@@ -19,16 +19,16 @@ const WelcomeScreen = () => {
       </p>
 
       <p className="mt-8 text-xs">
-        This{' '}
+        Fork this{' '}
         <a
           href="https://github.com/fireproof-storage/ai-app-builder"
           target="_blank"
           rel="noopener noreferrer"
           className="text-accent-00 hover:underline"
         >
-          open source
+          open source app builder
         </a>{' '}
-        app builder runs in the browser, no setup required.
+        and create vibecode apps anywhere, no setup required.
       </p>
     </div>
   );

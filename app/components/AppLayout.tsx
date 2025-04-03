@@ -33,9 +33,7 @@ export default function AppLayout({
 
       {/* Content with relative positioning to appear above the background */}
       <div
-        className={`flex w-full flex-col ${
-          fullWidthChat ? 'md:w-full' : 'md:w-1/3'
-        } ${
+        className={`flex w-full flex-col ${fullWidthChat ? 'md:w-full' : 'md:w-1/3'} ${
           mobilePreviewShown ? 'hidden md:flex md:h-full' : 'h-full'
         } relative z-10 transition-all duration-300 ease-in-out`}
       >
@@ -43,15 +41,25 @@ export default function AppLayout({
 
         <div className="flex-grow overflow-auto">{chatPanel}</div>
 
-        {suggestionsComponent && <div className="w-full">{suggestionsComponent}</div>}
+        {suggestionsComponent && (
+          <div className={`w-full ${fullWidthChat ? 'flex justify-center' : ''}`}>
+            <div className={`${fullWidthChat ? 'w-4/5' : 'w-full'}`}>{suggestionsComponent}</div>
+          </div>
+        )}
 
-        <div className="w-full">{chatInput}</div>
+        <div
+          className={`w-full ${fullWidthChat ? 'flex justify-center pb-[20vh]' : 'pb-0'} transition-all duration-300 ease-in-out`}
+        >
+          <div
+            className={`${fullWidthChat ? 'w-4/5' : 'w-full'} transition-all duration-300 ease-in-out`}
+          >
+            {chatInput}
+          </div>
+        </div>
       </div>
 
       <div
-        className={`flex w-full flex-col ${
-          fullWidthChat ? 'md:w-0' : 'md:w-2/3'
-        } ${
+        className={`flex w-full flex-col ${fullWidthChat ? 'md:w-0' : 'md:w-2/3'} ${
           mobilePreviewShown ? 'h-full' : 'h-auto overflow-visible opacity-100 md:h-full'
         } relative z-10 transition-all duration-300 ease-in-out`}
       >
