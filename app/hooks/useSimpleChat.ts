@@ -24,8 +24,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     submitUserMessage,
     mergeAiMessage,
     addScreenshot,
-    // screenshots,
-    database,
+    sessionDatabase,
     aiMessage,
   } = useSession(sessionId);
 
@@ -191,8 +190,12 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
             aiMessage.text = streamBufferRef.current;
           }
 
-          // Then persist to database
-          await database.put(aiMessage);
+          // Then persist to session database
+          if (sessionDatabase) {
+            await sessionDatabase.put(aiMessage);
+          } else {
+            console.error('Session db missing');
+          }
 
           // Finally, generate title if needed
           const { segments } = parseContent(aiMessage.text);
@@ -221,7 +224,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     buildMessageHistory,
     throttledMergeAiMessage,
     aiMessage,
-    database,
+    sessionDatabase,
     session?.title,
     updateTitle,
   ]);
