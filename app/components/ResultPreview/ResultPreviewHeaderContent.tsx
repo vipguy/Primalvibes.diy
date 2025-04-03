@@ -13,6 +13,7 @@ interface ResultPreviewHeaderContentProps {
   dependencies?: Record<string, string>;
   sessionId?: string;
   title?: string;
+  isIframeFetching?: boolean;
 }
 
 const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
@@ -25,6 +26,7 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
   setMobilePreviewShown,
   sessionId: propSessionId,
   title: propTitle,
+  isIframeFetching = false,
 }) => {
   const navigate = useNavigate();
   const { sessionId: paramSessionId, title: paramTitle } = useParams<{
@@ -103,12 +105,12 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
+                className={`h-4 w-4 ${isIframeFetching ? 'animate-spin-slow' : ''}`}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
               >
-                <title>Preview icon</title>
+                <title>{isIframeFetching ? 'App is fetching data' : 'Preview icon'}</title>
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"

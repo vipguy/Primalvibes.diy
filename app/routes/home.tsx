@@ -43,6 +43,7 @@ export default function UnifiedSession() {
   const [previewReady, setPreviewReady] = useState(false);
   const [bundlingComplete] = useState(true);
   const [mobilePreviewShown, setMobilePreviewShown] = useState(false);
+  const [isIframeFetching, setIsIframeFetching] = useState(false);
 
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
 
@@ -195,6 +196,7 @@ export default function UnifiedSession() {
               dependencies={chatState.selectedDependencies || {}}
               sessionId={chatState.sessionId || undefined}
               title={chatState.title || undefined}
+              isIframeFetching={isIframeFetching}
             />
           ) : null
         }
@@ -211,6 +213,7 @@ export default function UnifiedSession() {
             setActiveView={setActiveView}
             onPreviewLoaded={handlePreviewLoaded}
             setMobilePreviewShown={setMobilePreviewShown}
+            setIsIframeFetching={setIsIframeFetching}
           />
         }
         chatInput={

@@ -22,49 +22,49 @@
     </style>
     <script>
       const activeRequests = new Set();
-let lastState = null;
+      let lastState = null;
 
-function updateStreamingState() {
-  const currentState = activeRequests.size > 0;
-  if (currentState !== lastState) {
-    lastState = currentState;
-    window.parent.postMessage({ type: 'streaming', state: currentState }, '*');
-  }
-}
-
-const originalFetch = window.fetch;
-window.fetch = (...args) => {
-  const reqInfo = args[0];
-  activeRequests.add(reqInfo);
-  updateStreamingState();
-
-  return originalFetch(...args).then(res => {
-    if (!res.body) {
-      activeRequests.delete(reqInfo);
-      updateStreamingState();
-      return res;
-    }
-    const reader = res.body.getReader();
-    const stream = new ReadableStream({
-      start(controller) {
-        function pump() {
-          reader.read().then(({ done, value }) => {
-            if (done) {
-              activeRequests.delete(reqInfo);
-              updateStreamingState();
-              controller.close();
-              return;
-            }
-            controller.enqueue(value);
-            pump();
-          });
+      function updateStreamingState() {
+        const currentState = activeRequests.size > 0;
+        if (currentState !== lastState) {
+          lastState = currentState;
+          window.parent.postMessage({ type: 'streaming', state: currentState }, '*');
         }
-        pump();
       }
-    });
-    return new Response(stream, { headers: res.headers });
-  });
-};
+
+      const originalFetch = window.fetch;
+      window.fetch = (...args) => {
+        const reqInfo = args[0];
+        activeRequests.add(reqInfo);
+        updateStreamingState();
+
+        return originalFetch(...args).then((res) => {
+          if (!res.body) {
+            activeRequests.delete(reqInfo);
+            updateStreamingState();
+            return res;
+          }
+          const reader = res.body.getReader();
+          const stream = new ReadableStream({
+            start(controller) {
+              function pump() {
+                reader.read().then(({ done, value }) => {
+                  if (done) {
+                    activeRequests.delete(reqInfo);
+                    updateStreamingState();
+                    controller.close();
+                    return;
+                  }
+                  controller.enqueue(value);
+                  pump();
+                });
+              }
+              pump();
+            },
+          });
+          return new Response(stream, { headers: res.headers });
+        });
+      };
 
       // Screenshot functionality
       function captureScreenshot() {

@@ -16,6 +16,7 @@ function ResultPreview({
   setActiveView,
   onPreviewLoaded,
   setMobilePreviewShown,
+  setIsIframeFetching,
   children,
 }: ResultPreviewProps & { children?: React.ReactNode }) {
   // Add theme detection at the parent level
@@ -104,6 +105,12 @@ function ResultPreview({
 
           // Notify parent component that preview is loaded
           onPreviewLoaded();
+        } else if (data.type === 'streaming' && data.state !== undefined) {
+          // Handle the iframe fetching state from the iframe
+          console.log('Iframe fetching state:', data.state);
+          if (setIsIframeFetching) {
+            setIsIframeFetching(data.state);
+          }
         } else if (data.type === 'screenshot' && data.data) {
           if (onScreenshotCaptured) {
             onScreenshotCaptured(data.data);
@@ -122,7 +129,7 @@ function ResultPreview({
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, [onScreenshotCaptured, setActiveView, onPreviewLoaded]);
+  }, [onScreenshotCaptured, setActiveView, onPreviewLoaded, setIsIframeFetching]);
 
   // Create refs outside useEffect to track timeout state
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
@@ -178,13 +185,7 @@ function ResultPreview({
     <div className="h-full" style={{ overflow: 'hidden' }}>
       <style>{animationStyles}</style>
       {previewArea}
-      {/* Pass previewReady and bundlingComplete to the header
-      {React.Children.map(children, (child) => {
-        if (React.isValidElement(child) && child.type === ResultPreviewHeaderContent) {
-          return React.cloneElement(child, { previewReady, bundlingComplete });
-        }
-        return child;
-      })} */}
+      {children}
     </div>
   );
 }

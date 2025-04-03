@@ -9,6 +9,7 @@ export interface ResultPreviewProps {
   setActiveView: (view: 'code' | 'preview' | 'data') => void;
   onPreviewLoaded: () => void;
   setMobilePreviewShown: (shown: boolean) => void;
+  setIsIframeFetching?: (fetching: boolean) => void;
 }
 
 export type IframeFiles = {
