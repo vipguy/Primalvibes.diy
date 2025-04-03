@@ -42,16 +42,16 @@ export default function AppLayout({
         <div className="flex-grow overflow-auto">{chatPanel}</div>
 
         {suggestionsComponent && (
-          <div className={`w-full ${fullWidthChat ? 'flex justify-center' : ''}`}>
-            <div className={`${fullWidthChat ? 'w-4/5' : 'w-full'}`}>{suggestionsComponent}</div>
+          <div className={`w-full ${fullWidthChat ? 'md:flex md:justify-center' : ''}`}>
+            <div className={`${fullWidthChat ? 'md:w-4/5' : 'w-full'}`}>{suggestionsComponent}</div>
           </div>
         )}
 
         <div
-          className={`w-full ${fullWidthChat ? 'flex justify-center pb-[20vh]' : 'pb-0'} transition-all duration-300 ease-in-out`}
+          className={`w-full ${fullWidthChat ? 'md:flex md:justify-center md:pb-[20vh]' : 'pb-0'} transition-all duration-300 ease-in-out`}
         >
           <div
-            className={`${fullWidthChat ? 'w-4/5' : 'w-full'} transition-all duration-300 ease-in-out`}
+            className={`${fullWidthChat ? 'md:w-4/5' : 'w-full'} transition-all duration-300 ease-in-out`}
           >
             {chatInput}
           </div>
