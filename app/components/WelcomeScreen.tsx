@@ -1,10 +1,9 @@
 // Welcome screen component shown when no messages are present
 const WelcomeScreen = () => {
   return (
-    <div className="text-accent-02 mx-auto max-w-2xl space-y-4 px-12 pt-8 text-center italic">
-      <h3 className="py-10 text-2xl font-semibold">Vibe coding just got easier</h3>
-
-      <p>
+    <div className="text-accent-02 mx-auto max-w-2xl space-y-4 px-12 pt-8 text-center">
+      <h3 className="pb-10 text-3xl font-semibold">Vibe coding just got easier</h3>
+      <p className="italic">
         Describe your app and let AI write the code. If you need ideas, try the quick suggestions
         below or join our{' '}
         <a
@@ -18,7 +17,7 @@ const WelcomeScreen = () => {
         .
       </p>
 
-      <p className="mt-8 text-xs">
+      <p className="mt-8 text-xs italic">
         Fork this{' '}
         <a
           href="https://github.com/fireproof-storage/ai-app-builder"
