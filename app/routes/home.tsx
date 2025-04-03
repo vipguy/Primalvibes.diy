@@ -175,9 +175,12 @@ export default function UnifiedSession() {
     setActiveView,
   ]);
 
+  const shouldUseFullWidthChat = chatState.docs.length === 0 && !urlSessionId;
+
   return (
     <>
       <AppLayout
+        fullWidthChat={shouldUseFullWidthChat}
         headerLeft={<ChatHeaderContent onOpenSidebar={openSidebar} title={chatState.title || ''} />}
         headerRight={
           chatState.selectedCode?.content ? (

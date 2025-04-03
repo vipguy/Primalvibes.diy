@@ -10,6 +10,7 @@ interface AppLayoutProps {
   suggestionsComponent?: ReactNode;
   mobilePreviewShown?: boolean;
   appInfo?: ReactNode;
+  fullWidthChat?: boolean;
 }
 
 export default function AppLayout({
@@ -21,6 +22,7 @@ export default function AppLayout({
   suggestionsComponent,
   mobilePreviewShown = false,
   appInfo,
+  fullWidthChat = false,
 }: AppLayoutProps) {
   return (
     <div className="relative flex h-dvh flex-col md:flex-row md:overflow-hidden">
@@ -31,9 +33,11 @@ export default function AppLayout({
 
       {/* Content with relative positioning to appear above the background */}
       <div
-        className={`flex w-full flex-col md:w-1/3 ${
+        className={`flex w-full flex-col ${
+          fullWidthChat ? 'md:w-full' : 'md:w-1/3'
+        } ${
           mobilePreviewShown ? 'hidden md:flex md:h-full' : 'h-full'
-        } relative z-10`}
+        } relative z-10 transition-all duration-300 ease-in-out`}
       >
         <div className="flex h-[4rem] items-center p-2">{headerLeft}</div>
 
@@ -45,9 +49,11 @@ export default function AppLayout({
       </div>
 
       <div
-        className={`flex w-full flex-col md:w-2/3 ${
+        className={`flex w-full flex-col ${
+          fullWidthChat ? 'md:w-0' : 'md:w-2/3'
+        } ${
           mobilePreviewShown ? 'h-full' : 'h-auto overflow-visible opacity-100 md:h-full'
-        } relative z-10`}
+        } relative z-10 transition-all duration-300 ease-in-out`}
       >
         <div className="flex h-[4rem] items-center overflow-hidden p-2">{headerRight}</div>
 
