@@ -14,8 +14,8 @@ import { decodeStateFromUrl } from '../utils/sharing';
 
 export function meta() {
   return [
-    { title: 'AI App Builder' },
-    { name: 'description', content: 'Write apps in one prompt' },
+    { title: 'Vibes DIY - AI App Builder' },
+    { name: 'description', content: 'Generate apps in one prompt' },
   ];
 }
 
