@@ -55,16 +55,10 @@ function ChatInput({ value, onChange, onSend, onKeyDown, disabled, inputRef }: C
           aria-label={disabled ? 'Generating' : 'Send message'}
         >
           <div className="relative z-10">
-            <img
-              src="/fp-logo.svg"
-              alt="Fireproof"
-              className="block h-6 transition-all hover:brightness-110 active:brightness-125 dark:hidden"
-            />
-            <img
-              src="/fp-logo-white.svg"
-              alt="Fireproof"
-              className="hidden h-6 transition-all hover:brightness-110 active:brightness-125 dark:block"
-            />
+            Vibes{' '}
+            <sub style={{ display: 'inline-block', transform: 'rotate(-8deg)' }}>
+              <strong>DIY</strong>
+            </sub>
           </div>
         </button>
       </div>
