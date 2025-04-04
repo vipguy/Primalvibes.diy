@@ -16,7 +16,6 @@ interface IframeContentProps {
   codeReady: boolean;
 
   setActiveView: (view: 'preview' | 'code' | 'data') => void;
-  setBundlingComplete: (complete: boolean) => void;
   dependencies: Record<string, string>;
   isDarkMode: boolean; // Add isDarkMode prop
 }
@@ -29,13 +28,12 @@ const IframeContent: React.FC<IframeContentProps> = ({
   codeReady,
   dependencies,
   setActiveView,
-  setBundlingComplete,
   isDarkMode, // Receive the isDarkMode prop
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   // Theme state is now received from parent via props
   const contentLoadedRef = useRef(false);
-  const lastContentRef = useRef('');
+  const lastContentRef = useRef(''); // Use ref to track last rendered code
 
   // Reference to store the current Monaco editor instance
   const monacoEditorRef = useRef<any>(null);
@@ -51,6 +49,9 @@ const IframeContent: React.FC<IframeContentProps> = ({
   const lastScrollTopRef = useRef<number>(0);
   // Store the last viewport height for auto-scrolling
   const lastViewportHeightRef = useRef<number>(0);
+
+  // Extract the current app code string
+  const appCode = filesContent['/App.jsx']?.code || '';
 
   // Theme detection is now handled in the parent component
 
@@ -84,18 +85,15 @@ const IframeContent: React.FC<IframeContentProps> = ({
   // This effect is now managed at the ResultPreview component level
 
   useEffect(() => {
-    // Only load iframe content when necessary - if code is ready and content changed
-    if (!isStreaming && codeReady && iframeRef.current) {
-      const appCode = filesContent['/App.jsx']?.code || '';
-
-      // Check if content has changed
-      if (contentLoadedRef.current && lastContentRef.current === appCode) {
-        return; // Skip if content already loaded and hasn't changed
+    // Update iframe ONLY if code is ready AND the appCode has actually changed from the last rendered version
+    if (codeReady && iframeRef.current) {
+      // Compare with the ref holding the last rendered code
+      if (contentLoadedRef.current && appCode === lastContentRef.current) {
+        return;
       }
 
-      // Update references
       contentLoadedRef.current = true;
-      lastContentRef.current = appCode;
+      lastContentRef.current = appCode; // Update ref
 
       // Replace any default export with a consistent App name
       const normalizedCode = appCode.replace(
@@ -139,7 +137,7 @@ const IframeContent: React.FC<IframeContentProps> = ({
       // Setup message listener for preview ready signal
       const handleMessage = (event: MessageEvent) => {
         if (event.data?.type === 'preview-ready') {
-          setBundlingComplete(true);
+          // bundlingComplete state is removed, no action needed here
         }
       };
 
@@ -150,7 +148,7 @@ const IframeContent: React.FC<IframeContentProps> = ({
         window.removeEventListener('message', handleMessage);
       };
     }
-  }, [isStreaming, codeReady, filesContent, setBundlingComplete]);
+  }, [appCode, codeReady]);
 
   // Determine which view to show based on URL path - gives more stable behavior on refresh
   const getViewFromPath = () => {
@@ -177,17 +175,15 @@ const IframeContent: React.FC<IframeContentProps> = ({
           left: 0,
         }}
       >
-        {!isStreaming && (
-          <iframe
-            ref={iframeRef}
-            className="h-full w-full border-0"
-            title="Preview"
-            sandbox="allow-downloads allow-forms allow-modals allow-pointer-lock allow-popups-to-escape-sandbox allow-popups allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
-            allow="accelerometer *; bluetooth *; camera *; encrypted-media *; display-capture *; geolocation *; gyroscope *; microphone *; midi *; clipboard-read *; clipboard-write *; web-share *; serial *; xr-spatial-tracking *"
-            scrolling="auto"
-            allowFullScreen={true}
-          />
-        )}
+        <iframe
+          ref={iframeRef}
+          className="h-full w-full border-0"
+          title="Preview"
+          sandbox="allow-downloads allow-forms allow-modals allow-pointer-lock allow-popups-to-escape-sandbox allow-popups allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
+          allow="accelerometer *; bluetooth *; camera *; encrypted-media *; display-capture *; geolocation *; gyroscope *; microphone *; midi *; clipboard-read *; clipboard-write *; web-share *; serial *; xr-spatial-tracking *"
+          scrolling="auto"
+          allowFullScreen={true}
+        />
       </div>
       <div
         style={{
@@ -324,14 +320,12 @@ const IframeContent: React.FC<IframeContentProps> = ({
           overflow: 'auto',
         }}
       >
-        {!isStreaming && (
-          <div className="data-container">
-            <DatabaseListView
-              appCode={filesContent['/App.jsx']?.code || ''}
-              isDarkMode={isDarkMode}
-            />
-          </div>
-        )}
+        <div className="data-container">
+          <DatabaseListView
+            appCode={filesContent['/App.jsx']?.code || ''}
+            isDarkMode={isDarkMode}
+          />
+        </div>
       </div>
     </div>
   );

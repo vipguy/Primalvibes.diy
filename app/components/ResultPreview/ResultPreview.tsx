@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { CALLAI_API_KEY } from '../../config/env';
 import { animationStyles } from './ResultPreviewTemplates';
 import type { ResultPreviewProps, IframeFiles } from './ResultPreviewTypes';
+import { encodeTitle } from '../SessionSidebar/utils';
 // ResultPreview component
 import IframeContent from './IframeContent';
 
@@ -18,16 +19,25 @@ function ResultPreview({
   setMobilePreviewShown,
   setIsIframeFetching,
   children,
+  title,
 }: ResultPreviewProps & { children?: React.ReactNode }) {
   // Add theme detection at the parent level
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true); // Default to dark mode
-  // Note: setBundlingComplete is used by IframeContent, but bundlingComplete isn't used here
-  const [, setBundlingComplete] = useState(true);
   const isStreamingRef = useRef(isStreaming);
   const hasGeneratedStreamingKeyRef = useRef(false);
 
-  const filesRef = useRef<IframeFiles>({});
   const showWelcome = !isStreaming && (!code || code.length === 0);
+
+  // Calculate filesContent directly based on code prop
+  const filesContent = useMemo<IframeFiles>(() => {
+    // Always return the expected structure, defaulting code to empty string
+    return {
+      '/App.jsx': {
+        code: code && !showWelcome ? code : '', // Use code if available, else empty string
+        active: true,
+      },
+    };
+  }, [code, showWelcome]);
 
   // Track streaming state changes to reset key generation only when streaming starts/stops
   useEffect(() => {
@@ -42,19 +52,21 @@ function ResultPreview({
   }, [isStreaming]);
 
   useEffect(() => {
-    if (isStreaming) {
-      // Reset to code view when streaming starts
-      setActiveView('code');
-    } else if (codeReady) {
-      // Check URL path before switching to preview
+    // Effect to set initial view to 'code' only if there's no code yet.
+    // Switches based on streaming/codeReady are handled by the 'preview-ready' message handler.
+    if (!code || code.length === 0) {
       const path = window.location.pathname;
 
-      // Only switch to preview if we're not on a specific route
-      if (!path.endsWith('/code') && !path.endsWith('/data')) {
-        setActiveView('preview');
+      // Only switch if we're not already on a specific route or the base chat route
+      // Get base path without suffix
+      const basePath = path.replace(/\/(app|code|data)$/, '');
+
+      // Check if current path is just the base path (no suffix)
+      if (path === basePath && !path.endsWith('/code') && !path.endsWith('/data')) {
+        setActiveView('code');
       }
     }
-  }, [isStreaming, setActiveView, codeReady]);
+  }, [code, setActiveView]); // Depend only on `code` for initial check.
 
   // Theme detection effect
   useEffect(() => {
@@ -97,10 +109,17 @@ function ResultPreview({
 
           setMobilePreviewShown(true);
 
-          // Only switch to preview view if we're not on /code or /data routes
+          // Always switch to preview view when the iframe signals it's ready.
+          setActiveView('preview');
+
+          // Also navigate to the /app URL suffix if not already there.
           const path = window.location.pathname;
-          if (!path.endsWith('/code') && !path.endsWith('/data')) {
-            setActiveView('preview');
+          // Add null check for title and encode it
+          const encodedTitle = title ? encodeTitle(title) : '';
+          if (!path.endsWith('/app') && sessionId && encodedTitle) {
+            // Navigation is handled by the parent component (home.tsx) based on activeView state
+            // We only set the state here.
+            // navigate(`/chat/${sessionId}/${encodedTitle}/app`, { replace: true });
           }
 
           // Notify parent component that preview is loaded
@@ -129,56 +148,28 @@ function ResultPreview({
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, [onScreenshotCaptured, setActiveView, onPreviewLoaded, setIsIframeFetching]);
-
-  // Create refs outside useEffect to track timeout state
-  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    if (!showWelcome) {
-      const processedCode = code;
-      filesRef.current = {
-        ...filesRef.current,
-        '/App.jsx': {
-          code: processedCode,
-          active: true,
-        },
-      };
-    }
-
-    // Clean up timeout on unmount
-    return () => {
-      if (timeoutIdRef.current) {
-        clearTimeout(timeoutIdRef.current);
-      }
-    };
-  }, [code, showWelcome, codeReady]);
+  }, [
+    onScreenshotCaptured,
+    setActiveView,
+    onPreviewLoaded,
+    setIsIframeFetching,
+    setMobilePreviewShown,
+    sessionId,
+    title,
+  ]);
 
   const previewArea = showWelcome ? (
     <div className="h-full">{/* empty div to prevent layout shift */}</div>
   ) : (
-    (() => {
-      // Initialize files content here, right before SandpackContent is rendered
-      filesRef.current = {
-        '/App.jsx': {
-          code: code,
-          active: true,
-        },
-      };
-
-      return (
-        <IframeContent
-          activeView={activeView}
-          filesContent={filesRef.current}
-          isStreaming={!codeReady}
-          codeReady={codeReady}
-          setActiveView={setActiveView}
-          setBundlingComplete={setBundlingComplete}
-          dependencies={dependencies}
-          isDarkMode={isDarkMode} // Pass down the theme state
-        />
-      );
-    })()
+    <IframeContent
+      activeView={activeView}
+      filesContent={filesContent} // Pass the derived filesContent
+      isStreaming={!codeReady} // Pass the derived prop
+      codeReady={codeReady}
+      setActiveView={setActiveView}
+      dependencies={dependencies}
+      isDarkMode={isDarkMode} // Pass down the theme state
+    />
   );
 
   return (

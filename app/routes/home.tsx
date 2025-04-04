@@ -11,6 +11,7 @@ import ResultPreviewHeaderContent from '../components/ResultPreview/ResultPrevie
 import SessionSidebar from '../components/SessionSidebar';
 import { useSimpleChat } from '../hooks/useSimpleChat';
 import { decodeStateFromUrl } from '../utils/sharing';
+// import { useSession } from '../hooks/useSession';
 
 export function meta() {
   return [
@@ -41,7 +42,7 @@ export default function UnifiedSession() {
     return 'code';
   });
   const [previewReady, setPreviewReady] = useState(false);
-  const [bundlingComplete] = useState(true);
+  // const [bundlingComplete] = useState(true);
   const [mobilePreviewShown, setMobilePreviewShown] = useState(false);
   const [isIframeFetching, setIsIframeFetching] = useState(false);
 
@@ -56,6 +57,13 @@ export default function UnifiedSession() {
   const closeSidebar = useCallback(() => {
     setIsSidebarVisible(false);
   }, []);
+
+  // Reset previewReady state when streaming starts
+  useEffect(() => {
+    if (chatState.isStreaming) {
+      setPreviewReady(false);
+    }
+  }, [chatState.isStreaming]);
 
   // Handle preview loaded event
   const handlePreviewLoaded = useCallback(() => {
@@ -190,7 +198,6 @@ export default function UnifiedSession() {
               activeView={activeView}
               setActiveView={setActiveView}
               setMobilePreviewShown={setMobilePreviewShown}
-              bundlingComplete={bundlingComplete}
               isStreaming={chatState.isStreaming}
               code={chatState.selectedCode?.content}
               dependencies={chatState.selectedDependencies || {}}
