@@ -4,8 +4,8 @@ const WelcomeScreen = () => {
     <div className="text-accent-02 mx-auto max-w-2xl space-y-4 px-12 pt-8 text-center">
       <h3 className="pb-10 text-3xl font-semibold">Vibe coding just got easier</h3>
       <p className="italic">
-        Describe your app and let AI write the code. Want ideas? Try the quick suggestions
-        below or join our{' '}
+        Describe your app and let AI write the code. Want ideas? Try the quick suggestions below or
+        join our{' '}
         <a
           href="https://discord.gg/DbSXGqvxFc"
           target="_blank"

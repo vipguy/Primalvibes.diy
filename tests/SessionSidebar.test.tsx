@@ -53,7 +53,7 @@ describe('SessionSidebar', () => {
     );
 
     // Check that the sidebar title is rendered
-    expect(screen.getByText('App History')).toBeDefined();
+    expect(screen.getByText('My Vibes')).toBeDefined();
 
     // The sidebar is the first div within the container that has position fixed
     const sidebarContainer = container.querySelector('div > div'); // First div inside the container div
@@ -131,7 +131,7 @@ describe('SessionSidebar', () => {
     });
 
     // Verify that the sidebar is rendered
-    const sidebarElement = screen.getByText('App History').closest('div');
+    const sidebarElement = screen.getByText('My Vibes').closest('div');
     expect(sidebarElement).toBeInTheDocument();
 
     // Since createObjectURL would be called in a real implementation, verify our mock is in place
