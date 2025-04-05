@@ -1,11 +1,15 @@
 // Welcome screen component shown when no messages are present
+import VibesDIYLogo from './VibesDIYLogo';
+
 const WelcomeScreen = () => {
   return (
-    <div className="text-accent-02 mx-auto max-w-2xl space-y-4 px-12 pt-8 text-center">
-      <h3 className="pb-10 text-3xl font-semibold">Vibe coding just got easier</h3>
-      <p className="italic">
-        Describe your app and let AI write the code. Want ideas? Try the quick suggestions below or
-        join our{' '}
+    <div className="text-accent-01 mx-auto max-w-2xl space-y-4 px-12 pt-8 text-center">
+        <VibesDIYLogo className="font-bold scale-[3] sm:scale-[6]" />
+      <p className="italic pt-24">
+        Generate apps in seconds.
+      </p>
+
+      <p className="mt-8 text-xs italic text-accent-02">Share your apps with the{' '}
         <a
           href="https://discord.gg/DbSXGqvxFc"
           target="_blank"
@@ -14,20 +18,15 @@ const WelcomeScreen = () => {
         >
           Discord community
         </a>
-        .
-      </p>
-
-      <p className="mt-8 text-xs italic">
-        Fork this{' '}
+        {" "}
+        and fork the 
+        {" "}
         <a
-          href="https://github.com/fireproof-storage/ai-app-builder"
+          href="https://github.com/fireproof-storage/vibes.diy"
           target="_blank"
           rel="noopener noreferrer"
           className="text-accent-00 hover:underline"
-        >
-          open source app builder
-        </a>{' '}
-        and create vibecode apps anywhere, no setup required.
+        >builder repo</a>.
       </p>
     </div>
   );

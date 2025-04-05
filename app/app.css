@@ -373,7 +373,7 @@ a,
     transform: rotate(0deg) scale(1);
   }
   66% {
-    transform: rotate(45deg) scale(2.5);
+    transform: rotate(45deg) scale(5.5);
   }
   100% {
     transform: rotate(0deg) scale(1);
@@ -382,13 +382,13 @@ a,
 
 @keyframes logo-pulse-height {
   0% {
-    width: 80%;
+    width: 20%;
   }
-  50% {
-    width: 120%;
+  50% { 
+    width: 200%;
   }
   100% {
-    width: 80%;
+    width: 20%;
   }
 }
 

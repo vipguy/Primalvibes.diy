@@ -1,5 +1,6 @@
 import type { ChangeEvent, KeyboardEvent, RefObject } from 'react';
 import { useEffect, memo, useCallback } from 'react';
+import VibesDIYLogo from './VibesDIYLogo';
 
 interface ChatInputProps {
   value: string;
@@ -55,10 +56,7 @@ function ChatInput({ value, onChange, onSend, onKeyDown, disabled, inputRef }: C
           aria-label={disabled ? 'Generating' : 'Send message'}
         >
           <div className="relative z-10">
-            Vibes{' '}
-            <sub style={{ display: 'inline-block', transform: 'rotate(-8deg)' }}>
-              <strong>DIY</strong>
-            </sub>
+            <VibesDIYLogo />
           </div>
         </button>
       </div>
