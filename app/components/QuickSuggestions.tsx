@@ -37,6 +37,10 @@ function QuickSuggestions({ onSelectSuggestion }: QuickSuggestionsProps) {
       text: 'Two text areas, paste the availability for each person, and AI finds the best time to meet.',
     },
     {
+      label: 'Web Art',
+      text: 'Page mutator that automatically sends document.body.innerHTML to AI to make it more interesting, saves the results and dangerously updates the body, then uses DOM functions to insert a toggleable open control panel that lists the iteration history and shows the most recent 5 lines of the current mutation stream in a fixed size area. After each update, count 10 seconds and recursively send HTML to AI again. The page should start with the technicolor transition from Wizard of Oz.',
+    },
+    {
       label: 'Timer',
       text: 'Create a pomodoro timer app with multiple timers work/break intervals and session tracking.',
     },
