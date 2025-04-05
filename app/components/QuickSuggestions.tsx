@@ -30,7 +30,7 @@ function QuickSuggestions({ onSelectSuggestion }: QuickSuggestionsProps) {
     },
     {
       label: 'Autodraw',
-      text: 'Text to SVG, sketch with a rich color palette. Show the stream as it arrives.',
+      text: 'Text to simple SVG, sketch with a rich color palette. Show the stream as it arrives and save the results for browsing.',
     },
     {
       label: 'Schedule',
