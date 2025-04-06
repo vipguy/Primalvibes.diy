@@ -1,12 +1,12 @@
 [
   {
     "id": "anthropic/claude-3.7-sonnet",
-    "name": "Claude 3.7 Sonnet",
+    "name": "Claude 3.7 Sonnet (Default)",
     "description": "Advanced reasoning model from Anthropic"
   },
   {
     "id": "openrouter/quasar-alpha",
-    "name": "Quasar Alpha",
+    "name": "Quasar Alpha (Free)",
     "description": "Fast coding assistant from OpenRouter"
   },
   {
