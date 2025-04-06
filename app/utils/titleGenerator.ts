@@ -31,7 +31,7 @@ export async function generateTitle(segments: Segment[], model: string): Promise
       Authorization: `Bearer ${CALLAI_API_KEY}`,
       'Content-Type': 'application/json',
       'HTTP-Referer': window.location.origin,
-      'X-Title': 'Fireproof App Builder',
+      'X-Title': 'Vibes DIY',
     },
     body: JSON.stringify({
       model,
