@@ -25,7 +25,7 @@ export async function callOpenRouterAPI(
       headers: {
         Authorization: `Bearer ${CALLAI_API_KEY}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': window.location.origin,
+        'HTTP-Referer': 'https://vibes.diy',
         'X-Title': 'Vibes DIY',
       },
       body: JSON.stringify({
