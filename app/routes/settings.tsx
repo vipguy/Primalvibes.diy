@@ -15,7 +15,7 @@ export function meta() {
 export default function Settings() {
   const { mainDatabase } = useSession();
   const { useDocument } = useFireproof(mainDatabase.name);
-  
+
   // Add effect to modify parent container overflow
   useEffect(() => {
     // Find the parent overflow-auto container and modify its overflow property
@@ -23,10 +23,10 @@ export default function Settings() {
     if (parentContainer) {
       // Save original style to restore later
       const originalOverflow = parentContainer.style.overflow;
-      
+
       // Set overflow to visible
       parentContainer.style.overflow = 'visible';
-      
+
       // Cleanup function to restore original style
       return () => {
         if (parentContainer) {
@@ -110,7 +110,7 @@ export default function Settings() {
         <div className="flex items-center">
           <button
             type="button"
-            onClick={() => window.location.href = '/'}
+            onClick={() => (window.location.href = '/')}
             className="text-light-primary dark:text-dark-primary hover:text-accent-02-light dark:hover:text-accent-02-dark flex items-center px-3 py-2"
             aria-label="Go to home"
           >
@@ -120,7 +120,10 @@ export default function Settings() {
         </div>
       }
       chatPanel={
-        <div className="flex flex-col items-center justify-start p-6 min-h-full" style={{height: 'auto', minHeight: '100%', paddingBottom: '150px'}}>
+        <div
+          className="flex min-h-full flex-col items-center justify-start p-6"
+          style={{ height: 'auto', minHeight: '100%', paddingBottom: '150px' }}
+        >
           {/* Add extra padding at the bottom to ensure content is visible */}
           <div className="w-full max-w-2xl rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
             <h2 className="mb-4 text-xl font-semibold">Application Settings</h2>
