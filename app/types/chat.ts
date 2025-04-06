@@ -22,6 +22,7 @@ export type UserChatMessageDocument = BaseChatMessageDocument & {
 
 export type AiChatMessageDocument = BaseChatMessageDocument & {
   type: 'ai';
+  model?: string; // The model used to generate this message
 };
 
 export type ChatMessageDocument = UserChatMessageDocument | AiChatMessageDocument;

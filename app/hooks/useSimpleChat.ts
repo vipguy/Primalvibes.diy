@@ -51,6 +51,13 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
   const [selectedResponseId, setSelectedResponseId] = useState<string>(''); // default most recent
   const [pendingAiMessage, setPendingAiMessage] = useState<ChatMessageDocument | null>(null);
 
+  // Derive model to use from settings or default
+  const modelToUse = useMemo(
+    () =>
+      settingsDoc?.model && settingsDoc.model.trim() !== '' ? settingsDoc.model : CODING_MODEL,
+    [settingsDoc?.model]
+  );
+
   // The list of messages for the UI: docs + streaming message if active
   const messages = useMemo(() => {
     const baseDocs = docs.filter(
@@ -212,9 +219,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     return submitUserMessage()
       .then(() => {
         const messageHistory = buildMessageHistory();
-        // Use the model from user settings if available, otherwise use default
-        const modelToUse =
-          settingsDoc?.model && settingsDoc.model.trim() !== '' ? settingsDoc.model : CODING_MODEL;
+        // Use the hoisted modelToUse variable from the hook scope
         // Use the locally captured system prompt value, not the state variable
         return callOpenRouterAPI(modelToUse, currentSystemPrompt, messageHistory, userMessage.text);
       })
@@ -238,6 +243,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
 
           // Then persist to session database
           if (sessionDatabase) {
+            aiMessage.model = modelToUse;
             // Assert the return type to include the document id
             const { id } = (await sessionDatabase.put(aiMessage)) as { id: string };
             // Capture the completed message *after* persistence, using the returned id
