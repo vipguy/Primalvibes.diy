@@ -1,0 +1,22 @@
+[
+  {
+    "id": "anthropic/claude-3.7-sonnet",
+    "name": "Claude 3.7 Sonnet",
+    "description": "Advanced reasoning model from Anthropic"
+  },
+  {
+    "id": "openrouter/quasar-alpha",
+    "name": "Quasar Alpha",
+    "description": "Fast coding assistant from OpenRouter"
+  },
+  {
+    "id": "google/gemini-2.0-flash-001",
+    "name": "Gemini 2.0 Flash",
+    "description": "Fast response model from Google"
+  },
+  {
+    "id": "meta-llama/llama-4-maverick",
+    "name": "Llama 4 Maverick",
+    "description": "Large language model from Meta"
+  }
+]
