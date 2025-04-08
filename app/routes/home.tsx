@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router';
 import { useCookieConsent } from '../context/CookieConsentContext';
 import { encodeTitle } from '~/components/SessionSidebar/utils';
@@ -12,6 +12,7 @@ import ResultPreviewHeaderContent from '../components/ResultPreview/ResultPrevie
 import SessionSidebar from '../components/SessionSidebar';
 import { useSimpleChat } from '../hooks/useSimpleChat';
 import { decodeStateFromUrl } from '../utils/sharing';
+import { isMobileViewport } from '../utils/ViewState';
 // import { useSession } from '../hooks/useSession';
 
 export function meta() {
@@ -48,6 +49,9 @@ export default function UnifiedSession() {
   const [mobilePreviewShown, setMobilePreviewShown] = useState(false);
   const [isIframeFetching, setIsIframeFetching] = useState(false);
 
+  // Add a ref to track whether streaming was active previously
+  const wasStreamingRef = useRef(false);
+
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
 
   // Directly create an openSidebar function
@@ -70,7 +74,12 @@ export default function UnifiedSession() {
   // Handle preview loaded event
   const handlePreviewLoaded = useCallback(() => {
     setPreviewReady(true);
-    setMobilePreviewShown(true);
+
+    // Don't automatically show preview on mobile until streaming is complete
+    // and only do this on mobile devices
+    if (!chatState.isStreaming && isMobileViewport()) {
+      setMobilePreviewShown(true);
+    }
 
     // Update the active view locally, but don't force navigation
     // Let the user stay on their current tab
@@ -156,10 +165,10 @@ export default function UnifiedSession() {
   // Track if user manually clicked back to chat during streaming
   const [userClickedBack, setUserClickedBack] = useState(false);
 
-  // Handle the case when preview becomes ready
+  // Handle the case when preview becomes ready and streaming ends
   useEffect(() => {
-    // Only switch to preview view when preview becomes ready (not when streaming just ends)
-    if (previewReady) {
+    // Only switch to preview view when preview becomes ready AND streaming is complete
+    if (previewReady && !chatState.isStreaming) {
       // Reset user preference so future code content will auto-show preview
       setUserClickedBack(false);
 
@@ -168,44 +177,46 @@ export default function UnifiedSession() {
         setMobilePreviewShown(true);
       }
     }
-  }, [previewReady, userClickedBack]);
+  }, [previewReady, userClickedBack, chatState.isStreaming]);
 
   // Update mobilePreviewShown when selectedCode changes
   useEffect(() => {
+    // If we're on a mobile device and there's code content
     if (chatState.selectedCode?.content) {
-      // Only auto-show preview if the user hasn't clicked back during this streaming session
-      if (!chatState.isStreaming || !userClickedBack) {
+      // Only show preview when:
+      // 1. Streaming has finished (!chatState.isStreaming)
+      // 2. Preview is ready (previewReady)
+      // 3. We're on mobile (isMobileViewport())
+      if (!chatState.isStreaming && previewReady && isMobileViewport()) {
         setMobilePreviewShown(true);
       }
-
-      // Only navigate to /app if we're not already on a specific tab route
-      // This prevents overriding user's manual tab selection
-      // Add null check for location to prevent errors in tests
-      const path = location?.pathname || '';
-      const hasTabSuffix =
-        path.endsWith('/app') || path.endsWith('/code') || path.endsWith('/data');
-
-      if (!hasTabSuffix && chatState.sessionId && chatState.title) {
-        setActiveView('preview');
-        navigate(`/chat/${chatState.sessionId}/${encodeTitle(chatState.title)}/app`, {
-          replace: true,
-        });
-      } else if (path.endsWith('/app')) {
-        setActiveView('preview');
-      } else if (path.endsWith('/code')) {
-        setActiveView('code');
-      } else if (path.endsWith('/data')) {
-        setActiveView('data');
-      }
     }
-  }, [
-    chatState.selectedCode,
-    chatState.sessionId,
-    chatState.title,
-    navigate,
-    location.pathname,
-    setActiveView,
-  ]);
+
+    // Update wasStreaming ref to track state changes
+    wasStreamingRef.current = chatState.isStreaming;
+  }, [chatState.selectedCode, chatState.isStreaming, previewReady]);
+
+  // Handle URL path navigation
+  useEffect(() => {
+    // Only navigate to /app if we're not already on a specific tab route
+    // This prevents overriding user's manual tab selection
+    // Add null check for location to prevent errors in tests
+    const path = location?.pathname || '';
+    const hasTabSuffix = path.endsWith('/app') || path.endsWith('/code') || path.endsWith('/data');
+
+    if (!hasTabSuffix && chatState.sessionId && chatState.title) {
+      setActiveView('preview');
+      navigate(`/chat/${chatState.sessionId}/${encodeTitle(chatState.title)}/app`, {
+        replace: true,
+      });
+    } else if (path.endsWith('/app')) {
+      setActiveView('preview');
+    } else if (path.endsWith('/code')) {
+      setActiveView('code');
+    } else if (path.endsWith('/data')) {
+      setActiveView('data');
+    }
+  }, [chatState.sessionId, chatState.title, navigate, location.pathname, setActiveView]);
 
   const shouldUseFullWidthChat = chatState.docs.length === 0 && !urlSessionId;
 

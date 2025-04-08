@@ -2,6 +2,11 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useEffect, useRef } from 'react';
 import { encodeTitle } from '../components/SessionSidebar/utils';
 
+// Helper to detect mobile viewport
+export const isMobileViewport = () => {
+  return typeof window !== 'undefined' && window.innerWidth < 768;
+};
+
 export type ViewType = 'preview' | 'code' | 'data';
 
 export function useViewState(props: {
@@ -51,7 +56,9 @@ export function useViewState(props: {
     if (
       props.isStreaming &&
       !wasStreamingRef.current &&
-      (!hadCodeRef.current || props.code.length === 0)
+      (!hadCodeRef.current || props.code.length === 0) &&
+      // Don't auto-switch on mobile
+      !isMobileViewport()
     ) {
       // For the initial code streaming, we want to display code without changing URL
       // This is handled by the component that uses this hook
@@ -71,9 +78,10 @@ export function useViewState(props: {
     // AND don't redirect to app during active streaming
     if (props.previewReady && !wasPreviewReadyRef.current) {
       // Don't redirect to app if user is explicitly in data or code view OR if still streaming
+      // Also don't redirect on mobile devices
       const isInDataView = location.pathname.endsWith('/data');
       const isInCodeView = location.pathname.endsWith('/code');
-      if (!isInDataView && !isInCodeView && !props.isStreaming) {
+      if (!isInDataView && !isInCodeView && !props.isStreaming && !isMobileViewport()) {
         navigate(`/chat/${sessionId}/${encodedTitle}/app`);
       }
     }
@@ -82,9 +90,10 @@ export function useViewState(props: {
     // This ensures we navigate to the app view after streaming completes
     if (!props.isStreaming && wasStreamingRef.current && props.previewReady) {
       // Don't redirect to app if user is explicitly in data or code view
+      // Also don't redirect on mobile devices
       const isInDataView = location.pathname.endsWith('/data');
       const isInCodeView = location.pathname.endsWith('/code');
-      if (!isInDataView && !isInCodeView) {
+      if (!isInDataView && !isInCodeView && !isMobileViewport()) {
         navigate(`/chat/${sessionId}/${encodedTitle}/app`);
       }
     }
@@ -140,7 +149,8 @@ export function useViewState(props: {
 
   // Determine what view should be displayed (may differ from URL-based currentView)
   // During streaming, we always show code view regardless of the URL
-  const displayView = props.isStreaming ? 'code' : currentView;
+  // On mobile, don't force code view during streaming
+  const displayView = props.isStreaming && !isMobileViewport() ? 'code' : currentView;
 
   return {
     currentView, // The view based on URL (for navigation)
