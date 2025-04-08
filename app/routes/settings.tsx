@@ -133,17 +133,17 @@ export default function Settings() {
       >
         <div className="w-full max-w-2xl rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
           <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Application Settings</h2>
+            <h2 className="text-xl font-semibold">User Preferences</h2>
             <button
               onClick={handleSubmit}
               disabled={!hasUnsavedChanges}
               className={`rounded-md px-4 py-2 text-sm text-white transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none ${hasUnsavedChanges ? 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-500' : 'cursor-not-allowed bg-gray-400 dark:bg-gray-600'}`}
             >
-              Save Settings
+              Save
             </button>
           </div>
           <p className="mb-4 text-gray-600 dark:text-gray-300">
-            Configure your application preferences to customize the AI experience.
+            Configure your application settings to customize the AI experience.
           </p>
           <div className="space-y-6">
             <div className="rounded-md border border-gray-200 p-4 dark:border-gray-600">
@@ -175,7 +175,7 @@ export default function Settings() {
 
               <div className="mb-2">
                 <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Suggested Models (click to select):
+                  Recommended models (click to select):
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {modelsList.map((model, index) => (
