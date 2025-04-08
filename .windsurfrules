@@ -1,0 +1,1 @@
+I keep a dev server running in the workspace terminal, usually via `pnpm dev` and on port 5173 or 5174. You dont need to restart it unless you install new dependencies.

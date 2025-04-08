@@ -5,7 +5,9 @@ import { GA_TRACKING_ID } from '../config/analytics';
  * Initialize Google Analytics
  */
 export const initGA = (): void => {
-  ReactGA.initialize(GA_TRACKING_ID);
+  if (GA_TRACKING_ID) {
+    ReactGA.initialize(GA_TRACKING_ID);
+  }
 };
 
 /**
@@ -13,7 +15,9 @@ export const initGA = (): void => {
  * @param path - The page path
  */
 export const pageview = (path: string): void => {
-  ReactGA.send({ hitType: 'pageview', page: path });
+  if (GA_TRACKING_ID) {
+    ReactGA.send({ hitType: 'pageview', page: path });
+  }
 };
 
 /**
@@ -24,10 +28,12 @@ export const pageview = (path: string): void => {
  * @param value - Event value (optional)
  */
 export const event = (category: string, action: string, label?: string, value?: number): void => {
-  ReactGA.event({
-    category,
-    action,
-    label,
-    value,
-  });
+  if (GA_TRACKING_ID) {
+    ReactGA.event({
+      category,
+      action,
+      label,
+      value,
+    });
+  }
 };

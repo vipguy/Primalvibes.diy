@@ -7,4 +7,5 @@ export default [
   route('chat/:sessionId/:title/code', './routes/home.tsx', { id: 'chat-code' }),
   route('chat/:sessionId/:title/data', './routes/home.tsx', { id: 'chat-data' }),
   route('settings', './routes/settings.tsx', { id: 'settings' }),
+  route('about', './routes/about.tsx', { id: 'about' }),
 ] satisfies RouteConfig;

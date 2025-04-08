@@ -11,7 +11,7 @@ interface SimpleAppLayoutProps {
  */
 export default function SimpleAppLayout({ headerLeft, children }: SimpleAppLayoutProps) {
   return (
-    <div className="bg-light-background dark:bg-dark-background flex h-screen flex-col">
+    <div className="bg-light-background dark:bg-dark-background flex flex-col min-h-screen">
       {/* Header */}
       <header className="flex h-[4rem] items-center p-2">
         <div data-testid="header-left" className="flex items-center">
@@ -19,10 +19,10 @@ export default function SimpleAppLayout({ headerLeft, children }: SimpleAppLayou
         </div>
       </header>
 
-      {/* Content area with scrolling */}
-      <div className="flex-grow overflow-auto">
+      {/* Content area with natural scrolling */}
+      <main className="flex-grow">
         <div className="mx-auto px-4 py-6 sm:px-6 lg:px-8">{children}</div>
-      </div>
+      </main>
     </div>
   );
 }

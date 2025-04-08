@@ -68,7 +68,7 @@ export default function CookieBanner() {
 
   // Add GA script if consent is given
   useEffect(() => {
-    if (hasConsent && typeof document !== 'undefined') {
+    if (GA_TRACKING_ID && hasConsent && typeof document !== 'undefined') {
       const script = document.createElement('script');
       script.async = true;
       script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`;
@@ -91,7 +91,7 @@ export default function CookieBanner() {
       gtag('js', new Date());
       gtag('config', GA_TRACKING_ID);
     }
-  }, [hasConsent]);
+  }, [hasConsent, GA_TRACKING_ID]);
 
   // Don't render anything if any of these conditions are met:
   // 1. CookieConsent is not loaded
