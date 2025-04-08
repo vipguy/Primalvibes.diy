@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import type { ChangeEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import SimpleAppLayout from '../components/SimpleAppLayout';
 import { HomeIcon } from '../components/SessionSidebar/HomeIcon';
 import { useSession } from '../hooks/useSession';
@@ -15,6 +16,7 @@ export function meta() {
 }
 
 export default function Settings() {
+  const navigate = useNavigate();
   const { mainDatabase } = useSession();
   const { useDocument } = useFireproof(mainDatabase.name);
 
@@ -107,17 +109,9 @@ export default function Settings() {
   const handleSubmit = useCallback(async () => {
     await saveSettings(settings);
     setHasUnsavedChanges(false); // Reset after save
-
-    const savedMessage = document.createElement('div');
-    savedMessage.className =
-      'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg';
-    savedMessage.textContent = 'Settings saved!';
-    document.body.appendChild(savedMessage);
-
-    setTimeout(() => {
-      document.body.removeChild(savedMessage);
-    }, 2000);
-  }, [saveSettings, settings]);
+    // navigate to /
+    navigate('/');
+  }, [saveSettings, settings, navigate]);
 
   return (
     <SimpleAppLayout

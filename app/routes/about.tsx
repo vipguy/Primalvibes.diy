@@ -30,7 +30,18 @@ export default function About() {
         </div>
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
           <h1 className="pb-4 text-2xl font-bold">About</h1>
+
           <div className="space-y-6">
+            <div className="rounded-md border border-gray-200 p-5 dark:border-gray-600">
+              <h2 className="mb-3 text-xl font-medium text-gray-900 dark:text-white">
+                What is Vibes DIY?
+              </h2>
+              <p className="text-gray-700 dark:text-gray-300">
+                An AI-powered app builder that lets you create custom applications with your
+                preferred style and functionality. No extensive coding knowledge required.
+              </p>
+            </div>
+
             <div className="rounded-md border border-gray-200 p-5 dark:border-gray-600">
               <h2 className="mb-3 text-xl font-medium text-gray-900 dark:text-white">
                 Open source
@@ -55,16 +66,6 @@ export default function About() {
                   builder repo
                 </a>
                 .
-              </p>
-            </div>
-
-            <div className="rounded-md border border-gray-200 p-5 dark:border-gray-600">
-              <h2 className="mb-3 text-xl font-medium text-gray-900 dark:text-white">
-                What is Vibes DIY?
-              </h2>
-              <p className="text-gray-700 dark:text-gray-300">
-                An AI-powered app builder that lets you create custom applications with your
-                preferred style and functionality. No extensive coding knowledge required.
               </p>
             </div>
 
