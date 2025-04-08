@@ -11,7 +11,7 @@ interface SimpleAppLayoutProps {
  */
 export default function SimpleAppLayout({ headerLeft, children }: SimpleAppLayoutProps) {
   return (
-    <div className="bg-light-background dark:bg-dark-background flex flex-col min-h-screen">
+    <div className="bg-light-background dark:bg-dark-background flex min-h-screen flex-col">
       {/* Header */}
       <header className="flex h-[4rem] items-center p-2">
         <div data-testid="header-left" className="flex items-center">

@@ -121,17 +121,17 @@ export default function Settings() {
 
   return (
     <SimpleAppLayout
-    headerLeft={
-      <div className="flex items-center">
-        <a
-          href="/"
-          className="text-light-primary dark:text-dark-primary hover:text-accent-02-light dark:hover:text-accent-02-dark flex items-center px-3 py-2"
-          aria-label="Go to home"
-        >
-          <HomeIcon className="h-6 w-6" />
-        </a>
-      </div>
-    }
+      headerLeft={
+        <div className="flex items-center">
+          <a
+            href="/"
+            className="text-light-primary dark:text-dark-primary hover:text-accent-02-light dark:hover:text-accent-02-dark flex items-center px-3 py-2"
+            aria-label="Go to home"
+          >
+            <HomeIcon className="h-6 w-6" />
+          </a>
+        </div>
+      }
     >
       <div
         className="flex min-h-full flex-col items-center justify-start p-6"
