@@ -26,13 +26,13 @@ function ChatHeaderContent({ onOpenSidebar, title }: ChatHeaderContentProps) {
           <a
             href="/"
             className="peer bg-accent-02-light dark:bg-accent-02-dark hover:bg-accent-03-light dark:hover:bg-accent-03-dark flex cursor-pointer items-center justify-center rounded-full p-2.5 text-white transition-colors"
-            aria-label="New Chat"
-            title="New Chat"
+            aria-label="New Vibe"
+            title="New Vibe"
           >
-            <span className="sr-only">New Chat</span>
+            <span className="sr-only">New Vibe</span>
             <EditIcon />
           </a>
-          <span className="pointer-events-none absolute top-full right-0 mt-1 rounded bg-gray-800 px-2 py-1 text-sm whitespace-nowrap text-white opacity-0 transition-opacity peer-hover:opacity-100">
+          <span className="pointer-events-none absolute z-100 top-full right-0 mt-1 rounded bg-gray-800 px-2 py-1 text-sm whitespace-nowrap text-white opacity-0 transition-opacity peer-hover:opacity-100">
             New Vibe
           </span>
         </div>
