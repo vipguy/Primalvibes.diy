@@ -3,6 +3,7 @@ import { useSessionList } from '../hooks/sidebar/useSessionList';
 import { ImgFile } from './SessionSidebar/ImgFile';
 import { StarIcon } from './SessionSidebar/StarIcon';
 import { GearIcon } from './SessionSidebar/GearIcon';
+import { InfoIcon } from './SessionSidebar/InfoIcon';
 import { encodeTitle } from './SessionSidebar/utils';
 import type { SessionSidebarProps } from '../types/chat';
 import { incrementDatabaseVersion } from '../config/env';
@@ -171,6 +172,15 @@ function SessionSidebar({ isVisible, onClose }: SessionSidebarProps) {
               aria-label="Settings"
             >
               <GearIcon className="h-5 w-5" />
+            </a>
+            <a
+              href="/about"
+              onClick={() => onClose()}
+              className="text-gray-400 hover:text-gray-500 focus:outline-none"
+              title="About"
+              aria-label="About"
+            >
+              <InfoIcon className="h-5 w-5" />
             </a>
             <button
               type="button"
