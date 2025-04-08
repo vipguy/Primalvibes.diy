@@ -1,14 +1,22 @@
 import React from 'react';
-import { useNavigate, useParams } from 'react-router';
-import { encodeTitle } from '../SessionSidebar/utils';
+import { useViewState } from '../../utils/ViewState';
+import type { ViewType } from '../../utils/ViewState';
+import {
+  PreviewIcon,
+  CodeIcon,
+  DataIcon,
+  ShareIcon,
+  BackArrowIcon,
+} from '../HeaderContent/SvgIcons';
 
 interface ResultPreviewHeaderContentProps {
   previewReady: boolean;
-  activeView: 'preview' | 'code' | 'data';
-  setActiveView: (view: 'preview' | 'code' | 'data') => void;
+  activeView: ViewType;
+  setActiveView: (view: ViewType) => void;
   isStreaming: boolean;
   code: string;
   setMobilePreviewShown: (shown: boolean) => void;
+  setUserClickedBack?: (clicked: boolean) => void;
   sessionId?: string;
   title?: string;
   isIframeFetching?: boolean;
@@ -21,221 +29,181 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
   isStreaming,
   code,
   setMobilePreviewShown,
+  setUserClickedBack,
   sessionId: propSessionId,
   title: propTitle,
   isIframeFetching = false,
 }) => {
-  const navigate = useNavigate();
-  const { sessionId: paramSessionId, title: paramTitle } = useParams<{
-    sessionId: string;
-    title: string;
-  }>();
+  // Use the new ViewState hook to manage all view-related state and navigation
+  const {
+    currentView,
+    displayView,
+    navigateToView,
+    viewControls,
+    showViewControls,
+    sessionId,
+    encodedTitle,
+  } = useViewState({
+    sessionId: propSessionId,
+    title: propTitle,
+    code,
+    isStreaming,
+    previewReady,
+    isIframeFetching,
+  });
 
-  // Use props if provided, otherwise use params from the URL
-  const sessionId = propSessionId || paramSessionId;
-  const title = propTitle || paramTitle;
+  // When displayView changes, update activeView to match
+  React.useEffect(() => {
+    if (activeView !== displayView) {
+      setActiveView(displayView);
+    }
+  }, [displayView, activeView, setActiveView]);
 
-  // Ensure we have a properly encoded title for URL paths
-  const encodedTitle = title ? encodeTitle(title) : '';
-  const showSwitcher = code.length > 0;
-
-  // Determine active tab directly from URL path to prevent flashing
-  const getPathView = () => {
-    const path = window.location.pathname;
-    if (path.endsWith('/app')) return 'preview';
-    if (path.endsWith('/code')) return 'code';
-    if (path.endsWith('/data')) return 'data';
-    return activeView; // Fall back to state if no match
-  };
-
-  const pathView = getPathView();
+  // This effect has been replaced by the displayView from useViewState hook
+  // The hook now handles the logic of showing code view during streaming
 
   return (
     <div className="flex h-full w-full items-center px-2 py-4">
       <div className="flex w-1/4 items-center justify-start">
         <button
           type="button"
-          onClick={() => setMobilePreviewShown(false)}
+          onClick={() => {
+            // Tell parent component user explicitly clicked back
+            if (isStreaming && setUserClickedBack) {
+              setUserClickedBack(true);
+            }
+            // Force showing the chat panel immediately
+            setMobilePreviewShown(false);
+          }}
           className="bg-light-decorative-00 dark:bg-dark-decorative-00 text-light-primary dark:text-dark-primary hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 flex items-center justify-center rounded-lg p-2 transition-colors md:hidden"
           aria-label="Back to chat"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
+          <BackArrowIcon />
         </button>
 
-        {showSwitcher ? null : <div className="h-10"></div>}
+        {showViewControls ? null : <div className="h-10"></div>}
       </div>
 
       {/* Center buttons */}
       <div className="flex w-2/4 items-center justify-center">
-        {showSwitcher ? (
+        {showViewControls ? (
           <div className="bg-light-decorative-00 dark:bg-dark-decorative-00 flex justify-center gap-1 rounded-lg p-1 shadow-sm">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveView('preview');
-                if (sessionId && encodedTitle) {
-                  navigate(`/chat/${sessionId}/${encodedTitle}/app`);
-                }
-              }}
-              className={`flex items-center justify-center space-x-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors sm:space-x-1.5 sm:px-4 sm:text-sm ${
-                pathView === 'preview'
-                  ? 'bg-light-background-00 dark:bg-dark-background-00 text-light-primary dark:text-dark-primary shadow-sm'
-                  : 'text-light-primary dark:text-dark-primary' +
-                    (previewReady
-                      ? ' hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01'
-                      : ' cursor-not-allowed opacity-50')
-              }`}
-              aria-label="Switch to preview"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className={`h-4 w-4 ${isIframeFetching ? 'animate-spin-slow' : ''}`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <title>{isIframeFetching ? 'App is fetching data' : 'Preview icon'}</title>
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                />
-              </svg>
-              <span className="hidden min-[480px]:inline">App</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                if (activeView !== 'code') {
-                  setActiveView('code');
-                  if (sessionId && encodedTitle) {
-                    navigate(`/chat/${sessionId}/${encodedTitle}/code`);
-                  }
-                }
-              }}
-              className={`flex items-center justify-center space-x-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors sm:space-x-1.5 sm:px-4 sm:text-sm ${
-                pathView === 'code'
-                  ? 'bg-light-background-00 dark:bg-dark-background-00 text-light-primary dark:text-dark-primary shadow-sm'
-                  : 'text-light-primary dark:text-dark-primary hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01'
-              }`}
-              aria-label="Switch to code editor"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${isStreaming && !previewReady ? 'animate-spin-slow' : ''}`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <title>Code icon</title>
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-                />
-              </svg>
-              <span className="hidden min-[480px]:inline">Code</span>
-            </button>
-            {isStreaming ? (
-              <button
-                type="button"
-                disabled={true}
-                className="text-light-primary/50 dark:text-dark-primary/50 flex cursor-not-allowed items-center justify-center space-x-1 rounded-md px-3 py-1.5 text-xs font-medium opacity-50 transition-colors sm:space-x-1.5 sm:px-4 sm:text-sm"
-                aria-label="Data tab unavailable during streaming"
-                title="Data tab available after streaming completes"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-3.5 w-3.5 opacity-50 sm:h-4 sm:w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+            {/* Map over view controls to create buttons */}
+            {Object.entries(viewControls).map(([view, control]) => {
+              const viewType = view as ViewType;
+              // Use displayView instead of currentView to determine active state
+              // displayView will show code during streaming but respect URL otherwise
+              const isActive = displayView === viewType;
+
+              // Handle special case for data view with streaming state
+              if (viewType === 'data' && isStreaming) {
+                return (
+                  <button
+                    key={viewType}
+                    type="button"
+                    disabled={true}
+                    className="text-light-primary/50 dark:text-dark-primary/50 flex cursor-not-allowed items-center justify-center space-x-1 rounded-md px-3 py-1.5 text-xs font-medium opacity-50 transition-colors sm:space-x-1.5 sm:px-4 sm:text-sm"
+                    aria-label="Data tab unavailable during streaming"
+                    title="Data tab available after streaming completes"
+                  >
+                    <DataIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden min-[480px]:inline">{control.label}</span>
+                  </button>
+                );
+              }
+
+              // For data view when not streaming, use an anchor tag
+              if (viewType === 'data' && !isStreaming) {
+                return (
+                  <a
+                    key={viewType}
+                    href={
+                      sessionId && encodedTitle ? `/chat/${sessionId}/${encodedTitle}/data` : '#'
+                    }
+                    className={`flex items-center justify-center space-x-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors sm:space-x-1.5 sm:px-4 sm:text-sm ${
+                      isActive
+                        ? 'bg-light-background-00 dark:bg-dark-background-00 text-light-primary dark:text-dark-primary shadow-sm'
+                        : 'text-light-primary dark:text-dark-primary hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01'
+                    }`}
+                    aria-label={`Switch to ${control.label} viewer`}
+                    title={`View ${control.label.toLowerCase()}`}
+                    onClick={() => {
+                      if (activeView !== viewType) {
+                        setActiveView(viewType);
+                        // Ensure the preview is shown on mobile when the data view is clicked
+                        setMobilePreviewShown(true);
+
+                        // Reset userClickedBack when a user manually clicks data view during streaming
+                        if (isStreaming && setUserClickedBack) {
+                          setUserClickedBack(false);
+                        }
+                      }
+                    }}
+                  >
+                    <DataIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden min-[480px]:inline">{control.label}</span>
+                  </a>
+                );
+              }
+
+              // For all other cases, use a button
+              return (
+                <button
+                  key={viewType}
+                  type="button"
+                  onClick={() => {
+                    // Set the active view and navigate
+                    setActiveView(viewType);
+
+                    // During streaming, we should still update the route
+                    // but override the display with code view
+                    navigateToView(viewType);
+
+                    // Always show the mobile preview when clicking a view button
+                    setMobilePreviewShown(true);
+
+                    // Reset userClickedBack when a user manually clicks a view button during streaming
+                    // This ensures they can get back to the preview/code even after clicking back
+                    if (isStreaming && setUserClickedBack) {
+                      setUserClickedBack(false);
+                    }
+                  }}
+                  className={`flex items-center justify-center space-x-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors sm:space-x-1.5 sm:px-4 sm:text-sm ${
+                    isActive
+                      ? 'bg-light-background-00 dark:bg-dark-background-00 text-light-primary dark:text-dark-primary shadow-sm'
+                      : 'text-light-primary dark:text-dark-primary' +
+                        (control.enabled
+                          ? ' hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01'
+                          : ' cursor-not-allowed opacity-50')
+                  }`}
+                  disabled={!control.enabled}
+                  aria-label={`Switch to ${control.label}`}
                 >
-                  <title>Data icon</title>
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7c-2 0-3 1-3 3z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M7 15h5m-5-4h10"
-                  />
-                </svg>
-                <span className="hidden min-[480px]:inline">Data</span>
-              </button>
-            ) : (
-              <a
-                href={sessionId && encodedTitle ? `/chat/${sessionId}/${encodedTitle}/data` : '#'}
-                className={`flex items-center justify-center space-x-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors sm:space-x-1.5 sm:px-4 sm:text-sm ${
-                  pathView === 'data'
-                    ? 'bg-light-background-00 dark:bg-dark-background-00 text-light-primary dark:text-dark-primary shadow-sm'
-                    : 'text-light-primary dark:text-dark-primary hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01'
-                }`}
-                aria-label="Switch to data viewer"
-                title="View database data"
-                onClick={() => {
-                  // Just set the active view locally - navigation will happen via browser
-                  if (activeView !== 'data') {
-                    setActiveView('data');
-                  }
-                }}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${isStreaming ? 'opacity-50' : ''}`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <title>Data icon</title>
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7c-2 0-3 1-3 3z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M7 15h5m-5-4h10"
-                  />
-                </svg>
-                <span className="hidden min-[480px]:inline">Data</span>
-              </a>
-            )}
+                  {viewType === 'preview' && (
+                    <PreviewIcon
+                      className="h-4 w-4"
+                      isLoading={!!control.loading}
+                      title={control.loading ? 'App is fetching data' : 'Preview icon'}
+                    />
+                  )}
+                  {viewType === 'code' && (
+                    <CodeIcon
+                      className="h-3.5 w-3.5 sm:h-4 sm:w-4"
+                      isLoading={currentView === 'preview' && !!control.loading}
+                    />
+                  )}
+                  {viewType === 'data' && <DataIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+                  <span className="hidden min-[480px]:inline">{control.label}</span>
+                </button>
+              );
+            })}
           </div>
         ) : null}
       </div>
 
       {/* Right side */}
       <div className="flex w-1/4 justify-end">
-        {code ? (
+        {showViewControls ? (
           <div className="flex items-center gap-2">
             <div className="bg-light-decorative-00 dark:bg-dark-decorative-00 flex justify-center gap-1 rounded-lg p-1 shadow-sm">
               <a
@@ -245,21 +213,7 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
                 className="text-light-primary dark:text-dark-primary hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 flex items-center justify-center space-x-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors sm:space-x-1.5 sm:px-4 sm:text-sm"
                 aria-label="Connect"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-3.5 w-3.5 sm:h-4 sm:w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <title>Connect icon</title>
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-                  />
-                </svg>
+                <ShareIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span className="hidden min-[480px]:inline">Share</span>
               </a>
             </div>

@@ -10,28 +10,36 @@ interface MessageProps {
   setSelectedResponseId: (id: string) => void;
   selectedResponseId: string;
   setMobilePreviewShown: (shown: boolean) => void;
+  setActiveView?: (view: 'preview' | 'code' | 'data') => void;
 }
 
 // AI Message component (simplified without animation handling)
 const AIMessage = memo(
   ({
     message,
+    model,
     isStreaming,
     setSelectedResponseId,
     selectedResponseId,
     setMobilePreviewShown,
+    setActiveView,
   }: {
     message: AiChatMessageDocument;
+    model?: string;
     isStreaming: boolean;
     setSelectedResponseId: (id: string) => void;
     selectedResponseId: string;
     setMobilePreviewShown: (shown: boolean) => void;
+    setActiveView?: (view: 'preview' | 'code' | 'data') => void;
   }) => {
     const { segments } = parseContent(message.text);
     return (
       <div className="mb-4 flex flex-row justify-start px-4">
         <div className="mr-2 flex-shrink-0">
-          <div className="bg-accent-02-light dark:bg-accent-02-dark flex h-8 w-8 items-center justify-center rounded-full shadow-sm">
+          <div
+            className="bg-accent-02-light dark:bg-accent-02-dark flex h-8 w-8 items-center justify-center rounded-full shadow-sm"
+            title={model || undefined}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5 text-white"
@@ -64,6 +72,7 @@ const AIMessage = memo(
             selectedResponseId={selectedResponseId}
             setMobilePreviewShown={setMobilePreviewShown}
             rawText={message.text}
+            setActiveView={setActiveView}
           />
         </div>
       </div>
@@ -77,7 +86,8 @@ const AIMessage = memo(
       prevProps.isStreaming !== nextProps.isStreaming ||
       prevProps.setSelectedResponseId !== nextProps.setSelectedResponseId ||
       prevProps.selectedResponseId !== nextProps.selectedResponseId ||
-      prevProps.setMobilePreviewShown !== nextProps.setMobilePreviewShown
+      prevProps.setMobilePreviewShown !== nextProps.setMobilePreviewShown ||
+      prevProps.setActiveView !== nextProps.setActiveView
     ) {
       return false;
     }
@@ -107,16 +117,19 @@ const Message = memo(
     setSelectedResponseId,
     selectedResponseId,
     setMobilePreviewShown,
+    setActiveView,
   }: MessageProps) => {
     return (
       <div className="transition-all duration-150 ease-in hover:opacity-95">
         {message.type === 'ai' ? (
           <AIMessage
             message={message as AiChatMessageDocument}
+            model={message.model}
             isStreaming={isStreaming}
             setSelectedResponseId={setSelectedResponseId}
             selectedResponseId={selectedResponseId}
             setMobilePreviewShown={setMobilePreviewShown}
+            setActiveView={setActiveView}
           />
         ) : (
           <UserMessage message={message} />
@@ -148,6 +161,11 @@ const Message = memo(
     // Check if setMobilePreviewShown changed
     if (prevProps.setMobilePreviewShown !== nextProps.setMobilePreviewShown) {
       return false; // Mobile preview function changed, need to re-render
+    }
+
+    // Check if setActiveView changed
+    if (prevProps.setActiveView !== nextProps.setActiveView) {
+      return false; // Active view function changed, need to re-render
     }
 
     // If we get here, props are equal enough to skip re-render

@@ -153,10 +153,30 @@ export default function UnifiedSession() {
     [chatState.setInput, chatState.inputRef]
   );
 
+  // Track if user manually clicked back to chat during streaming
+  const [userClickedBack, setUserClickedBack] = useState(false);
+
+  // Handle the case when preview becomes ready
+  useEffect(() => {
+    // Only switch to preview view when preview becomes ready (not when streaming just ends)
+    if (previewReady) {
+      // Reset user preference so future code content will auto-show preview
+      setUserClickedBack(false);
+
+      // Only auto-show preview if the user hasn't explicitly clicked back to chat
+      if (!userClickedBack) {
+        setMobilePreviewShown(true);
+      }
+    }
+  }, [previewReady, userClickedBack]);
+
   // Update mobilePreviewShown when selectedCode changes
   useEffect(() => {
     if (chatState.selectedCode?.content) {
-      setMobilePreviewShown(true);
+      // Only auto-show preview if the user hasn't clicked back during this streaming session
+      if (!chatState.isStreaming || !userClickedBack) {
+        setMobilePreviewShown(true);
+      }
 
       // Only navigate to /app if we're not already on a specific tab route
       // This prevents overriding user's manual tab selection
@@ -195,21 +215,29 @@ export default function UnifiedSession() {
         fullWidthChat={shouldUseFullWidthChat}
         headerLeft={<ChatHeaderContent onOpenSidebar={openSidebar} title={chatState.title || ''} />}
         headerRight={
-          chatState.selectedCode?.content ? (
+          // Only render the header content when we have code content or a completed session
+          chatState.selectedCode?.content || urlSessionId ? (
             <ResultPreviewHeaderContent
               previewReady={previewReady}
               activeView={activeView}
               setActiveView={setActiveView}
               setMobilePreviewShown={setMobilePreviewShown}
+              setUserClickedBack={setUserClickedBack}
               isStreaming={chatState.isStreaming}
-              code={chatState.selectedCode?.content}
+              code={chatState.selectedCode?.content || ''}
               sessionId={chatState.sessionId || undefined}
               title={chatState.title || undefined}
               isIframeFetching={isIframeFetching}
             />
           ) : null
         }
-        chatPanel={<ChatInterface {...chatState} setMobilePreviewShown={setMobilePreviewShown} />}
+        chatPanel={
+          <ChatInterface
+            {...chatState}
+            setMobilePreviewShown={setMobilePreviewShown}
+            setActiveView={setActiveView}
+          />
+        }
         previewPanel={
           <ResultPreview
             sessionId={chatState.sessionId || ''}

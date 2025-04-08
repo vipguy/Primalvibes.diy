@@ -10,6 +10,7 @@ interface StructuredMessageProps {
   selectedResponseId: string;
   setMobilePreviewShown: (shown: boolean) => void;
   rawText?: string; // Raw message text to be copied on shift+click
+  setActiveView?: (view: 'preview' | 'code' | 'data') => void; // Add ability to set active view
 }
 
 // Extracted CodeSegment as a separate component to avoid hooks in render functions
@@ -23,6 +24,8 @@ interface CodeSegmentProps {
   setMobilePreviewShown: (shown: boolean) => void;
   codeLines: number;
   rawText?: string; // Raw message text to be copied on shift+click
+  isStreaming?: boolean; // Add isStreaming to determine how to handle navigation
+  setActiveView?: (view: 'preview' | 'code' | 'data') => void; // Add ability to set active view
 }
 
 const CodeSegment = ({
@@ -35,6 +38,8 @@ const CodeSegment = ({
   setMobilePreviewShown,
   codeLines,
   rawText,
+  isStreaming,
+  setActiveView,
 }: CodeSegmentProps) => {
   const content = segment.content || '';
   const codeSegmentRef = useRef<HTMLDivElement>(null);
@@ -126,8 +131,14 @@ const CodeSegment = ({
     if (messageId) {
       setSelectedResponseId(messageId);
     }
-    if (isSelected) {
-      setMobilePreviewShown(true);
+
+    // Always show mobile preview and set to code view regardless of selection state
+    // This ensures we can always enter code view by clicking a code segment
+    setMobilePreviewShown(true);
+
+    // Always navigate to code view when clicking on a code segment
+    if (setActiveView) {
+      setActiveView('code');
     }
   };
 
@@ -226,6 +237,7 @@ const StructuredMessage = ({
   selectedResponseId,
   setMobilePreviewShown,
   rawText,
+  setActiveView,
 }: StructuredMessageProps) => {
   // Ensure segments is an array (defensive)
   const validSegments = Array.isArray(segments) ? segments : [];
@@ -311,6 +323,8 @@ const StructuredMessage = ({
                   setMobilePreviewShown={setMobilePreviewShown}
                   codeLines={codeLines}
                   rawText={rawText}
+                  isStreaming={isStreaming}
+                  setActiveView={setActiveView}
                 />
               );
             }
