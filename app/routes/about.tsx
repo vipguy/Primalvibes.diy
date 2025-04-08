@@ -93,10 +93,10 @@ export default function About() {
                       target="_blank"
                       className="text-blue-600 hover:underline dark:text-blue-400"
                     >
-                      Fireproof Storage
+                      Fireproof
                     </a>
                   </span>{' '}
-                  - Reliable, secure data storage that syncs across devices
+                  - Reliable, secure database that syncs across devices
                 </li>
                 <li>
                   <span className="font-medium">Choose Your Model</span> - Access to a variety of AI
