@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 import LightUpYourData from './ResultPreview/LightUpYourData';
 
+import TechnologyPreviewBanner from './TechnologyPreviewBanner';
+
 interface AppLayoutProps {
   chatPanel: ReactNode;
   previewPanel: ReactNode;
@@ -25,6 +27,8 @@ export default function AppLayout({
   fullWidthChat = false,
 }: AppLayoutProps) {
   return (
+    <div>
+      <TechnologyPreviewBanner/>
     <div className="relative flex h-dvh flex-col md:flex-row md:overflow-hidden">
       {/* Background component that covers the entire viewport */}
       <div className="absolute inset-0 z-0 h-full w-full overflow-hidden">
@@ -73,6 +77,7 @@ export default function AppLayout({
 
         <div className="w-full">{appInfo}</div>
       </div>
+    </div>
     </div>
   );
 }
