@@ -32,7 +32,7 @@ function ChatHeaderContent({ onOpenSidebar, title }: ChatHeaderContentProps) {
             <span className="sr-only">New Vibe</span>
             <EditIcon />
           </a>
-          <span className="pointer-events-none absolute z-100 top-full right-0 mt-1 rounded bg-gray-800 px-2 py-1 text-sm whitespace-nowrap text-white opacity-0 transition-opacity peer-hover:opacity-100">
+          <span className="pointer-events-none absolute top-full right-0 z-100 mt-1 rounded bg-gray-800 px-2 py-1 text-sm whitespace-nowrap text-white opacity-0 transition-opacity peer-hover:opacity-100">
             New Vibe
           </span>
         </div>

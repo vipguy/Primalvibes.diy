@@ -109,9 +109,9 @@ describe('Component Rendering', () => {
     it('handles new chat button click', () => {
       render(<ChatHeader onOpenSidebar={onOpenSidebar} title="Test Chat" />);
 
-      // Just verify the new chat button exists since we can't easily mock document.location
-      const newChatButton = screen.getByLabelText('New Chat');
-      expect(newChatButton).toBeInTheDocument();
+      // Just verify the new vibe button exists since we can't easily mock document.location
+      const newVibeButton = screen.getByLabelText('New Vibe');
+      expect(newVibeButton).toBeInTheDocument();
 
       // Note: we can't reliably test the navigation in JSDOM environment
       // In a real browser, clicking this button would navigate to '/'

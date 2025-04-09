@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import Settings from '../app/routes/settings';
 
 // Create mock objects outside the mock function to access them in tests
@@ -95,10 +95,10 @@ describe('Settings Route', () => {
     expect(headerSection).toBeInTheDocument();
 
     // Check for main content sections
-    expect(screen.getByText('Application Settings')).toBeInTheDocument();
+    expect(screen.getByText('User Preferences')).toBeInTheDocument();
     expect(screen.getByText('Style Prompt')).toBeInTheDocument();
     expect(screen.getByText('User Prompt')).toBeInTheDocument();
-    expect(screen.getByText('Save Settings')).toBeInTheDocument();
+    expect(screen.getByText('Save')).toBeInTheDocument();
   });
 
   it('allows updating style prompt via text input', async () => {
@@ -152,7 +152,7 @@ describe('Settings Route', () => {
     renderSettings();
 
     // Find the save button
-    const saveButton = screen.getByRole('button', { name: /save settings/i });
+    const saveButton = screen.getByRole('button', { name: /save/i });
 
     // Initially, the button should be disabled
     expect(saveButton).toBeDisabled();
@@ -161,11 +161,17 @@ describe('Settings Route', () => {
     const styleInput = screen.getByPlaceholderText(
       'Enter or select style prompt...'
     ) as HTMLInputElement;
-    await fireEvent.change(styleInput, { target: { value: 'new style' } });
+
+    await act(async () => {
+      fireEvent.change(styleInput, { target: { value: 'new style' } });
+    });
+
     expect(saveButton).not.toBeDisabled(); // Now it should be enabled
 
     // Click save button
-    await fireEvent.click(saveButton);
+    await act(async () => {
+      fireEvent.click(saveButton);
+    });
 
     // Check that save was called
     expect(mockSave).toHaveBeenCalled();
@@ -179,12 +185,18 @@ describe('Settings Route', () => {
 
     // Simulate changing the style prompt to enable the save button
     const styleInput = screen.getByPlaceholderText('Enter or select style prompt...');
-    await fireEvent.change(styleInput, { target: { value: 'new test style' } });
+
+    await act(async () => {
+      fireEvent.change(styleInput, { target: { value: 'new test style' } });
+    });
 
     // Find the button and click it
-    const saveButton = screen.getByRole('button', { name: /save settings/i });
+    const saveButton = screen.getByRole('button', { name: /save/i });
     expect(saveButton).not.toBeDisabled(); // Ensure it's enabled before click
-    await fireEvent.click(saveButton);
+
+    await act(async () => {
+      fireEvent.click(saveButton);
+    });
 
     // Verify save was called
     expect(mockSave).toHaveBeenCalled();

@@ -97,7 +97,7 @@ describe('About Route', () => {
     const localFirstFeature = screen.getByText(/Local-First Architecture/);
     expect(localFirstFeature).toBeInTheDocument();
 
-    const fireproofFeature = screen.getByText(/Fireproof Storage/);
+    const fireproofFeature = screen.getByText(/Fireproof/);
     expect(fireproofFeature).toBeInTheDocument();
 
     const modelFeature = screen.getByText(/Choose Your Model/);
@@ -108,7 +108,7 @@ describe('About Route', () => {
     renderAbout();
 
     // Check Fireproof link
-    const fireproofLink = screen.getByText('Fireproof Storage');
+    const fireproofLink = screen.getByText('Fireproof');
     expect(fireproofLink).toBeInTheDocument();
     expect(fireproofLink.getAttribute('href')).toBe('https://use-fireproof.com');
 
