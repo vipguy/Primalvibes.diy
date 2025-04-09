@@ -6,7 +6,7 @@ import { parseContent, parseDependencies } from '../utils/segmentParser';
 import { useSession } from './useSession';
 import { useFireproof } from 'use-fireproof';
 import { generateTitle } from '../utils/titleGenerator';
-import { processStream, callOpenRouterAPI } from '../utils/streamHandler';
+import { streamAI } from '../utils/streamHandler';
 
 const CODING_MODEL = 'anthropic/claude-3.7-sonnet';
 // const CODING_MODEL = 'openrouter/quasar-alpha';
@@ -35,7 +35,6 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
   } = useSession(sessionId);
 
   // First declare ALL ref hooks to maintain hook order consistency
-  const streamBufferRef = useRef<string>('');
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const isProcessingRef = useRef<boolean>(false);
   const lastUpdateTimeRef = useRef<number>(0);
@@ -142,9 +141,6 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
 
   const throttledMergeAiMessage = useCallback(
     (content: string) => {
-      // Store content in ref to ensure latest content is always available
-      streamBufferRef.current = content;
-
       // If we're already processing a database operation, don't trigger more updates
       if (isProcessingRef.current) {
         return;
@@ -177,14 +173,11 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
 
       // Schedule update with calculated delay
       updateTimeoutRef.current = setTimeout(() => {
-        // Capture the current content at time of execution
-        const currentContent = streamBufferRef.current;
-
         // Record update time before the actual update
         lastUpdateTimeRef.current = Date.now();
 
-        // Only update if the content has actually changed
-        mergeAiMessage({ text: currentContent });
+        // Update with the content passed directly to this function
+        mergeAiMessage({ text: content });
       }, delay);
     },
     [mergeAiMessage]
@@ -211,8 +204,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
       }
     }
 
-    // Reset stream buffer and set streaming state
-    streamBufferRef.current = '';
+    // Set streaming state
     setIsStreaming(true);
 
     // Submit user message first
@@ -221,39 +213,33 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
         const messageHistory = buildMessageHistory();
         // Use the hoisted modelToUse variable from the hook scope
         // Use the locally captured system prompt value, not the state variable
-        return callOpenRouterAPI(modelToUse, currentSystemPrompt, messageHistory, userMessage.text);
+        return streamAI(
+          modelToUse,
+          currentSystemPrompt,
+          messageHistory,
+          userMessage.text,
+          // This callback receives the complete content so far
+          (content) => throttledMergeAiMessage(content)
+        );
       })
-      .then((response) => {
-        return processStream(response, (content) => {
-          // Append to buffer and use throttled update
-          streamBufferRef.current += content;
-          throttledMergeAiMessage(streamBufferRef.current);
-        });
-      })
-      .then(async () => {
+      .then(async (finalContent) => {
         // Set processing flag to prevent infinite updates
         isProcessingRef.current = true;
 
         try {
-          // Only do a final update if the current state doesn't match our buffer
-          if (aiMessage.text !== streamBufferRef.current) {
+          // Only do a final update if the current state doesn't match our final content
+          if (aiMessage.text !== finalContent) {
             // First update the aiMessage object (no state update)
-            aiMessage.text = streamBufferRef.current;
+            aiMessage.text = finalContent;
           }
 
-          // Then persist to session database
-          if (sessionDatabase) {
-            aiMessage.model = modelToUse;
-            // Assert the return type to include the document id
-            const { id } = (await sessionDatabase.put(aiMessage)) as { id: string };
-            // Capture the completed message *after* persistence, using the returned id
-            setPendingAiMessage({ ...aiMessage, _id: id });
-            // HACK: Always select the message that just finished streaming
-            setSelectedResponseId(id);
-          } else {
-            console.error('Session db missing');
-          }
-
+          aiMessage.model = modelToUse;
+          // Assert the return type to include the document id
+          const { id } = (await sessionDatabase.put(aiMessage)) as { id: string };
+          // Capture the completed message *after* persistence, using the returned id
+          setPendingAiMessage({ ...aiMessage, _id: id });
+          // HACK: Always select the message that just finished streaming
+          setSelectedResponseId(id);
           // Finally, generate title if needed and handle auto-selection
           const { segments } = parseContent(aiMessage.text);
 
@@ -279,7 +265,6 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     userMessage.text,
     systemPrompt,
     setSystemPrompt,
-    streamBufferRef,
     setIsStreaming,
     submitUserMessage,
     buildMessageHistory,
