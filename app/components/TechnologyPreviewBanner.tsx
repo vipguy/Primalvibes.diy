@@ -19,7 +19,7 @@ const TechnologyPreviewBanner = () => {
         </h2>
       </header>
       <header className={`bg-amber-100 text-center p-2 ${isExpanded ? '' : 'hidden'}`}>
-        <div className='w-110 mx-auto my-0 align-center text-left'>
+        <div className='max-w-110 mx-auto my-0 align-center text-left'>
           <p className={`p-2 ${isExpanded ? '' : 'hidden'}`}>
             This is a vibe coding tool from <a href="https://use-fireproof.com" target="_blank" className="hover:underline">Fireproof</a>. What's different about it is that we're thinking about your data.
           </p>
