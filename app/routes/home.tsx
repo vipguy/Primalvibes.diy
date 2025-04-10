@@ -29,6 +29,9 @@ export default function UnifiedSession() {
   const chatState = useSimpleChat(urlSessionId);
   const { setMessageHasBeenSent } = useCookieConsent();
 
+  // Track message submission events
+  const [hasSubmittedMessage, setHasSubmittedMessage] = useState(false);
+
   // State for view management - set initial view based on URL path
   const [activeView, setActiveView] = useState<'code' | 'preview' | 'data'>(() => {
     // Directly check the pathname on initial render
@@ -218,7 +221,9 @@ export default function UnifiedSession() {
     }
   }, [chatState.sessionId, chatState.title, navigate, location.pathname, setActiveView]);
 
-  const shouldUseFullWidthChat = chatState.docs.length === 0 && !urlSessionId;
+  // Switch to 2-column view immediately when a message is submitted
+  const shouldUseFullWidthChat =
+    chatState.docs.length === 0 && !urlSessionId && !hasSubmittedMessage;
 
   return (
     <>
@@ -280,6 +285,7 @@ export default function UnifiedSession() {
             onSend={() => {
               chatState.sendMessage();
               setMessageHasBeenSent(true);
+              setHasSubmittedMessage(true);
             }}
             disabled={chatState.isStreaming}
             inputRef={chatState.inputRef}
