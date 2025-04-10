@@ -122,8 +122,8 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
                     }
                     className={`bg-amber-100 flex items-center justify-center space-x-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors sm:space-x-1.5 sm:px-4 sm:text-sm ${
                       isActive
-                        ? 'bg-amber-300 dark:bg-amber-300 text-light-primary dark:text-dark-primary shadow-sm'
-                        : 'text-light-primary dark:text-dark-primary hover:bg-amber-100 dark:hover:bg-amber-100'
+                        ? 'bg-amber-300 dark:bg-amber-300 text-light-primary dark:text-black shadow-sm'
+                        : 'text-light-primary dark:text-black hover:bg-amber-100 dark:hover:bg-amber-100'
                     }`}
                     aria-label={`Switch to ${control.label} viewer`}
                     title={`View ${control.label.toLowerCase()}`}
@@ -170,10 +170,10 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
                   }}
                   className={`flex items-center justify-center space-x-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors sm:space-x-1.5 sm:px-4 sm:text-sm ${
                     isActive
-                      ? `${control.background} text-light-primary dark:text-dark-primary shadow-sm`
-                      : 'text-light-primary dark:text-dark-primary' +
+                      ? `${control.background} text-light-primary dark:text-white shadow-sm`
+                      : 'text-light-primary dark:text-white' +
                         (control.enabled
-                          ? control.backgroundEnabled
+                          ? control.backgroundEnabled + ' dark:text-white'
                           : ' cursor-not-allowed opacity-50')
                   }`}
                   disabled={!control.enabled}
