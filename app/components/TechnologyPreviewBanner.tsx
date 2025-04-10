@@ -24,7 +24,7 @@ const TechnologyPreviewBanner = () => {
             This is a vibe coding tool from <a href="https://use-fireproof.com" target="_blank" className="hover:underline">Fireproof</a>. What's different about it is that we're thinking about your data.
           </p>
           <p className={`p-2 ${isExpanded ? '' : 'hidden'}`}>
-            We're getting this out there to work out any kinks before we enable sharing of the data behind your app.
+            We're putting this out here to work out any kinks before we enable sharing of the data behind your app.
           </p>
         </div>
       </header>
