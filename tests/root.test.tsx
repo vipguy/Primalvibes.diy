@@ -1,6 +1,6 @@
-import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { Layout, ErrorBoundary } from '../app/root';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ErrorBoundary, Layout } from '../app/root';
 
 // Mock React Router components to avoid HTML validation errors
 vi.mock('react-router', () => ({
