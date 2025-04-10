@@ -30,15 +30,15 @@ export const links: Route.LinksFunction = () => [
 
 export const meta: MetaFunction = () => {
   return [
-    { title: 'Vibes' },
+    { title: 'Vibes DIY' },
     { name: 'description', content: 'Vibe coding made easy' },
-    { property: 'og:title', content: 'Vibes' },
+    { property: 'og:title', content: 'Vibes DIY' },
     { property: 'og:description', content: 'Vibe coding made easy' },
     { property: 'og:image', content: 'https://vibes.diy/card2.png' },
     { property: 'og:url', content: 'https://vibes.diy' },
     { property: 'og:type', content: 'website' },
     { name: 'twitter:card', content: 'summary_large_image' },
-    { name: 'twitter:title', content: 'Vibes' },
+    { name: 'twitter:title', content: 'Vibes DIY' },
     { name: 'twitter:description', content: 'Vibe coding made easy' },
     { name: 'twitter:image', content: 'https://vibes.diy/card2.png' },
     { name: 'twitter:url', content: 'https://vibes.diy' },
