@@ -120,10 +120,10 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
                     href={
                       sessionId && encodedTitle ? `/chat/${sessionId}/${encodedTitle}/data` : '#'
                     }
-                    className={`bg-amber-100 flex items-center justify-center space-x-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors sm:space-x-1.5 sm:px-4 sm:text-sm ${
+                    className={`flex items-center justify-center space-x-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors sm:space-x-1.5 sm:px-4 sm:text-sm ${
                       isActive
-                        ? 'bg-amber-300 dark:bg-amber-300 text-light-primary dark:text-black shadow-sm'
-                        : 'text-light-primary dark:text-black hover:bg-amber-100 dark:hover:bg-amber-100'
+                        ? 'bg-light-background-00 dark:bg-dark-background-00 text-light-primary dark:text-dark-primary shadow-sm'
+                        : 'text-light-primary dark:text-dark-primary hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01'
                     }`}
                     aria-label={`Switch to ${control.label} viewer`}
                     title={`View ${control.label.toLowerCase()}`}
@@ -170,10 +170,10 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
                   }}
                   className={`flex items-center justify-center space-x-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors sm:space-x-1.5 sm:px-4 sm:text-sm ${
                     isActive
-                      ? `${control.background} text-light-primary dark:text-white shadow-sm`
-                      : 'text-light-primary dark:text-white' +
+                      ? 'bg-light-background-00 dark:bg-dark-background-00 text-light-primary dark:text-dark-primary shadow-sm'
+                      : 'text-light-primary dark:text-dark-primary' +
                         (control.enabled
-                          ? control.backgroundEnabled + ' dark:text-white'
+                          ? ' hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01'
                           : ' cursor-not-allowed opacity-50')
                   }`}
                   disabled={!control.enabled}
