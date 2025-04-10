@@ -114,6 +114,15 @@ export default function About() {
             </div>
           </div>
         </div>
+        <p className="text-center text-xs text-gray-700 dark:text-gray-300">
+          Copyright © 2025{' '}
+          <a
+            href="https://fireproof.storage"
+            target="_blank"
+            className="text-blue-600 hover:underline dark:text-blue-400"
+          ></a>
+          Fireproof
+        </p>
       </div>
     </SimpleAppLayout>
   );

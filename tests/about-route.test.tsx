@@ -97,7 +97,7 @@ describe('About Route', () => {
     const localFirstFeature = screen.getByText(/Local-First Architecture/);
     expect(localFirstFeature).toBeInTheDocument();
 
-    const fireproofFeature = screen.getByText(/Fireproof/);
+    const fireproofFeature = screen.getByText(/database/);
     expect(fireproofFeature).toBeInTheDocument();
 
     const modelFeature = screen.getByText(/Choose Your Model/);
