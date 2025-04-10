@@ -9,7 +9,7 @@ const TechnologyPreviewBanner = () => {
 
   return (
     <>
-      <header className="bg-amber-300 text-center p-2">
+      <header className="bg-amber-300 dark:text-black text-center p-2">
         <h2>
           <span className="uppercase">Technology Preview</span> (
           <a onClick={toggleExpand} className="cursor-pointer hover:underline">
@@ -18,7 +18,7 @@ const TechnologyPreviewBanner = () => {
           )
         </h2>
       </header>
-      <header className={`bg-amber-100 text-center p-2 ${isExpanded ? '' : 'hidden'}`}>
+      <header className={`bg-amber-100 dark:text-black text-center p-2 ${isExpanded ? '' : 'hidden'}`}>
         <div className='max-w-110 mx-auto my-0 align-center text-left'>
           <p className={`p-2 ${isExpanded ? '' : 'hidden'}`}>
             This is a vibe coding tool from <a href="https://use-fireproof.com" target="_blank" className="hover:underline">Fireproof</a>. What's different about it is that we're thinking about your data.
