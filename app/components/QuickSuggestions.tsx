@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 interface QuickSuggestionsProps {
   onSelectSuggestion: (suggestion: string) => void;
 }
@@ -25,8 +27,8 @@ function QuickSuggestions({ onSelectSuggestion }: QuickSuggestionsProps) {
       text: 'Create a calculator app with basic arithmetic operations.',
     },
     {
-      label: 'Texture',
-      text: 'Create a texture design app users can sketch, blur, effect, save and load textures.',
+      label: 'Canvas',
+      text: 'Create a canvas drawing app where users can sketch, blur, effect, save and load images.',
     },
     {
       label: 'Autodraw',
@@ -43,6 +45,14 @@ function QuickSuggestions({ onSelectSuggestion }: QuickSuggestionsProps) {
     {
       label: 'Timer',
       text: 'Create a pomodoro timer app with multiple timers work/break intervals and session tracking.',
+    },
+    {
+      label: 'Poetry',
+      text: 'Write a short non-rhyming poem about a butterfly and then use it to have Al make an SVG drawing and when the drawing is complete do another poem. Keep going one at a time.',
+    },
+    {
+      label: 'Galaxy Blaster',
+      text: 'Space invaders clone for mobile, with high scores, and sound effects via create oscillator.',
     },
     {
       label: 'Music',
@@ -62,10 +72,17 @@ function QuickSuggestions({ onSelectSuggestion }: QuickSuggestionsProps) {
     },
   ];
 
+  const [randomSuggestions, setRandomSuggestions] = useState<typeof suggestions>([]);
+
+  useEffect(() => {
+    const shuffled = [...suggestions].sort(() => 0.5 - Math.random());
+    setRandomSuggestions(shuffled.slice(0, 8));
+  }, []);
+
   return (
     <div className="px-4 py-1">
       <div className="flex flex-wrap gap-2">
-        {suggestions.map((suggestion, index) => (
+        {randomSuggestions.map((suggestion, index) => (
           <button
             key={index}
             type="button"
