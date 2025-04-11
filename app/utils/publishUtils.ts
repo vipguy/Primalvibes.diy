@@ -69,9 +69,8 @@ export async function publishApp({
 
     const data = await response.json();
     if (data.success && data.app?.slug) {
-      const appUrl = `${API_BASE_URL.replace(/^https?:\/\//, 'http://')}`.endsWith('/')
-        ? `http://${data.app.slug}.${API_BASE_URL.replace(/^https?:\/\//, '').replace(/\/$/, '')}/`
-        : `http://${data.app.slug}.${API_BASE_URL.replace(/^https?:\/\//, '')}/`;
+      const url = new URL(API_BASE_URL);
+      const appUrl = `${url.protocol}//${data.app.slug}.${url.hostname}${url.port ? `:${url.port}` : ''}`;
 
       // Update the session with the published URL if callback provided
       if (updatePublishedUrl) {
