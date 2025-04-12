@@ -179,8 +179,9 @@ function ResultPreview({
       isStreaming={!codeReady} // Pass the derived prop
       codeReady={codeReady}
       setActiveView={setActiveView}
-      dependencies={dependencies}
+      /* dependencies prop removed */
       isDarkMode={isDarkMode} // Pass down the theme state
+      sessionId={sessionId} // Pass the sessionId to IframeContent
     />
   );
 
