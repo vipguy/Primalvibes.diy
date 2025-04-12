@@ -48,7 +48,7 @@
         "npm:tailwindcss@4",
         "npm:tsx@^4.19.3",
         "npm:typescript@^5.7.2",
-        "npm:use-fireproof@0.20.1",
+        "npm:use-fireproof@0.20.3",
         "npm:vite-tsconfig-paths@^5.1.4",
         "npm:vite@^6.1.0",
         "npm:vitest@^3.0.8"
