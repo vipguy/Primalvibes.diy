@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { CALLAI_API_KEY } from '../../config/env';
 import { animationStyles } from './ResultPreviewTemplates';
 import type { ResultPreviewProps, IframeFiles } from './ResultPreviewTypes';
+import type { RuntimeError } from '../../hooks/useRuntimeErrors';
 import { encodeTitle } from '../SessionSidebar/utils';
 // ResultPreview component
 import IframeContent from './IframeContent';
@@ -18,6 +19,7 @@ function ResultPreview({
   onPreviewLoaded,
   setMobilePreviewShown,
   setIsIframeFetching,
+  addError,
   children,
   title,
 }: ResultPreviewProps & { children?: React.ReactNode }) {
@@ -152,6 +154,14 @@ function ResultPreview({
           if (onScreenshotCaptured) {
             onScreenshotCaptured(null);
           }
+        } else if (data.type === 'iframe-error' && data.error) {
+          // Process the error and forward it to the error handler
+          const error = data.error as RuntimeError;
+
+          // Send to error handler if available
+          if (addError) {
+            addError(error);
+          }
         }
       }
     };
@@ -166,6 +176,7 @@ function ResultPreview({
     onPreviewLoaded,
     setIsIframeFetching,
     setMobilePreviewShown,
+    addError,
     sessionId,
     title,
   ]);

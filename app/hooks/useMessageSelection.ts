@@ -23,7 +23,7 @@ export function useMessageSelection({
   // The list of messages for the UI: docs + streaming message if active
   const messages = useMemo(() => {
     const baseDocs = docs.filter(
-      (doc: any) => doc.type === 'ai' || doc.type === 'user'
+      (doc: any) => doc.type === 'ai' || doc.type === 'user' || doc.type === 'system'
     ) as unknown as ChatMessageDocument[];
     return isStreaming && aiMessage.text.length > 0 ? [...baseDocs, aiMessage] : baseDocs;
   }, [docs, isStreaming, aiMessage.text]);
@@ -60,8 +60,29 @@ export function useMessageSelection({
       ? parseContent(selectedResponseDoc.text)
       : { segments: [], dependenciesString: '' };
 
-    const code =
-      segments.find((segment) => segment.type === 'code') || ({ content: '' } as Segment);
+    // First try to find code in the currently selected message
+    let code = segments.find((segment) => segment.type === 'code');
+
+    // If no code was found and we have a valid selectedResponseDoc, look through all AI messages
+    if (!code && selectedResponseDoc) {
+      // Get all AI messages sorted from newest to oldest
+      const aiMessages = docs
+        .filter((doc: any) => doc.type === 'ai')
+        .sort((a: any, b: any) => b.created_at - a.created_at);
+
+      // Look through each AI message until we find code
+      for (const message of aiMessages) {
+        // Skip the current message as we already checked it
+        if (message._id === selectedResponseDoc._id) continue;
+
+        const { segments: msgSegments } = parseContent(message.text);
+        code = msgSegments.find((segment) => segment.type === 'code');
+        if (code) break; // Stop once we find code
+      }
+    }
+
+    // Default empty segment if no code was found anywhere
+    if (!code) code = { content: '' } as Segment;
 
     const dependencies = dependenciesString ? parseDependencies(dependenciesString) : {};
 
@@ -70,15 +91,28 @@ export function useMessageSelection({
       selectedCode: code,
       selectedDependencies: dependencies,
     };
-  }, [selectedResponseDoc]);
+  }, [selectedResponseDoc, docs]);
 
   // Build message history for AI requests
-  const filteredDocs = docs.filter((doc: any) => doc.type === 'ai' || doc.type === 'user');
-  const buildMessageHistory = useCallback(() => {
-    return filteredDocs.map((msg: any) => ({
-      role: msg.type === 'user' ? ('user' as const) : ('assistant' as const),
-      content: msg.text || '',
-    }));
+  const filteredDocs = docs.filter(
+    (doc: any) => doc.type === 'ai' || doc.type === 'user' || doc.type === 'system'
+  );
+  const buildMessageHistory = useCallback((): Array<{
+    role: 'user' | 'assistant' | 'system';
+    content: string;
+  }> => {
+    return filteredDocs.map((msg: any) => {
+      const role =
+        msg.type === 'user'
+          ? ('user' as const)
+          : msg.type === 'system'
+            ? ('system' as const)
+            : ('assistant' as const);
+      return {
+        role,
+        content: msg.text || '',
+      };
+    });
   }, [filteredDocs]);
 
   return {

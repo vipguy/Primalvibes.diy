@@ -140,7 +140,7 @@ export default function UnifiedSession() {
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === 'Enter' && !e.shiftKey && !chatState.isStreaming) {
         e.preventDefault();
-        chatState.sendMessage();
+        chatState.sendMessage(chatState.input);
         setMessageHasBeenSent(true);
       }
     },
@@ -275,6 +275,7 @@ export default function UnifiedSession() {
             onPreviewLoaded={handlePreviewLoaded}
             setMobilePreviewShown={setMobilePreviewShown}
             setIsIframeFetching={setIsIframeFetching}
+            addError={(error) => chatState.addError(error)}
           />
         }
         chatInput={
@@ -283,7 +284,7 @@ export default function UnifiedSession() {
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             onSend={() => {
-              chatState.sendMessage();
+              chatState.sendMessage(chatState.input);
               setMessageHasBeenSent(true);
               setHasSubmittedMessage(true);
             }}
