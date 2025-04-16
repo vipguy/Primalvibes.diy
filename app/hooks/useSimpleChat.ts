@@ -334,7 +334,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
 
   // Determine if code is ready for display
   const codeReady = useMemo(() => {
-    return !isStreaming || selectedSegments.length > 2;
+    return (!isStreaming && selectedSegments.length > 1) || selectedSegments.length > 2;
   }, [isStreaming, selectedSegments]);
 
   // Effect to clear pending message once it appears in the main docs list
