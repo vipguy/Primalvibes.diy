@@ -1,7 +1,6 @@
 import type { ChangeEvent, KeyboardEvent, RefObject } from 'react';
 import { useEffect, memo, useCallback } from 'react';
 import VibesDIYLogo from './VibesDIYLogo';
-import { trackChatInputClick } from '../utils/analytics';
 
 interface ChatInputProps {
   value: string;
@@ -54,10 +53,7 @@ function ChatInput({
         />
         <button
           type="button"
-          onClick={() => {
-            trackChatInputClick(value.length);
-            onSend();
-          }}
+          onClick={onSend}
           disabled={disabled}
           className={`light-gradient border-glimmer hover:border-light-decorative-01 dark:hover:border-dark-decorative-01 absolute flex items-center justify-center overflow-hidden rounded-xl border shadow-sm transition-all duration-300 hover:shadow-md active:shadow-inner ${
             disabled

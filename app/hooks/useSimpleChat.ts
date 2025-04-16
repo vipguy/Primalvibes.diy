@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { trackChatInputClick } from '../utils/analytics';
 import type { ChatMessageDocument, ChatState } from '../types/chat';
 import type { UserSettings } from '../types/settings';
 import { parseContent } from '../utils/segmentParser';
@@ -203,6 +204,9 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     async (textOverride?: string): Promise<void> => {
       // Use provided text or fall back to userMessage.text
       const promptText = textOverride || userMessage.text;
+
+      // Fire analytics for chat input
+      trackChatInputClick(promptText.length);
 
       if (!promptText.trim()) return;
       if (!apiKey) {
