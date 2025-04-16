@@ -85,9 +85,9 @@ const IframeContent: React.FC<IframeContentProps> = ({
   // This effect is now managed at the ResultPreview component level
 
   useEffect(() => {
-    // Update iframe ONLY if code is ready AND the appCode has actually changed from the last rendered version
+    // Update iframe when code is ready
     if (codeReady && iframeRef.current) {
-      // Compare with the ref holding the last rendered code
+      // Skip if content hasn't changed
       if (contentLoadedRef.current && appCode === lastContentRef.current) {
         return;
       }

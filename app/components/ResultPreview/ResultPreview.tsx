@@ -39,7 +39,7 @@ function ResultPreview({
         active: true,
       },
     };
-  }, [code, showWelcome]);
+  }, [code, showWelcome, codeReady, isStreaming]); // Include codeReady to ensure updates
 
   // Track streaming state changes to reset key generation only when streaming starts/stops
   useEffect(() => {

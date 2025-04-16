@@ -74,26 +74,12 @@ export function useViewState(props: {
       }
     }
 
-    // When preview becomes ready, auto jump to preview view, but respect explicit navigation
-    // AND don't redirect to app during active streaming
+    // As soon as previewReady becomes true, jump to preview view (app), UNLESS user is explicitly in data or code view
+    // Removed mobile check to allow consistent behavior across all devices
     if (props.previewReady && !wasPreviewReadyRef.current) {
-      // Don't redirect to app if user is explicitly in data or code view OR if still streaming
-      // Also don't redirect on mobile devices
       const isInDataView = location.pathname.endsWith('/data');
       const isInCodeView = location.pathname.endsWith('/code');
-      if (!isInDataView && !isInCodeView && !props.isStreaming && !isMobileViewport()) {
-        navigate(`/chat/${sessionId}/${encodedTitle}/app`);
-      }
-    }
-
-    // Handle the state when streaming ENDS and preview is ready
-    // This ensures we navigate to the app view after streaming completes
-    if (!props.isStreaming && wasStreamingRef.current && props.previewReady) {
-      // Don't redirect to app if user is explicitly in data or code view
-      // Also don't redirect on mobile devices
-      const isInDataView = location.pathname.endsWith('/data');
-      const isInCodeView = location.pathname.endsWith('/code');
-      if (!isInDataView && !isInCodeView && !isMobileViewport()) {
+      if (!isInDataView && !isInCodeView) {
         navigate(`/chat/${sessionId}/${encodedTitle}/app`);
       }
     }
@@ -148,9 +134,13 @@ export function useViewState(props: {
     (props.code && props.code.length > 0) || (sessionId && sessionId.length > 0);
 
   // Determine what view should be displayed (may differ from URL-based currentView)
-  // During streaming, we always show code view regardless of the URL
-  // On mobile, don't force code view during streaming
-  const displayView = props.isStreaming && !isMobileViewport() ? 'code' : currentView;
+  // If preview is ready, we prioritize showing it, even during streaming
+  // Otherwise, during streaming on desktop, we show code view
+  const displayView = props.previewReady
+    ? 'preview'
+    : props.isStreaming && !isMobileViewport()
+      ? 'code'
+      : currentView;
 
   return {
     currentView, // The view based on URL (for navigation)
