@@ -14,6 +14,7 @@ import {
 import { PublishMenu } from '../PublishMenu';
 import { UserMenu } from '../UserMenu';
 import { publishApp } from '../../utils/publishUtils';
+import { trackAuthClick } from '../../utils/analytics';
 
 interface ResultPreviewHeaderContentProps {
   previewReady: boolean;
@@ -123,8 +124,15 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
   const handleAuthCheck = async () => {
     if (isVerifying) return; // Prevent action while verifying
 
+    // Track Share/Get Credits click
+    trackAuthClick({
+      label: needsLogin ? 'Get Credits' : 'Share',
+      isUserAuthenticated,
+      userId: userInfo?.userId,
+    });
+
     if (isUserAuthenticated) {
-      setIsMenuOpen(!isMenuOpen);
+      setIsMenuOpen((open) => !open);
     } else {
       // Use the dedicated function to initiate auth flow
       initiateAuthFlow();
