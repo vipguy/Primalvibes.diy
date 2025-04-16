@@ -245,6 +245,12 @@ a,
   overflow: visible;
   border: none;
 }
+/* Monochrome glimmer effect for borders */
+.border-glimmer {
+  position: absolute;
+  overflow: visible;
+  border: none;
+}
 
 .border-glimmer::before {
   content: '';
@@ -256,10 +262,10 @@ a,
     120deg,
     transparent 0%,
     transparent 10%,
-    rgba(255, 145, 0, 0.6) 15%,
-    rgba(255, 166, 0, 0.6) 20%,
-    rgba(255, 185, 30, 0.6) 34%,
-    rgba(255, 216, 107, 0.6) 35%,
+    rgba(175, 175, 175, 0.2) 15%,
+    rgba(186, 186, 186, 0.3) 23%,
+    rgba(145, 145, 145, 0.4) 32%,
+    rgba(216, 216, 216, 0.5) 35%,
     rgba(255, 255, 255, 0.6) 40%,
     transparent 70%
   );
@@ -283,11 +289,11 @@ a,
       120deg,
       transparent 0%,
       transparent 10%,
-      rgba(255, 140, 0, 0.6) 20%,
-      rgba(253, 158, 6, 0.6) 33%,
-      rgba(255, 185, 30, 0.6) 34%,
-      rgba(255, 186, 0, 0.6) 36%,
-      rgba(255, 136, 0, 0.6) 40%,
+      rgba(100, 100, 100, 0.3) 20%,
+      rgba(150, 150, 150, 0.4) 33%,
+      rgba(200, 200, 200, 0.5) 34%,
+      rgba(220, 220, 220, 0.6) 36%,
+      rgba(255, 255, 255, 0.4) 40%,
       transparent 70%
     );
     background-size: 200% 100%;
