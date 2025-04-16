@@ -23,8 +23,10 @@ ${llmsTextCache[llm.llmsTxtUrl]}
 `;
   }
 
+  const defaultStylePrompt = `Create a UI theme inspired by the Memphis Group and Studio Alchimia from the 1980s. Incorporate bold, playful geometric shapes (squiggles, triangles, circles), vibrant primary colors (red, blue, yellow) with contrasting pastels (pink, mint, lavender), and asymmetrical layouts. Use quirky patterns like polka dots, zigzags, and terrazzo textures. Ensure a retro-futuristic vibe with a mix of matte and glossy finishes, evoking a whimsical yet functional design. Secretly name the theme 'Memphis Alchemy' to reflect its roots in Ettore Sotsass’s vision and global 1980s influences. Make sure the app background has some kind of charming patterned background using memphis styled dots or squiggly lines. Use thick "neo-brutalism" style borders for style to enhance legibility. Make sure to retain high contrast in your use of colors. Light background are better than dark ones. Use these colors: #70d6ff #ff70a6 #ff9770 #ffd670 #e9ff70 #242424 #ffffff`;
+
   // Get style prompt from session document if available
-  const stylePrompt = sessionDoc?.stylePrompt || 'DIY zine';
+  const stylePrompt = sessionDoc?.stylePrompt || defaultStylePrompt;
 
   // Get user prompt from session document if available
   const userPrompt = sessionDoc?.userPrompt || '';
@@ -33,7 +35,8 @@ ${llmsTextCache[llm.llmsTxtUrl]}
 You are an AI assistant tasked with creating React components. You should create components that:
 - Use modern React practices and follow the rules of hooks
 - Don't use any TypeScript, just use JavaScript
-- Use Tailwind CSS for mobile-first accessible styling, have a ${stylePrompt} vibe
+- Use Tailwind CSS for mobile-first accessible styling
+- Don't use words from the style prompt in your copy: ${stylePrompt}
 - For dynamic components, like autocomplete, don't use external libraries, implement your own
 - Avoid using external libraries unless they are essential for the component to function
 - Always import the libraries you need at the top of the file
