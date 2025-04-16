@@ -9,9 +9,20 @@ interface ChatInputProps {
   onKeyDown: (e: KeyboardEvent<HTMLTextAreaElement>) => void;
   disabled: boolean;
   inputRef: RefObject<HTMLTextAreaElement | null>;
+  docsLength: number;
+  isStreaming: boolean;
 }
 
-function ChatInput({ value, onChange, onSend, onKeyDown, disabled, inputRef }: ChatInputProps) {
+function ChatInput({
+  value,
+  onChange,
+  onSend,
+  onKeyDown,
+  disabled,
+  inputRef,
+  docsLength,
+  isStreaming,
+}: ChatInputProps) {
   // Auto-resize textarea function
   const autoResizeTextarea = useCallback(() => {
     const textarea = inputRef.current;
@@ -37,7 +48,7 @@ function ChatInput({ value, onChange, onSend, onKeyDown, disabled, inputRef }: C
           onChange={onChange}
           onKeyDown={onKeyDown}
           className="border-light-decorative-00 dark:border-dark-decorative-00 text-light-primary dark:text-dark-primary bg-light-background-01 dark:bg-dark-background-01 focus:ring-accent-01-light dark:focus:ring-accent-01-dark max-h-[200px] min-h-[90px] w-full resize-y rounded-xl border p-2.5 text-sm focus:border-transparent focus:ring-2 focus:outline-none"
-          placeholder={'I want to build...'}
+          placeholder={docsLength || isStreaming ? 'Continue coding...' : 'I want to build...'}
           disabled={disabled}
           rows={2}
         />
@@ -56,7 +67,7 @@ function ChatInput({ value, onChange, onSend, onKeyDown, disabled, inputRef }: C
           aria-label={disabled ? 'Generating' : 'Send message'}
         >
           <div className="relative z-10">
-            <VibesDIYLogo />
+            <VibesDIYLogo className="h-[28px] pl-1.5" />
           </div>
         </button>
       </div>

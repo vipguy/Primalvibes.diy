@@ -25,6 +25,8 @@ describe('ChatInput Component', () => {
         onKeyDown={onKeyDown}
         disabled={false}
         inputRef={inputRef}
+        isStreaming={false}
+        docsLength={0}
       />
     );
     expect(screen.getByPlaceholderText('I want to build...')).toBeDefined();
@@ -39,6 +41,8 @@ describe('ChatInput Component', () => {
         onKeyDown={onKeyDown}
         disabled={false}
         inputRef={inputRef}
+        isStreaming={false}
+        docsLength={0}
       />
     );
 
@@ -57,6 +61,8 @@ describe('ChatInput Component', () => {
         onKeyDown={onKeyDown}
         disabled={false}
         inputRef={inputRef}
+        isStreaming={false}
+        docsLength={0}
       />
     );
 
@@ -75,6 +81,8 @@ describe('ChatInput Component', () => {
         onKeyDown={onKeyDown}
         disabled={true}
         inputRef={inputRef}
+        isStreaming={false}
+        docsLength={0}
       />
     );
 
@@ -97,6 +105,8 @@ describe('ChatInput Component', () => {
         onKeyDown={onKeyDown}
         disabled={false}
         inputRef={inputRef}
+        isStreaming={false}
+        docsLength={0}
       />
     );
 

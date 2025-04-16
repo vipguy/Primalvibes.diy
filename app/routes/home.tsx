@@ -280,6 +280,7 @@ export default function UnifiedSession() {
         }
         chatInput={
           <ChatInput
+            isStreaming={chatState.isStreaming}
             value={chatState.input}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
@@ -290,6 +291,7 @@ export default function UnifiedSession() {
             }}
             disabled={chatState.isStreaming}
             inputRef={chatState.inputRef}
+            docsLength={chatState.docs.length}
           />
         }
         suggestionsComponent={
