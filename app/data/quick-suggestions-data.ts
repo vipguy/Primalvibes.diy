@@ -17,15 +17,15 @@ export const quickSuggestions: Suggestion[] = [
   },
   {
     label: 'Chat',
-    text: 'Chat with legends, results are streamed and then saved by legend_id.',
+    text: 'Chat with legends, results are streamed and then queried by legendId.',
   },
   {
     label: 'Playlist',
     text: 'I send messages and AI responds with a playlist for me, with YouTube search links for each song.',
   },
   {
-    label: 'Math',
-    text: 'Create a calculator app with basic arithmetic operations.',
+    label: 'Finance',
+    text: 'Create a personal finance calculator with student loan and compound interest formulas, and retirement goal tracking.',
   },
   {
     label: 'Canvas',
@@ -43,17 +43,17 @@ export const quickSuggestions: Suggestion[] = [
     label: 'Web Art',
     text: 'Page mutator that automatically sends document.body.innerHTML to callAI to make it more interesting web art, then extracts the HTML result, updates the body, and uses DOM (not ReactDOM) functions to insert a toggleable open control panel that lists the iteration history and shows the most recent 5 lines of the current mutation stream in a fixed size area. After each response, count 10 seconds and recursively send HTML to AI again. The page should start with the technicolor transition from Wizard of Oz, "we\'re not in Kansas anymore."',
   },
-  {
-    label: 'Guitar',
-    text: "Create Hendrix-like guitar solos with Web Audio API: Set up oscillators (ctx.createOscillator()) with 'sawtooth' waveforms for guitar-like harmonics, use modulator.connect(modulationGain).connect(carrier.frequency) for expressive bends and feedback effects, create signature wah-wah with BiquadFilter (filter.frequency.setValueAtTime() + automated sweeps), simulate feedback using high modulationGain.gain values, achieve dramatic dives with carrier.frequency.exponentialRampToValueAtTime(), implement string bending/vibrato by modulating pitch with LFOs, create percussive attacks with gainNode.gain.linearRampToValueAtTime() for fast attack/sustain, and simulate whammy bar techniques with rapid frequency wobbles. Add distortion via WaveShaperNode with custom curves for that iconic fuzz tone, and schedule phrases with setTimeout()/Math.random() for human-like timing variations in pentatonic patterns. Average carrier wave around 1kHz, note density: rests are rare.",
-  },
+  // {
+  //   label: 'Guitar',
+  //   text: "Create Hendrix-like guitar solos with Web Audio API: Set up oscillators (ctx.createOscillator()) with 'sawtooth' waveforms for guitar-like harmonics, use modulator.connect(modulationGain).connect(carrier.frequency) for expressive bends and feedback effects, create signature wah-wah with BiquadFilter (filter.frequency.setValueAtTime() + automated sweeps), simulate feedback using high modulationGain.gain values, achieve dramatic dives with carrier.frequency.exponentialRampToValueAtTime(), implement string bending/vibrato by modulating pitch with LFOs, create percussive attacks with gainNode.gain.linearRampToValueAtTime() for fast attack/sustain, and simulate whammy bar techniques with rapid frequency wobbles. Add distortion via WaveShaperNode with custom curves for that iconic fuzz tone, and schedule phrases with setTimeout()/Math.random() for human-like timing variations in pentatonic patterns. Average carrier wave around 1kHz, note density: rests are rare.",
+  // },
   {
     label: 'Timer',
-    text: 'Create a pomodoro timer app with multiple timers work/break intervals and session tracking.',
+    text: 'Create a pomodoro timer app with multiple timers, work/break intervals, and session tracking.',
   },
   {
     label: 'Poetry',
-    text: 'Write a short non-rhyming poem about a butterfly and then use it to have Al make an SVG drawing and when the drawing is complete do another poem. Keep going one at a time.',
+    text: 'Write a short non-rhyming poem about a topic (default butterfly) and then use it to have AI make an SVG drawing and when the drawing is complete do another poem. Keep going one at a time.',
   },
   {
     label: 'Galaxy Blaster',
@@ -65,11 +65,27 @@ export const quickSuggestions: Suggestion[] = [
   },
   {
     label: 'Quiz',
-    text: 'Trivia show that lets me pick a topic, and uses AI to make questions and judge answers.',
+    text: 'Trivia game show that lets me pick a topic, and uses AI to make questions and judge answers. Style like a board game.',
   },
   {
     label: 'Blocks',
-    text: 'A full screen paddle-and-ball game where a horizontal paddle at the bottom of the screen follows the mouse or jumps to touch locations, and the goal is to bounce a ball upward. Use createOscillator for sound effects. The ball breaks a wall of bricks at the top, and the goal is to clear all bricks without letting the ball fall. Start slow and speed up each level.Power-ups drop from some bricks, adding effects like multiple balls, lasers, or a wider paddle.',
+    text: 'A full screen paddle-and-ball game where a horizontal paddle at the bottom of the screen follows the mouse or jumps to touch locations, and the goal is to bounce a ball upward. Use createOscillator for sound effects. The ball breaks a wall of bricks at the top, and the goal is to clear all bricks without letting the ball fall. Start slow and speed up each level. Power-ups drop from some bricks, adding effects like multiple balls, lasers, or a wider paddle.',
+  },
+  {
+    label: 'Memory',
+    text: 'Memory matching game with custom images and sound effects.',
+  },
+  {
+    label: 'Flashcards',
+    text: 'Flashcard study app that prompts for a topic.',
+  },
+  {
+    label: 'Camera',
+    text: 'Get live camera and convert it to ascii.',
+  },
+  {
+    label: '3D',
+    text: 'Use three js to create a 3D scene with editable persistent object and camera positions.',
   },
   {
     label: 'Wildcard',
