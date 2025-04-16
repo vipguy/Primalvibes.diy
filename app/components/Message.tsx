@@ -41,7 +41,7 @@ const AIMessage = memo(
       <div className="mb-4 flex flex-row justify-start px-4">
         <div className="mr-2 flex-shrink-0">
           <div
-            className="bg-accent-02-light dark:bg-accent-02-dark flex h-8 w-8 items-center justify-center rounded-full shadow-sm"
+            className="bg-light-decorative-02 dark:bg-dark-decorative-02 flex h-8 w-8 items-center justify-center rounded-full shadow-sm"
             title={model || undefined}
           >
             <svg
@@ -67,7 +67,7 @@ const AIMessage = memo(
             </svg>
           </div>
         </div>
-        <div className="max-w-[85%] rounded-xl bg-white px-5 py-3 text-gray-900 shadow-md dark:bg-gray-800 dark:text-gray-100">
+        <div className="text-light-primary dark:bg-dark-background-01 dark:text-dark-primary max-w-[85%] rounded-xl bg-white px-5 py-3 shadow-md">
           <StructuredMessage
             segments={segments || []}
             isStreaming={isStreaming}
@@ -104,7 +104,7 @@ const AIMessage = memo(
 const UserMessage = memo(({ message }: { message: ChatMessageDocument }) => {
   return (
     <div className="mb-4 flex flex-row justify-end px-4">
-      <div className="max-w-[85%] rounded-xl bg-gray-300 px-5 py-3 text-gray-800 shadow-md dark:bg-gray-700 dark:text-gray-100">
+      <div className="bg-light-background-02 dark:bg-dark-decorative-00 text-light-primary dark:text-dark-primary max-w-[85%] rounded-xl px-5 py-3 shadow-md">
         <div className="prose prose-sm dark:prose-invert prose-ul:pl-5 prose-ul:list-disc prose-ol:pl-5 prose-ol:list-decimal prose-li:my-0 max-w-none">
           <ReactMarkdown>{message.text}</ReactMarkdown>
         </div>
@@ -131,7 +131,7 @@ const SystemMessage = memo(({ message }: { message: SystemChatMessageDocument })
   return (
     <div className="mb-4 flex flex-row justify-center px-4">
       <div
-        className={`max-w-[90%] rounded border-l-4 px-4 py-3 text-gray-800 shadow-sm dark:text-gray-200 ${errorClass}`}
+        className={`text-light-primary dark:text-dark-secondary max-w-[90%] rounded border-l-4 px-4 py-3 shadow-sm ${errorClass}`}
       >
         <div className="prose prose-sm dark:prose-invert max-w-none">
           <h4 className="m-0 font-semibold">{errorTitle}</h4>

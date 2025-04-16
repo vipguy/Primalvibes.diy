@@ -76,7 +76,7 @@ function SessionSidebar({ isVisible, onClose }: SessionSidebarProps) {
       return (
         <li
           key={session._id}
-          className="cursor-pointer border-b border-gray-200 p-3 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
+          className="border-light-decorative-01 hover:bg-light-background-01 dark:border-dark-decorative-00 dark:hover:bg-dark-background-01 cursor-pointer border-b p-3"
         >
           <a
             href={`/chat/${session._id}/${encodedTitle}`}
@@ -84,16 +84,18 @@ function SessionSidebar({ isVisible, onClose }: SessionSidebarProps) {
             onClick={() => onClose()}
           >
             <div className="flex items-center justify-between">
-              <div className="text-sm font-semibold text-gray-900 dark:text-white">{title}</div>
+              <div className="text-light-primary text-sm font-semibold dark:text-white">
+                {title}
+              </div>
               <button
                 onClick={(e) => toggleFavorite(session, e)}
-                className="ml-2 text-gray-400 hover:text-yellow-500 focus:outline-none"
+                className="text-accent-01 ml-2 hover:text-yellow-500 focus:outline-none"
                 aria-label={session.favorite ? 'Remove from favorites' : 'Add to favorites'}
               >
                 <StarIcon filled={session.favorite} />
               </button>
             </div>
-            <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            <div className="text-accent-01 dark:text-accent-01 mt-1 text-xs">
               {new Date(session.created_at).toLocaleString()}
             </div>
             {shownScreenshots.map(
@@ -122,7 +124,7 @@ function SessionSidebar({ isVisible, onClose }: SessionSidebarProps) {
       }`}
     >
       <div className="flex h-full flex-col overflow-scroll">
-        <div className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
+        <div className="border-light-decorative-01 dark:border-dark-decorative-00 flex items-center justify-between border-b p-4">
           <h2
             className="text-light-primary dark:text-dark-primary cursor-pointer text-lg font-semibold"
             onClick={() => {
@@ -161,13 +163,13 @@ function SessionSidebar({ isVisible, onClose }: SessionSidebarProps) {
             >
               <StarIcon
                 filled={justFavorites}
-                className={`h-5 w-5 transition-colors duration-300 ${justFavorites ? 'text-yellow-500' : 'text-gray-400'} hover:text-yellow-400`}
+                className={`h-5 w-5 transition-colors duration-300 ${justFavorites ? 'text-yellow-500' : 'text-accent-01'} hover:text-yellow-400`}
               />
             </button>
             <a
               href="/settings"
               onClick={() => onClose()}
-              className="text-gray-400 hover:text-gray-500 focus:outline-none"
+              className="text-accent-01 hover:text-accent-01 focus:outline-none"
               title="Settings"
               aria-label="Settings"
             >
@@ -176,7 +178,7 @@ function SessionSidebar({ isVisible, onClose }: SessionSidebarProps) {
             <a
               href="/about"
               onClick={() => onClose()}
-              className="text-gray-400 hover:text-gray-500 focus:outline-none"
+              className="text-accent-01 hover:text-accent-01 focus:outline-none"
               title="About"
               aria-label="About"
             >

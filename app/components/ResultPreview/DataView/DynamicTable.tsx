@@ -11,25 +11,25 @@ export default function DynamicTable({
 }: any) {
   return (
     <div className="relative mt-[40px] max-h-[calc(100vh-140px)] overflow-x-auto overflow-y-auto">
-      <table className="w-full border-collapse text-left text-gray-900 dark:text-gray-100">
-        <thead className="sticky top-0 z-10 bg-white dark:bg-gray-900">
+      <table className="text-light-primary dark:text-dark-primary w-full border-collapse text-left">
+        <thead className="dark:bg-dark-background-00 sticky top-0 z-10 bg-white">
           <tr key={'header' + Math.random()}>
             {headers.map((header: string) => (
               <th
                 key={header}
                 scope="col"
-                className="text-11 px-[15px] py-[8px] text-gray-500 dark:text-gray-400"
+                className="text-11 text-accent-01 dark:text-accent-01 px-[15px] py-[8px]"
               >
                 {header === '_id' ? 'doc id' : header}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="text-14 border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+        <tbody className="text-14 border-light-decorative-01 dark:border-dark-decorative-00 dark:bg-dark-background-01 border bg-white">
           {rows.map((fields: any) => (
             <tr
               key={fields._id}
-              className="cursor-pointer border-b border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700"
+              className="border-light-decorative-01 hover:bg-light-background-01 dark:border-dark-decorative-00 dark:hover:bg-dark-decorative-00 cursor-pointer border-b"
               onClick={() => {
                 onRowClick(fields._id, dbName);
               }}

@@ -151,7 +151,7 @@ const CodeSegment = ({
         top: '8px',
         zIndex: 10,
       }}
-      className={`relative my-4 cursor-pointer rounded-md border border-gray-200 bg-gray-50 p-4 shadow-sm transition-all hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 ${
+      className={`border-light-decorative-01 bg-light-background-01 hover:bg-light-background-01 dark:border-dark-decorative-00 dark:bg-dark-decorative-00 dark:hover:bg-dark-decorative-01 relative my-4 cursor-pointer rounded-md border p-4 shadow-sm transition-all ${
         isSticky ? 'sticky-active' : ''
       }`}
       onClick={handleCodeClick}
@@ -162,13 +162,13 @@ const CodeSegment = ({
             ? 'text-orange-500 dark:text-orange-400'
             : isSelected
               ? 'text-green-500 dark:text-green-400'
-              : 'text-gray-400 dark:text-gray-600'
+              : 'text-accent-01 dark:text-accent-02'
         }`}
       >
         •
       </div>
       <div className="flex items-center justify-between rounded-sm p-2">
-        <span className="font-mono text-sm text-gray-500 dark:text-gray-400">
+        <span className="text-accent-01 dark:text-accent-01 font-mono text-sm">
           {`${codeLines} line${codeLines !== 1 ? 's' : ''}`}
         </span>
         <button
@@ -178,7 +178,7 @@ const CodeSegment = ({
             const textToCopy = e.shiftKey && rawText ? rawText : content;
             navigator.clipboard.writeText(textToCopy);
           }}
-          className="rounded-sm bg-gray-200 px-2 py-1 text-sm text-gray-500 transition-colors hover:bg-gray-300 hover:text-gray-600 active:bg-orange-400 active:text-orange-800 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300 dark:active:bg-orange-600 dark:active:text-orange-200"
+          className="bg-light-background-02 hover:accent-00 dark:bg-dark-background-01 dark:hover:bg-dark-decorative-00 text-accent-01 hover:text-accent-02 dark:text-accent-01 dark:hover:text-dark-secondary rounded-sm px-2 py-1 text-sm transition-colors active:bg-orange-400 active:text-orange-800 dark:active:bg-orange-600 dark:active:text-orange-200"
         >
           <code className="font-mono">
             <span className="mr-3">App.jsx</span>
@@ -206,7 +206,7 @@ const CodeSegment = ({
 
       {/* Code preview with height transition instead of conditional rendering */}
       <div
-        className={`overflow-hidden rounded-sm bg-gray-100 font-mono text-sm shadow-inner transition-all dark:bg-gray-800 ${
+        className={`bg-light-background-02 dark:bg-dark-background-01 overflow-hidden rounded-sm font-mono text-sm shadow-inner transition-all ${
           isSticky ? 'm-0 h-0 max-h-0 min-h-0 border-0 p-0 opacity-0' : 'mt-2 max-h-24 p-2'
         }`}
       >
@@ -214,12 +214,12 @@ const CodeSegment = ({
           .split('\n')
           .slice(0, 3)
           .map((line, i) => (
-            <div key={i} className="truncate text-gray-800 dark:text-gray-300">
+            <div key={i} className="text-light-primary dark:text-dark-secondary truncate">
               {line || ' '}
             </div>
           ))}
         {content.split('\n').length > 3 && (
-          <div className="text-gray-500 dark:text-gray-400">...</div>
+          <div className="text-accent-01 dark:text-accent-01">...</div>
         )}
       </div>
     </div>
