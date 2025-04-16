@@ -117,6 +117,11 @@ button {
   font-family: inherit;
 }
 
+/* Prevent auto-zoom on input focus in mobile Safari */
+input, textarea, select {
+  font-size: 16px; /* prevents auto-zoom */
+}
+
 /* Ensure all buttons and links show pointer cursor on hover */
 button,
 a,
