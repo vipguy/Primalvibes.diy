@@ -118,7 +118,9 @@ button {
 }
 
 /* Prevent auto-zoom on input focus in mobile Safari */
-input, textarea, select {
+input,
+textarea,
+select {
   font-size: 16px; /* prevents auto-zoom */
 }
 

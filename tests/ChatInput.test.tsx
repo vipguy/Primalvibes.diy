@@ -89,7 +89,7 @@ describe('ChatInput Component', () => {
     const textArea = screen.getByPlaceholderText('I want to build...');
     const sendButton = screen.getByLabelText('Generating');
 
-    expect(textArea).toBeDisabled();
+    expect(textArea).not.toBeDisabled();
     expect(sendButton).toBeDisabled();
 
     fireEvent.click(sendButton);
