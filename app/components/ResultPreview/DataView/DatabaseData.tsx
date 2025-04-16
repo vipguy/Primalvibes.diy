@@ -82,7 +82,7 @@ const DatabaseData: React.FC<{ dbName: string; sessionId: string }> = ({ dbName,
           </p>
           <button
             onClick={() => listSessionDatabases()}
-            className="mr-2 mb-2 rounded bg-blue-500 px-2 py-1 text-xs text-white hover:bg-blue-700"
+            className="mr-2 mb-2 rounded-sm bg-blue-500 px-2 py-1 text-xs text-white hover:bg-blue-700"
           >
             Refresh DB List
           </button>
@@ -101,7 +101,7 @@ const DatabaseData: React.FC<{ dbName: string; sessionId: string }> = ({ dbName,
 
   if (docs.length === 0) {
     return (
-      <div className="bg-light-decorative-00 dark:bg-dark-decorative-00 rounded-lg p-4">
+      <div className="bg-light-decorative-00 dark:bg-dark-decorative-00 rounded-md p-4">
         <DbDebugInfo />
         <p>Loading data from {database.name}...</p>
       </div>

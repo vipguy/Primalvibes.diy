@@ -45,7 +45,7 @@ describe('QuickSuggestions', () => {
     const button = container.querySelector('button');
 
     // Check that it has expected styling classes
-    expect(button).toHaveClass('rounded-lg');
+    expect(button).toHaveClass('rounded-md');
     expect(button).toHaveClass('cursor-pointer');
   });
 });

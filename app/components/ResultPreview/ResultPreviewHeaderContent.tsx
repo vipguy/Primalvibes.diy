@@ -166,7 +166,7 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
             // Force showing the chat panel immediately
             setMobilePreviewShown(false);
           }}
-          className="bg-light-decorative-00 dark:bg-dark-decorative-00 text-light-primary dark:text-dark-primary hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 flex items-center justify-center rounded-lg p-2 transition-colors md:hidden"
+          className="bg-light-decorative-00 dark:bg-dark-decorative-00 text-light-primary dark:text-dark-primary hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 flex items-center justify-center rounded-md p-2 transition-colors md:hidden"
           aria-label="Back to chat"
         >
           <BackArrowIcon />
@@ -178,7 +178,7 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
       {/* Center buttons */}
       <div className="flex w-2/4 items-center justify-center">
         {showViewControls ? (
-          <div className="bg-light-decorative-00 dark:bg-dark-decorative-00 flex justify-center gap-1 rounded-lg p-1 shadow-sm">
+          <div className="bg-light-decorative-00 dark:bg-dark-decorative-00 flex justify-center gap-1 rounded-md p-1 shadow-sm">
             {/* Map over view controls to create buttons */}
             {Object.entries(viewControls).map(([view, control]) => {
               const viewType = view as ViewType;
@@ -193,7 +193,7 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
                     key={viewType}
                     type="button"
                     disabled={true}
-                    className="text-light-primary/50 dark:text-dark-primary/50 flex cursor-not-allowed items-center justify-center space-x-1 rounded-md px-3 py-1.5 text-xs font-medium opacity-50 transition-colors sm:space-x-1.5 sm:px-4 sm:text-sm"
+                    className="text-light-primary/50 dark:text-dark-primary/50 flex cursor-not-allowed items-center justify-center space-x-1 rounded px-3 py-1.5 text-xs font-medium opacity-50 transition-colors sm:space-x-1.5 sm:px-4 sm:text-sm"
                     aria-label="Data tab unavailable during streaming"
                     title="Data tab available after streaming completes"
                   >
@@ -211,7 +211,7 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
                     href={
                       sessionId && encodedTitle ? `/chat/${sessionId}/${encodedTitle}/data` : '#'
                     }
-                    className={`flex items-center justify-center space-x-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors sm:space-x-1.5 sm:px-4 sm:text-sm ${
+                    className={`flex items-center justify-center space-x-1 rounded px-3 py-1.5 text-xs font-medium transition-colors sm:space-x-1.5 sm:px-4 sm:text-sm ${
                       isActive
                         ? 'bg-light-background-00 dark:bg-dark-background-00 text-light-primary dark:text-dark-primary shadow-sm'
                         : 'text-light-primary/90 dark:text-dark-primary/90 hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 hover:text-light-primary dark:hover:text-dark-primary'
@@ -259,7 +259,7 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
                       setUserClickedBack(false);
                     }
                   }}
-                  className={`flex items-center justify-center space-x-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors sm:space-x-1.5 sm:px-4 sm:text-sm ${
+                  className={`flex items-center justify-center space-x-1 rounded px-3 py-1.5 text-xs font-medium transition-colors sm:space-x-1.5 sm:px-4 sm:text-sm ${
                     isActive
                       ? 'bg-light-background-00 dark:bg-dark-background-00 text-light-primary dark:text-dark-primary shadow-sm'
                       : `text-light-primary/90 dark:text-dark-primary/90 ${
@@ -302,7 +302,7 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
                 ref={publishButtonRef}
                 type="button"
                 onClick={() => setIsPublishMenuOpen(!isPublishMenuOpen)}
-                className="bg-light-decorative-00 border-glimmer dark:bg-dark-decorative-00 text-light-primary dark:text-dark-primary hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 -mt-4.5 -ml-10 flex items-center justify-center rounded-lg p-2 transition-colors"
+                className="bg-light-decorative-00 border-glimmer dark:bg-dark-decorative-00 text-light-primary dark:text-dark-primary hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 -mt-4.5 -ml-10 flex items-center justify-center rounded-md p-2 transition-colors"
                 aria-label="Publish"
                 title="Publish"
               >
@@ -333,13 +333,13 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
             </div>
           )}
           <div className="relative">
-            <div className="bg-light-decorative-00 dark:bg-dark-decorative-00 flex justify-center gap-1 rounded-lg p-1 shadow-sm">
+            <div className="bg-light-decorative-00 dark:bg-dark-decorative-00 flex justify-center gap-1 rounded-md p-1 shadow-sm">
               <button
                 ref={buttonRef}
                 type="button"
                 onClick={handleAuthCheck}
                 disabled={isVerifying}
-                className={`${needsLogin ? 'text-orange-500' : 'text-light-primary dark:text-dark-primary'} hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 flex items-center justify-center space-x-1 rounded-md px-2 py-1.5 text-xs font-medium transition-colors sm:space-x-1.5 sm:px-1.5 sm:text-sm ${isVerifying ? 'cursor-wait opacity-50' : ''}`}
+                className={`${needsLogin ? 'text-orange-500' : 'text-light-primary dark:text-dark-primary'} hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 flex items-center justify-center space-x-1 rounded px-2 py-1.5 text-xs font-medium transition-colors sm:space-x-1.5 sm:px-1.5 sm:text-sm ${isVerifying ? 'cursor-wait opacity-50' : ''}`}
                 aria-label={isUserAuthenticated ? `User: ${userInfo?.userId}` : 'Connect Account'}
                 title={
                   isUserAuthenticated

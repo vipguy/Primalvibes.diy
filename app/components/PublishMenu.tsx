@@ -72,7 +72,7 @@ export function PublishMenu({
     >
       <div
         style={menuStyle}
-        className="ring-opacity-5 w-80 rounded-md bg-white p-4 shadow-lg ring-1 ring-black dark:bg-gray-800"
+        className="ring-opacity-5 w-80 rounded bg-white p-4 shadow-lg ring-1 ring-black dark:bg-gray-800"
       >
         <div
           className="py-1"
@@ -85,7 +85,7 @@ export function PublishMenu({
             multi-user sync coming soon.
           </p>
           {publishedAppUrl ? (
-            <div className="rounded-md bg-gray-50 px-2 py-2 text-sm text-gray-700 dark:bg-gray-700 dark:text-gray-200">
+            <div className="rounded bg-gray-50 px-2 py-2 text-sm text-gray-700 dark:bg-gray-700 dark:text-gray-200">
               <div className="mb-2 text-center font-medium">
                 <strong>Published</strong>
               </div>
@@ -94,7 +94,7 @@ export function PublishMenu({
                   type="text"
                   readOnly
                   value={publishedAppUrl}
-                  className="flex-1 truncate rounded bg-gray-100 px-1 py-1 text-xs dark:bg-gray-600"
+                  className="flex-1 truncate rounded-sm bg-gray-100 px-1 py-1 text-xs dark:bg-gray-600"
                 />
                 <button
                   type="button"
@@ -215,7 +215,7 @@ export function PublishMenu({
               type="button"
               onClick={handlePublish}
               disabled={isPublishing}
-              className="block w-full rounded-md bg-gray-300 px-4 py-2 text-center text-sm text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
+              className="block w-full rounded bg-gray-300 px-4 py-2 text-center text-sm text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
               role="menuitem"
             >
               <div className="flex items-center justify-between">

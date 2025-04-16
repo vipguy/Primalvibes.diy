@@ -64,7 +64,7 @@ function MessageList({
               </svg>
             </div>
           </div>
-          <div className="max-w-[85%] rounded-2xl bg-white px-5 py-3 text-gray-900 shadow-md dark:bg-gray-800 dark:text-gray-100">
+          <div className="max-w-[85%] rounded-xl bg-white px-5 py-3 text-gray-900 shadow-md dark:bg-gray-800 dark:text-gray-100">
             <div className="flex items-center space-x-1">
               <div
                 className="h-2 w-2 animate-pulse rounded-full bg-gray-400 opacity-75"

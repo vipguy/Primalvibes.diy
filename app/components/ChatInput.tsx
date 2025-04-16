@@ -47,7 +47,7 @@ function ChatInput({
           value={value}
           onChange={onChange}
           onKeyDown={onKeyDown}
-          className="border-light-decorative-00 dark:border-dark-decorative-00 text-light-primary dark:text-dark-primary bg-light-background-01 dark:bg-dark-background-01 focus:ring-accent-01-light dark:focus:ring-accent-01-dark max-h-[200px] min-h-[90px] w-full resize-y rounded-xl border p-2.5 text-sm focus:border-transparent focus:ring-2 focus:outline-none"
+          className="border-light-decorative-00 dark:border-dark-decorative-00 text-light-primary dark:text-dark-primary bg-light-background-01 dark:bg-dark-background-01 focus:ring-accent-01-light dark:focus:ring-accent-01-dark max-h-[200px] min-h-[90px] w-full resize-y rounded-lg border p-2.5 text-sm focus:border-transparent focus:ring-2 focus:outline-none"
           placeholder={docsLength || isStreaming ? 'Continue coding...' : 'I want to build...'}
           disabled={disabled}
           rows={2}
