@@ -1,6 +1,8 @@
 import SimpleAppLayout from '../../components/SimpleAppLayout';
 import { HomeIcon } from '../../components/SessionSidebar/HomeIcon';
 import VibesDIYLogo from '~/components/VibesDIYLogo';
+import ReactMarkdown from 'react-markdown';
+import privacyContent from './privacy-notes.md?raw';
 
 export function meta() {
   return [
@@ -31,10 +33,8 @@ export default function Privacy() {
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
           <h1 className="pb-4 text-2xl font-bold">Privacy Policy</h1>
 
-          <div className="prose dark:prose-invert max-w-none">
-            <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-            </p>
+          <div className="prose dark:prose-invert space-y-4">
+            <ReactMarkdown>{privacyContent}</ReactMarkdown>
           </div>
         </div>
         <p className="text-light-secondary dark:text-dark-secondary text-center text-xs">

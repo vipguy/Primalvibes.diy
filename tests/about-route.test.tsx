@@ -107,10 +107,11 @@ describe('About Route', () => {
   it('has the correct external links', () => {
     renderAbout();
 
-    // Check Fireproof link
-    const fireproofLink = screen.getByText('Fireproof');
-    expect(fireproofLink).toBeInTheDocument();
-    expect(fireproofLink.getAttribute('href')).toBe('https://use-fireproof.com');
+    // Check Fireproof link - use the within scope of the feature list to be more specific
+    const fireproofLink = screen.getByText(/Reliable, secure database that syncs across devices/);
+    const featureFireproofLink = fireproofLink.querySelector('a');
+    expect(featureFireproofLink).toBeInTheDocument();
+    expect(featureFireproofLink?.getAttribute('href')).toBe('https://use-fireproof.com');
 
     // Check OpenRouter link
     const openRouterLink = screen.getByText('OpenRouter');

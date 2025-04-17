@@ -124,17 +124,11 @@ export default function About() {
             Fireproof
           </a>
           {' · '}
-          <a 
-            href="/legal/privacy"
-            className="text-blue-600 hover:underline dark:text-blue-400"
-          >
+          <a href="/legal/privacy" className="text-blue-600 hover:underline dark:text-blue-400">
             Privacy Policy
           </a>
           {' · '}
-          <a 
-            href="/legal/tos"
-            className="text-blue-600 hover:underline dark:text-blue-400"
-          >
+          <a href="/legal/tos" className="text-blue-600 hover:underline dark:text-blue-400">
             Terms of Service
           </a>
         </p>
