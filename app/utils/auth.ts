@@ -98,7 +98,7 @@ export function initiateAuthFlow(): void {
   console.log('Calculated callback URL:', callbackUrl);
 
   // Redirect to get a token, using our auth/callback route as the back_url
-  const authUrl = `https://dev.connect.fireproof.direct/fp/cloud/api/token?back_url=${encodeURIComponent(callbackUrl)}`;
+  const authUrl = `https://connect.fireproof.direct/fp/cloud/api/token?back_url=${encodeURIComponent(callbackUrl)}`;
   console.log('Redirecting to auth provider:', authUrl);
   window.location.href = authUrl;
 }
