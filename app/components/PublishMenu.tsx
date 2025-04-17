@@ -83,8 +83,16 @@ export function PublishMenu({
           aria-labelledby="publish-menu"
         >
           <p className="mb-4 text-xs text-blue-700 italic dark:text-blue-200">
-            <strong>Technical Preview:</strong> Data is browser-local, AI in published apps and
-            multi-user sync coming soon.
+            Apps are public, data is local, private sharing is coming soon. See app listings in{' '}
+            <a
+              href="https://discord.gg/vnpWycj4Ta"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline dark:text-blue-400"
+            >
+              Discord
+            </a>
+            .
           </p>
           {publishedAppUrl ? (
             <div className="bg-light-background-01 text-light-secondary dark:bg-dark-decorative-00 dark:text-dark-secondary rounded px-2 py-2 text-sm">
