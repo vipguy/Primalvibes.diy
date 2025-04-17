@@ -120,8 +120,23 @@ export default function About() {
             href="https://fireproof.storage"
             target="_blank"
             className="text-blue-600 hover:underline dark:text-blue-400"
-          ></a>
-          Fireproof
+          >
+            Fireproof
+          </a>
+          {' · '}
+          <a 
+            href="/legal/privacy"
+            className="text-blue-600 hover:underline dark:text-blue-400"
+          >
+            Privacy Policy
+          </a>
+          {' · '}
+          <a 
+            href="/legal/tos"
+            className="text-blue-600 hover:underline dark:text-blue-400"
+          >
+            Terms of Service
+          </a>
         </p>
       </div>
     </SimpleAppLayout>
