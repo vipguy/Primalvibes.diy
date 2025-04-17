@@ -16,6 +16,8 @@ import CookieBanner from './components/CookieBanner';
 import { CookieConsentProvider } from './context/CookieConsentContext';
 
 export const links: Route.LinksFunction = () => [
+  { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+  { rel: 'alternate icon', href: '/favicon.ico' },
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
   {
     rel: 'preconnect',
