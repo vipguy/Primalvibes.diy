@@ -2,7 +2,9 @@
  * Utilities for publishing apps to the server
  */
 
+import { fireproof } from 'use-fireproof';
 import { normalizeComponentExports } from './normalizeComponentExports';
+import { getSessionDatabaseName } from './databaseManager';
 
 /**
  * Transform bare import statements to use esm.sh URLs
@@ -32,16 +34,69 @@ function transformImports(code: string): string {
 export async function publishApp({
   sessionId,
   code,
+  title,
   updatePublishedUrl,
 }: {
   sessionId?: string;
   code: string;
+  title?: string;
   updatePublishedUrl?: (url: string) => Promise<void>;
 }): Promise<string | undefined> {
   try {
     if (!code || !sessionId) {
       console.error('Code or sessionId missing for publishing');
       return undefined;
+    }
+
+    // Get the session database to retrieve screenshot and metadata
+    const sessionDb = fireproof(getSessionDatabaseName(sessionId));
+
+    // Try to get the vibe document which might contain remixOf information
+    let remixOf = null;
+    try {
+      const vibeDoc = (await sessionDb.get('vibe')) as any;
+      if (vibeDoc && vibeDoc.remixOf) {
+        remixOf = vibeDoc.remixOf;
+      }
+    } catch (error) {
+      // No vibe doc or no remixOf property, which is fine
+    }
+
+    // Query for the most recent screenshot document
+    const result = await sessionDb.query('type', {
+      key: 'screenshot',
+      includeDocs: true,
+      descending: true,
+      limit: 1,
+    });
+
+    // Prepare screenshot data for inclusion in the payload
+    let screenshotBase64 = null;
+
+    // Check if we have a screenshot document
+    if (result.rows.length > 0) {
+      const screenshotDoc = result.rows[0].doc as any; // Cast to any to handle Fireproof types
+
+      // Check if the screenshot document has a file in _files.screenshot
+      if (screenshotDoc._files && screenshotDoc._files.screenshot) {
+        try {
+          // Get the File object using the file() method - Fireproof specific API
+          const screenshotFile = await (screenshotDoc._files.screenshot as any).file();
+
+          // Read the file as a buffer using FileReader
+          const buffer = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(screenshotFile); // Read as base64 data URL
+          });
+
+          // Extract the base64 part of the data URL
+          screenshotBase64 = buffer.split(',')[1];
+        } catch (err) {
+          console.error('Error processing screenshot file:', err);
+        }
+      }
     }
 
     // First, normalize the code to handle different line endings and whitespace
@@ -59,7 +114,11 @@ export async function publishApp({
       },
       body: JSON.stringify({
         chatId: sessionId,
+        raw: code,
         code: transformedCode,
+        title,
+        remixOf, // Include information about the original app if this is a remix
+        screenshot: screenshotBase64, // Include the base64 screenshot if available
       }),
     });
 
@@ -77,7 +136,6 @@ export async function publishApp({
         await updatePublishedUrl(appUrl);
       }
 
-      console.log('App published successfully');
       return appUrl;
     }
 
