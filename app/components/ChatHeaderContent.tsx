@@ -32,16 +32,16 @@ function ChatHeaderContent({
       <div className="text-light-primary dark:text-dark-primary text-center text-sm">
         {remixOf ? (
           <>
-            {title} (
-            <a 
+            
+            <a
               href={`https://${remixOf}.vibecode.garden/`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-accent-02-light dark:text-accent-02-dark hover:underline"
             >
-              remixed from {remixOf}
+              🔀
             </a>
-            )
+            {" "}  {title}
           </>
         ) : (
           title

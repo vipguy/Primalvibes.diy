@@ -5,6 +5,7 @@ import type {
   AiChatMessageDocument,
   SessionDocument,
   UserChatMessageDocument,
+  VibeDocument,
 } from '../types/chat';
 import { getSessionDatabaseName } from '../utils/databaseManager';
 
@@ -73,11 +74,16 @@ export function useSession(routedSessionId?: string) {
       await mainDatabase.put(session);
       mergeSession({ title });
 
-      // Also write a document with {_id: "vibe", title} to the session database
-      await sessionDatabase.put({
-        _id: 'vibe',
-        title,
-      });
+      const currentVibeDoc = await sessionDatabase.get<VibeDocument>('vibe').catch(() => null);
+      if (currentVibeDoc) {
+        currentVibeDoc.title = title;
+        await sessionDatabase.put(currentVibeDoc);
+      } else {
+        await sessionDatabase.put({
+          _id: 'vibe',
+          title,
+        });
+      }
     },
     [mainDatabase, mergeSession, session, sessionDatabase]
   );
