@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useSession } from '../hooks/useSession';
 import { encodeTitle } from '~/components/SessionSidebar/utils';
+import type { VibeDocument } from '~/types/chat';
 
 export function meta() {
   return [
@@ -56,6 +57,11 @@ export default function Remix() {
         // Update the session title
         await updateTitle(sessionTitle);
         console.log('Session created:', session);
+        // get the vibe doc from session database
+        const vibeDoc = await sessionDatabase.get<VibeDocument>('vibe');
+        console.log('Vibe doc:', vibeDoc);
+        vibeDoc.remixOf = appName;
+        await sessionDatabase.put(vibeDoc);
 
         // Create and save user message directly with deterministic ID
         const userMessage = {

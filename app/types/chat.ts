@@ -2,6 +2,13 @@ import type { DocTypes } from 'use-fireproof';
 import type { GroupedSession } from '../hooks/sidebar/useSessionList';
 import type { RuntimeError } from '../hooks/useRuntimeErrors';
 
+// ===== Vibe Document Type =====
+export interface VibeDocument {
+  _id: 'vibe';
+  title: string;
+  remixOf: string;
+}
+
 // ===== Content Segment Types =====
 export type Segment = {
   type: 'markdown' | 'code';
@@ -123,6 +130,7 @@ export interface ChatState {
   needsNewKey?: boolean;
   setNeedsNewKey: (value: boolean) => void;
   needsLogin?: boolean;
+  vibeDoc?: VibeDocument;
 
   // Error tracking
   immediateErrors: RuntimeError[];

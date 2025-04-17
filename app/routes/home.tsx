@@ -230,6 +230,7 @@ export default function UnifiedSession() {
         fullWidthChat={shouldUseFullWidthChat}
         headerLeft={
           <ChatHeaderContent
+            remixOf={chatState.vibeDoc?.remixOf}
             onOpenSidebar={openSidebar}
             isStreaming={chatState.isStreaming}
             codeReady={chatState.codeReady}

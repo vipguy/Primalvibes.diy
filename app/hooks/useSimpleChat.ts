@@ -17,6 +17,8 @@ import { useSystemPromptManager } from './useSystemPromptManager';
 import { useMessageSelection } from './useMessageSelection';
 import { useThrottledUpdates } from './useThrottledUpdates';
 
+import type { VibeDocument } from '../types/chat';
+
 // Constants
 const CODING_MODEL = 'anthropic/claude-3.7-sonnet';
 const TITLE_MODEL = 'google/gemini-2.0-flash-lite-001';
@@ -51,6 +53,24 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     mainDatabase,
     aiMessage,
   } = useSession(sessionId);
+
+  const [vibeDoc, setVibeDoc] = useState<VibeDocument | undefined>(undefined);
+
+  // Get vibe document
+  useEffect(() => {
+    if (!sessionDatabase) return;
+    sessionDatabase
+      .get<VibeDocument>('vibe')
+      .then((doc) => {
+        if (doc) {
+          console.log('Vibe document found:', doc);
+          setVibeDoc(doc);
+        }
+      })
+      .catch((err) => {
+        // thats ok
+      });
+  }, [sessionDatabase]);
 
   // Function to save errors as system messages to the session database
   const saveErrorAsSystemMessage = useCallback(
@@ -435,6 +455,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
 
   return {
     sessionId: session._id,
+    vibeDoc,
     addScreenshot,
     docs: messages,
     setSelectedResponseId,

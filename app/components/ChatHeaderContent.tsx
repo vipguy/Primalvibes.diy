@@ -6,6 +6,7 @@ interface ChatHeaderContentProps {
   title: string;
   isStreaming: boolean;
   codeReady: boolean;
+  remixOf?: string;
 }
 
 function ChatHeaderContent({
@@ -13,7 +14,9 @@ function ChatHeaderContent({
   title,
   isStreaming,
   codeReady,
+  remixOf,
 }: ChatHeaderContentProps) {
+  console.log('ChatHeaderContent props:', { remixOf });
   return (
     <div className="flex h-full w-full items-center justify-between p-2 py-4">
       <div className="flex items-center">
@@ -26,7 +29,24 @@ function ChatHeaderContent({
           <MenuIcon />
         </button>
       </div>
-      <div className="text-light-primary dark:text-dark-primary text-center text-sm">{title}</div>
+      <div className="text-light-primary dark:text-dark-primary text-center text-sm">
+        {remixOf ? (
+          <>
+            {title} (
+            <a 
+              href={`https://${remixOf}.vibecode.garden/`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-accent-02-light dark:text-accent-02-dark hover:underline"
+            >
+              remixed from {remixOf}
+            </a>
+            )
+          </>
+        ) : (
+          title
+        )}
+      </div>
 
       {(codeReady || isStreaming || title) && (
         <div className="relative px-2">
@@ -53,6 +73,7 @@ function ChatHeaderContent({
 export default memo(ChatHeaderContent, (prevProps, nextProps) => {
   // Only re-render if title or onOpenSidebar changes
   return (
+    prevProps.remixOf === nextProps.remixOf &&
     prevProps.onOpenSidebar === nextProps.onOpenSidebar &&
     prevProps.title === nextProps.title &&
     prevProps.isStreaming === nextProps.isStreaming &&
