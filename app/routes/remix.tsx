@@ -117,77 +117,83 @@ export default function Remix() {
 
   // TV Static Canvas Effect
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>();
-  
+  const animationRef = useRef<number | null>(null);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    
+
     // Set canvas to full window size
     function resizeCanvas() {
       if (!canvas || !ctx) return;
-      
+
       const dpr = window.devicePixelRatio || 1;
       canvas.width = window.innerWidth * dpr;
       canvas.height = window.innerHeight * dpr;
       ctx.scale(dpr, dpr);
-      
+
       // Reset canvas size in CSS
       canvas.style.width = window.innerWidth + 'px';
       canvas.style.height = window.innerHeight + 'px';
     }
-    
+
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
-    
+
     // Create off-screen buffer
     const scale = 0.25; // 25% of screen resolution for performance
     const staticBuffer = document.createElement('canvas');
     staticBuffer.width = canvas.width * scale;
     staticBuffer.height = canvas.height * scale;
     const staticCtx = staticBuffer.getContext('2d');
-    
+
     if (!staticCtx) return;
-    
+
     // Generate the static pattern
     function generateStatic() {
       if (!staticCtx) return;
-      
+
       const imgData = staticCtx.createImageData(staticBuffer.width, staticBuffer.height);
       const data = imgData.data;
-      
+
       for (let i = 0; i < data.length; i += 4) {
         // Random grayscale value
         const val = Math.floor(Math.random() * 256);
-        data[i] = val;     // Red
-        data[i+1] = val;   // Green
-        data[i+2] = val;   // Blue
-        data[i+3] = 255;   // Alpha
+        data[i] = val; // Red
+        data[i + 1] = val; // Green
+        data[i + 2] = val; // Blue
+        data[i + 3] = 255; // Alpha
       }
-      
+
       staticCtx.putImageData(imgData, 0, 0);
     }
-    
+
     // Animation loop
     function render() {
       if (!ctx || !canvas) return;
-      
+
       generateStatic();
-      
+
       ctx.drawImage(
-        staticBuffer, 
-        0, 0, staticBuffer.width, staticBuffer.height,
-        0, 0, canvas.width / (window.devicePixelRatio || 1), canvas.height / (window.devicePixelRatio || 1)
+        staticBuffer,
+        0,
+        0,
+        staticBuffer.width,
+        staticBuffer.height,
+        0,
+        0,
+        canvas.width / (window.devicePixelRatio || 1),
+        canvas.height / (window.devicePixelRatio || 1)
       );
-      
+
       animationRef.current = requestAnimationFrame(render);
     }
-    
+
     render();
-    
+
     // Cleanup
     return () => {
       window.removeEventListener('resize', resizeCanvas);
@@ -206,18 +212,20 @@ export default function Remix() {
         className="absolute inset-0 z-0"
         style={{ filter: 'brightness(0.5) contrast(1.2)' }}
       />
-      
+
       {/* Content Container */}
       <div className="relative z-10">
         {isLoading ? (
-          <div className="text-center backdrop-blur-md bg-black/40 p-8 rounded-xl shadow-2xl border border-white/20">
-            <div className="text-4xl font-bold text-white mb-4 tracking-wider">
+          <div className="rounded-xl border border-white/20 bg-black/40 p-8 text-center shadow-2xl backdrop-blur-md">
+            <div className="mb-4 text-4xl font-bold tracking-wider text-white">
               {appDomain ? `REMIXING ${appDomain.toUpperCase()}` : 'LOADING...'}
             </div>
-            <div className="mt-6 h-3 w-64 overflow-hidden rounded-full bg-gray-700 relative">
-              <div className="h-full animate-pulse bg-green-500 absolute top-0 left-0 right-0 glow-effect"></div>
+            <div className="relative mt-6 h-3 w-64 overflow-hidden rounded-full bg-gray-700">
+              <div className="glow-effect absolute top-0 right-0 left-0 h-full animate-pulse bg-green-500"></div>
             </div>
-            <style dangerouslySetInnerHTML={{ __html: `
+            <style
+              dangerouslySetInnerHTML={{
+                __html: `
               @keyframes glow {
                 0%, 100% { box-shadow: 0 0 10px 2px rgba(74, 222, 128, 0.6); }
                 50% { box-shadow: 0 0 20px 5px rgba(74, 222, 128, 0.8); }
@@ -225,15 +233,17 @@ export default function Remix() {
               .glow-effect {
                 animation: glow 1.5s ease-in-out infinite;
               }
-            `}} />
+            `,
+              }}
+            />
           </div>
         ) : error ? (
-          <div className="backdrop-blur-md bg-black/40 p-8 rounded-xl shadow-2xl border border-red-500/40 text-center">
-            <div className="text-3xl font-bold text-red-500 mb-4">TRANSMISSION ERROR</div>
-            <div className="mt-2 text-white text-lg">{error}</div>
+          <div className="rounded-xl border border-red-500/40 bg-black/40 p-8 text-center shadow-2xl backdrop-blur-md">
+            <div className="mb-4 text-3xl font-bold text-red-500">TRANSMISSION ERROR</div>
+            <div className="mt-2 text-lg text-white">{error}</div>
             <button
               onClick={() => navigate('/')}
-              className="mt-6 rounded-md border border-white/30 bg-white/10 px-6 py-3 text-white hover:bg-white/20 transition-all duration-300 text-lg font-medium"
+              className="mt-6 rounded-md border border-white/30 bg-white/10 px-6 py-3 text-lg font-medium text-white transition-all duration-300 hover:bg-white/20"
             >
               Return to Base
             </button>
