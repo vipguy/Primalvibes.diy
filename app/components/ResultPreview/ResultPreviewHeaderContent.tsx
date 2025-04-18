@@ -153,11 +153,15 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
         return;
       }
       let prompt = messages[0].text;
-      if (messages.length > 2) {
-        if (messages[0]._id === '0001-user-first') {
-          prompt = messages[2].text;
+
+      const userMessages = messages.filter((message) => message.type === 'user');
+
+      if (userMessages.length > 1) {
+        if (userMessages[0]._id === '0001-user-first') {
+          prompt = userMessages[1].text;
         }
       }
+      console.log('Publishing app with prompt:', prompt, title, messages);
 
       const appUrl = await publishApp({
         sessionId,
