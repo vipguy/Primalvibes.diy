@@ -36,12 +36,14 @@ export async function publishApp({
   code,
   title,
   userId,
+  prompt,
   updatePublishedUrl,
 }: {
   sessionId?: string;
   code: string;
   title?: string;
   userId: string;
+  prompt?: string;
   updatePublishedUrl?: (url: string) => Promise<void>;
 }): Promise<string | undefined> {
   try {
@@ -118,6 +120,7 @@ export async function publishApp({
         chatId: sessionId,
         userId,
         raw: code,
+        prompt,
         code: transformedCode,
         title,
         remixOf, // Include information about the original app if this is a remix

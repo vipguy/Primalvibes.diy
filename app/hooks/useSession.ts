@@ -6,6 +6,7 @@ import type {
   SessionDocument,
   UserChatMessageDocument,
   VibeDocument,
+  ChatMessageDocument,
 } from '../types/chat';
 import { getSessionDatabaseName } from '../utils/databaseManager';
 
@@ -64,7 +65,9 @@ export function useSession(routedSessionId?: string) {
   });
 
   // Query messages from the session-specific database
-  const { docs } = useSessionLiveQuery('session_id', { key: session._id });
+  const { docs } = useSessionLiveQuery('session_id', { key: session._id }) as {
+    docs: ChatMessageDocument[];
+  };
 
   // Update session title (in main database and session database)
   const updateTitle = useCallback(

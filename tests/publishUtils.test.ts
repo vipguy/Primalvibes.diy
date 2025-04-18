@@ -96,12 +96,16 @@ describe('publishApp', () => {
     const testCode = 'const App = () => <div>Hello World</div>; export default App;';
     const testTitle = 'Remixed Test App';
     const updatePublishedUrl = vi.fn();
+    const userId = 'test-user-id';
+    const testPrompt = 'Create a hello world app';
 
     // Act: Call the publishApp function
     await publishApp({
       sessionId,
       code: testCode,
       title: testTitle,
+      userId,
+      prompt: testPrompt,
       updatePublishedUrl,
     });
 
@@ -132,6 +136,8 @@ describe('publishApp', () => {
       sessionId,
       code: testCode,
       title: testTitle,
+      userId: 'test-user-id',
+      prompt: 'Create an original app',
     });
 
     // Assert: Check that fetch was called with null remixOf
@@ -153,6 +159,8 @@ describe('publishApp', () => {
     await publishApp({
       sessionId,
       code: testCode,
+      userId: 'test-user-id',
+      prompt: 'Create an app with screenshot',
     });
 
     // Assert: Check that the screenshot was included

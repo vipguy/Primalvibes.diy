@@ -58,7 +58,7 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
   const title = propTitle || urlView;
 
   // Use the session hook to get and update session data
-  const { session, updatePublishedUrl } = useSession(sessionId);
+  const { session, docs: messages, updatePublishedUrl } = useSession(sessionId);
 
   // Initialize publishedAppUrl from session data if available
   const [publishedAppUrl, setPublishedAppUrl] = useState<string | undefined>(session.publishedUrl);
@@ -153,6 +153,7 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
         sessionId,
         code,
         title,
+        prompt: messages[0].text,
         userId: userInfo.userId,
         updatePublishedUrl,
       });
