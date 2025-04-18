@@ -3,8 +3,6 @@ import { useNavigate, useParams } from 'react-router';
 import { useSession } from '../hooks/useSession';
 import { encodeTitle } from '~/components/SessionSidebar/utils';
 import type { VibeDocument } from '~/types/chat';
-import { generateTitle } from '~/utils/titleGenerator';
-import { parseContent } from '~/utils/segmentParser';
 import { useApiKey } from '~/hooks/useApiKey';
 import { useAuth } from '~/hooks/useAuth';
 
@@ -100,18 +98,18 @@ export default function Remix() {
 
         // Generate a better title based on the code content
         let finalTitle = `Remix of ${appName}`;
-        try {
-          // Parse the content to get segments
-          const { segments } = parseContent(aiMessage.text);
+        // try {
+        //   // Parse the content to get segments
+        //   const { segments } = parseContent(aiMessage.text);
 
-          // Use the title generation model from useSimpleChat
-          const titleModel = 'meta-llama/llama-3.1-8b-instruct';
+        //   // Use the title generation model from useSimpleChat
+        //   const titleModel = 'meta-llama/llama-3.1-8b-instruct';
 
-          finalTitle = await generateTitle(segments, titleModel, apiKey);
-        } catch (titleError) {
-          console.error('Error generating title:', titleError);
-          // Keep the initial title if generation fails
-        }
+        //   finalTitle = await generateTitle(segments, titleModel, apiKey);
+        // } catch (titleError) {
+        //   console.error('Error generating title:', titleError);
+        //   // Keep the initial title if generation fails
+        // }
         await updateTitle(finalTitle);
 
         // Navigate to the chat session URL

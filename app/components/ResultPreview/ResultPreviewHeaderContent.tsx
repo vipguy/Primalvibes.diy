@@ -149,11 +149,21 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
   const handlePublish = async () => {
     if (!userInfo?.userId) return;
     try {
+      if (messages.length === 0) {
+        return;
+      }
+      let prompt = messages[0].text;
+      if (messages.length > 2) {
+        if (messages[0]._id === '0001-user-first') {
+          prompt = messages[2].text;
+        }
+      }
+
       const appUrl = await publishApp({
         sessionId,
         code,
         title,
-        prompt: messages[0].text,
+        prompt,
         userId: userInfo.userId,
         updatePublishedUrl,
       });
