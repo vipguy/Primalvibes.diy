@@ -142,15 +142,18 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
   const handleLogout = () => {
     localStorage.removeItem('auth_token');
     setIsUserAuthenticated(false);
+    setUserInfo(null);
     setIsMenuOpen(false);
   };
 
   const handlePublish = async () => {
+    if (!userInfo?.userId) return;
     try {
       const appUrl = await publishApp({
         sessionId,
         code,
         title,
+        userId: userInfo.userId,
         updatePublishedUrl,
       });
 

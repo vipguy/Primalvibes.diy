@@ -35,11 +35,13 @@ export async function publishApp({
   sessionId,
   code,
   title,
+  userId,
   updatePublishedUrl,
 }: {
   sessionId?: string;
   code: string;
   title?: string;
+  userId: string;
   updatePublishedUrl?: (url: string) => Promise<void>;
 }): Promise<string | undefined> {
   try {
@@ -114,6 +116,7 @@ export async function publishApp({
       },
       body: JSON.stringify({
         chatId: sessionId,
+        userId,
         raw: code,
         code: transformedCode,
         title,
