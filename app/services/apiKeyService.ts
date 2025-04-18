@@ -18,6 +18,7 @@ export async function createKeyViaEdgeFunction(userId: string | undefined): Prom
   created_at: string;
   updated_at: string;
 }> {
+  console.log('Creating new key for user:', userId);
   const response = await fetch('/api/callai/create-key', {
     method: 'POST',
     headers: {

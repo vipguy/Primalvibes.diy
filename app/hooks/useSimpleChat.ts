@@ -21,7 +21,7 @@ import type { VibeDocument } from '../types/chat';
 
 // Constants
 const CODING_MODEL = 'anthropic/claude-3.7-sonnet';
-const TITLE_MODEL = 'google/gemini-2.0-flash-lite-001';
+const TITLE_MODEL = 'meta-llama/llama-3.1-8b-instruct';
 
 /**
  * Simplified chat hook that focuses on data-driven state management

@@ -6,6 +6,7 @@ import type { VibeDocument } from '~/types/chat';
 import { generateTitle } from '~/utils/titleGenerator';
 import { parseContent } from '~/utils/segmentParser';
 import { useApiKey } from '~/hooks/useApiKey';
+import { useAuth } from '~/hooks/useAuth';
 
 export function meta() {
   return [
@@ -29,17 +30,19 @@ export default function Remix() {
     updateTitle,
   } = useSession(undefined);
 
+  const { userId } = useAuth();
+
   // Get API key for title generation
-  const { apiKey } = useApiKey();
+  const { apiKey } = useApiKey(userId);
 
   // Effect to get vibe slug from path parameter and fetch code
   useEffect(() => {
     // Log API key status for debugging
     if (!apiKey) {
-      console.log('No API key available for title generation');
+      return;
     }
 
-    async function processVibeSlug() {
+    async function processVibeSlug(apiKey: string) {
       try {
         // Check if we have a vibe slug in the URL path
         if (!vibeSlug) {
@@ -62,14 +65,10 @@ export default function Remix() {
 
         const codeContent = await response.text();
 
-        // We'll generate a better title soon, but start with something sensible
-        const initialTitle = `Remix of ${appName}`;
-        await updateTitle(initialTitle);
-        // get the vibe doc from session database
-        const vibeDoc = await sessionDatabase.get<VibeDocument>('vibe').catch(() => null);
-        if (!vibeDoc) {
-          return;
-        }
+        const vibeDoc = await sessionDatabase
+          .get<VibeDocument>('vibe')
+          .catch(() => ({ _id: 'vibe' }) as VibeDocument);
+
         vibeDoc.remixOf = appName;
         await sessionDatabase.put(vibeDoc);
 
@@ -100,31 +99,23 @@ export default function Remix() {
         await sessionDatabase.put(aiMessage);
 
         // Generate a better title based on the code content
+        let finalTitle = `Remix of ${appName}`;
         try {
           // Parse the content to get segments
           const { segments } = parseContent(aiMessage.text);
 
           // Use the title generation model from useSimpleChat
-          const titleModel = 'google/gemini-2.0-flash-lite-001';
+          const titleModel = 'meta-llama/llama-3.1-8b-instruct';
 
-          // Skip title generation if no API key is available
-          if (!apiKey) {
-            return;
-          }
-
-          // Generate a title using the same function as useSimpleChat
-          const generatedTitle = await generateTitle(segments, titleModel, apiKey);
-
-          // Prefix with 'Remix of' to make it clear this is a remix
-          // const finalTitle = `Remix: ${generatedTitle} (from ${appName})`;
-          await updateTitle(generatedTitle);
+          finalTitle = await generateTitle(segments, titleModel, apiKey);
         } catch (titleError) {
           console.error('Error generating title:', titleError);
           // Keep the initial title if generation fails
         }
+        await updateTitle(finalTitle);
 
         // Navigate to the chat session URL
-        navigate(`/chat/${session._id}/${encodeTitle(session.title || initialTitle)}`);
+        navigate(`/chat/${session._id}/${encodeTitle(session.title || '')}`);
       } catch (error) {
         console.error('Error in remix process:', error);
         setError(error instanceof Error ? error.message : 'Unknown error occurred');
@@ -133,7 +124,8 @@ export default function Remix() {
     }
 
     // Run the process
-    processVibeSlug();
+    console.log('Running processVibeSlug', apiKey);
+    processVibeSlug(apiKey);
   }, [apiKey]); // Add apiKey to dependency array so effect re-runs if key becomes available
 
   // TV Static Canvas Effect
