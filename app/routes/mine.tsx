@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SimpleAppLayout from '../components/SimpleAppLayout';
-import { HomeIcon } from '../components/SessionSidebar/HomeIcon';
 import { StarIcon } from '../components/SessionSidebar/StarIcon';
 import { ImgFile } from '../components/SessionSidebar/ImgFile';
 import { useSession } from '../hooks/useSession';
@@ -24,11 +23,11 @@ export default function MyVibesRoute(): ReactElement {
   const { vibes, isLoading, deleteVibe, toggleFavorite } = useVibes();
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
-  
+
   // Filter vibes based on the showOnlyFavorites toggle
   const filteredVibes = useMemo(() => {
     if (showOnlyFavorites) {
-      return vibes.filter(vibe => vibe.favorite);
+      return vibes.filter((vibe) => vibe.favorite);
     }
     return vibes;
   }, [vibes, showOnlyFavorites]);
@@ -95,7 +94,7 @@ export default function MyVibesRoute(): ReactElement {
       headerLeft={
         <div className="flex items-center">
           <a href="/" className="flex items-center px-2 py-1 hover:opacity-80" title="Home">
-            <VibesDIYLogo width={100}/>
+            <VibesDIYLogo width={100} />
           </a>
         </div>
       }
@@ -114,14 +113,14 @@ export default function MyVibesRoute(): ReactElement {
               <button
                 onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
                 className="flex items-center gap-2 rounded-md px-3 py-2 focus:outline-none"
-                title={showOnlyFavorites ? "Show all vibes" : "Show favorites only"}
-                aria-label={showOnlyFavorites ? "Show all vibes" : "Show favorites only"}
+                title={showOnlyFavorites ? 'Show all vibes' : 'Show favorites only'}
+                aria-label={showOnlyFavorites ? 'Show all vibes' : 'Show favorites only'}
               >
-                <StarIcon 
+                <StarIcon
                   filled={showOnlyFavorites}
-                  className={`h-5 w-5 transition-colors duration-300 ${showOnlyFavorites ? 'text-yellow-500' : 'text-accent-01'} hover:text-yellow-400`} 
+                  className={`h-5 w-5 transition-colors duration-300 ${showOnlyFavorites ? 'text-yellow-500' : 'text-accent-01'} hover:text-yellow-400`}
                 />
-                <span>{showOnlyFavorites ? "All Vibes" : "Favorites Only"}</span>
+                <span>{showOnlyFavorites ? 'All Vibes' : 'Favorites Only'}</span>
               </button>
             </div>
           </div>
@@ -133,8 +132,8 @@ export default function MyVibesRoute(): ReactElement {
           ) : filteredVibes.length === 0 ? (
             <div className="border-light-decorative-01 dark:border-dark-decorative-01 rounded-md border py-8 text-center">
               <p className="mb-4 text-lg">
-                {showOnlyFavorites 
-                  ? "You don't have any favorite vibes yet" 
+                {showOnlyFavorites
+                  ? "You don't have any favorite vibes yet"
                   : "You don't have any vibes yet"}
               </p>
               <button
