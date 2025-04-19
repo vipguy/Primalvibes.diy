@@ -21,7 +21,8 @@ export async function streamAI(
   messageHistory: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>,
   userMessage: string,
   onContent: (content: string) => void,
-  apiKey: string
+  apiKey: string,
+  userId?: string
 ): Promise<string> {
   // Stream process starts
 
@@ -36,6 +37,7 @@ export async function streamAI(
     apiKey: apiKey,
     model: model,
     stream: true,
+    max_tokens: userId ? 150000 : 75000,
     debug: false, // Disable debugging logs
     headers: {
       'HTTP-Referer': 'https://vibes.diy',

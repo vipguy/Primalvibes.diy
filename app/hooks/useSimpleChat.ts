@@ -254,7 +254,8 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
             messageHistory,
             promptText,
             (content) => throttledMergeAiMessage(content),
-            apiKey || ''
+            apiKey || '',
+            userId
           );
         })
         .then(async (finalContent) => {

@@ -137,10 +137,11 @@ export function useViewState(props: {
   // If user has explicitly navigated to a view (indicated by URL path), respect that choice
   // Otherwise, if preview is ready, prioritize showing it
   // Finally, during streaming on desktop (without explicit navigation), show code view
-  const hasExplicitViewInURL = location.pathname.endsWith('/app') || 
-                              location.pathname.endsWith('/code') || 
-                              location.pathname.endsWith('/data');
-  
+  const hasExplicitViewInURL =
+    location.pathname.endsWith('/app') ||
+    location.pathname.endsWith('/code') ||
+    location.pathname.endsWith('/data');
+
   const displayView = hasExplicitViewInURL
     ? currentView // Respect user's explicit view choice from URL
     : props.previewReady

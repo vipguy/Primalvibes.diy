@@ -219,7 +219,7 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
                     key={viewType}
                     type="button"
                     disabled={true}
-                    className="text-light-primary/50 dark:text-dark-primary/50 flex cursor-not-allowed !pointer-events-none items-center justify-center space-x-1 rounded px-3 py-1.5 text-xs font-medium opacity-50 transition-colors sm:space-x-1.5 sm:px-4 sm:text-sm"
+                    className="text-light-primary/50 dark:text-dark-primary/50 !pointer-events-none flex cursor-not-allowed items-center justify-center space-x-1 rounded px-3 py-1.5 text-xs font-medium opacity-50 transition-colors sm:space-x-1.5 sm:px-4 sm:text-sm"
                     aria-label="Data tab unavailable during streaming"
                     title="Data tab available after streaming completes"
                   >
@@ -286,14 +286,14 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
                     }
                   }}
                   className={`flex items-center justify-center space-x-1 rounded px-3 py-1.5 text-xs font-medium transition-colors sm:space-x-1.5 sm:px-4 sm:text-sm ${
-                    isActive 
+                    isActive
                       ? 'bg-light-background-00 dark:bg-dark-background-00 text-light-primary dark:text-dark-primary shadow-sm'
                       : `text-light-primary/90 dark:text-dark-primary/90 ${
                           control.enabled
                             ? 'hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 hover:text-light-primary dark:hover:text-dark-primary'
                             : 'opacity-50'
                         }`
-                  } ${!control.enabled ? 'cursor-not-allowed !pointer-events-none' : ''}`}
+                  } ${!control.enabled ? '!pointer-events-none cursor-not-allowed' : ''}`}
                   disabled={!control.enabled}
                   aria-label={`Switch to ${control.label}`}
                 >
