@@ -4,9 +4,10 @@
   functions = "netlify/functions"
 
 [dev]
-  command = "react-router dev"
-  targetPort = 5173
+  command = "react-router dev --port 5175"
+  targetPort = 5175
   framework = "#custom"
+  port = 8889
 
 [[redirects]]
   from = "/*"
@@ -44,12 +45,12 @@
 
 # Image files - immutable and long cache
 [[headers]]
-  for = "/assets/*.{png,jpg,jpeg,gif,webp,svg,ico}"
+  for = "/assets/*.(png|jpg|jpeg|gif|webp|svg|ico)"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
 # Fonts - immutable and long cache
 [[headers]]
-  for = "/assets/*.{woff,woff2,ttf,otf,eot}"
+  for = "/assets/*.(woff|woff2|ttf|otf|eot)"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"

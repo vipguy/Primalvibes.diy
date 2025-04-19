@@ -21,12 +21,7 @@ export default function Remix() {
   const [appDomain, setAppDomain] = useState<string | null>(null);
 
   // Get database instances from hooks
-  const {
-    session,
-    // mainDatabase,
-    sessionDatabase,
-    updateTitle,
-  } = useSession(undefined);
+  const { session, sessionDatabase, updateTitle } = useSession(undefined);
 
   const { userId } = useAuth();
 

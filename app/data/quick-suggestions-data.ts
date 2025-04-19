@@ -49,7 +49,7 @@ export const quickSuggestions: Suggestion[] = [
   // },
   {
     label: 'Timer',
-    text: 'Create a pomodoro timer app with multiple timers, work/break intervals, and session tracking.',
+    text: 'Create a pomodoro timer app with multiple timers, work/break intervals, and session tracking. Save time start times so I can refresh the page with running timers.',
   },
   {
     label: 'Poetry',
