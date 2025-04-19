@@ -134,13 +134,20 @@ export function useViewState(props: {
     (props.code && props.code.length > 0) || (sessionId && sessionId.length > 0);
 
   // Determine what view should be displayed (may differ from URL-based currentView)
-  // If preview is ready, we prioritize showing it, even during streaming
-  // Otherwise, during streaming on desktop, we show code view
-  const displayView = props.previewReady
-    ? 'preview'
-    : props.isStreaming && !isMobileViewport()
-      ? 'code'
-      : currentView;
+  // If user has explicitly navigated to a view (indicated by URL path), respect that choice
+  // Otherwise, if preview is ready, prioritize showing it
+  // Finally, during streaming on desktop (without explicit navigation), show code view
+  const hasExplicitViewInURL = location.pathname.endsWith('/app') || 
+                              location.pathname.endsWith('/code') || 
+                              location.pathname.endsWith('/data');
+  
+  const displayView = hasExplicitViewInURL
+    ? currentView // Respect user's explicit view choice from URL
+    : props.previewReady
+      ? 'preview'
+      : props.isStreaming && !isMobileViewport()
+        ? 'code'
+        : currentView;
 
   return {
     currentView, // The view based on URL (for navigation)
