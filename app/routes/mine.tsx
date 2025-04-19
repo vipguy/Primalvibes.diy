@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SimpleAppLayout from '../components/SimpleAppLayout';
 import { HomeIcon } from '../components/SessionSidebar/HomeIcon';
+import { StarIcon } from '../components/SessionSidebar/StarIcon';
 import { ImgFile } from '../components/SessionSidebar/ImgFile';
 import { useSession } from '../hooks/useSession';
 import { useVibes } from '../hooks/useVibes';
 import type { ReactElement } from 'react';
+import VibesDIYLogo from '~/components/VibesDIYLogo';
 
 export function meta() {
   return [
@@ -19,7 +21,7 @@ export default function MyVibesRoute(): ReactElement {
   // We need to call useSession() to maintain context but don't need its values yet
   useSession();
   // Use our custom hook for vibes state management
-  const { vibes, isLoading, deleteVibe } = useVibes();
+  const { vibes, isLoading, deleteVibe, toggleFavorite } = useVibes();
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   // Handle deleting a vibe
@@ -72,13 +74,19 @@ export default function MyVibesRoute(): ReactElement {
     navigate(`/remix/${slug}`);
   };
 
+  // Handle toggling the favorite status
+  const handleToggleFavorite = async (vibeId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    await toggleFavorite(vibeId);
+  };
+
   return (
     <SimpleAppLayout
       headerLeft={
         <div className="flex items-center">
           <a href="/" className="flex items-center px-2 py-1 hover:opacity-80" title="Home">
-            <HomeIcon className="mr-2 h-6 w-6" />
-            <h1 className="text-xl font-semibold">Vibes DIY</h1>
+            <VibesDIYLogo width={100}/>
           </a>
         </div>
       }
@@ -86,10 +94,14 @@ export default function MyVibesRoute(): ReactElement {
       {/* Content goes here */}
       <div className="container mx-auto p-4">
         <div className="mb-6">
-          <h2 className="mb-4 text-2xl font-bold">My Vibes</h2>
-          <p className="text-accent-01 dark:text-accent-01 mb-6">
-            View and manage the vibes you've created
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="mb-4 text-2xl font-bold">My Vibes</h2>
+              <p className="text-accent-01 dark:text-accent-01 mb-6">
+                View and manage the vibes you've created
+              </p>
+            </div>
+          </div>
 
           {isLoading ? (
             <div className="flex justify-center py-8">
@@ -113,7 +125,16 @@ export default function MyVibesRoute(): ReactElement {
                   onClick={() => handleVibeClick(vibe.id)}
                   className="border-light-decorative-01 dark:border-dark-decorative-01 cursor-pointer rounded-md border p-4 transition-colors hover:border-blue-500"
                 >
-                  <h3 className="mb-1 text-lg font-medium">{vibe.title}</h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="mb-1 text-lg font-medium">{vibe.title}</h3>
+                    <button
+                      onClick={(e) => handleToggleFavorite(vibe.id, e)}
+                      className="text-accent-01 ml-2 hover:text-yellow-500 focus:outline-none"
+                      aria-label={vibe.favorite ? 'Remove from favorites' : 'Add to favorites'}
+                    >
+                      <StarIcon filled={vibe.favorite} />
+                    </button>
+                  </div>
                   {vibe.screenshot && (
                     <ImgFile
                       file={vibe.screenshot}

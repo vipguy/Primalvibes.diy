@@ -1,5 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { listLocalVibes, deleteVibeDatabase, type LocalVibe } from '../utils/vibeUtils';
+import {
+  listLocalVibes,
+  deleteVibeDatabase,
+  toggleVibeFavorite,
+  type LocalVibe,
+} from '../utils/vibeUtils';
 
 /**
  * Custom hook for managing vibes state
@@ -52,11 +57,39 @@ export function useVibes() {
     loadVibes();
   }, [loadVibes]);
 
+  // Function to toggle favorite status on a vibe
+  const toggleFavorite = useCallback(
+    async (vibeId: string) => {
+      try {
+        // Optimistically update UI by updating the favorite status in state
+        setVibes((currentVibes) =>
+          currentVibes.map((vibe) =>
+            vibe.id === vibeId ? { ...vibe, favorite: !vibe.favorite } : vibe
+          )
+        );
+
+        // Update the favorite status in the database
+        await toggleVibeFavorite(vibeId);
+
+        // We don't need to reload vibes since we've already updated the state optimistically
+        // But if you want to ensure DB and state are in sync, you could uncomment this:
+        // await loadVibes();
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error(String(err)));
+
+        // If toggling fails, reload vibes to restore correct state
+        await loadVibes();
+      }
+    },
+    [loadVibes]
+  );
+
   return {
     vibes,
     isLoading,
     error,
     loadVibes,
     deleteVibe,
+    toggleFavorite,
   };
 }

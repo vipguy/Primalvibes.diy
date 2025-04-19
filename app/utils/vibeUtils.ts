@@ -9,6 +9,7 @@ export interface LocalVibe {
   title: string;
   slug: string;
   created: string;
+  favorite?: boolean;
   screenshot?: {
     file: () => Promise<File>;
     type: string;
@@ -79,6 +80,7 @@ export async function listLocalVibes(): Promise<LocalVibe[]> {
             title: vibeDoc.title || 'Unnamed Vibe',
             slug: vibeDoc.remixOf || vibeId, // Use remixOf as the slug
             created: createdTimestamp,
+            favorite: vibeDoc.favorite || false,
             screenshot: screenshot,
           };
         }
@@ -108,6 +110,34 @@ export async function deleteVibeDatabase(vibeId: string): Promise<void> {
   try {
     const dbName = `fp.vibe-${vibeId}`;
     await indexedDB.deleteDatabase(dbName);
+  } catch (error) {
+    throw error;
+  }
+}
+
+/**
+ * Toggle favorite status for a vibe
+ * @param vibeId The ID of the vibe to toggle favorite status for
+ * @returns Promise that resolves to the updated vibe document
+ */
+export async function toggleVibeFavorite(vibeId: string): Promise<VibeDocument> {
+  try {
+    // Open the Fireproof database for this vibe
+    const db = fireproof('vibe-' + vibeId);
+
+    // Get the current vibe document
+    const vibeDoc = (await db.get('vibe')) as VibeDocument;
+
+    // Toggle the favorite status
+    const updatedVibeDoc = {
+      ...vibeDoc,
+      favorite: !vibeDoc.favorite,
+    };
+
+    // Save the updated document
+    await db.put(updatedVibeDoc);
+
+    return updatedVibeDoc;
   } catch (error) {
     throw error;
   }

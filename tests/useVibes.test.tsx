@@ -1,7 +1,7 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useVibes } from '../app/hooks/useVibes';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { deleteVibeDatabase, listLocalVibes } from '../app/utils/vibeUtils';
+import { deleteVibeDatabase, listLocalVibes, toggleVibeFavorite } from '../app/utils/vibeUtils';
 import type { LocalVibe } from '../app/utils/vibeUtils';
 
 // Mock the vibeUtils module
@@ -9,6 +9,7 @@ vi.mock('../app/utils/vibeUtils', () => {
   return {
     listLocalVibes: vi.fn(),
     deleteVibeDatabase: vi.fn(),
+    toggleVibeFavorite: vi.fn(),
   };
 });
 
@@ -20,6 +21,7 @@ describe('useVibes', () => {
       title: 'Test Vibe 1',
       slug: 'test-vibe-1',
       created: new Date('2025-04-18').toISOString(),
+      favorite: false,
       screenshot: {
         file: () => Promise.resolve(new File(['test'], 'screenshot.png', { type: 'image/png' })),
         type: 'image/png',
@@ -30,6 +32,7 @@ describe('useVibes', () => {
       title: 'Test Vibe 2',
       slug: 'test-vibe-2',
       created: new Date('2025-04-19').toISOString(),
+      favorite: true,
     },
   ];
 
@@ -38,6 +41,7 @@ describe('useVibes', () => {
     // Setup default mock behavior
     (listLocalVibes as any).mockResolvedValue(mockVibes);
     (deleteVibeDatabase as any).mockResolvedValue(undefined);
+    (toggleVibeFavorite as any).mockResolvedValue({ _id: 'vibe', favorite: true });
   });
 
   afterEach(() => {
@@ -147,6 +151,62 @@ describe('useVibes', () => {
     expect(deleteVibeDatabase).toHaveBeenCalledWith('test-vibe-1');
     expect(result.current.error).toBeDefined();
     // Skip checking the specific error message content to avoid test brittleness
+
+    // Should have called listLocalVibes again to restore the state
+    expect(listLocalVibes).toHaveBeenCalled();
+  });
+
+  it('should toggle favorite status and update state optimistically', async () => {
+    // Act - render hook
+    const { result } = renderHook(() => useVibes());
+
+    // Wait for the initial load
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    // Perform toggle favorite for the first vibe (initially false)
+    await act(async () => {
+      await result.current.toggleFavorite('test-vibe-1');
+    });
+
+    // Assert
+    expect(toggleVibeFavorite).toHaveBeenCalledWith('test-vibe-1');
+
+    // Check optimistic update - first vibe should now be favorited
+    expect(result.current.vibes[0].favorite).toBe(true);
+
+    // Second vibe should remain unchanged
+    expect(result.current.vibes[1].favorite).toBe(true);
+  });
+
+  it('should reload vibes if toggling favorite fails', async () => {
+    // Arrange
+    const toggleError = new Error('Failed to toggle favorite');
+    (toggleVibeFavorite as any).mockRejectedValueOnce(toggleError);
+
+    // Act - render hook
+    const { result } = renderHook(() => useVibes());
+
+    // Wait for the initial load
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    // Reset the listLocalVibes mock to track if it's called again
+    (listLocalVibes as any).mockClear();
+
+    // Perform toggle which will fail
+    await act(async () => {
+      try {
+        await result.current.toggleFavorite('test-vibe-1');
+      } catch (e) {
+        // Ignore the error, we'll check the hook state
+      }
+    });
+
+    // Wait for the error state to be set
+    await waitFor(() => expect(result.current.error).toBeDefined());
+
+    // Assert
+    expect(toggleVibeFavorite).toHaveBeenCalledWith('test-vibe-1');
+    expect(result.current.error).toBeDefined();
 
     // Should have called listLocalVibes again to restore the state
     expect(listLocalVibes).toHaveBeenCalled();
