@@ -96,7 +96,9 @@ export async function listLocalVibes(): Promise<LocalVibe[]> {
     // Wait for all promises to resolve and filter out nulls
     const results = await Promise.all(vibePromises);
     // Filter out null values and cast to LocalVibe[] to satisfy TypeScript
-    return results.filter((vibe) => vibe !== null) as LocalVibe[];
+    return results
+      .filter((vibe) => vibe !== null)
+      .sort((b, a) => new Date(a.created).getTime() - new Date(b.created).getTime()) as LocalVibe[];
   } catch (error) {
     // Return empty array if there's any error in the process
     return [];
