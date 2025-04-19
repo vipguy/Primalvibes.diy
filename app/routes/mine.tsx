@@ -7,7 +7,7 @@ import { useSession } from '../hooks/useSession';
 import { useVibes } from '../hooks/useVibes';
 import VibesDIYLogo from '../components/VibesDIYLogo';
 import type { ReactElement } from 'react';
-// import { useAuth } from '~/hooks/useAuth';
+import { useAuth } from '../hooks/useAuth';
 
 export function meta() {
   return [
@@ -21,7 +21,7 @@ export default function MyVibesRoute(): ReactElement {
   // We need to call useSession() to maintain context but don't need its values yet
   useSession();
 
-  // const { userId } = useAuth();
+  const { userId } = useAuth();
 
   // Use our custom hook for vibes state management
   const { vibes, isLoading, deleteVibe, toggleFavorite } = useVibes();
@@ -98,7 +98,7 @@ export default function MyVibesRoute(): ReactElement {
       headerLeft={
         <div className="flex items-center">
           <a href="/" className="flex items-center px-2 py-1 hover:opacity-80" title="Home">
-            <VibesDIYLogo width={100} />
+            <VibesDIYLogo width={100} className="pointer-events-none" />
           </a>
         </div>
       }
@@ -110,7 +110,13 @@ export default function MyVibesRoute(): ReactElement {
             <div>
               <h2 className="mb-4 text-2xl font-bold">My Vibes</h2>
               <p className="text-accent-01 dark:text-accent-01 mb-6">
-                View and manage the vibes you've created
+                Published and favorited vibes are listed on your{' '}
+                <a
+                  href={`/~${userId}`}
+                  className="text-light-primary dark:text-dark-primary hover:text-blue-500"
+                >
+                  vibespace
+                </a>
               </p>
             </div>
             <div className="flex items-center">
