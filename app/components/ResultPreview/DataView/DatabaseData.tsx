@@ -48,12 +48,42 @@ const DatabaseData: React.FC<{ dbName: string; sessionId: string }> = ({ dbName,
 
   // With the IndexedDB patch, we should now be able to use the original dbName
   // and the patch will handle the namespacing at the IndexedDB.open level
-  const { useAllDocs, database } = useFireproof(dbName);
+  const { database } = useFireproof(dbName);
 
-  // Always call hooks at the top level regardless of conditions
-  // In Fireproof, useLiveQuery returns docs and potentially other properties
-  const queryResult = useAllDocs();
-  const docs = queryResult?.docs || [];
+  const [docs, setDocs] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  // Fetch documents function - separated so it can be called manually if needed
+  const fetchDocs = async () => {
+    try {
+      setIsLoading(true);
+
+      // Try direct document access
+      const result = await database.allDocs({
+        includeDocs: true,
+      });
+
+      // Extract docs from the result based on Fireproof's API
+      const extractedDocs = result.rows
+        .filter((row) => row && ((row as any).doc || row.value))
+        .map((row) => (row as any).doc || row.value);
+
+      setDocs(extractedDocs);
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Initial data fetch is sufficient, users can reload page to refresh
+
+  // Initial fetch when database is ready
+  useEffect(() => {
+    console.log('Database ready effect triggered:', database?.name);
+    if (database && database.name) {
+      fetchDocs();
+    }
+  }, [database?.name]); // Only depend on database name to avoid dependency loops
 
   const headers = docs.length > 0 ? headersForDocs(docs) : [];
 
@@ -99,11 +129,24 @@ const DatabaseData: React.FC<{ dbName: string; sessionId: string }> = ({ dbName,
     </details>
   );
 
-  if (docs.length === 0) {
+  console.log('Render state:', { isLoading, docsLength: docs.length });
+
+  // Loading state UI
+  if (isLoading) {
     return (
       <div className="bg-light-decorative-00 dark:bg-dark-decorative-00 rounded-md p-4">
         <DbDebugInfo />
         <p>Loading data from {database.name}...</p>
+        <p className="mt-2 text-xs text-gray-500">Loading state: {String(isLoading)}</p>
+      </div>
+    );
+  }
+
+  if (docs.length === 0) {
+    return (
+      <div className="bg-light-decorative-00 dark:bg-dark-decorative-00 rounded-md p-4">
+        <DbDebugInfo />
+        <p>No data found in database {database.name}</p>
       </div>
     );
   }
@@ -111,6 +154,7 @@ const DatabaseData: React.FC<{ dbName: string; sessionId: string }> = ({ dbName,
   return (
     <div className="">
       <DbDebugInfo />
+
       <DynamicTable
         headers={headers}
         rows={docs}
