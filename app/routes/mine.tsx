@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SimpleAppLayout from '../components/SimpleAppLayout';
 import { HomeIcon } from '../components/SessionSidebar/HomeIcon';
@@ -6,8 +6,8 @@ import { StarIcon } from '../components/SessionSidebar/StarIcon';
 import { ImgFile } from '../components/SessionSidebar/ImgFile';
 import { useSession } from '../hooks/useSession';
 import { useVibes } from '../hooks/useVibes';
+import VibesDIYLogo from '../components/VibesDIYLogo';
 import type { ReactElement } from 'react';
-import VibesDIYLogo from '~/components/VibesDIYLogo';
 
 export function meta() {
   return [
@@ -23,6 +23,15 @@ export default function MyVibesRoute(): ReactElement {
   // Use our custom hook for vibes state management
   const { vibes, isLoading, deleteVibe, toggleFavorite } = useVibes();
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
+  
+  // Filter vibes based on the showOnlyFavorites toggle
+  const filteredVibes = useMemo(() => {
+    if (showOnlyFavorites) {
+      return vibes.filter(vibe => vibe.favorite);
+    }
+    return vibes;
+  }, [vibes, showOnlyFavorites]);
 
   // Handle deleting a vibe
   const handleDeleteClick = async (vibeId: string, e: React.MouseEvent) => {
@@ -101,15 +110,33 @@ export default function MyVibesRoute(): ReactElement {
                 View and manage the vibes you've created
               </p>
             </div>
+            <div className="flex items-center">
+              <button
+                onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
+                className="flex items-center gap-2 rounded-md px-3 py-2 focus:outline-none"
+                title={showOnlyFavorites ? "Show all vibes" : "Show favorites only"}
+                aria-label={showOnlyFavorites ? "Show all vibes" : "Show favorites only"}
+              >
+                <StarIcon 
+                  filled={showOnlyFavorites}
+                  className={`h-5 w-5 transition-colors duration-300 ${showOnlyFavorites ? 'text-yellow-500' : 'text-accent-01'} hover:text-yellow-400`} 
+                />
+                <span>{showOnlyFavorites ? "All Vibes" : "Favorites Only"}</span>
+              </button>
+            </div>
           </div>
 
           {isLoading ? (
             <div className="flex justify-center py-8">
               <div className="h-8 w-8 animate-spin rounded-full border-t-2 border-b-2 border-blue-500"></div>
             </div>
-          ) : vibes.length === 0 ? (
+          ) : filteredVibes.length === 0 ? (
             <div className="border-light-decorative-01 dark:border-dark-decorative-01 rounded-md border py-8 text-center">
-              <p className="mb-4 text-lg">You don't have any vibes yet</p>
+              <p className="mb-4 text-lg">
+                {showOnlyFavorites 
+                  ? "You don't have any favorite vibes yet" 
+                  : "You don't have any vibes yet"}
+              </p>
               <button
                 onClick={() => navigate('/remix')}
                 className="rounded bg-blue-500 px-4 py-2 text-white transition-colors hover:bg-blue-600"
@@ -119,7 +146,7 @@ export default function MyVibesRoute(): ReactElement {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {vibes.map((vibe) => (
+              {filteredVibes.map((vibe) => (
                 <div
                   key={vibe.id}
                   onClick={() => handleVibeClick(vibe.id)}
