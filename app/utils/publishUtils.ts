@@ -109,7 +109,7 @@ export async function publishApp({
     // Transform imports to use esm.sh
     const transformedCode = transformImports(normalizeComponentExports(normalizedCode));
 
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8787';
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://vibecode.garden';
 
     const response = await fetch(`${API_BASE_URL}/api/apps`, {
       method: 'POST',

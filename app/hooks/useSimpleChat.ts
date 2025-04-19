@@ -421,7 +421,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
           mergeUserMessage({ text: promptText });
 
           // Signal that errors were sent to trigger clearing
-          // setDidSendErrors(true);
+          setDidSendErrors(true);
         } catch (error) {
           console.error('[useSimpleChat] Failed to auto-send error report:', error);
           // Remove from sent errors if there was a failure
