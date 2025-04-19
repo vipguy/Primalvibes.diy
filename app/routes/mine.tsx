@@ -63,8 +63,8 @@ export default function MyVibesRoute(): ReactElement {
     };
   }, [confirmDelete]);
 
-  const handleVibeClick = (slug: string) => {
-    navigate(`/vibe/${slug}`);
+  const handleVibeClick = (id: string) => {
+    navigate(`/chat/${id}/app`);
   };
 
   const handleRemixClick = (slug: string, event: React.MouseEvent<HTMLButtonElement>) => {
@@ -110,7 +110,7 @@ export default function MyVibesRoute(): ReactElement {
               {vibes.map((vibe) => (
                 <div
                   key={vibe.id}
-                  onClick={() => handleVibeClick(vibe.slug)}
+                  onClick={() => handleVibeClick(vibe.id)}
                   className="border-light-decorative-01 dark:border-dark-decorative-01 cursor-pointer rounded-md border p-4 transition-colors hover:border-blue-500"
                 >
                   <h3 className="mb-1 text-lg font-medium">{vibe.title}</h3>
@@ -149,7 +149,7 @@ export default function MyVibesRoute(): ReactElement {
                       onClick={(e) => {
                         e.stopPropagation();
                         e.preventDefault();
-                        handleVibeClick(vibe.slug);
+                        handleVibeClick(vibe.id);
                       }}
                       className="text-light-primary bg-light-decorative-01 dark:text-dark-primary dark:bg-dark-decorative-01 rounded-md px-3 py-1 text-sm hover:bg-blue-500 hover:text-white dark:hover:bg-blue-500"
                     >
