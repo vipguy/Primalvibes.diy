@@ -71,7 +71,7 @@ const initialMockDocs: MockDoc[] = [
   {
     _id: 'ai-message-0',
     type: 'ai',
-    text: 'Older AI message',
+    text: 'Older AI message with code:\n\n```javascript\nfunction example() {\n  return "This is a code example";\n}\n```\n\nThe above function returns a string.',
     session_id: 'test-session-id',
     timestamp: Date.now() - 2000,
   },

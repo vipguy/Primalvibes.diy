@@ -416,10 +416,12 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
           const promptText = `Please help me fix the errors shown above. Simplify the code if necessary.`;
 
           // Send the message with the prompt text directly
-          await sendMessage(promptText);
+          // await sendMessage(promptText);
+
+          mergeUserMessage({ text: promptText });
 
           // Signal that errors were sent to trigger clearing
-          setDidSendErrors(true);
+          // setDidSendErrors(true);
         } catch (error) {
           console.error('[useSimpleChat] Failed to auto-send error report:', error);
           // Remove from sent errors if there was a failure

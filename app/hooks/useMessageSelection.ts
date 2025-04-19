@@ -47,9 +47,17 @@ export function useMessageSelection({
       return aiMessage;
     }
 
-    // Priority 4: Default to latest AI message from docs
-    const latestAiDoc = docs.filter((doc: any) => doc.type === 'ai').reverse()[0];
-    return latestAiDoc;
+    // Priority 4: Default to latest AI message from docs that contains code
+    const aiDocs = docs.filter((doc: any) => doc.type === 'ai');
+    // Find the most recent doc that contains code when parsed
+    const latestAiDocWithCode = aiDocs
+      .filter((doc) => {
+        const { segments } = parseContent(doc.text);
+        return segments.some((s: Segment) => s.type === 'code');
+      })
+      .sort((a: any, b: any) => b.created_at - a.created_at)[0];
+
+    return latestAiDocWithCode;
   }, [selectedResponseId, docs, pendingAiMessage, isStreaming, aiMessage]) as
     | ChatMessageDocument
     | undefined;
