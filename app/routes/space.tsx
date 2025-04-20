@@ -3,6 +3,7 @@ import SimpleAppLayout from '../components/SimpleAppLayout';
 import VibesDIYLogo from '../components/VibesDIYLogo';
 import Basic from '../components/vibespace/Basic';
 import Wild from '../components/vibespace/Wild';
+import ExplodingBrain from '../components/vibespace/ExplodingBrain';
 import type { ReactElement } from 'react';
 import { useFireproof } from 'use-fireproof';
 
@@ -34,6 +35,7 @@ export default function SpaceRoute(): ReactElement {
   const searchParams = new URLSearchParams(location.search);
   const theme = searchParams.get('theme');
   const isWild = theme === 'wild';
+  const isExplodingBrain = theme === 'exploding-brain';
 
   // Check if the prefix is a tilde (~) and extract the userId
   // This handles our custom /~userId route pattern
@@ -70,7 +72,9 @@ export default function SpaceRoute(): ReactElement {
         </div>
       }
     >
-      {isWild ? (
+      {isExplodingBrain ? (
+        <ExplodingBrain userId={userId} vibes={vibes} isLoading={isLoading} />
+      ) : isWild ? (
         <Wild userId={userId} vibes={vibes} isLoading={isLoading} />
       ) : (
         <Basic userId={userId} vibes={vibes} isLoading={isLoading} />
