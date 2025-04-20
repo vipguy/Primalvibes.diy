@@ -1,7 +1,8 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import SimpleAppLayout from '../components/SimpleAppLayout';
 import VibesDIYLogo from '../components/VibesDIYLogo';
-import { Basic } from '../components/vibespace/Basic';
+import Basic from '../components/vibespace/Basic';
+import Wild from '../components/vibespace/Wild';
 import type { ReactElement } from 'react';
 import { useFireproof } from 'use-fireproof';
 
@@ -29,6 +30,10 @@ export function meta() {
 export default function SpaceRoute(): ReactElement {
   const navigate = useNavigate();
   const { prefixUserId } = useParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const theme = searchParams.get('theme');
+  const isWild = theme === 'wild';
 
   // Check if the prefix is a tilde (~) and extract the userId
   // This handles our custom /~userId route pattern
@@ -65,7 +70,11 @@ export default function SpaceRoute(): ReactElement {
         </div>
       }
     >
-      <Basic userId={userId} vibes={vibes} isLoading={isLoading} />
+      {isWild ? (
+        <Wild userId={userId} vibes={vibes} isLoading={isLoading} />
+      ) : (
+        <Basic userId={userId} vibes={vibes} isLoading={isLoading} />
+      )}
     </SimpleAppLayout>
   );
 }

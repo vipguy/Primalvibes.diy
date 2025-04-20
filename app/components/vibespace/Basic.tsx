@@ -15,7 +15,7 @@ interface BasicVibespaceProps {
   isLoading: boolean;
 }
 
-export function Basic({ userId, vibes, isLoading }: BasicVibespaceProps): ReactElement {
+export default function Basic({ userId, vibes, isLoading }: BasicVibespaceProps): ReactElement {
   return (
     <div className="container mx-auto p-4">
       <div className="mb-6">
