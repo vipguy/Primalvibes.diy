@@ -109,15 +109,15 @@ export default function MyVibesRoute(): ReactElement {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="mb-4 text-2xl font-bold">My Vibes</h2>
-              <p className="text-accent-01 dark:text-accent-01 mb-6">
+              {userId && <p className="text-accent-01 dark:text-accent-01 mb-6">
                 Published and favorited vibes are listed on your{' '}
                 <a
                   href={`/~${userId}`}
                   className="text-light-primary dark:text-dark-primary hover:text-blue-500"
-                >
+                > 
                   vibespace
                 </a>
-              </p>
+              </p>}
             </div>
             <div className="flex items-center">
               <button
