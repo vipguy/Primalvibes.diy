@@ -4,6 +4,7 @@ import VibesDIYLogo from '../components/VibesDIYLogo';
 import Basic from '../components/vibespace/Basic';
 import Wild from '../components/vibespace/Wild';
 import ExplodingBrain from '../components/vibespace/ExplodingBrain';
+import Cyberpunk from '../components/vibespace/Cyberpunk';
 import type { ReactElement } from 'react';
 import { useFireproof } from 'use-fireproof';
 
@@ -36,6 +37,7 @@ export default function SpaceRoute(): ReactElement {
   const theme = searchParams.get('theme');
   const isWild = theme === 'wild';
   const isExplodingBrain = theme === 'exploding-brain';
+  const isCyberpunk = theme === 'cyberpunk';
 
   // Check if the prefix is a tilde (~) and extract the userId
   // This handles our custom /~userId route pattern
@@ -62,13 +64,51 @@ export default function SpaceRoute(): ReactElement {
   // No need to log database contents
 
   // Handle clicking the remix button
+  // Create URL for theme switching
+  const createThemeUrl = (themeParam: string | null) => {
+    const newSearchParams = new URLSearchParams(location.search);
+    if (themeParam) {
+      newSearchParams.set('theme', themeParam);
+    } else {
+      newSearchParams.delete('theme');
+    }
+    return `/${prefixUserId}?${newSearchParams.toString()}`;
+  };
+
   return (
     <SimpleAppLayout
       headerLeft={
-        <div className="flex items-center">
+        <div className="flex w-full items-center justify-between">
           <a href="/" className="flex items-center px-2 py-1 hover:opacity-80" title="Home">
             <VibesDIYLogo width={100} className="pointer-events-none" />
           </a>
+          <div className="mr-4 flex items-center space-x-2 text-sm">
+            <span className="mr-1 text-gray-500">Theme:</span>
+            <a
+              href={createThemeUrl(null)}
+              className={`rounded px-2 py-1 ${!theme ? 'bg-blue-100 text-blue-800' : 'hover:bg-gray-100'}`}
+            >
+              Basic
+            </a>
+            <a
+              href={createThemeUrl('wild')}
+              className={`rounded px-2 py-1 ${isWild ? 'bg-green-100 text-green-800' : 'hover:bg-gray-100'}`}
+            >
+              Wild
+            </a>
+            <a
+              href={createThemeUrl('exploding-brain')}
+              className={`rounded px-2 py-1 ${isExplodingBrain ? 'bg-purple-100 text-purple-800' : 'hover:bg-gray-100'}`}
+            >
+              Brain
+            </a>
+            <a
+              href={createThemeUrl('cyberpunk')}
+              className={`rounded px-2 py-1 ${isCyberpunk ? 'bg-pink-100 text-pink-800' : 'hover:bg-gray-100'}`}
+            >
+              Cyberpunk
+            </a>
+          </div>
         </div>
       }
     >
@@ -76,6 +116,8 @@ export default function SpaceRoute(): ReactElement {
         <ExplodingBrain userId={userId} vibes={vibes} isLoading={isLoading} />
       ) : isWild ? (
         <Wild userId={userId} vibes={vibes} isLoading={isLoading} />
+      ) : isCyberpunk ? (
+        <Cyberpunk userId={userId} vibes={vibes} isLoading={isLoading} />
       ) : (
         <Basic userId={userId} vibes={vibes} isLoading={isLoading} />
       )}
