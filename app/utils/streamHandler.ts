@@ -32,19 +32,40 @@ export async function streamAI(
     ...messageHistory,
     { role: 'user', content: userMessage },
   ];
-  // Configure call-ai options
+  // Configure call-ai options with default maximum token limit
+  const defaultMaxTokens = userId ? 150000 : 75000;
   const options = {
     apiKey: apiKey,
     model: model,
     transforms: ['middle-out'],
     stream: true,
-    max_tokens: userId ? 150000 : 75000,
+    max_tokens: defaultMaxTokens,
     debug: false, // Disable debugging logs
     headers: {
       'HTTP-Referer': 'https://vibes.diy',
       'X-Title': 'Vibes DIY',
     },
   };
+  
+  // If available, check if credits should constrain max_tokens
+  try {
+    const { getCredits } = await import('../config/provisioning');
+    const credits = await getCredits(apiKey);
+    if (credits && credits.available) {
+      // Convert available credits to tokens (rough approximation)
+      const tokensFromCredits = Math.floor(credits.available * 1000000); // Each credit roughly equals 1M tokens
+      // Only reduce max_tokens if credits constrain it below the default maximum
+      if (tokensFromCredits < defaultMaxTokens) {
+        options.max_tokens = tokensFromCredits;
+        console.log(`Constraining max_tokens to ${options.max_tokens} based on available credits: ${credits.available}`);
+      } else {
+        console.log(`Using default max_tokens: ${defaultMaxTokens} (credits available: ${credits.available})`);
+      }
+    }
+  } catch (error) {
+    // If we can't check credits, just use the default max_tokens
+    console.log('Could not check credits for max_tokens adjustment:', error);
+  }
 
   try {
     const response = await callAI(messages, options);
