@@ -36,6 +36,7 @@ export async function streamAI(
   const options = {
     apiKey: apiKey,
     model: model,
+    transforms: ['middle-out'],
     stream: true,
     max_tokens: userId ? 150000 : 75000,
     debug: false, // Disable debugging logs
