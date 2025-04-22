@@ -116,10 +116,3 @@ export const trackErrorEvent = (
     ...details,
   });
 };
-
-interface WindowWithTestErrorTracking extends Window {
-  testErrorTracking: () => void;
-}
-const windowWithTestErrorTracking = window as unknown as WindowWithTestErrorTracking;
-windowWithTestErrorTracking.testErrorTracking = () =>
-  trackErrorEvent('Other', 'Test of the error tracking system');
