@@ -61,9 +61,8 @@ export function PublishMenu({
   };
 
   return createPortal(
-    <dialog
-      open
-      className="fixed inset-0 z-[9999] m-0 bg-transparent p-0"
+    <div
+      className="fixed inset-0 z-[9999] m-0 bg-black/25"
       onClick={handleBackdropClick}
       onKeyDown={(e) => {
         if (e.key === 'Escape') {
@@ -74,6 +73,7 @@ export function PublishMenu({
     >
       <div
         style={menuStyle}
+        onClick={(e) => e.stopPropagation()}
         className="ring-opacity-5 dark:bg-dark-background-01 w-80 rounded bg-white p-4 shadow-lg ring-1 ring-black"
       >
         <div
@@ -83,14 +83,14 @@ export function PublishMenu({
           aria-labelledby="publish-menu"
         >
           <p className="mb-4 text-xs text-blue-700 italic dark:text-blue-200">
-            Apps are public, data is local, private sharing is coming soon. See app listings in{' '}
+            Publish your app for anyone to share and remix. Selected apps are featured in{' '}
             <a
               href="https://discord.gg/vnpWycj4Ta"
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 hover:underline dark:text-blue-400"
             >
-              Discord
+              our community
             </a>
             .
           </p>
@@ -259,7 +259,7 @@ export function PublishMenu({
           )}
         </div>
       </div>
-    </dialog>,
+    </div>,
     document.body
   );
 }

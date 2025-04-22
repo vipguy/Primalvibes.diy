@@ -9,6 +9,7 @@ import {
   CodeIcon,
   DataIcon,
   PreviewIcon,
+  PublishIcon,
   UserIcon,
 } from '../HeaderContent/SvgIcons';
 import { PublishMenu } from '../PublishMenu';
@@ -147,7 +148,7 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
   };
 
   const handlePublish = async () => {
-    if (!userInfo?.userId) return;
+    // if (!userInfo?.userId) return;
     try {
       if (messages.length === 0) {
         return;
@@ -167,7 +168,7 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
         code,
         title,
         prompt,
-        userId: userInfo.userId,
+        userId: userInfo?.userId,
         updatePublishedUrl,
       });
 
@@ -320,79 +321,72 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
       </div>
 
       {/* Right side */}
-      <div className="flex w-1/4 justify-end">
-        <div className="flex items-center gap-2">
-          {isUserAuthenticated && showViewControls && previewReady && (
-            <div className="relative">
+      <div className="flex w-1/4 items-center justify-end">
+        <div className="flex items-center">
+          {/* Publish button */}
+          {showViewControls && previewReady && (
+            <div className="mr-2">
               <button
                 ref={publishButtonRef}
                 type="button"
                 onClick={() => setIsPublishMenuOpen(!isPublishMenuOpen)}
-                className="bg-light-decorative-00 border-glimmer dark:bg-dark-decorative-00 text-light-primary dark:text-dark-primary hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 -mt-4.5 -ml-10 flex items-center justify-center rounded-md p-2 transition-colors"
+                className="bg-glimmer text-light-primary dark:text-dark-primary flex items-center justify-center gap-1 rounded-md border border-gray-200 px-3 py-2 text-sm font-medium max-[767px]:aspect-square max-[767px]:p-2 min-[768px]:w-auto dark:border-gray-700"
                 aria-label="Publish"
-                title="Publish"
+                title="Share with the world"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-labelledby="publishSvgTitle"
-                >
-                  <title id="publishSvgTitle">Publish</title>
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-                  />
-                </svg>
-              </button>
-              <PublishMenu
-                isOpen={isPublishMenuOpen}
-                onPublish={handlePublish}
-                onClose={() => setIsPublishMenuOpen(false)}
-                buttonRef={publishButtonRef}
-                publishedAppUrl={publishedAppUrl}
-              />
-            </div>
-          )}
-          <div className="relative">
-            <div className="bg-light-decorative-00 dark:bg-dark-decorative-00 flex justify-center gap-1 rounded-md p-1 shadow-sm">
-              <button
-                ref={buttonRef}
-                type="button"
-                onClick={handleAuthCheck}
-                disabled={isVerifying}
-                className={`${needsLogin ? 'text-orange-500' : 'text-light-primary dark:text-dark-primary'} hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 flex items-center justify-center space-x-1 rounded px-2 py-1.5 text-xs font-medium transition-colors sm:space-x-1.5 sm:px-1.5 sm:text-sm ${isVerifying ? 'cursor-wait opacity-50' : ''}`}
-                aria-label={isUserAuthenticated ? `User: ${userInfo?.userId}` : 'Connect Account'}
-                title={
-                  isUserAuthenticated
-                    ? `Logged in as ${userInfo?.userId}`
-                    : 'Login with Fireproof to Publish'
-                }
-              >
-                <UserIcon isVerifying={isVerifying} isUserAuthenticated={isUserAuthenticated} />
-                <span className="hidden min-[480px]:inline">
-                  {isVerifying
-                    ? 'Verifying...'
-                    : isUserAuthenticated
-                      ? ''
-                      : needsLogin
-                        ? 'Get Credits'
-                        : 'Share'}
+                <PublishIcon className="h-5 w-5" />
+                <span className="hidden text-xs whitespace-nowrap min-[1024px]:inline">
+                  Publish
                 </span>
               </button>
             </div>
+          )}
 
+          {/* Credits button */}
+          <div>
+            <button
+              ref={buttonRef}
+              type="button"
+              onClick={handleAuthCheck}
+              disabled={isVerifying}
+              className={`bg-light-decorative-00 dark:bg-dark-decorative-00 ${needsLogin ? 'text-orange-500' : 'text-light-primary dark:text-dark-primary'} hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 flex items-center justify-center gap-1 rounded-md border border-gray-200 px-3 py-2 text-sm font-medium transition-colors max-[767px]:aspect-square max-[767px]:p-2 min-[768px]:w-auto dark:border-gray-700 ${isVerifying ? 'cursor-wait opacity-50' : ''}`}
+              aria-label={isUserAuthenticated ? `User: ${userInfo?.userId}` : 'Connect Account'}
+              title={
+                isUserAuthenticated ? `Logged in as ${userInfo?.userId}` : 'Login to keep building'
+              }
+            >
+              <UserIcon isVerifying={isVerifying} isUserAuthenticated={isUserAuthenticated} />
+              <span className="hidden text-xs whitespace-nowrap min-[1024px]:inline">
+                {isVerifying
+                  ? 'Verifying...'
+                  : isUserAuthenticated
+                    ? ''
+                    : needsLogin
+                      ? 'Get Credits'
+                      : 'Login'}
+              </span>
+            </button>
+          </div>
+
+          {/* Menus rendered at the top level */}
+          {isPublishMenuOpen && showViewControls && previewReady && (
+            <PublishMenu
+              isOpen={isPublishMenuOpen}
+              onPublish={handlePublish}
+              onClose={() => setIsPublishMenuOpen(false)}
+              buttonRef={publishButtonRef}
+              publishedAppUrl={publishedAppUrl}
+            />
+          )}
+
+          {isMenuOpen && isUserAuthenticated && (
             <UserMenu
-              isOpen={isMenuOpen && isUserAuthenticated}
+              isOpen={isMenuOpen}
               onLogout={handleLogout}
               onClose={() => setIsMenuOpen(false)}
               buttonRef={buttonRef}
             />
-          </div>
+          )}
         </div>
       </div>
     </div>
