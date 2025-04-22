@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useFireproof } from 'use-fireproof';
 import { FIREPROOF_CHAT_HISTORY } from '../config/env';
 import type {
@@ -9,6 +9,8 @@ import type {
   ChatMessageDocument,
 } from '../types/chat';
 import { getSessionDatabaseName } from '../utils/databaseManager';
+import { useLazyFireproof } from './useLazyFireproof';
+import { encodeTitle } from '../components/SessionSidebar/utils';
 
 export function useSession(routedSessionId?: string) {
   const { useDocument: useMainDocument, database: mainDatabase } =
@@ -25,7 +27,17 @@ export function useSession(routedSessionId?: string) {
     database: sessionDatabase,
     useDocument: useSessionDocument,
     useLiveQuery: useSessionLiveQuery,
-  } = useFireproof(sessionDbName);
+    open: openSessionDatabase,
+  } = useLazyFireproof(sessionDbName);
+
+  // Automatically open the database if we have a routed session ID
+  // This ensures existing sessions are loaded immediately
+  // Use useEffect to ensure this only runs once during initialization
+  useEffect(() => {
+    if (routedSessionId) {
+      openSessionDatabase();
+    }
+  }, [routedSessionId, openSessionDatabase]);
 
   // Session document is stored in the main database
   const { doc: session, merge: mergeSession } = useMainDocument<SessionDocument>(
@@ -75,15 +87,20 @@ export function useSession(routedSessionId?: string) {
       // Update local session state for UI
       mergeSession({ title });
 
+      // Encode the title for URL-friendly slug
+      const encodedTitle = encodeTitle(title);
+
       // Store title in the vibe document
       const currentVibeDoc = await sessionDatabase.get<VibeDocument>('vibe').catch(() => null);
       if (currentVibeDoc) {
         currentVibeDoc.title = title;
+        currentVibeDoc.encodedTitle = encodedTitle;
         await sessionDatabase.put(currentVibeDoc);
       } else {
         await sessionDatabase.put({
           _id: 'vibe',
           title,
+          encodedTitle,
           created_at: Date.now(),
         });
       }
@@ -141,6 +158,13 @@ export function useSession(routedSessionId?: string) {
     [sessionId, sessionDatabase]
   );
 
+  // Wrap submitUserMessage to ensure database is opened before first write
+  const wrappedSubmitUserMessage = useCallback(async () => {
+    // Database will be automatically opened on first write via the LazyDB wrapper
+    // This explicit call is optional but makes the intent clear
+    return submitUserMessage();
+  }, [submitUserMessage]);
+
   return {
     // Session information
     session,
@@ -149,6 +173,7 @@ export function useSession(routedSessionId?: string) {
     // Databases
     mainDatabase,
     sessionDatabase,
+    openSessionDatabase,
 
     // Session management functions
     updateTitle,
@@ -157,7 +182,7 @@ export function useSession(routedSessionId?: string) {
 
     // Message management
     userMessage,
-    submitUserMessage,
+    submitUserMessage: wrappedSubmitUserMessage,
     mergeUserMessage,
     aiMessage,
     submitAiMessage,
