@@ -147,7 +147,8 @@ export function useMessageSelection({
     role: 'user' | 'assistant' | 'system';
     content: string;
   }> => {
-    return filteredDocs.map((msg: any) => {
+    // Map all messages to the correct format first
+    const allMessages = filteredDocs.map((msg: any) => {
       const role =
         msg.type === 'user'
           ? ('user' as const)
@@ -159,6 +160,17 @@ export function useMessageSelection({
         content: msg.text || '',
       };
     });
+
+    // Handle shorter histories without duplicates
+    if (allMessages.length <= 8) {
+      return allMessages;
+    }
+
+    // For longer histories, get first 2 and last 6
+    const firstMessages = allMessages.slice(0, 2);
+    const lastMessages = allMessages.slice(-6);
+
+    return [...firstMessages, ...lastMessages];
   }, [filteredDocs]);
 
   return {

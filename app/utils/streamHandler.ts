@@ -46,7 +46,7 @@ export async function streamAI(
       'X-Title': 'Vibes DIY',
     },
   };
-  
+
   // If available, check if credits should constrain max_tokens
   try {
     const { getCredits } = await import('../config/provisioning');
@@ -57,9 +57,13 @@ export async function streamAI(
       // Only reduce max_tokens if credits constrain it below the default maximum
       if (tokensFromCredits < defaultMaxTokens) {
         options.max_tokens = tokensFromCredits;
-        console.log(`Constraining max_tokens to ${options.max_tokens} based on available credits: ${credits.available}`);
+        console.log(
+          `Constraining max_tokens to ${options.max_tokens} based on available credits: ${credits.available}`
+        );
       } else {
-        console.log(`Using default max_tokens: ${defaultMaxTokens} (credits available: ${credits.available})`);
+        console.log(
+          `Using default max_tokens: ${defaultMaxTokens} (credits available: ${credits.available})`
+        );
       }
     }
   } catch (error) {
