@@ -87,14 +87,19 @@ export function useMessageSelection({
 
     // Priority 4: Default to latest AI message from docs that contains code
     const aiDocs = docs.filter((doc: any) => doc.type === 'ai');
-    // Find the most recent doc that contains code when parsed
-    const latestAiDocWithCode = aiDocs
-      .filter((doc) => {
-        const { segments } = parseContent(doc.text);
-        return segments.some((s: Segment) => s.type === 'code');
-      })
-      .sort((a: any, b: any) => b.created_at - a.created_at)[0];
-
+    
+    // Find all docs that contain code when parsed
+    const docsWithCode = aiDocs.filter((doc) => {
+      const { segments } = parseContent(doc.text);
+      return segments.some((s: Segment) => s.type === 'code');
+    });
+    
+    // Sort by document ID - this is more reliable than timestamps
+    // when determining the most recent message, especially since IDs often have 
+    // chronological information encoded in them
+    const sortedDocsWithCode = docsWithCode.sort((a: any, b: any) => b._id.localeCompare(a._id));
+    
+    const latestAiDocWithCode = sortedDocsWithCode[0];
     return latestAiDocWithCode;
   }, [selectedResponseId, docs, pendingAiMessage, isStreaming, aiMessage]) as
     | ChatMessageDocument
