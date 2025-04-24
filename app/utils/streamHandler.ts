@@ -13,6 +13,8 @@ import { callAI, type Message } from 'call-ai';
  * @param userMessage - The current user message
  * @param onContent - Callback function that receives the accumulated content so far
  * @param apiKey - The API key to use for the callAI service
+ * @param userId - The user ID
+ * @param setNeedsLogin - Optional callback to set needs login flag
  * @returns A promise that resolves to the complete response when streaming is complete
  */
 export async function streamAI(
@@ -22,7 +24,8 @@ export async function streamAI(
   userMessage: string,
   onContent: (content: string) => void,
   apiKey: string,
-  userId?: string
+  userId?: string,
+  setNeedsLogin?: (value: boolean) => void
 ): Promise<string> {
   // Stream process starts
 
@@ -93,12 +96,53 @@ export async function streamAI(
         }
         return finalResponse;
       } catch (streamError) {
-        throw streamError;
+        // Failed to even start streaming
+
+        // Format a user-friendly error message for toast
+        const errorMsg = streamError instanceof Error ? streamError.message : String(streamError);
+        const toastMsg = `Error during AI response: ${errorMsg}`;
+        console.log('[TOAST MESSAGE]', toastMsg);
+
+        // Check if this is an authentication error
+        if (
+          errorMsg.includes('authentication') ||
+          errorMsg.includes('key') ||
+          errorMsg.includes('token') ||
+          errorMsg.includes('credits')
+        ) {
+          if (setNeedsLogin) {
+            setNeedsLogin(true);
+          }
+        }
+
+        // Don't return any message to the chat, let the caller handle it
+        return '';
       }
     } else {
       throw new Error('Unexpected response type from callAI');
     }
   } catch (initialError) {
-    throw initialError;
+    // Failed to even start streaming
+
+    // Format a user-friendly error message for toast
+    const errorMsg = initialError instanceof Error ? initialError.message : String(initialError);
+    const toastMsg = `Error starting AI response: ${errorMsg}`;
+    console.log('[TOAST MESSAGE]', toastMsg);
+
+    // Check if this is an authentication error
+    if (
+      errorMsg.includes('authentication') ||
+      errorMsg.includes('key') ||
+      errorMsg.includes('token') ||
+      errorMsg.includes('credits')
+    ) {
+      console.log('Setting needs login due to auth/credit error');
+      if (setNeedsLogin) {
+        setNeedsLogin(true);
+      }
+    }
+
+    // Don't return any message to the chat, let the caller handle it
+    return '';
   }
 }

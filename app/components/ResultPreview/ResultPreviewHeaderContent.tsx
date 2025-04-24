@@ -404,20 +404,22 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
             </div>
           )}
 
-          {/* Credits button */}
-          {showViewControls && previewReady && (
+          {/* Credits button - Always show when needsLogin=true */}
+          {(showViewControls && previewReady) || needsLogin ? (
             <div>
               <button
                 ref={buttonRef}
                 type="button"
                 onClick={handleAuthCheck}
                 disabled={isVerifying}
-                className={`bg-light-decorative-00 dark:bg-dark-decorative-00 ${needsLogin ? 'text-orange-500' : 'text-light-primary dark:text-dark-primary'} hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 flex items-center justify-center gap-1 rounded-md border border-gray-200 px-3 py-2 text-sm font-medium transition-colors max-[767px]:aspect-square max-[767px]:p-2 min-[768px]:w-auto dark:border-gray-700 ${isVerifying ? 'cursor-wait opacity-50' : ''}`}
+                className={`bg-light-decorative-00 dark:bg-dark-decorative-00 ${needsLogin ? 'font-bold text-orange-500' : 'text-light-primary dark:text-dark-primary'} hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 flex items-center justify-center gap-1 rounded-md border border-gray-200 px-3 py-2 text-sm font-medium transition-colors max-[767px]:aspect-square max-[767px]:p-2 min-[768px]:w-auto dark:border-gray-700 ${isVerifying ? 'cursor-wait opacity-50' : ''}`}
                 aria-label={isUserAuthenticated ? `User: ${userInfo?.userId}` : 'Connect Account'}
                 title={
                   isUserAuthenticated
                     ? `Logged in as ${userInfo?.userId}`
-                    : 'Login to keep building'
+                    : needsLogin
+                      ? 'Get more API credits'
+                      : 'Login to keep building'
                 }
               >
                 <UserIcon isVerifying={isVerifying} isUserAuthenticated={isUserAuthenticated} />
@@ -432,7 +434,7 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
                 </span>
               </button>
             </div>
-          )}
+          ) : null}
           {/* Menus rendered at the top level */}
 
           {isMenuOpen && isUserAuthenticated && (

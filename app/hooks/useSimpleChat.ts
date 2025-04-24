@@ -281,15 +281,20 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
         .then(() => {
           const messageHistory = buildMessageHistory();
 
-          return streamAI(
-            modelToUse,
-            currentSystemPrompt,
-            messageHistory,
-            promptText,
-            (content) => throttledMergeAiMessage(content),
-            apiKey || '',
-            userId
-          );
+          try {
+            return streamAI(
+              modelToUse,
+              currentSystemPrompt,
+              messageHistory,
+              promptText,
+              (content) => throttledMergeAiMessage(content),
+              apiKey || '',
+              userId,
+              setNeedsLogin
+            );
+          } catch (error) {
+            throw error; // Re-throw to maintain existing error handling flow
+          }
         })
         .then(async (finalContent) => {
           // Set processing flag to prevent infinite updates
@@ -318,13 +323,18 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
               }
             }
 
-            // Handle empty responses with a friendly message
+            // Log empty responses but don't show error messages in the chat
             if (
               !finalContent ||
               (typeof finalContent === 'string' && finalContent.trim().length === 0)
             ) {
-              finalContent =
-                'Sorry, there was an error processing your request. Please try again in a moment.';
+              console.log('[TOAST MESSAGE] Error occurred while processing the request');
+
+              // This is likely a credits/api key issue, set needsLogin to true
+              setNeedsLogin(true);
+
+              // Don't set any error message in the chat
+              return; // Exit early without updating the message
             }
 
             // Only do a final update if the current state doesn't match our final content
