@@ -280,6 +280,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
       return submitUserMessage()
         .then(() => {
           const messageHistory = buildMessageHistory();
+
           return streamAI(
             modelToUse,
             currentSystemPrompt,

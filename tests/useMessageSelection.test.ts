@@ -7,7 +7,7 @@ describe('useMessageSelection', () => {
   // Sample data for testing
   const createTestMessages = (count: number) => {
     const messages: ChatMessageDocument[] = [];
-    
+
     for (let i = 0; i < count; i++) {
       const timestamp = Date.now() - (count - i) * 1000; // Older to newer
       messages.push({
@@ -18,21 +18,21 @@ describe('useMessageSelection', () => {
         created_at: timestamp,
       } as ChatMessageDocument);
     }
-    
+
     return messages;
   };
 
   it('should select the latest AI message with code by default', () => {
     // Create multiple AI messages with code blocks in chronological order
     const messages = createTestMessages(3);
-    
+
     // Format logs for debugging
     console.log('Test messages with timestamps:');
     messages.forEach((msg) => {
       console.log(`ID: ${msg._id}, Created: ${new Date(msg.created_at).toISOString()}`);
     });
 
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useMessageSelection({
         docs: messages,
         isStreaming: false,
@@ -71,14 +71,14 @@ describe('useMessageSelection', () => {
         created_at: Date.now() - 500, // Middle timestamp
       } as ChatMessageDocument,
     ];
-    
+
     // Format logs for debugging
     console.log('Shuffled timestamp messages:');
     messages.forEach((msg) => {
       console.log(`ID: ${msg._id}, Created: ${new Date(msg.created_at).toISOString()}`);
     });
 
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useMessageSelection({
         docs: messages,
         isStreaming: false,
@@ -94,8 +94,8 @@ describe('useMessageSelection', () => {
 
   it('should prioritize explicit selection over default selection', () => {
     const messages = createTestMessages(3);
-    
-    const { result } = renderHook(() => 
+
+    const { result } = renderHook(() =>
       useMessageSelection({
         docs: messages,
         isStreaming: false,
@@ -134,14 +134,16 @@ describe('useMessageSelection', () => {
         created_at: Date.now(), // Most recent but no code
       } as ChatMessageDocument,
     ];
-    
+
     // Format logs for debugging
     console.log('Messages with some missing code blocks:');
     messages.forEach((msg) => {
-      console.log(`ID: ${msg._id}, Has code: ${msg.text.includes('```')}, Created: ${new Date(msg.created_at).toISOString()}`);
+      console.log(
+        `ID: ${msg._id}, Has code: ${msg.text.includes('```')}, Created: ${new Date(msg.created_at).toISOString()}`
+      );
     });
 
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useMessageSelection({
         docs: messages,
         isStreaming: false,
@@ -157,25 +159,22 @@ describe('useMessageSelection', () => {
 
   it('should handle messages being loaded asynchronously', () => {
     // Start with empty docs
-    const { result, rerender } = renderHook(
-      (props) => useMessageSelection(props),
-      {
-        initialProps: {
-          docs: [] as ChatMessageDocument[],
-          isStreaming: false,
-          aiMessage: { text: '', type: 'ai' } as ChatMessageDocument,
-          selectedResponseId: '',
-          pendingAiMessage: null,
-        }
-      }
-    );
+    const { result, rerender } = renderHook((props) => useMessageSelection(props), {
+      initialProps: {
+        docs: [] as ChatMessageDocument[],
+        isStreaming: false,
+        aiMessage: { text: '', type: 'ai' } as ChatMessageDocument,
+        selectedResponseId: '',
+        pendingAiMessage: null,
+      },
+    });
 
     // Initially should not have a selection
     expect(result.current.selectedResponseDoc).toBeUndefined();
 
     // Now simulate docs loading
     const messages = createTestMessages(3);
-    
+
     rerender({
       docs: messages,
       isStreaming: false,

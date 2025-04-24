@@ -21,7 +21,20 @@ export function useSession(routedSessionId?: string) {
       `${Date.now().toString(36).padStart(9, 'f')}${Math.random().toString(36).slice(2, 11).padEnd(9, '0')}`
   );
 
-  const sessionId = routedSessionId || generatedSessionId;
+  // Using useState to track the effective sessionId and ensure it updates properly
+  // when routedSessionId changes from undefined to a real ID
+  const [effectiveSessionId, setEffectiveSessionId] = useState(
+    routedSessionId || generatedSessionId
+  );
+
+  // Update effectiveSessionId whenever routedSessionId changes
+  useEffect(() => {
+    if (routedSessionId) {
+      setEffectiveSessionId(routedSessionId);
+    }
+  }, [routedSessionId]);
+
+  const sessionId = effectiveSessionId;
   const sessionDbName = getSessionDatabaseName(sessionId);
   const {
     database: sessionDatabase,
@@ -31,13 +44,10 @@ export function useSession(routedSessionId?: string) {
   } = useLazyFireproof(sessionDbName);
 
   // Automatically open the database if we have a routed session ID
-  // This ensures existing sessions are loaded immediately
-  // Use useEffect to ensure this only runs once during initialization
+  // or whenever the effective session ID changes
   useEffect(() => {
-    if (routedSessionId) {
-      openSessionDatabase();
-    }
-  }, [routedSessionId, openSessionDatabase]);
+    openSessionDatabase();
+  }, [sessionId, openSessionDatabase]);
 
   // Session document is stored in the main database
   const { doc: session, merge: mergeSession } = useMainDocument<SessionDocument>(

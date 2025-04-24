@@ -54,6 +54,21 @@ export function useMessageSelection({
 
       // If the message has been saved to the database, no need to append it
       if (messageInDocs) {
+        // Message exists in docs, clear the prevStreamingMessage to avoid duplicates
+        setPrevStreamingMessage(null);
+        return baseDocs;
+      }
+
+      // Check if we have a similar message with the same text content
+      // This helps prevent duplicates during session ID transitions
+      const similarMessageExists = baseDocs.some(
+        (doc) => doc.type === 'ai' && doc.text === prevStreamingMessage.text
+      );
+
+      if (similarMessageExists) {
+        // We have a message with identical content - likely the same message
+        // saved with a different ID after session migration
+        setPrevStreamingMessage(null);
         return baseDocs;
       }
 
@@ -87,18 +102,18 @@ export function useMessageSelection({
 
     // Priority 4: Default to latest AI message from docs that contains code
     const aiDocs = docs.filter((doc: any) => doc.type === 'ai');
-    
+
     // Find all docs that contain code when parsed
     const docsWithCode = aiDocs.filter((doc) => {
       const { segments } = parseContent(doc.text);
       return segments.some((s: Segment) => s.type === 'code');
     });
-    
+
     // Sort by document ID - this is more reliable than timestamps
-    // when determining the most recent message, especially since IDs often have 
+    // when determining the most recent message, especially since IDs often have
     // chronological information encoded in them
     const sortedDocsWithCode = docsWithCode.sort((a: any, b: any) => b._id.localeCompare(a._id));
-    
+
     const latestAiDocWithCode = sortedDocsWithCode[0];
     return latestAiDocWithCode;
   }, [selectedResponseId, docs, pendingAiMessage, isStreaming, aiMessage]) as
@@ -176,7 +191,7 @@ export function useMessageSelection({
     const lastMessages = allMessages.slice(-6);
 
     return [...firstMessages, ...lastMessages];
-  }, [filteredDocs]);
+  }, [filteredDocs, docs]);
 
   return {
     messages,
