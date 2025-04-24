@@ -13,6 +13,7 @@ import {
   UserIcon,
 } from '../HeaderContent/SvgIcons';
 import { UserMenu } from '../UserMenu';
+import { LoginMenu } from '../LoginMenu';
 import { publishApp } from '../../utils/publishUtils';
 import { trackAuthClick, trackPublishClick } from '../../utils/analytics';
 
@@ -48,6 +49,7 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
   const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoginMenuOpen, setIsLoginMenuOpen] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [urlCopied, setUrlCopied] = useState(false);
 
@@ -78,6 +80,29 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
       console.debug('Published URL updated:', publishedAppUrl);
     }
   }, [publishedAppUrl]);
+
+  // Automatically open the login menu when needsLogin becomes true
+  useEffect(() => {
+    if (needsLogin) {
+      setIsLoginMenuOpen(true);
+    }
+  }, [needsLogin]);
+
+  // Listen for the needsLoginTriggered event to open the login menu even when needsLogin is already true
+  useEffect(() => {
+    const handleNeedsLoginTriggered = () => {
+      // Open the login menu regardless of current state
+      setIsLoginMenuOpen(true);
+    };
+
+    // Add event listener
+    window.addEventListener('needsLoginTriggered', handleNeedsLoginTriggered);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('needsLoginTriggered', handleNeedsLoginTriggered);
+    };
+  }, []);
 
   // Use the new ViewState hook to manage all view-related state and navigation
   const { currentView, displayView, navigateToView, viewControls, showViewControls, encodedTitle } =
@@ -142,6 +167,9 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
 
     if (isUserAuthenticated) {
       setIsMenuOpen((open) => !open);
+    } else if (needsLogin) {
+      // Open the login menu with credit information
+      setIsLoginMenuOpen((open) => !open);
     } else {
       // Use the dedicated function to initiate auth flow
       initiateAuthFlow();
@@ -442,6 +470,18 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
               isOpen={isMenuOpen}
               onLogout={handleLogout}
               onClose={() => setIsMenuOpen(false)}
+              buttonRef={buttonRef}
+            />
+          )}
+
+          {isLoginMenuOpen && needsLogin && (
+            <LoginMenu
+              isOpen={isLoginMenuOpen}
+              onLogin={() => {
+                setIsLoginMenuOpen(false);
+                initiateAuthFlow();
+              }}
+              onClose={() => setIsLoginMenuOpen(false)}
               buttonRef={buttonRef}
             />
           )}

@@ -138,7 +138,17 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
   const [selectedResponseId, setSelectedResponseId] = useState<string>('');
   const [pendingAiMessage, setPendingAiMessage] = useState<ChatMessageDocument | null>(null);
   const [needsNewKey, setNeedsNewKey] = useState<boolean>(false);
-  const [needsLogin, setNeedsLogin] = useState<boolean>(false);
+  const [needsLogin, _setNeedsLogin] = useState<boolean>(false);
+
+  // Custom setNeedsLogin that emits an event when set to true
+  const setNeedsLogin = (value: boolean) => {
+    _setNeedsLogin(value);
+    if (value) {
+      // Create a custom event to notify about needsLogin change
+      const event = new CustomEvent('needsLoginTriggered');
+      window.dispatchEvent(event);
+    }
+  };
 
   // when needsNewKey turns true, call refreshKey or indicate login needed
   useEffect(() => {
