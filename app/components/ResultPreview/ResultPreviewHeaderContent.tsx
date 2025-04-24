@@ -398,7 +398,7 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
                   <PublishIcon className="h-5 w-5" />
                 )}
                 <span className="hidden text-xs whitespace-nowrap min-[1024px]:inline">
-                  {urlCopied ? 'URL copied' : 'Publish'}
+                  {urlCopied ? 'URL copied' : 'Share'}
                 </span>
               </button>
             </div>
