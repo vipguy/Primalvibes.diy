@@ -23,6 +23,10 @@ export const publishedVibes = [
     name: 'Ascii Camera',
     url: 'https://physical-krill-5417.vibecode.garden',
   },
+  {
+    name: 'Doodlebox',
+    url: 'https://graceful-ptarmigan-9865.vibecode.garden/',
+  },
 ];
 
 interface FeaturedVibesProps {
