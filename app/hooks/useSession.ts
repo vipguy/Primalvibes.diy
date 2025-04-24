@@ -44,10 +44,15 @@ export function useSession(routedSessionId?: string) {
   } = useLazyFireproof(sessionDbName);
 
   // Automatically open the database if we have a routed session ID
-  // or whenever the effective session ID changes
+  // This ensures existing sessions are loaded immediately
+  // But prevents creating empty databases unnecessarily
   useEffect(() => {
-    openSessionDatabase();
-  }, [sessionId, openSessionDatabase]);
+    // Only open the database if we have a session from the URL
+    // or if this is the result of a user action (not just page load)
+    if (routedSessionId) {
+      openSessionDatabase();
+    }
+  }, [routedSessionId, openSessionDatabase]);
 
   // Session document is stored in the main database
   const { doc: session, merge: mergeSession } = useMainDocument<SessionDocument>(
