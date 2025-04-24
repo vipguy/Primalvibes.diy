@@ -11,6 +11,7 @@ interface StructuredMessageProps {
   setMobilePreviewShown: (shown: boolean) => void;
   rawText?: string; // Raw message text to be copied on shift+click
   setActiveView?: (view: 'preview' | 'code' | 'data') => void; // Add ability to set active view
+  isLatestMessage?: boolean; // Add prop to determine if this is the latest AI message
 }
 
 // Extracted CodeSegment as a separate component to avoid hooks in render functions
@@ -238,6 +239,7 @@ const StructuredMessage = ({
   setMobilePreviewShown,
   rawText,
   setActiveView,
+  isLatestMessage = false, // Default to false if not provided
 }: StructuredMessageProps) => {
   // Ensure segments is an array (defensive)
   const validSegments = Array.isArray(segments) ? segments : [];
@@ -332,8 +334,8 @@ const StructuredMessage = ({
           })
       )}
 
-      {/* Show streaming indicator only when streaming AND we already have content */}
-      {isStreaming && hasContent && (
+      {/* Show streaming indicator only when this is the latest message, streaming is active, and we already have content */}
+      {isStreaming && hasContent && isLatestMessage && (
         <span className="bg-light-primary dark:bg-dark-primary ml-1 inline-block h-4 w-2 animate-pulse" />
       )}
     </div>

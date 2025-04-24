@@ -15,6 +15,7 @@ interface MessageProps {
   selectedResponseId: string;
   setMobilePreviewShown: (shown: boolean) => void;
   setActiveView?: (view: 'preview' | 'code' | 'data') => void;
+  isLatestMessage?: boolean; // Flag to indicate if this is the latest AI message for showing the streaming indicator
 }
 
 // AI Message component (simplified without animation handling)
@@ -27,6 +28,7 @@ const AIMessage = memo(
     selectedResponseId,
     setMobilePreviewShown,
     setActiveView,
+    isLatestMessage,
   }: {
     message: AiChatMessageDocument;
     model?: string;
@@ -35,6 +37,7 @@ const AIMessage = memo(
     selectedResponseId: string;
     setMobilePreviewShown: (shown: boolean) => void;
     setActiveView?: (view: 'preview' | 'code' | 'data') => void;
+    isLatestMessage?: boolean;
   }) => {
     const { segments } = parseContent(message.text);
     return (
@@ -77,6 +80,7 @@ const AIMessage = memo(
             setMobilePreviewShown={setMobilePreviewShown}
             rawText={message.text}
             setActiveView={setActiveView}
+            isLatestMessage={isLatestMessage}
           />
         </div>
       </div>
@@ -91,7 +95,8 @@ const AIMessage = memo(
       prevProps.setSelectedResponseId !== nextProps.setSelectedResponseId ||
       prevProps.selectedResponseId !== nextProps.selectedResponseId ||
       prevProps.setMobilePreviewShown !== nextProps.setMobilePreviewShown ||
-      prevProps.setActiveView !== nextProps.setActiveView
+      prevProps.setActiveView !== nextProps.setActiveView ||
+      prevProps.isLatestMessage !== nextProps.isLatestMessage
     ) {
       return false;
     }
@@ -154,6 +159,7 @@ const Message = memo(
     selectedResponseId,
     setMobilePreviewShown,
     setActiveView,
+    isLatestMessage,
   }: MessageProps) => {
     return (
       <div className="transition-all duration-150 ease-in hover:opacity-95">
@@ -166,6 +172,7 @@ const Message = memo(
             selectedResponseId={selectedResponseId}
             setMobilePreviewShown={setMobilePreviewShown}
             setActiveView={setActiveView}
+            isLatestMessage={isLatestMessage}
           />
         ) : message.type === 'system' ? (
           <SystemMessage message={message as SystemChatMessageDocument} />
@@ -204,6 +211,11 @@ const Message = memo(
     // Check if setActiveView changed
     if (prevProps.setActiveView !== nextProps.setActiveView) {
       return false; // Active view function changed, need to re-render
+    }
+
+    // Check if isLatestMessage changed
+    if (prevProps.isLatestMessage !== nextProps.isLatestMessage) {
+      return false; // Latest message flag changed, need to re-render
     }
 
     // If we get here, props are equal enough to skip re-render

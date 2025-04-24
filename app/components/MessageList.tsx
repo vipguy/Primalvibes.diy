@@ -85,7 +85,13 @@ function MessageList({
     }
 
     // Otherwise, just render normal messages
+    // Find the index of the latest AI message for streaming indicator
+    const latestAiMessageIndex = messages.map((msg) => msg.type).lastIndexOf('ai');
+
     return messages.map((msg, i) => {
+      // Only show the streaming indicator on the latest AI message
+      const isLatestAiMessage = isStreaming && i === latestAiMessageIndex && msg.type === 'ai';
+
       return (
         <Message
           key={msg._id || 'streaming' + i}
@@ -95,6 +101,7 @@ function MessageList({
           selectedResponseId={selectedResponseId}
           setMobilePreviewShown={setMobilePreviewShown}
           setActiveView={setActiveView}
+          isLatestMessage={isLatestAiMessage}
         />
       );
     });
