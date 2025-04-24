@@ -124,22 +124,40 @@ export function VibeCardData({ vibeId }: VibeCardDataProps) {
     };
   }, [vibeId]);
 
-  // Create a default/placeholder vibe with loading state if we're still loading
-  // or if the vibe data failed to load
-  const title = isLoading ? 'Loading...' : 'Vibe Not Found';
-  const vibeData = vibe || {
-    id: vibeId,
-    title,
-    encodedTitle: title.toLowerCase().replace(/ /g, '-'),
-    slug: vibeId,
-    created: new Date().toISOString(),
-    favorite: false,
-    publishedUrl: undefined,
-  };
+  // If we're still loading, show a loading placeholder
+  if (isLoading) {
+    const loadingVibeData = {
+      id: vibeId,
+      title: 'Loading...',
+      encodedTitle: 'loading',
+      slug: vibeId,
+      created: new Date().toISOString(),
+      favorite: false,
+      publishedUrl: undefined,
+    };
 
+    return (
+      <VibeCard
+        vibe={loadingVibeData}
+        screenshot={screenshot}
+        confirmDelete={confirmDelete}
+        onEditClick={handleEditClick}
+        onToggleFavorite={handleToggleFavorite}
+        onDeleteClick={handleDeleteClick}
+        onRemixClick={handleRemixClick}
+      />
+    );
+  }
+
+  // If the vibe wasn't found (not loading and no data), return null to filter it out
+  if (!vibe) {
+    return null;
+  }
+
+  // We have a valid vibe, render it
   return (
     <VibeCard
-      vibe={vibeData}
+      vibe={vibe}
       screenshot={screenshot}
       confirmDelete={confirmDelete}
       onEditClick={handleEditClick}
