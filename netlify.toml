@@ -4,10 +4,10 @@
   functions = "netlify/functions"
 
 [dev]
-  command = "react-router dev --port 5175"
-  targetPort = 5175
+  command = "react-router dev --port 5174"
+  targetPort = 5174
   framework = "#custom"
-  port = 8889
+  port = 8888
 
 [[redirects]]
   from = "/*"
