@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SimpleAppLayout from '../components/SimpleAppLayout';
 import { StarIcon } from '../components/SessionSidebar/StarIcon';
@@ -34,6 +34,32 @@ export default function MyVibesRoute(): ReactElement {
     }
     return vibes;
   }, [vibes, showOnlyFavorites]);
+
+  // Simple state for how many vibes to show
+  const [itemsToShow, setItemsToShow] = useState(9);
+  const loadingTriggerRef = useRef<HTMLDivElement>(null);
+
+  // Simple function to load more vibes
+  const loadMoreVibes = () => {
+    setItemsToShow((prev) => Math.min(prev + 9, filteredVibes.length));
+  };
+
+  // Infinite scroll detection
+  useEffect(() => {
+    if (!loadingTriggerRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && itemsToShow < filteredVibes.length) {
+          loadMoreVibes();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+
+    observer.observe(loadingTriggerRef.current);
+    return () => observer.disconnect();
+  }, [itemsToShow, filteredVibes.length]);
 
   return (
     <SimpleAppLayout
@@ -99,9 +125,15 @@ export default function MyVibesRoute(): ReactElement {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {filteredVibes.map((vibe) => (
+              {/* Render vibes with simple slicing */}
+              {filteredVibes.slice(0, itemsToShow).map((vibe) => (
                 <VibeCardData key={vibe.id} vibeId={vibe.id} />
               ))}
+
+              {/* Invisible loading trigger for infinite scroll */}
+              {itemsToShow < filteredVibes.length && (
+                <div ref={loadingTriggerRef} className="col-span-full h-4" aria-hidden="true" />
+              )}
             </div>
           )}
         </div>
