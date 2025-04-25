@@ -24,8 +24,8 @@ export const publishedVibes = [
     url: 'https://physical-krill-5417.vibecode.garden',
   },
   {
-    name: 'Doodlebox',
-    url: 'https://graceful-ptarmigan-9865.vibecode.garden/',
+    name: 'Cosmic Canvas',
+    url: 'https://urban-ant-4026.vibecode.garden/',
   },
 ];
 
