@@ -8,8 +8,8 @@ export const publishedVibes = [
     url: 'https://immense-shrimp-9469.vibecode.garden/',
   },
   {
-    name: 'Quiz Game',
-    url: 'https://miniature-mouse-6448.vibecode.garden/',
+    name: 'Party Game',
+    url: 'https://cute-frog-9259.vibecode.garden',
   },
   {
     name: '303 Synth',
@@ -22,6 +22,10 @@ export const publishedVibes = [
   {
     name: 'Ascii Camera',
     url: 'https://physical-krill-5417.vibecode.garden',
+  },
+  {
+    name: 'Moto Tempest',
+    url: 'https://proper-lemur-3368.vibecode.garden/',
   },
   {
     name: 'Cosmic Canvas',
