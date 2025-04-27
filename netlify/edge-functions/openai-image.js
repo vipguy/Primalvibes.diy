@@ -25,8 +25,8 @@ export default async (request, context) => {
   try {
     // Authorization validation
     const authHeader = request.headers.get('Authorization');
-    // Check if we're in development mode
-    const isDev = process.env.NODE_ENV === 'development' || request.url.includes('localhost');
+    // Check if we're in development mode based on URL
+    const isDev = request.url.includes('localhost') || request.url.includes('127.0.0.1');
     
     if (!isDev && (!authHeader || !authHeader.startsWith('Bearer '))) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
