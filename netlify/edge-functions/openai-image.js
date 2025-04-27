@@ -187,11 +187,22 @@ async function handleGenerateImage(requestData, openaiApiKey, userId) {
         });
       }
       
-      // Stream the response directly back to the client
+      // Stream the response efficiently
       console.log(`✅ EDGE FUNCTION: Successfully generated image - streaming response`);
       
-      // Return the response directly, no need to parse JSON
-      return new Response(openaiResponse.body, {
+      // Use native body with proper error handling
+      const { readable, writable } = new TransformStream();
+      
+      // Clone the response to avoid locking the body
+      const clonedResponse = openaiResponse.clone();
+      
+      // Process the response without awaiting
+      clonedResponse.body.pipeTo(writable).catch(err => {
+        console.error(`❌ Edge Function: Pipe error:`, err);
+      });
+      
+      // Return the stream immediately
+      return new Response(readable, {
         headers: { 
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
@@ -339,11 +350,22 @@ async function handleEditImage(request, requestData, openaiApiKey, userId) {
         });
       }
       
-      // Stream the response directly back to the client
+      // Stream the response efficiently
       console.log(`✅ EDGE FUNCTION: Successfully edited image - streaming response`);
       
-      // Return the response directly, no need to parse JSON
-      return new Response(openaiResponse.body, {
+      // Use native body with proper error handling
+      const { readable, writable } = new TransformStream();
+      
+      // Clone the response to avoid locking the body
+      const clonedResponse = openaiResponse.clone();
+      
+      // Process the response without awaiting
+      clonedResponse.body.pipeTo(writable).catch(err => {
+        console.error(`❌ Edge Function: Pipe error:`, err);
+      });
+      
+      // Return the stream immediately
+      return new Response(readable, {
         headers: { 
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
