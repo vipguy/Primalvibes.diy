@@ -1,6 +1,6 @@
 export default async (request, context) => {
   console.log(`💾 EDGE FUNCTION: Image request received for ${request.url}`);
-  
+
   // Handle CORS preflight requests
   if (request.method === 'OPTIONS') {
     return new Response(null, {
@@ -13,7 +13,7 @@ export default async (request, context) => {
       },
     });
   }
-  
+
   // Extract the path segment after /api/openai-image/
   const url = new URL(request.url);
   const pathSegments = url.pathname.split('/');
@@ -27,15 +27,15 @@ export default async (request, context) => {
     const authHeader = request.headers.get('Authorization');
     // Check if we're in development mode based on URL
     const isDev = request.url.includes('localhost') || request.url.includes('127.0.0.1');
-    
+
     if (!isDev && (!authHeader || !authHeader.startsWith('Bearer '))) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         },
       });
     }
@@ -43,7 +43,7 @@ export default async (request, context) => {
     // Extract userId from request body if available
     let requestBody;
     const contentType = request.headers.get('Content-Type') || '';
-    
+
     if (contentType.includes('multipart/form-data')) {
       // For multipart form data (used in edit endpoint with image uploads)
       const formData = await request.formData();
@@ -70,11 +70,11 @@ export default async (request, context) => {
     if (!openaiApiKey) {
       return new Response(JSON.stringify({ error: 'OpenAI API key not configured' }), {
         status: 500,
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         },
       });
     }
@@ -88,11 +88,11 @@ export default async (request, context) => {
       default:
         return new Response(JSON.stringify({ error: 'Invalid image action' }), {
           status: 400,
-          headers: { 
+          headers: {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
           },
         });
     }
@@ -100,11 +100,11 @@ export default async (request, context) => {
     console.error(`❌ EDGE FUNCTION: Error:`, error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       },
     });
   }
@@ -114,7 +114,7 @@ export default async (request, context) => {
 async function handleGenerateImage(requestData, openaiApiKey, userId) {
   console.log(`🖼️ Edge Function: Generating image for user: ${userId}`);
   try {
-    const { 
+    const {
       prompt,
       model = 'gpt-image-1', // default to GPT Image model
       n = 1, // number of images to generate
@@ -123,22 +123,24 @@ async function handleGenerateImage(requestData, openaiApiKey, userId) {
       background = 'auto', // transparent or opaque or auto
       output_format = 'png', // png, jpeg, or webp
       output_compression = null, // 0-100 for jpeg and webp
-      moderation = 'auto' // auto or low
+      moderation = 'auto', // auto or low
     } = requestData;
 
     if (!prompt) {
       return new Response(JSON.stringify({ error: 'Prompt is required' }), {
         status: 400,
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         },
       });
     }
 
-    console.log(`🎨 Edge Function: Image generation with prompt: "${prompt.substring(0, 50)}${prompt.length > 50 ? '...' : ''}"`);
+    console.log(
+      `🎨 Edge Function: Image generation with prompt: "${prompt.substring(0, 50)}${prompt.length > 50 ? '...' : ''}"`
+    );
 
     // Prepare request body with conditional parameters
     const requestBody = {
@@ -148,77 +150,80 @@ async function handleGenerateImage(requestData, openaiApiKey, userId) {
       quality,
       size,
       background,
-      user: userId // For OpenAI billing purposes
+      user: userId, // For OpenAI billing purposes
     };
-    
+
     // Only add output format and compression if specified
     if (output_format) requestBody.output_format = output_format;
     if (output_compression !== null && (output_format === 'jpeg' || output_format === 'webp')) {
       requestBody.output_compression = output_compression;
     }
     if (moderation) requestBody.moderation = moderation;
-    
+
     // Send request to OpenAI API
     try {
       const openaiResponse = await fetch('https://api.openai.com/v1/images/generations', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${openaiApiKey}`,
+          Authorization: `Bearer ${openaiApiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(requestBody),
       });
-      
+
       // If there's an error from the OpenAI API, handle it
       if (!openaiResponse.ok) {
         const errorData = await openaiResponse.json();
         console.error(`❌ Edge Function: Error generating image:`, errorData);
-        return new Response(JSON.stringify({ 
-          error: 'Failed to generate image', 
-          details: errorData 
-        }), {
-          status: openaiResponse.status,
-          headers: { 
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-          },
-        });
+        return new Response(
+          JSON.stringify({
+            error: 'Failed to generate image',
+            details: errorData,
+          }),
+          {
+            status: openaiResponse.status,
+            headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+              'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            },
+          }
+        );
       }
-      
+
       // Stream the response efficiently
       console.log(`✅ EDGE FUNCTION: Successfully generated image - streaming response`);
-      
+
       // Use native body with proper error handling
       const { readable, writable } = new TransformStream();
-      
+
       // Clone the response to avoid locking the body
       const clonedResponse = openaiResponse.clone();
-      
+
       // Process the response without awaiting
-      clonedResponse.body.pipeTo(writable).catch(err => {
+      clonedResponse.body.pipeTo(writable).catch((err) => {
         console.error(`❌ Edge Function: Pipe error:`, err);
       });
-      
+
       // Return the stream immediately
       return new Response(readable, {
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         },
       });
     } catch (streamError) {
       console.error(`❌ Edge Function: Error in streaming:`, streamError);
       return new Response(JSON.stringify({ error: streamError.message }), {
         status: 500,
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         },
       });
     }
@@ -226,11 +231,11 @@ async function handleGenerateImage(requestData, openaiApiKey, userId) {
     console.error(`❌ Edge Function: Error in handleGenerateImage:`, error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       },
     });
   }
@@ -240,7 +245,7 @@ async function handleGenerateImage(requestData, openaiApiKey, userId) {
 async function handleEditImage(request, requestData, openaiApiKey, userId) {
   console.log(`🖌️ Edge Function: Editing image for user: ${userId}`);
   try {
-    const { 
+    const {
       prompt,
       model = 'gpt-image-1', // GPT Image model
       n = 1, // number of images to generate
@@ -249,17 +254,17 @@ async function handleEditImage(request, requestData, openaiApiKey, userId) {
       background = 'auto', // transparent, opaque, or auto
       output_format = 'png', // png, jpeg, or webp
       output_compression = null, // 0-100 for jpeg and webp
-      moderation = 'auto' // auto or low
+      moderation = 'auto', // auto or low
     } = requestData;
 
     if (!prompt) {
       return new Response(JSON.stringify({ error: 'Prompt is required' }), {
         status: 400,
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         },
       });
     }
@@ -268,7 +273,7 @@ async function handleEditImage(request, requestData, openaiApiKey, userId) {
     let imageData;
     let maskData = null;
     let multipleImages = [];
-    
+
     // Process form data to extract images
     const formData = await request.formData();
     for (const [name, value] of formData.entries()) {
@@ -289,9 +294,13 @@ async function handleEditImage(request, requestData, openaiApiKey, userId) {
       });
     }
 
-    console.log(`🎨 Edge Function: Image edit with prompt: "${prompt.substring(0, 50)}${prompt.length > 50 ? '...' : ''}"`); 
-    console.log(`📊 Edge Function: Edit with ${imageData ? 'single image' : ''} ${maskData ? 'and mask' : ''} ${multipleImages.length > 0 ? `and ${multipleImages.length} reference images` : ''}`);
-    
+    console.log(
+      `🎨 Edge Function: Image edit with prompt: "${prompt.substring(0, 50)}${prompt.length > 50 ? '...' : ''}"`
+    );
+    console.log(
+      `📊 Edge Function: Edit with ${imageData ? 'single image' : ''} ${maskData ? 'and mask' : ''} ${multipleImages.length > 0 ? `and ${multipleImages.length} reference images` : ''}`
+    );
+
     // Prepare request body
     const formDataToSend = new FormData();
     formDataToSend.append('prompt', prompt);
@@ -306,7 +315,7 @@ async function handleEditImage(request, requestData, openaiApiKey, userId) {
     }
     if (moderation) formDataToSend.append('moderation', moderation);
     formDataToSend.append('user', userId);
-    
+
     // Add images - handling both single image and multiple images cases
     if (multipleImages.length > 0) {
       // Multiple images case (like the gift basket example)
@@ -316,7 +325,7 @@ async function handleEditImage(request, requestData, openaiApiKey, userId) {
     } else if (imageData) {
       // Single image case
       formDataToSend.append('image', new Blob([imageData]), 'image.png');
-      
+
       if (maskData) {
         formDataToSend.append('mask', new Blob([maskData]), 'mask.png');
       }
@@ -327,61 +336,64 @@ async function handleEditImage(request, requestData, openaiApiKey, userId) {
       const openaiResponse = await fetch('https://api.openai.com/v1/images/edit', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${openaiApiKey}`,
+          Authorization: `Bearer ${openaiApiKey}`,
         },
         body: formDataToSend,
       });
-      
+
       // If there's an error from the OpenAI API, handle it
       if (!openaiResponse.ok) {
         const errorData = await openaiResponse.json();
         console.error(`❌ Edge Function: Error editing image:`, errorData);
-        return new Response(JSON.stringify({ 
-          error: 'Failed to edit image', 
-          details: errorData 
-        }), {
-          status: openaiResponse.status,
-          headers: { 
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-          },
-        });
+        return new Response(
+          JSON.stringify({
+            error: 'Failed to edit image',
+            details: errorData,
+          }),
+          {
+            status: openaiResponse.status,
+            headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+              'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            },
+          }
+        );
       }
-      
+
       // Stream the response efficiently
       console.log(`✅ EDGE FUNCTION: Successfully edited image - streaming response`);
-      
+
       // Use native body with proper error handling
       const { readable, writable } = new TransformStream();
-      
+
       // Clone the response to avoid locking the body
       const clonedResponse = openaiResponse.clone();
-      
+
       // Process the response without awaiting
-      clonedResponse.body.pipeTo(writable).catch(err => {
+      clonedResponse.body.pipeTo(writable).catch((err) => {
         console.error(`❌ Edge Function: Pipe error:`, err);
       });
-      
+
       // Return the stream immediately
       return new Response(readable, {
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         },
       });
     } catch (streamError) {
       console.error(`❌ Edge Function: Error in streaming edited image:`, streamError);
       return new Response(JSON.stringify({ error: streamError.message }), {
         status: 500,
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         },
       });
     }
@@ -389,11 +401,11 @@ async function handleEditImage(request, requestData, openaiApiKey, userId) {
     console.error(`❌ Edge Function: Error in handleEditImage:`, error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       },
     });
   }

@@ -16,7 +16,11 @@ interface ViewControlsProps {
   onClick?: (view: ViewType) => void;
 }
 
-export const ViewControls: React.FC<ViewControlsProps> = ({ viewControls, currentView, onClick }) => {
+export const ViewControls: React.FC<ViewControlsProps> = ({
+  viewControls,
+  currentView,
+  onClick,
+}) => {
   return (
     <div className="bg-light-decorative-00 dark:bg-dark-decorative-00 flex justify-center gap-1 rounded-md p-1 shadow-sm">
       {Object.entries(viewControls).map(([viewType, control]) => {
