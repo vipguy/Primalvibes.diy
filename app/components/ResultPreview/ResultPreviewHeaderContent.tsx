@@ -47,7 +47,7 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
   const { session, docs: messages, updatePublishedUrl } = useSession(sessionId);
 
   // Use the new ViewState hook to manage all view-related state and navigation
-  const { currentView, displayView, viewControls, showViewControls } = useViewState({
+  const { currentView, displayView, viewControls, showViewControls, navigateToView } = useViewState({
     sessionId,
     title,
     code,
@@ -100,7 +100,7 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
 
       {/* Center - View controls */}
       <div className="flex w-1/2 items-center justify-center">
-        {showViewControls && <ViewControls viewControls={viewControls} currentView={currentView} />}
+        {showViewControls && <ViewControls viewControls={viewControls} currentView={currentView} onClick={navigateToView} />}
       </div>
       {/* Right side - Publish button */}
       <div className="flex w-1/4 items-center justify-end">
