@@ -159,24 +159,50 @@ async function handleGenerateImage(requestData, openaiApiKey, userId) {
     if (moderation) requestBody.moderation = moderation;
     
     // Send request to OpenAI API
-    const response = await fetch('https://api.openai.com/v1/images/generations', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openaiApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error(`❌ Edge Function: Error generating image:`, data);
-      return new Response(JSON.stringify({ 
-        error: 'Failed to generate image', 
-        details: data 
-      }), {
-        status: response.status,
+    try {
+      const openaiResponse = await fetch('https://api.openai.com/v1/images/generations', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openaiApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+      
+      // If there's an error from the OpenAI API, handle it
+      if (!openaiResponse.ok) {
+        const errorData = await openaiResponse.json();
+        console.error(`❌ Edge Function: Error generating image:`, errorData);
+        return new Response(JSON.stringify({ 
+          error: 'Failed to generate image', 
+          details: errorData 
+        }), {
+          status: openaiResponse.status,
+          headers: { 
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+          },
+        });
+      }
+      
+      // Stream the response directly back to the client
+      console.log(`✅ EDGE FUNCTION: Successfully generated image - streaming response`);
+      
+      // Return the response directly, no need to parse JSON
+      return new Response(openaiResponse.body, {
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        },
+      });
+    } catch (streamError) {
+      console.error(`❌ Edge Function: Error in streaming:`, streamError);
+      return new Response(JSON.stringify({ error: streamError.message }), {
+        status: 500,
         headers: { 
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
@@ -185,18 +211,6 @@ async function handleGenerateImage(requestData, openaiApiKey, userId) {
         },
       });
     }
-
-    console.log(`✅ EDGE FUNCTION: Successfully generated image`);
-
-    return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: { 
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-      },
-    });
   } catch (error) {
     console.error(`❌ Edge Function: Error in handleGenerateImage:`, error);
     return new Response(JSON.stringify({ error: error.message }), {
@@ -298,38 +312,57 @@ async function handleEditImage(request, requestData, openaiApiKey, userId) {
     }
 
     // Send request to OpenAI API
-    const response = await fetch('https://api.openai.com/v1/images/edit', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openaiApiKey}`,
-      },
-      body: formDataToSend,
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error(`❌ Edge Function: Error editing image:`, data);
-      return new Response(JSON.stringify({ 
-        error: 'Failed to edit image', 
-        details: data 
-      }), {
-        status: response.status,
-        headers: { 'Content-Type': 'application/json' },
+    try {
+      const openaiResponse = await fetch('https://api.openai.com/v1/images/edit', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openaiApiKey}`,
+        },
+        body: formDataToSend,
+      });
+      
+      // If there's an error from the OpenAI API, handle it
+      if (!openaiResponse.ok) {
+        const errorData = await openaiResponse.json();
+        console.error(`❌ Edge Function: Error editing image:`, errorData);
+        return new Response(JSON.stringify({ 
+          error: 'Failed to edit image', 
+          details: errorData 
+        }), {
+          status: openaiResponse.status,
+          headers: { 
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+          },
+        });
+      }
+      
+      // Stream the response directly back to the client
+      console.log(`✅ EDGE FUNCTION: Successfully edited image - streaming response`);
+      
+      // Return the response directly, no need to parse JSON
+      return new Response(openaiResponse.body, {
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        },
+      });
+    } catch (streamError) {
+      console.error(`❌ Edge Function: Error in streaming edited image:`, streamError);
+      return new Response(JSON.stringify({ error: streamError.message }), {
+        status: 500,
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        },
       });
     }
-
-    console.log(`✅ EDGE FUNCTION: Successfully edited image`);
-
-    return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: { 
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-      },
-    });
   } catch (error) {
     console.error(`❌ Edge Function: Error in handleEditImage:`, error);
     return new Response(JSON.stringify({ error: error.message }), {
