@@ -206,7 +206,7 @@
           "react-dom": "https://esm.sh/react-dom@19.1.0/es2022/react-dom.mjs",
           "react-dom/client": "https://esm.sh/react-dom@19.1.0/es2022/client.mjs",
           "use-fireproof": "https://esm.sh/use-fireproof@0.20.4",
-          "call-ai": "https://esm.sh/call-ai@0.8.1",
+          "call-ai": "https://esm.sh/call-ai@0.8.3",
           "three": "https://esm.sh/three"
         }
       }
@@ -368,6 +368,8 @@
     </script>
 
     <script type="text/babel" data-type="module">
+      window.CALLAI_IMG_URL = 'https://vibecode.garden';
+
       import ReactDOMClient from 'react-dom/client';
 
       // App runs normally without our interference, but the iframe loads our script to modify use-fireproof
