@@ -20,8 +20,20 @@ export const publishedVibes = [
     url: 'https://loose-gerbil-5537.vibecode.garden/',
   },
   {
+    name: 'Startup Landing',
+    url: 'https://dominant-lion-3190.vibecode.garden/',
+  },
+  {
+    name: 'Archive Radio',
+    url: 'https://minimum-sawfish-6762.vibecode.garden',
+  },
+  {
     name: 'BMX Legends',
     url: 'https://interested-barnacle-9449.vibecode.garden',
+  },
+  {
+    name: 'Vibecode News',
+    url: 'https://smiling-barnacle-8368.vibecode.garden/',
   },
   {
     name: 'Museum API',

@@ -23,8 +23,7 @@ export default function PublishedVibeCard({
 
   return (
     <div className="border-light-decorative-01 dark:border-dark-decorative-01 relative overflow-hidden rounded-md border transition-colors hover:border-blue-500">
-      {/* Card links directly to remix URL */}
-      <Link to={`/remix/${slug}`} className="block h-full w-full">
+      <Link to={normalizedUrl} className="block h-full w-full">
         <div className="p-2 py-1">
           <div className="flex h-8 items-center justify-between">
             <h3
