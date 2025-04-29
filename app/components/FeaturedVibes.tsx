@@ -16,6 +16,14 @@ export const publishedVibes = [
     url: 'https://nice-peacock-7883.vibecode.garden/',
   },
   {
+    name: 'Color Bender',
+    url: 'https://loose-gerbil-5537.vibecode.garden/',
+  },
+  {
+    name: 'BMX Legends',
+    url: 'https://interested-barnacle-9449.vibecode.garden',
+  },
+  {
     name: 'Museum API',
     url: 'https://global-kingfisher-4005.vibecode.garden',
   },
