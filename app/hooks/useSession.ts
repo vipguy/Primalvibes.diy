@@ -1,9 +1,6 @@
 import { useCallback, useState, useEffect } from 'react';
-import { useFireproof } from 'use-fireproof';
-import { FIREPROOF_CHAT_HISTORY } from '../config/env';
 import type {
   AiChatMessageDocument,
-  SessionDocument,
   UserChatMessageDocument,
   VibeDocument,
   ChatMessageDocument,
@@ -13,9 +10,6 @@ import { useLazyFireproof } from './useLazyFireproof';
 import { encodeTitle } from '../components/SessionSidebar/utils';
 
 export function useSession(routedSessionId?: string) {
-  const { useDocument: useMainDocument, database: mainDatabase } =
-    useFireproof(FIREPROOF_CHAT_HISTORY);
-
   const [generatedSessionId] = useState(
     () =>
       `${Date.now().toString(36).padStart(9, 'f')}${Math.random().toString(36).slice(2, 11).padEnd(9, '0')}`
@@ -41,30 +35,14 @@ export function useSession(routedSessionId?: string) {
     useDocument: useSessionDocument,
     useLiveQuery: useSessionLiveQuery,
     open: openSessionDatabase,
-  } = useLazyFireproof(sessionDbName);
+  } = useLazyFireproof(sessionDbName, !!routedSessionId);
 
-  // Automatically open the database if we have a routed session ID
-  // This ensures existing sessions are loaded immediately
-  // But prevents creating empty databases unnecessarily
+  // Explicitly open the database when a sessionId is provided
   useEffect(() => {
-    // Only open the database if we have a session from the URL
-    // or if this is the result of a user action (not just page load)
     if (routedSessionId) {
       openSessionDatabase();
     }
   }, [routedSessionId, openSessionDatabase]);
-
-  // Session document is stored in the main database
-  const { doc: session, merge: mergeSession } = useMainDocument<SessionDocument>(
-    (routedSessionId
-      ? { _id: routedSessionId }
-      : {
-          _id: sessionId,
-          type: 'session',
-          title: '',
-          created_at: Date.now(),
-        }) as SessionDocument
-  );
 
   // User message is stored in the session-specific database
   const {
@@ -91,59 +69,49 @@ export function useSession(routedSessionId?: string) {
     created_at: Date.now(),
   });
 
+  // Vibe document is stored in the session-specific database
+  const {
+    doc: vibeDoc,
+    merge: mergeVibeDoc,
+    save: saveVibeDoc,
+  } = useSessionDocument<VibeDocument>({
+    _id: 'vibe',
+    title: '',
+    encodedTitle: '',
+    created_at: Date.now(),
+    remixOf: '',
+  });
+
   // Query messages from the session-specific database
-  const { docs } = useSessionLiveQuery('session_id', { key: session._id }) as {
+  const { docs } = useSessionLiveQuery('session_id', { key: sessionId }) as {
     docs: ChatMessageDocument[];
   };
 
-  // Update session title (in session database only)
+  // Update session title using the vibe document
   const updateTitle = useCallback(
     async (title: string) => {
-      // Update local session state for UI
-      mergeSession({ title });
-
-      // Encode the title for URL-friendly slug
       const encodedTitle = encodeTitle(title);
 
-      // Store title in the vibe document
-      const currentVibeDoc = await sessionDatabase.get<VibeDocument>('vibe').catch(() => null);
-      if (currentVibeDoc) {
-        currentVibeDoc.title = title;
-        currentVibeDoc.encodedTitle = encodedTitle;
-        await sessionDatabase.put(currentVibeDoc);
-      } else {
-        await sessionDatabase.put({
-          _id: 'vibe',
-          title,
-          encodedTitle,
-          created_at: Date.now(),
-        });
-      }
+      await mergeVibeDoc({
+        title,
+        encodedTitle,
+      });
+
+      await saveVibeDoc();
     },
-    [mergeSession, sessionDatabase]
+    [mergeVibeDoc, saveVibeDoc]
   );
 
-  // Update published URL (in vibe document in session database only)
+  // Update published URL using the vibe document
   const updatePublishedUrl = useCallback(
     async (publishedUrl: string) => {
-      // Update local session state for UI
-      mergeSession({ publishedUrl });
+      await mergeVibeDoc({
+        publishedUrl,
+      });
 
-      // Store the URL in the vibe document in the session database
-      const currentVibeDoc = await sessionDatabase.get<VibeDocument>('vibe').catch(() => null);
-      if (currentVibeDoc) {
-        currentVibeDoc.publishedUrl = publishedUrl;
-        await sessionDatabase.put(currentVibeDoc);
-      } else {
-        await sessionDatabase.put({
-          _id: 'vibe',
-          title: session.title || '',
-          publishedUrl,
-          created_at: Date.now(),
-        });
-      }
+      await saveVibeDoc();
     },
-    [mergeSession, session, sessionDatabase]
+    [mergeVibeDoc, saveVibeDoc]
   );
 
   // Add a screenshot to the session (in session-specific database)
@@ -175,10 +143,20 @@ export function useSession(routedSessionId?: string) {
 
   // Wrap submitUserMessage to ensure database is opened before first write
   const wrappedSubmitUserMessage = useCallback(async () => {
-    // Database will be automatically opened on first write via the LazyDB wrapper
-    // This explicit call is optional but makes the intent clear
     return submitUserMessage();
   }, [submitUserMessage]);
+
+  interface SessionView {
+    _id: string;
+    title: string;
+    publishedUrl?: string;
+  }
+
+  const session: SessionView = {
+    _id: sessionId,
+    title: vibeDoc.title,
+    publishedUrl: vibeDoc.publishedUrl,
+  };
 
   return {
     // Session information
@@ -186,7 +164,6 @@ export function useSession(routedSessionId?: string) {
     docs,
 
     // Databases
-    mainDatabase,
     sessionDatabase,
     openSessionDatabase,
 
@@ -194,7 +171,6 @@ export function useSession(routedSessionId?: string) {
     updateTitle,
     updatePublishedUrl,
     addScreenshot,
-
     // Message management
     userMessage,
     submitUserMessage: wrappedSubmitUserMessage,
@@ -203,5 +179,9 @@ export function useSession(routedSessionId?: string) {
     submitAiMessage,
     mergeAiMessage,
     saveAiMessage,
+    // Vibe document management
+    vibeDoc,
+    mergeVibeDoc,
+    saveVibeDoc,
   };
 }

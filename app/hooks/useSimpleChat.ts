@@ -11,6 +11,7 @@ import { streamAI } from '../utils/streamHandler';
 import { useApiKey } from './useApiKey';
 import { useAuth } from './useAuth';
 import { getCredits } from '../config/provisioning';
+import { FIREPROOF_CHAT_HISTORY } from '../config/env';
 
 // Import our custom hooks
 import { useSystemPromptManager } from './useSystemPromptManager';
@@ -50,9 +51,11 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     mergeAiMessage,
     addScreenshot,
     sessionDatabase,
-    mainDatabase,
     aiMessage,
   } = useSession(sessionId);
+
+  // Get main database directly for settings document
+  const { useDocument } = useFireproof(FIREPROOF_CHAT_HISTORY);
 
   const [vibeDoc, setVibeDoc] = useState<VibeDocument | undefined>(undefined);
 
@@ -130,7 +133,6 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // Get settings document
-  const { useDocument } = useFireproof(mainDatabase);
   const { doc: settingsDoc } = useDocument<UserSettings>({ _id: 'user_settings' });
 
   // State hooks
@@ -361,9 +363,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
 
             // Generate title if needed
             const { segments } = parseContent(aiMessage.text);
-            // if (!session?.title || (vibeDoc && vibeDoc.remixOf && docs.length === 3)) {
             await generateTitle(segments, TITLE_MODEL, apiKey || '').then(updateTitle);
-            // }
           } finally {
             isProcessingRef.current = false;
           }
@@ -398,7 +398,6 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
       sessionDatabase,
       setPendingAiMessage,
       setSelectedResponseId,
-      session?.title,
       updateTitle,
       checkCredits,
       apiKey,
@@ -476,7 +475,6 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
           // Signal that errors were sent to trigger clearing
           setDidSendErrors(true);
         } catch (error) {
-          console.error('[useSimpleChat] Failed to auto-send error report:', error);
           // Remove from sent errors if there was a failure
           sentErrorsRef.current.delete(errorFingerprint);
         } finally {
@@ -524,7 +522,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     codeReady,
     sendMessage,
     inputRef,
-    title: session?.title || '',
+    title: session.title,
     needsNewKey,
     setNeedsNewKey,
     needsLogin,
