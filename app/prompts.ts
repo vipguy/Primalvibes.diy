@@ -69,7 +69,7 @@ ${
     : ''
 }IMPORTANT: You are working in one JavaScript file, use tailwind classes for styling.
 
-Provide a title and brief explanation followed by the component code. The component should demonstrate proper Fireproof integration with real-time updates and proper data persistence. Follow it with a longer description of the app's purpose and detailed instructions how to use it (with occasional bold or italic for emphasis). Then suggest some additional features that could be added to the app.
+Provide a title and brief explanation followed by the component code. The component should demonstrate proper Fireproof integration with real-time updates and proper data persistence. Follow it with a short description of the app's purpose and instructions how to use it (with occasional bold or italic for emphasis). Then suggest some additional features that could be added to the app.
 
 Begin the component with the import statements. Use react, use-fireproof, and call-ai:
 
