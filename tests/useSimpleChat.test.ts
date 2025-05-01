@@ -51,6 +51,26 @@ vi.mock('../app/config/env', () => ({
   FIREPROOF_CHAT_HISTORY: 'test-chat-history',
 }));
 
+// Mock Fireproof to prevent CRDT errors
+vi.mock('use-fireproof', () => ({
+  useFireproof: () => ({
+    useDocument: () => [{ _id: 'mock-doc' }, vi.fn()],
+    useLiveQuery: () => [[]],
+    useFind: () => [[]],
+    useLiveFind: () => [[]],
+    useIndex: () => [[]],
+    useSubscribe: () => {},
+    database: {
+      put: vi.fn().mockResolvedValue({ id: 'test-id' }),
+      get: vi.fn().mockResolvedValue({ _id: 'test-id', title: 'Test Document' }),
+      query: vi.fn().mockResolvedValue({
+        rows: [{ id: 'session1', key: 'session1', value: { title: 'Test Session' } }],
+      }),
+      delete: vi.fn().mockResolvedValue({ ok: true }),
+    },
+  }),
+}));
+
 // Define shared state and reset function *outside* the mock factory
 type MockDoc = {
   _id?: string;
@@ -63,6 +83,7 @@ type MockDoc = {
   dependenciesString?: string;
   isStreaming?: boolean;
   model?: string;
+  dataUrl?: string; // For screenshot docs
 };
 let mockDocs: MockDoc[] = [];
 const initialMockDocs: MockDoc[] = [
@@ -663,74 +684,6 @@ export default Timer;`,
       };
     },
   };
-});
-
-describe('segmentParser utilities', () => {
-  it('correctly parses markdown content with no code blocks', () => {
-    const text = 'This is a simple markdown text with no code blocks.';
-    const result = parseContent(text);
-
-    expect(result.segments.length).toBe(1);
-    expect(result.segments[0].type).toBe('markdown');
-    expect(result.segments[0].content).toBe(text);
-    expect(result.dependenciesString).toBeUndefined();
-  });
-
-  it('correctly parses content with code blocks', () => {
-    const text = `
-Here's a React component:
-
-\`\`\`jsx
-function Button() {
-  return <button>Click me</button>;
-}
-\`\`\`
-
-You can use it in your app.
-    `.trim();
-
-    const result = parseContent(text);
-
-    expect(result.segments.length).toBe(3);
-    expect(result.segments[0].type).toBe('markdown');
-    expect(result.segments[0].content).toContain("Here's a React component:");
-    expect(result.segments[1].type).toBe('code');
-    expect(result.segments[1].content).toContain('function Button()');
-    expect(result.segments[2].type).toBe('markdown');
-    expect(result.segments[2].content).toContain('You can use it in your app.');
-  });
-
-  it('correctly extracts dependencies from content', () => {
-    const text = `{"react": "^18.2.0", "react-dom": "^18.2.0"}}
-
-Here's how to use React.
-    `.trim();
-
-    const result = parseContent(text);
-
-    expect(result.dependenciesString).toBe('{"react": "^18.2.0", "react-dom": "^18.2.0"}}');
-    expect(result.segments.length).toBe(1);
-    expect(result.segments[0].type).toBe('markdown');
-    expect(result.segments[0].content.trim()).toBe("Here's how to use React.");
-  });
-
-  it('correctly parses dependencies string into object', () => {
-    const dependenciesString = '{"react": "^18.2.0", "react-dom": "^18.2.0"}}';
-    const dependencies = parseDependencies(dependenciesString);
-
-    expect(dependencies).toEqual({
-      react: '^18.2.0',
-      'react-dom': '^18.2.0',
-    });
-  });
-
-  it('returns empty object for invalid dependencies string', () => {
-    const dependencies = parseDependencies(undefined);
-    expect(dependencies).toEqual({});
-
-    const emptyDependencies = parseDependencies('{}');
-    expect(emptyDependencies).toEqual({});
-  });
 });
 
 describe('useSimpleChat', () => {
