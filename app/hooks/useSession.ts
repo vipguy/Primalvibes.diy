@@ -70,11 +70,7 @@ export function useSession(routedSessionId?: string) {
   });
 
   // Vibe document is stored in the session-specific database
-  const {
-    doc: vibeDoc,
-    merge: mergeVibeDoc,
-    save: saveVibeDoc,
-  } = useSessionDocument<VibeDocument>({
+  const { doc: vibeDoc, merge: mergeVibeDoc } = useSessionDocument<VibeDocument>({
     _id: 'vibe',
     title: '',
     encodedTitle: '',
@@ -90,12 +86,10 @@ export function useSession(routedSessionId?: string) {
   // Update session title using the vibe document
   const updateTitle = useCallback(
     async (title: string) => {
-      console.log('Updating title to:', title);
       const encodedTitle = encodeTitle(title);
 
       vibeDoc.title = title;
       vibeDoc.encodedTitle = encodedTitle;
-      console.log('Merged vibe document', vibeDoc);
 
       await sessionDatabase.put(vibeDoc);
       mergeVibeDoc(vibeDoc);
@@ -106,13 +100,12 @@ export function useSession(routedSessionId?: string) {
   // Update published URL using the vibe document
   const updatePublishedUrl = useCallback(
     async (publishedUrl: string) => {
-      await mergeVibeDoc({
-        publishedUrl,
-      });
+      vibeDoc.publishedUrl = publishedUrl;
 
-      await saveVibeDoc();
+      await sessionDatabase.put(vibeDoc);
+      mergeVibeDoc(vibeDoc);
     },
-    [mergeVibeDoc, saveVibeDoc]
+    [sessionDatabase, vibeDoc, mergeVibeDoc]
   );
 
   // Add a screenshot to the session (in session-specific database)
@@ -182,7 +175,5 @@ export function useSession(routedSessionId?: string) {
     saveAiMessage,
     // Vibe document management
     vibeDoc,
-    mergeVibeDoc,
-    saveVibeDoc,
   };
 }
