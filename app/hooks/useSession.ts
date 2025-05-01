@@ -90,16 +90,17 @@ export function useSession(routedSessionId?: string) {
   // Update session title using the vibe document
   const updateTitle = useCallback(
     async (title: string) => {
+      console.log('Updating title to:', title);
       const encodedTitle = encodeTitle(title);
 
-      await mergeVibeDoc({
-        title,
-        encodedTitle,
-      });
+      vibeDoc.title = title;
+      vibeDoc.encodedTitle = encodedTitle;
+      console.log('Merged vibe document', vibeDoc);
 
-      await saveVibeDoc();
+      await sessionDatabase.put(vibeDoc);
+      mergeVibeDoc(vibeDoc);
     },
-    [mergeVibeDoc, saveVibeDoc]
+    [sessionDatabase, vibeDoc]
   );
 
   // Update published URL using the vibe document

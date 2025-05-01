@@ -18,8 +18,6 @@ import { useSystemPromptManager } from './useSystemPromptManager';
 import { useMessageSelection } from './useMessageSelection';
 import { useThrottledUpdates } from './useThrottledUpdates';
 
-import type { VibeDocument } from '../types/chat';
-
 // Constants
 const CODING_MODEL = 'anthropic/claude-3.7-sonnet';
 const TITLE_MODEL = 'meta-llama/llama-3.1-8b-instruct';
@@ -52,27 +50,11 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     addScreenshot,
     sessionDatabase,
     aiMessage,
+    vibeDoc,
   } = useSession(sessionId);
 
   // Get main database directly for settings document
   const { useDocument } = useFireproof(FIREPROOF_CHAT_HISTORY);
-
-  const [vibeDoc, setVibeDoc] = useState<VibeDocument | undefined>(undefined);
-
-  // Get vibe document
-  useEffect(() => {
-    if (!sessionDatabase) return;
-    sessionDatabase
-      .get<VibeDocument>('vibe')
-      .then((doc) => {
-        if (doc) {
-          setVibeDoc(doc);
-        }
-      })
-      .catch((err) => {
-        // thats ok
-      });
-  }, [sessionDatabase]);
 
   // Function to save errors as system messages to the session database
   const saveErrorAsSystemMessage = useCallback(
@@ -522,7 +504,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     codeReady,
     sendMessage,
     inputRef,
-    title: session.title,
+    title: vibeDoc?.title || '',
     needsNewKey,
     setNeedsNewKey,
     needsLogin,
