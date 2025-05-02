@@ -65,7 +65,7 @@ export default function UnifiedSession() {
 
   // Reset previewReady state when streaming starts
   useEffect(() => {
-    if (chatState.isStreaming && !chatState.codeReady) {
+    if (chatState.isStreaming) {
       setPreviewReady(false);
     }
   }, [chatState.isStreaming]);
@@ -180,11 +180,11 @@ export default function UnifiedSession() {
       // Only show preview when:
       // 1. Preview is ready (previewReady)
       // 2. We're on mobile (isMobileViewport())
-      if (!chatState.isStreaming && previewReady && isMobileViewport()) {
+      if (previewReady && isMobileViewport()) {
         setMobilePreviewShown(true);
       }
     }
-  }, [chatState.selectedCode, previewReady, chatState.isStreaming]);
+  }, [chatState.selectedCode, previewReady]);
 
   // Handle URL path navigation
   useEffect(() => {
