@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router';
 import { useCookieConsent } from '../context/CookieConsentContext';
 import { encodeTitle } from '~/components/SessionSidebar/utils';
@@ -48,12 +48,8 @@ export default function UnifiedSession() {
     return 'code';
   });
   const [previewReady, setPreviewReady] = useState(false);
-  // const [bundlingComplete] = useState(true);
   const [mobilePreviewShown, setMobilePreviewShown] = useState(false);
   const [isIframeFetching, setIsIframeFetching] = useState(false);
-
-  // Add a ref to track whether streaming was active previously
-  const wasStreamingRef = useRef(false);
 
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
 
@@ -169,34 +165,26 @@ export default function UnifiedSession() {
 
   // Handle the case when preview becomes ready
   useEffect(() => {
-    // Switch to preview view as soon as preview becomes ready, regardless of streaming status
     if (previewReady) {
-      // Reset user preference so future code content will auto-show preview
-      setUserClickedBack(false);
-
-      // Only auto-show preview if the user hasn't explicitly clicked back to chat
       if (!userClickedBack) {
         setMobilePreviewShown(true);
       }
+      setUserClickedBack(false);
     }
-  }, [previewReady, userClickedBack, chatState.isStreaming, chatState.codeReady]);
+  }, [previewReady, userClickedBack]);
 
   // Update mobilePreviewShown when selectedCode changes
   useEffect(() => {
     // If we're on a mobile device and there's code content
     if (chatState.selectedCode?.content) {
       // Only show preview when:
-      // 1. Streaming has finished (!chatState.isStreaming)
-      // 2. Preview is ready (previewReady)
-      // 3. We're on mobile (isMobileViewport())
-      if (!chatState.isStreaming && previewReady && isMobileViewport()) {
+      // 1. Preview is ready (previewReady)
+      // 2. We're on mobile (isMobileViewport())
+      if (previewReady && isMobileViewport()) {
         setMobilePreviewShown(true);
       }
     }
-
-    // Update wasStreaming ref to track state changes
-    wasStreamingRef.current = chatState.isStreaming;
-  }, [chatState.selectedCode, chatState.isStreaming, previewReady]);
+  }, [chatState.selectedCode, previewReady]);
 
   // Handle URL path navigation
   useEffect(() => {
@@ -266,7 +254,6 @@ export default function UnifiedSession() {
           <ResultPreview
             sessionId={chatState.sessionId || ''}
             code={chatState.selectedCode?.content || ''}
-            dependencies={chatState.selectedDependencies || {}}
             isStreaming={chatState.isStreaming}
             codeReady={chatState.codeReady}
             onScreenshotCaptured={chatState.addScreenshot}

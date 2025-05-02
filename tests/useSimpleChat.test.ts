@@ -1093,8 +1093,6 @@ export default Timer;`,
     });
 
     // Check selected dependencies
-    expect(result.current.selectedDependencies?.react).toBe('^18.2.0');
-    expect(result.current.selectedDependencies?.['react-dom']).toBe('^18.2.0');
   });
 
   it('handles pending AI message state correctly', async () => {

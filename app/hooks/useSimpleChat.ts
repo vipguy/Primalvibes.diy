@@ -193,20 +193,14 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     return result;
   }, [docs, pendingUserDoc]);
 
-  const {
-    messages,
-    selectedResponseDoc,
-    selectedSegments,
-    selectedCode,
-    selectedDependencies,
-    buildMessageHistory,
-  } = useMessageSelection({
-    docs: allDocs,
-    isStreaming,
-    aiMessage,
-    selectedResponseId,
-    pendingAiMessage,
-  });
+  const { messages, selectedResponseDoc, selectedSegments, selectedCode, buildMessageHistory } =
+    useMessageSelection({
+      docs: allDocs,
+      isStreaming,
+      aiMessage,
+      selectedResponseId,
+      pendingAiMessage,
+    });
 
   // Simple input handler
   const setInput = useCallback(
@@ -497,7 +491,6 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     selectedResponseDoc,
     selectedSegments,
     selectedCode,
-    selectedDependencies,
     input: userMessage.text,
     setInput,
     isStreaming,

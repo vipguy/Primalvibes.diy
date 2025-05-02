@@ -130,7 +130,6 @@ export interface ChatState {
   selectedResponseDoc?: ChatMessageDocument;
   selectedSegments?: Segment[];
   selectedCode?: Segment;
-  selectedDependencies?: Record<string, string>;
   needsNewKey?: boolean;
   setNeedsNewKey: (value: boolean) => void;
   needsLogin?: boolean;

@@ -117,12 +117,8 @@ describe('ResultPreview', () => {
 
   it('passes dependencies to SandpackProvider', () => {
     const code = 'console.log("test");';
-    const dependencies = {
-      react: '^18.0.0',
-      'react-dom': '^18.0.0',
-    };
 
-    render(<ResultPreview code={code} dependencies={dependencies} {...mockResultPreviewProps} />);
+    render(<ResultPreview code={code} {...mockResultPreviewProps} />);
 
     // Just verify it renders without errors
     expect(screen.getAllByTestId('sandpack-provider')[0]).toBeDefined();
@@ -170,12 +166,8 @@ describe('ResultPreview', () => {
 
   it('renders with custom dependencies', async () => {
     const code = 'import React from "react";';
-    const dependencies = {
-      react: '^18.0.0',
-      'react-dom': '^18.0.0',
-    };
 
-    render(<ResultPreview code={code} dependencies={dependencies} {...mockResultPreviewProps} />);
+    render(<ResultPreview code={code} {...mockResultPreviewProps} />);
 
     // Use getAllByTestId to handle multiple elements
     expect(screen.getAllByTestId('sandpack-provider')[0]).toBeInTheDocument();
@@ -252,11 +244,7 @@ describe('ResultPreview', () => {
 
   it('handles dependencies correctly', () => {
     const code = `function App() { return <div>Hello World</div>; }`;
-    const dependencies = {
-      react: '17.0.2',
-      'react-dom': '17.0.2',
-    };
-    render(<ResultPreview code={code} dependencies={dependencies} {...mockResultPreviewProps} />);
+    render(<ResultPreview code={code} {...mockResultPreviewProps} />);
 
     // Dependencies should be passed to the Sandpack component
     expect(screen.queryByText(/Welcome to the preview/i)).not.toBeInTheDocument();
@@ -336,11 +324,7 @@ describe('ResultPreview', () => {
 
   it('passes dependencies to Sandpack', () => {
     const code = `function App() { return <div>Hello World</div>; }`;
-    const dependencies = {
-      react: '17.0.2',
-      'react-dom': '17.0.2',
-    };
-    render(<ResultPreview code={code} dependencies={dependencies} {...mockResultPreviewProps} />);
+    render(<ResultPreview code={code} {...mockResultPreviewProps} />);
 
     // Dependencies should be configured in Sandpack
     expect(screen.queryByText(/Welcome to the preview/i)).not.toBeInTheDocument();
@@ -413,7 +397,6 @@ describe('ResultPreview', () => {
     render(
       <ResultPreview
         code={code}
-        dependencies={{}}
         isStreaming={false}
         codeReady={true}
         activeView="code"

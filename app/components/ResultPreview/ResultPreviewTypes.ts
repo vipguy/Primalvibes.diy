@@ -2,7 +2,6 @@ import type { RuntimeError } from '../../hooks/useRuntimeErrors';
 
 export interface ResultPreviewProps {
   code: string;
-  dependencies?: Record<string, string>;
   onScreenshotCaptured?: (screenshotData: string | null) => void;
   sessionId?: string;
   title?: string;
