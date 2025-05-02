@@ -193,6 +193,10 @@ describe('Home Route in completed state', () => {
         { type: 'code', content: mockCode } as Segment,
       ],
       selectedCode: { type: 'code', content: mockCode } as Segment,
+      selectedDependencies: {
+        react: '^18.2.0',
+        'react-dom': '^18.2.0',
+      },
       inputRef: { current: null },
       title: 'React App',
       selectedResponseDoc: {
@@ -325,6 +329,7 @@ describe('Home Route in completed state', () => {
       sessionId: null,
       selectedSegments: [],
       selectedCode: { type: 'code' as const, content: '' },
+      selectedDependencies: {},
     });
 
     render(<UnifiedSession />);

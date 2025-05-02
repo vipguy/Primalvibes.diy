@@ -1,6 +1,6 @@
 import { useMemo, useCallback, useState, useEffect } from 'react';
 import type { Segment, ChatMessageDocument } from '../types/chat';
-import { parseContent } from '../utils/segmentParser';
+import { parseContent, parseDependencies } from '../utils/segmentParser';
 
 /**
  * Hook for managing message selection and content processing
@@ -121,10 +121,10 @@ export function useMessageSelection({
     | undefined;
 
   // Process selected response into segments and code
-  const { selectedSegments, selectedCode } = useMemo(() => {
-    const { segments } = selectedResponseDoc
+  const { selectedSegments, selectedCode, selectedDependencies } = useMemo(() => {
+    const { segments, dependenciesString } = selectedResponseDoc
       ? parseContent(selectedResponseDoc.text)
-      : { segments: [] };
+      : { segments: [], dependenciesString: '' };
 
     // First try to find code in the currently selected message
     let code = segments.find((segment) => segment.type === 'code');
@@ -150,9 +150,12 @@ export function useMessageSelection({
     // Default empty segment if no code was found anywhere
     if (!code) code = { content: '' } as Segment;
 
+    const dependencies = dependenciesString ? parseDependencies(dependenciesString) : {};
+
     return {
       selectedSegments: segments,
       selectedCode: code,
+      selectedDependencies: dependencies,
     };
   }, [selectedResponseDoc, docs]);
 
@@ -195,6 +198,7 @@ export function useMessageSelection({
     selectedResponseDoc,
     selectedSegments,
     selectedCode,
+    selectedDependencies,
     buildMessageHistory,
   };
 }

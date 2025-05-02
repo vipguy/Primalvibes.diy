@@ -181,6 +181,7 @@ describe('Session Route Integration', () => {
         type: 'code',
         content: Array(210).fill('console.log("test");').join('\n'),
       },
+      selectedDependencies: {},
     });
   });
 

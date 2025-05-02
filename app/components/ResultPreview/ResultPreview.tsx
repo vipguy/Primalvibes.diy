@@ -3,11 +3,13 @@ import { CALLAI_API_KEY } from '../../config/env';
 import { animationStyles } from './ResultPreviewTemplates';
 import type { ResultPreviewProps, IframeFiles } from './ResultPreviewTypes';
 import type { RuntimeError } from '../../hooks/useRuntimeErrors';
+import { encodeTitle } from '../SessionSidebar/utils';
 // ResultPreview component
 import IframeContent from './IframeContent';
 
 function ResultPreview({
   code,
+  dependencies = {},
   onScreenshotCaptured,
   sessionId,
   isStreaming = false,
@@ -102,7 +104,7 @@ function ResultPreview({
   useEffect(() => {
     const handleMessage = ({ data }: MessageEvent) => {
       if (data) {
-        if (data.type === 'preview-ready') {
+        if (data.type === 'preview-ready' || data.type === 'preview-loaded') {
           // respond with the API key
           // Use CALLAI_API_KEY if available (dev mode), otherwise check localStorage
           let apiKey = CALLAI_API_KEY;
@@ -122,6 +124,21 @@ function ResultPreview({
           const iframe = document.querySelector('iframe') as HTMLIFrameElement;
           iframe?.contentWindow?.postMessage({ type: 'callai-api-key', key: apiKey }, '*');
 
+          setMobilePreviewShown(true);
+
+          // Always switch to preview view when the iframe signals it's ready.
+          setActiveView('preview');
+
+          // Also navigate to the /app URL suffix if not already there.
+          const path = window.location.pathname;
+          // Add null check for title and encode it
+          const encodedTitle = title ? encodeTitle(title) : '';
+          if (!path.endsWith('/app') && sessionId && encodedTitle) {
+            // Navigation is handled by the parent component (home.tsx) based on activeView state
+            // We only set the state here.
+            // navigate(`/chat/${sessionId}/${encodedTitle}/app`, { replace: true });
+          }
+
           // Notify parent component that preview is loaded
           onPreviewLoaded();
         } else if (data.type === 'streaming' && data.state !== undefined) {
@@ -133,7 +150,10 @@ function ResultPreview({
             onScreenshotCaptured(data.data);
           }
         } else if (data.type === 'screenshot-error' && data.error) {
-          console.error('Screenshot error:', data.error);
+          // Still call onScreenshotCaptured with null to signal that the screenshot failed
+          if (onScreenshotCaptured) {
+            onScreenshotCaptured(null);
+          }
         } else if (data.type === 'iframe-error' && data.error) {
           // Process the error and forward it to the error handler
           const error = data.error as RuntimeError;
@@ -170,6 +190,7 @@ function ResultPreview({
       isStreaming={!codeReady} // Pass the derived prop
       codeReady={codeReady}
       setActiveView={setActiveView}
+      /* dependencies prop removed */
       isDarkMode={isDarkMode} // Pass down the theme state
       sessionId={sessionId} // Pass the sessionId to IframeContent
     />

@@ -163,6 +163,7 @@ describe('Iframe Template', () => {
       render(
         <ResultPreview
           code={testAppCode}
+          dependencies={{}}
           onScreenshotCaptured={onScreenshotCapturedMock}
           sessionId="test-session"
           isStreaming={false}
