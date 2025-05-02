@@ -312,7 +312,7 @@ describe('ResultPreview', () => {
     act(() => {
       window.dispatchEvent(
         new MessageEvent('message', {
-          data: { type: 'preview-ready' },
+          data: { type: 'preview-loaded' },
         })
       );
     });
