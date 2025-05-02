@@ -90,13 +90,6 @@ export function useViewState(props: {
     wasPreviewReadyRef.current = props.previewReady;
   }, [props.isStreaming, props.previewReady, props.code, sessionId, encodedTitle, navigate]);
 
-  // We handle the initial view display without changing the URL
-  // This allows for proper auto-navigation to app view when preview is ready
-  useEffect(() => {
-    // The actual display of code view is handled by the component that uses this hook
-    // We don't navigate to /code on initial load anymore
-  }, []);
-
   // Access control data
   const viewControls = {
     preview: {
