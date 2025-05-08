@@ -30,7 +30,7 @@ export async function createKeyViaEdgeFunction(userId: string | undefined): Prom
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: 'Bearer temporary-auth-token',
+      Authorization: 'Bearer use-vibes',
     },
     body: JSON.stringify({
       userId,
