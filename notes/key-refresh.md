@@ -8,12 +8,15 @@ This document outlines the API endpoints and patterns used for managing API keys
 ## 1. Key Creation API
 
 ### Endpoint
+
 ```
 POST ${API_ORIGIN}/api/keys
 ```
+
 Where `API_ORIGIN` defaults to `https://vibecode.garden` or uses the local path `/api/keys` for same-origin requests.
 
 ### Request Headers
+
 ```javascript
 {
   'Content-Type': 'application/json',
@@ -22,6 +25,7 @@ Where `API_ORIGIN` defaults to `https://vibecode.garden` or uses the local path 
 ```
 
 ### Request Body
+
 ```javascript
 {
   userId: string | undefined,  // Optional user ID to associate with the key
@@ -31,6 +35,7 @@ Where `API_ORIGIN` defaults to `https://vibecode.garden` or uses the local path 
 ```
 
 ### Response Format
+
 ```typescript
 {
   key: string,          // The actual API key to use for OpenRouter
@@ -46,13 +51,15 @@ Where `API_ORIGIN` defaults to `https://vibecode.garden` or uses the local path 
 ```
 
 ### Error Response
+
 ```javascript
 {
-  error: string  // Error message describing what went wrong
+  error: string; // Error message describing what went wrong
 }
 ```
 
 ### Implementation Notes
+
 - The key is stored in localStorage with a timestamp to track its age
 - Keys are considered valid for 7 days
 - The system uses a module-level Promise to deduplicate simultaneous key creation requests
@@ -61,11 +68,13 @@ Where `API_ORIGIN` defaults to `https://vibecode.garden` or uses the local path 
 ## 2. Credits Check API
 
 ### Endpoint
+
 ```
 GET https://openrouter.ai/api/v1/auth/key
 ```
 
 ### Request Headers
+
 ```javascript
 {
   'Authorization': `Bearer ${apiKey}`,  // The API key to check
@@ -74,7 +83,9 @@ GET https://openrouter.ai/api/v1/auth/key
 ```
 
 ### Response Format
+
 The raw response has varying structures, but is normalized to:
+
 ```typescript
 {
   available: number,  // Available credits (limit - usage)
@@ -84,10 +95,12 @@ The raw response has varying structures, but is normalized to:
 ```
 
 ### Error Handling
+
 - 401 Unauthorized: The API key is invalid
 - 429 Too Many Requests: Rate limited, need to implement backoff
 
 ### Implementation Notes
+
 - The system warns when credits are running low (available < 0.2)
 - Request deduplication is used to prevent multiple simultaneous credit checks
 - Detailed error information is extracted from the response when available
@@ -95,18 +108,22 @@ The raw response has varying structures, but is normalized to:
 ## Usage Patterns
 
 ### Key Lifecycle
+
 1. Check localStorage for existing valid key
 2. If no valid key exists, create a new one via Edge Function
 3. Store the key with timestamp in localStorage
 4. Use the key for API requests to OpenRouter
 
 ### Managing Rate Limits
+
 1. Track API request timestamps in localStorage
 2. Implement backoff periods when rate limited (default: 10 seconds)
 3. Clear backoff timers after successful requests
 
 ### Request Deduplication
+
 Module-level Promise variables are used to track in-flight requests:
+
 ```javascript
 let pendingKeyRequest: Promise<any> | null = null;
 let pendingCreditsCheck: Promise<any> | null = null;
