@@ -31,38 +31,3 @@ export function copyToClipboard(text: string): void {
     }
   }
 }
-
-/**
- * Encode application state to URL-safe string
- */
-export function encodeStateToUrl(code: string, dependencies: Record<string, string>): string {
-  try {
-    const stateObj = { code, dependencies };
-    const jsonStr = JSON.stringify(stateObj);
-    const encoded = btoa(encodeURIComponent(jsonStr));
-    return encoded;
-  } catch (error) {
-    console.error('Error encoding state to URL:', error);
-    return '';
-  }
-}
-
-/**
- * Decode URL-safe string to application state
- */
-export function decodeStateFromUrl(encoded: string): {
-  code: string;
-  dependencies: Record<string, string>;
-} {
-  try {
-    const jsonStr = decodeURIComponent(atob(encoded));
-    const stateObj = JSON.parse(jsonStr);
-    return {
-      code: stateObj.code || '',
-      dependencies: stateObj.dependencies || {},
-    };
-  } catch (error) {
-    console.error('Error decoding state from URL:', error);
-    return { code: '', dependencies: {} };
-  }
-}

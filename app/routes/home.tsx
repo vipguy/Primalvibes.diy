@@ -11,7 +11,6 @@ import ResultPreview from '../components/ResultPreview/ResultPreview';
 import ResultPreviewHeaderContent from '../components/ResultPreview/ResultPreviewHeaderContent';
 import SessionSidebar from '../components/SessionSidebar';
 import { useSimpleChat } from '../hooks/useSimpleChat';
-import { decodeStateFromUrl } from '../utils/sharing';
 import { isMobileViewport } from '../utils/ViewState';
 // import { useSession } from '../hooks/useSession';
 
@@ -115,17 +114,16 @@ export default function UnifiedSession() {
     }
   }, [chatState.title, location.pathname, chatState.sessionId, navigate]);
 
-  // Check if there's a state parameter in the URL (for shared apps)
+  // Check if there's a prompt parameter in the URL to prefill the chat input
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
-    const encodedState = searchParams.get('state');
-    if (encodedState) {
-      const decodedState = decodeStateFromUrl(encodedState);
-      if (decodedState.code) {
-        console.log('UnifiedSession: decodedState share:', decodedState);
-      }
+
+    // Check for prompt parameter to prefill chat input
+    const promptParam = searchParams.get('prompt');
+    if (promptParam && promptParam.trim()) {
+      chatState.setInput(promptParam);
     }
-  }, [location.search]);
+  }, [location.search, chatState.setInput]);
 
   // Create chat input event handlers
   const handleInputChange = useCallback(
