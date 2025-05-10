@@ -11,7 +11,7 @@
       64%, 100% { opacity: 0; }
     }
     path {
-      animation: rotateSegments 2s linear infinite;
+      animation: rotateSegments 4s linear infinite;
     }
     
     path:nth-child(1) { animation-delay: 0s; }
