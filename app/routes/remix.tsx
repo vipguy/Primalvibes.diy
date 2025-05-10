@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useNavigate, useParams, useLocation } from 'react-router';
 import { useSession } from '../hooks/useSession';
 import { encodeTitle } from '~/components/SessionSidebar/utils';
 import type { VibeDocument } from '~/types/chat';
@@ -15,6 +15,7 @@ export function meta() {
 
 export default function Remix() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { vibeSlug } = useParams<{ vibeSlug?: string }>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,6 +48,11 @@ export default function Remix() {
           setIsLoading(false);
           return;
         }
+        
+        // Get the prompt parameter from the URL right away
+        const urlParams = new URLSearchParams(location.search);
+        const promptParameter = urlParams.get('prompt');
+        const customPrompt = promptParameter?.trim() || null;
 
         // Use the slug directly
         const appName = vibeSlug;
@@ -81,9 +87,10 @@ export default function Remix() {
           _id: '0001-user-first',
           type: 'user',
           session_id: session._id,
-          text: `Please help me remix ${appName}.vibecode.garden`,
+          text: customPrompt ? customPrompt : `Please help me remix ${appName}.vibecode.garden`,
           created_at: Date.now(),
         };
+        console.log('Using message text:', userMessage.text, 'from prompt param:', customPrompt);
         console.log('Saving user message:', userMessage._id);
         await sessionDatabase.put(userMessage);
 
@@ -123,8 +130,14 @@ export default function Remix() {
         console.log('Updating session title to:', finalTitle);
         await updateTitle(finalTitle);
 
-        // Navigate to the chat session URL
-        const targetUrl = `/chat/${session._id}/${encodeTitle(finalTitle)}/app`;
+        // Build the target URL, including the prompt parameter if it exists
+        let targetUrl = `/chat/${session._id}/${encodeTitle(finalTitle)}/app`;
+        
+        // Forward the prompt parameter to the chat route if it exists
+        if (promptParameter && promptParameter.trim()) {
+          targetUrl += `?prompt=${encodeURIComponent(promptParameter.trim())}`;
+        }
+        
         console.log('Navigating to:', targetUrl);
         navigate(targetUrl);
       } catch (error) {
