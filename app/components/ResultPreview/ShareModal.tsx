@@ -22,6 +22,7 @@ export function ShareModal({
   const [showCopySuccess, setShowCopySuccess] = useState(false);
   const [showUpdateSuccess, setShowUpdateSuccess] = useState(false);
 
+  const publishedSubdomain = publishedAppUrl ? new URL(publishedAppUrl).hostname.split('.')[0] : '';
   useEffect(() => {
     // Reset state when modal opens/closes
     if (isOpen) {
@@ -100,7 +101,15 @@ export function ShareModal({
           {publishedAppUrl ? (
             <div className="bg-light-background-01 text-light-secondary dark:bg-dark-decorative-00 dark:text-dark-secondary rounded px-2 py-2 text-sm">
               <div className="mb-2 text-center font-medium">
-                <strong>Published</strong>
+                <strong>
+                  Published{' '}
+                  <a
+                    className="text-blue-600 hover:underline dark:text-blue-400"
+                    href={publishedAppUrl}
+                  >
+                    {publishedSubdomain}
+                  </a>
+                </strong>
               </div>
               <div className="flex">
                 <input
