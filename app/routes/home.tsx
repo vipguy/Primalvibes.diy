@@ -122,6 +122,18 @@ export default function UnifiedSession() {
     const promptParam = searchParams.get('prompt');
     if (promptParam && promptParam.trim()) {
       chatState.setInput(promptParam);
+
+      // Focus the input element and place cursor at the end after a short delay
+      // to ensure the input has been updated and DOM is ready
+      setTimeout(() => {
+        if (chatState.inputRef.current) {
+          chatState.inputRef.current.focus();
+
+          // Place cursor at the end of the text
+          const inputLength = chatState.inputRef.current.value.length;
+          chatState.inputRef.current.setSelectionRange(inputLength, inputLength);
+        }
+      }, 100);
     }
   }, [location.search, chatState.setInput]);
 
