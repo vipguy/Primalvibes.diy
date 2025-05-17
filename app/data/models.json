@@ -5,6 +5,11 @@
     "description": "Advanced reasoning model from Anthropic"
   },
   {
+    "id": "openai/codex-mini",
+    "name": "Codex Mini",
+    "description": "Coding assistant (not streaming)"
+  },
+  {
     "id": "openai/gpt-4.1",
     "name": "GPT-4.1",
     "description": "Fast coding assistant"
