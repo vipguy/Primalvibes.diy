@@ -105,6 +105,7 @@ export function ShareModal({
                   Published{' '}
                   <a
                     className="text-blue-600 hover:underline dark:text-blue-400"
+                    target="_blank"
                     href={publishedAppUrl}
                   >
                     {publishedSubdomain}
