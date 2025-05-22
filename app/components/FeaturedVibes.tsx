@@ -4,6 +4,18 @@ import PublishedVibeCard from './PublishedVibeCard';
 // Featured vibes data
 export const publishedVibes = [
   {
+    name: 'Bedtime Stories',
+    url: 'https://okay-bedbug-2773.vibecode.garden/',
+  },
+  {
+    name: 'Chess Drills',
+    url: 'https://advanced-tahr-2423.vibecode.garden/',
+  },
+  {
+    name: 'Napkin Sketch',
+    url: 'https://varying-peacock-7591.vibecode.garden/',
+  },
+  {
     name: 'Reality Distortion Field',
     url: 'https://immense-shrimp-9469.vibecode.garden/',
   },
@@ -52,20 +64,8 @@ export const publishedVibes = [
     url: 'https://grand-platypus-4140.vibecode.garden',
   },
   {
-    name: 'Napkin Sketch',
-    url: 'https://varying-peacock-7591.vibecode.garden/',
-  },
-  {
     name: 'Bonsai Generator',
     url: 'https://lonely-flamingo-6403.vibecode.garden/',
-  },
-  {
-    name: 'Bedtime Stories',
-    url: 'https://okay-bedbug-2773.vibecode.garden/',
-  },
-  {
-    name: 'Chess Drills',
-    url: 'https://advanced-tahr-2423.vibecode.garden/',
   },
 ];
 
