@@ -7,7 +7,7 @@ import { callAI, type Message } from 'call-ai';
 /**
  * Stream AI responses with accumulated content callback
  *
- * @param model - The model to use (e.g. 'anthropic/claude-3.7-sonnet')
+ * @param model - The model to use (e.g. 'anthropic/claude-opus-4')
  * @param systemPrompt - The system prompt
  * @param messageHistory - Array of previous messages
  * @param userMessage - The current user message

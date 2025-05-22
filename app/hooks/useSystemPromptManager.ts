@@ -3,7 +3,7 @@ import type { UserSettings } from '../types/settings';
 import { makeBaseSystemPrompt } from '../prompts';
 
 // Model constant used for system prompts
-const CODING_MODEL = 'anthropic/claude-3.7-sonnet';
+const CODING_MODEL = 'anthropic/claude-opus-4';
 
 /**
  * Hook for managing system prompts based on settings
