@@ -16,6 +16,10 @@ export const publishedVibes = [
     url: 'https://varying-peacock-7591.vibecode.garden/',
   },
   {
+    name: 'Bonsai Generator',
+    url: 'https://historical-wildfowl-2884.vibecode.garden/',
+  },
+  {
     name: 'Reality Distortion Field',
     url: 'https://immense-shrimp-9469.vibecode.garden/',
   },
@@ -62,10 +66,6 @@ export const publishedVibes = [
   {
     name: 'Cosmic Canvas',
     url: 'https://grand-platypus-4140.vibecode.garden',
-  },
-  {
-    name: 'Bonsai Generator',
-    url: 'https://lonely-flamingo-6403.vibecode.garden/',
   },
 ];
 
