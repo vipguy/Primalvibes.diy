@@ -118,7 +118,7 @@ describe('auth utils', () => {
     it('can extend a token when needed', async () => {
       // From examining the implementation, we can see it's using http://localhost:3000/api as the default
       // This might be coming from other test setup, so let's match what's actually being used
-      const usedEndpoint = 'http://localhost:3000/api';
+      const usedEndpoint = 'https://dev.connect.fireproof.direct/api';
 
       // Mock successful API response for token extension
       global.fetch = vi.fn().mockResolvedValue({
@@ -176,7 +176,7 @@ describe('auth utils', () => {
 
       const result = auth.initiateAuthFlow();
       expect(result).toBeTruthy();
-      expect(result?.connectUrl).toMatch(/http:\/\/localhost:3000\/token/);
+      expect(result?.connectUrl).toMatch(/connect.fireproof.direct/);
       expect(result?.resultId).toMatch(/^z/);
       expect(window.sessionStorage.getItem('auth_result_id')).toBe(result?.resultId);
     });
