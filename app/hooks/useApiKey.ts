@@ -1,18 +1,15 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { createOrUpdateKeyViaEdgeFunction } from '../services/apiKeyService';
-
-// Global request tracking to prevent duplicate API calls
-let pendingKeyRequest: Promise<any> | null = null;
 
 /**
  * Hook for API key management that uses dynamic key provisioning
  * @param userId - Optional user ID for associating keys with specific users
- * @returns Object containing apiKey, isLoading, and error states
+ * @returns Object containing apiKey, error, refreshKey, and ensureApiKey states
  */
 export function useApiKey(userId?: string) {
   const [apiKey, setApiKey] = useState<{ key: string; hash: string } | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
+  const loadingPromiseRef = useRef<Promise<{ key: string; hash: string }> | null>(null);
   // Always use a consistent storage key regardless of user ID
   const storageKey = 'vibes-openrouter-key';
 
@@ -36,38 +33,28 @@ export function useApiKey(userId?: string) {
 
   // Internal function to fetch a new key
   const fetchNewKeyInternal = useCallback(
-    async (currentUserId?: string, currentKeyHash?: string) => {
-      setIsLoading(true);
-      setError(null);
+    async (currentKeyHashParam?: string): Promise<{ key: string; hash: string }> => {
       let keyData: any = null;
 
       try {
-        // Deduplicate API key requests across components
-        if (!pendingKeyRequest) {
-          // Extract hash from localStorage even if the key is expired
-          let storedHash = apiKey?.hash;
-          if (!storedHash) {
+        let hashToUse = currentKeyHashParam;
+        if (!hashToUse) {
+          hashToUse = apiKey?.hash;
+          if (!hashToUse) {
             const storedData = localStorage.getItem(storageKey);
             if (storedData) {
               try {
                 const parsed = JSON.parse(storedData);
-                storedHash = parsed.hash;
+                hashToUse = parsed.hash;
               } catch (e) {
                 // Ignore parsing errors
               }
             }
           }
-
-          pendingKeyRequest = createOrUpdateKeyViaEdgeFunction(
-            currentUserId,
-            currentKeyHash || storedHash
-          );
         }
 
-        // Wait for the existing or new request to complete
-        const apiResponse = await pendingKeyRequest;
+        const apiResponse = await createOrUpdateKeyViaEdgeFunction(userId, hashToUse);
 
-        // Ensure keyData points to the actual key information object
         if (apiResponse && typeof apiResponse === 'object') {
           if (
             'key' in apiResponse &&
@@ -88,15 +75,9 @@ export function useApiKey(userId?: string) {
           keyData = apiResponse; // keyData will be non-object here if apiResponse was, or null/undefined.
         }
       } catch (error) {
-        // Reset the pending request on error to allow future attempts
-        pendingKeyRequest = null;
-        // Set error state for components to display
-        setError(error instanceof Error ? error : new Error('Unknown error creating API key'));
-        throw error;
-      } finally {
-        // Always reset the pending request regardless of outcome
-        pendingKeyRequest = null;
-        setIsLoading(false);
+        const err = error instanceof Error ? error : new Error('Error fetching API key data');
+        setError(err);
+        throw err;
       }
 
       // Validate keyData and determine what to store and return
@@ -129,42 +110,50 @@ export function useApiKey(userId?: string) {
       } else {
         // Case 3: Invalid response (keyData is null, not an object, or missing both key and hash)
         console.error('Invalid API key response format (keyData problematic):', keyData);
-        const error = new Error('Invalid API key response format');
-        setError(error);
-        throw error;
+        const err = new Error('Invalid API key response format');
+        setError(err);
+        throw err;
       }
     },
-    [userId, storageKey]
-  ); // Retain original dependencies for fetchNewKeyInternal's closure
+    [userId, apiKey, storageKey, setApiKey, setError]
+  );
 
   const ensureApiKey = useCallback(async (): Promise<{ key: string; hash: string }> => {
-    // 1. If we already have a valid key in state and not currently loading, use it.
-    if (apiKey?.key && apiKey?.hash && !isLoading) {
+    if (loadingPromiseRef.current) {
+      return loadingPromiseRef.current;
+    }
+
+    if (apiKey?.key && apiKey?.hash) {
       return apiKey;
     }
 
-    // 2. Check localStorage for an existing valid key.
     const storedKeyData = checkLocalStorageForKey();
     if (storedKeyData?.key && storedKeyData?.hash) {
       setApiKey({ key: storedKeyData.key, hash: storedKeyData.hash });
       return { key: storedKeyData.key, hash: storedKeyData.hash };
     }
 
-    // 3. No valid key in state or localStorage, so fetch a new one.
-    try {
-      const newKeyData = await fetchNewKeyInternal(userId, storedKeyData?.hash); // Pass userId and hash from localStorage if available
-      // fetchNewKeyInternal already sets apiKey state and localStorage on success.
-      return newKeyData;
-    } catch (fetchError) {
-      console.error('Error obtaining API key in ensureApiKey:', fetchError);
-      throw fetchError; // Surface the error directly to the caller
-    }
-  }, [apiKey, userId, isLoading, checkLocalStorageForKey, fetchNewKeyInternal, error]);
+    // setError(null); // Optionally clear previous errors
+
+    const fetchPromise = fetchNewKeyInternal(storedKeyData?.hash)
+      .then((newKey) => {
+        loadingPromiseRef.current = null;
+        return newKey;
+      })
+      .catch((err) => {
+        loadingPromiseRef.current = null;
+        // error state is already set by fetchNewKeyInternal
+        throw err;
+      });
+
+    loadingPromiseRef.current = fetchPromise;
+    return fetchPromise;
+  }, [apiKey, checkLocalStorageForKey, fetchNewKeyInternal]);
 
   const refreshKey = useCallback(async (): Promise<{ key: string; hash: string }> => {
     // Attempt to refresh using the current key's hash if available.
-    return await fetchNewKeyInternal(userId, apiKey?.hash);
-  }, [fetchNewKeyInternal, userId, apiKey]);
+    return await fetchNewKeyInternal(apiKey?.hash);
+  }, [fetchNewKeyInternal, apiKey]);
 
-  return { apiKey: apiKey?.key, apiKeyObject: apiKey, isLoading, error, refreshKey, ensureApiKey };
+  return { apiKey: apiKey?.key, apiKeyObject: apiKey, error, refreshKey, ensureApiKey };
 }
