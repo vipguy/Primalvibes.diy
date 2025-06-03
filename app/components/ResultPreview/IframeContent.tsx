@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { IframeFiles } from './ResultPreviewTypes';
-import { CALLAI_API_KEY } from '~/config/env';
 import Editor from '@monaco-editor/react';
+import { useApiKey } from '~/hooks/useApiKey';
 import { shikiToMonaco } from '@shikijs/monaco';
 import { createHighlighter } from 'shiki';
 import { DatabaseListView } from './DataView';
@@ -27,6 +27,8 @@ const IframeContent: React.FC<IframeContentProps> = ({
   isDarkMode,
   sessionId,
 }) => {
+  const { ensureApiKey } = useApiKey();
+  const [apiKey, setApiKey] = useState('');
   const iframeRef = useRef<HTMLIFrameElement>(null);
   // Theme state is now received from parent via props
   const contentLoadedRef = useRef(false);
@@ -42,10 +44,6 @@ const IframeContent: React.FC<IframeContentProps> = ({
   const disposablesRef = useRef<{ dispose: () => void }[]>([]);
   // Flag to track if user has manually scrolled during streaming
   const userScrolledRef = useRef<boolean>(false);
-  // Store the last scroll top position to detect user-initiated scrolls
-  const lastScrollTopRef = useRef<number>(0);
-  // Store the last viewport height for auto-scrolling
-  const lastViewportHeightRef = useRef<number>(0);
 
   // Extract the current app code string
   const appCode = filesContent['/App.jsx']?.code || '';
@@ -81,9 +79,19 @@ const IframeContent: React.FC<IframeContentProps> = ({
 
   // This effect is now managed at the ResultPreview component level
 
+  // Get API key on component mount
   useEffect(() => {
-    // Update iframe when code is ready
-    if (codeReady && iframeRef.current) {
+    const getApiKey = async () => {
+      const keyData = await ensureApiKey();
+      setApiKey(keyData.key);
+    };
+
+    getApiKey();
+  }, [ensureApiKey]);
+
+  // Update iframe when code is ready and API key is available
+  useEffect(() => {
+    if (codeReady && apiKey && iframeRef.current) {
       // Skip if content hasn't changed
       if (contentLoadedRef.current && appCode === lastContentRef.current) {
         return;
@@ -129,7 +137,7 @@ const IframeContent: React.FC<IframeContentProps> = ({
 
       // Use the template and replace placeholders
       const htmlContent = iframeTemplateRaw
-        .replace('{{API_KEY}}', CALLAI_API_KEY)
+        .replace('{{API_KEY}}', apiKey)
         .replace('{{APP_CODE}}', transformedCode)
         .replace('{{SESSION_ID}}', sessionIdValue);
 
@@ -151,7 +159,7 @@ const IframeContent: React.FC<IframeContentProps> = ({
         window.removeEventListener('message', handleMessage);
       };
     }
-  }, [appCode, codeReady]);
+  }, [appCode, apiKey, codeReady]);
 
   // Determine which view to show based on URL path - gives more stable behavior on refresh
   const getViewFromPath = () => {
@@ -250,8 +258,6 @@ const IframeContent: React.FC<IframeContentProps> = ({
 
               // Initialize positions
               lastScrollTime = Date.now();
-              lastScrollTopRef.current = editor.getScrollTop();
-              lastViewportHeightRef.current = editor.getLayoutInfo().height;
 
               // Auto-scroll on content change, but only if user hasn't manually scrolled
               const contentDisposable = editor.onDidChangeModelContent(() => {
@@ -297,16 +303,41 @@ const IframeContent: React.FC<IframeContentProps> = ({
 
             // Handle scroll events to detect manual user scrolling
             editor.onDidScrollChange((e) => {
-              const scrollTop = e.scrollTop;
-              // If there's a significant difference, consider it a manual scroll
-              if (Math.abs(scrollTop - lastScrollTopRef.current) > 30) {
-                userScrolledRef.current = true;
+              const model = editor.getModel();
+              if (model) {
+                const totalLines = model.getLineCount();
+                const visibleRanges = editor.getVisibleRanges();
+                if (visibleRanges.length > 0) {
+                  const lastVisibleLine = visibleRanges[0].endLineNumber;
+                  // If the last 3 lines are visible, keep auto-scroll enabled
+                  if (lastVisibleLine >= totalLines - 2) {
+                    userScrolledRef.current = false;
+                  }
+                }
               }
-              lastScrollTopRef.current = scrollTop;
             });
-          }}
-          onChange={(value) => {
-            // Nothing to do here as we've set readOnly to true
+            // Listen for mouse wheel events to detect manual scroll intent
+            const domNode = editor.getDomNode();
+            if (domNode) {
+              const wheelListener = () => {
+                const model = editor.getModel();
+                if (model) {
+                  const totalLines = model.getLineCount();
+                  const visibleRanges = editor.getVisibleRanges();
+                  if (visibleRanges.length > 0) {
+                    const lastVisibleLine = visibleRanges[0].endLineNumber;
+                    if (lastVisibleLine < totalLines - 2) {
+                      userScrolledRef.current = true;
+                    }
+                  }
+                }
+              };
+              domNode.addEventListener('wheel', wheelListener);
+              // Clean up wheel listener on unmount
+              disposablesRef.current.push({
+                dispose: () => domNode.removeEventListener('wheel', wheelListener),
+              });
+            }
           }}
         />
       </div>

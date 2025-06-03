@@ -55,7 +55,3 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://vibeco
 // Chat History Database
 export const FIREPROOF_CHAT_HISTORY =
   (import.meta.env.VITE_VIBES_CHAT_HISTORY || 'vibes-chats') + getVersionSuffix();
-
-// AI Services API Key
-export const CALLAI_API_KEY =
-  import.meta.env.VITE_CALLAI_API_KEY || import.meta.env.VITE_OPENROUTER_API_KEY || '';
