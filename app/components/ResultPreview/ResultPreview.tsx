@@ -8,7 +8,6 @@ import IframeContent from './IframeContent';
 
 function ResultPreview({
   code,
-  dependencies = {},
   onScreenshotCaptured,
   sessionId,
   isStreaming = false,

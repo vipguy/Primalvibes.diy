@@ -75,7 +75,6 @@ vi.mock('../app/hooks/useSimpleChat', () => ({
     input: '',
     selectedSegments: [],
     selectedCode: '',
-    selectedDependencies: [],
     setSelectedResponseId: vi.fn(),
     immediateErrors: [],
     advisoryErrors: [],

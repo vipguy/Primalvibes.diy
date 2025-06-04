@@ -106,7 +106,6 @@ export type AiChatMessage = ChatMessage & {
   type: 'ai';
   segments?: Segment[];
   isStreaming?: boolean;
-  dependenciesString?: string;
 };
 
 // System message type for errors and important system notifications
@@ -132,7 +131,6 @@ export interface ChatState {
   selectedResponseDoc?: ChatMessageDocument;
   selectedSegments?: Segment[];
   selectedCode?: Segment;
-  selectedDependencies?: Record<string, string>;
   needsNewKey?: boolean;
   setNeedsNewKey: (value: boolean) => void;
   needsLogin?: boolean;

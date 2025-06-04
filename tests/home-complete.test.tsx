@@ -187,9 +187,6 @@ describe('Home Route in completed state', () => {
         { type: 'markdown', content: 'Explanation of the code' } as Segment,
         { type: 'code', content: mockCode } as Segment,
       ],
-      dependenciesString: JSON.stringify({
-        dependencies: { react: '^18.2.0', 'react-dom': '^18.2.0' },
-      }),
     });
 
     vi.spyOn(segmentParser, 'parseDependencies').mockReturnValue({
@@ -224,10 +221,6 @@ describe('Home Route in completed state', () => {
         { type: 'code', content: mockCode } as Segment,
       ],
       selectedCode: { type: 'code', content: mockCode } as Segment,
-      selectedDependencies: {
-        react: '^18.2.0',
-        'react-dom': '^18.2.0',
-      },
       inputRef: { current: null },
       title: 'React App',
       selectedResponseDoc: {

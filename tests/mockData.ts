@@ -36,7 +36,6 @@ export const createMockChatState = (overrides = {}) => ({
     type: 'code',
     content: 'console.log("Hello world")',
   },
-  selectedDependencies: {},
   selectedResponseDoc: undefined,
   codeReady: false,
   addScreenshot: () => Promise.resolve(),

@@ -37,7 +37,6 @@ const mockChatState: ChatState & {
     type: 'code',
     content: 'console.log("test")',
   },
-  selectedDependencies: {},
   codeReady: false,
   addScreenshot: () => Promise.resolve(),
   setSelectedResponseId: vi.fn(),

@@ -141,7 +141,6 @@ describe('Space Route Integration', () => {
       sendMessage: vi.fn(),
       selectedSegments: [] as Segment[],
       selectedCode: undefined,
-      selectedDependencies: {},
       title: '',
       sessionId: 'test-session-id',
       inputRef: { current: null },

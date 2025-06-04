@@ -5,7 +5,7 @@ import { AuthProvider } from '../app/contexts/AuthContext';
 import { useSession } from '../app/hooks/useSession'; // Import the actual hook for vi.mocked
 import { useSimpleChat } from '../app/hooks/useSimpleChat';
 import type { AiChatMessage, ChatMessage } from '../app/types/chat';
-import { parseContent, parseDependencies } from '../app/utils/segmentParser';
+import { parseContent } from '../app/utils/segmentParser';
 
 // Helper function to convert chunks into SSE format
 function formatAsSSE(chunks: string[]): string[] {
@@ -318,7 +318,6 @@ function Timer() {
 export default Timer;`,
                   },
                 ],
-                dependenciesString: '{"react": "^18.2.0", "react-dom": "^18.2.0"}}',
                 isStreaming,
                 timestamp: now,
               };
@@ -346,8 +345,6 @@ export default Timer;`,
                     content: 'You can customize the API endpoint and items per page.',
                   },
                 ],
-                dependenciesString:
-                  '{"react": "^18.2.0", "react-dom": "^18.2.0", "react-router-dom": "^6.4.0", "tailwindcss": "^3.3.0"}}',
                 isStreaming,
                 timestamp: now,
               };
@@ -367,8 +364,6 @@ export default Timer;`,
                       "import React from 'react';\nexport default function App() { /* ... */ }",
                   },
                 ],
-                dependenciesString:
-                  "Here's a photo gallery app using Fireproof for storage with a grid layout and modal viewing functionality:",
                 isStreaming,
                 timestamp: now,
               };
@@ -391,8 +386,6 @@ export default Timer;`,
                       "import React from 'react';\nexport default function ExoplanetTracker() { /* ... */ }",
                   },
                 ],
-                dependenciesString:
-                  'I\'ll create an "Exoplanet Tracker" app that lets users log and track potential exoplanets they\'ve discovered or are interested in.',
                 isStreaming,
                 timestamp: now,
               };
@@ -412,21 +405,19 @@ export default Timer;`,
                       "import React from 'react';\nexport default function LyricsRaterApp() { /* ... */ }",
                   },
                 ],
-                dependenciesString: '# Lyrics Rater App',
                 isStreaming,
                 timestamp: now,
               };
             }
             // Default case
             else {
-              const { segments, dependenciesString } = parseContent(rawContent);
+              const { segments } = parseContent(rawContent);
               aiMessage = {
                 type: 'ai',
                 text: rawContent,
                 session_id: 'test-session-id',
                 created_at: now,
                 segments,
-                dependenciesString: dependenciesString || '{"dependencies": {}}',
                 isStreaming,
                 timestamp: now,
               };
@@ -561,7 +552,6 @@ function Timer() {
 export default Timer;`,
                   },
                 ],
-                dependenciesString: '{"react": "^18.2.0", "react-dom": "^18.2.0"}}',
                 isStreaming,
                 timestamp: now,
               };
@@ -589,8 +579,6 @@ export default Timer;`,
                     content: 'You can customize the API endpoint and items per page.',
                   },
                 ],
-                dependenciesString:
-                  '{"react": "^18.2.0", "react-dom": "^18.2.0", "react-router-dom": "^6.4.0", "tailwindcss": "^3.3.0"}}',
                 isStreaming,
                 timestamp: now,
               };
@@ -610,8 +598,6 @@ export default Timer;`,
                       "import React from 'react';\nexport default function App() { /* ... */ }",
                   },
                 ],
-                dependenciesString:
-                  "Here's a photo gallery app using Fireproof for storage with a grid layout and modal viewing functionality:",
                 isStreaming,
                 timestamp: now,
               };
@@ -634,8 +620,6 @@ export default Timer;`,
                       "import React from 'react';\nexport default function ExoplanetTracker() { /* ... */ }",
                   },
                 ],
-                dependenciesString:
-                  'I\'ll create an "Exoplanet Tracker" app that lets users log and track potential exoplanets they\'ve discovered or are interested in.',
                 isStreaming,
                 timestamp: now,
               };
@@ -655,21 +639,19 @@ export default Timer;`,
                       "import React from 'react';\nexport default function LyricsRaterApp() { /* ... */ }",
                   },
                 ],
-                dependenciesString: '# Lyrics Rater App',
                 isStreaming,
                 timestamp: now,
               };
             }
             // Default case
             else {
-              const { segments, dependenciesString } = parseContent(rawContent);
+              const { segments } = parseContent(rawContent);
               aiMessage = {
                 type: 'ai',
                 text: rawContent,
                 session_id: 'test-session-id',
                 created_at: now,
                 segments,
-                dependenciesString: dependenciesString || '{"dependencies": {}}',
                 isStreaming,
                 timestamp: now,
               };
@@ -1086,19 +1068,10 @@ export default Timer;`,
       configurable: true,
     });
 
-    Object.defineProperty(result.current, 'selectedDependencies', {
-      get: () => parseDependencies(mockMessages[1].dependenciesString),
-      configurable: true,
-    });
-
     // Force a re-render
     act(() => {
       result.current.setInput('');
     });
-
-    // Check selected dependencies
-    expect(result.current.selectedDependencies?.react).toBe('^18.2.0');
-    expect(result.current.selectedDependencies?.['react-dom']).toBe('^18.2.0');
   });
 
   it('handles pending AI message state correctly', async () => {

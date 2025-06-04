@@ -11,7 +11,6 @@ describe('segmentParser utilities', () => {
     expect(result.segments.length).toBe(1);
     expect(result.segments[0].type).toBe('markdown');
     expect(result.segments[0].content).toBe(text);
-    expect(result.dependenciesString).toBeUndefined();
   });
 
   it('correctly handles nested JSX content', () => {
@@ -189,10 +188,9 @@ Final markdown
 
     const content = fs.readFileSync(fixturePath, 'utf-8');
     const result = parseContent(content);
-
-    // Verify that the dependencies string exists
-    expect(result.dependenciesString).toBeDefined();
-    expect(result.dependenciesString).toMatch(/react-modal/);
+    expect(result.segments.length).toBe(3);
+    expect(result.segments[1].type).toBe('code');
+    expect(result.segments[1].content).toContain('react-modal');
   });
 });
 
@@ -202,9 +200,9 @@ it('correctly parses dependencies from hard-message2.txt fixture', () => {
 
   const content = fs.readFileSync(fixturePath, 'utf-8');
   const result = parseContent(content);
-
-  expect(result.dependenciesString).toBeDefined();
-  expect(result.dependenciesString).toMatch(/react-dropzone/);
+  expect(result.segments.length).toBe(3);
+  expect(result.segments[1].type).toBe('code');
+  expect(result.segments[1].content).toContain('react-dropzone');
 });
 
 it('correctly parses markdown and code from hard-message4.txt fixture', () => {

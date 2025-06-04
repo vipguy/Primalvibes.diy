@@ -261,7 +261,6 @@ export default HelloWorld;`,
                   content: 'You can use this component in your application.',
                 },
               ],
-              dependenciesString: '{"react": "^18.2.0", "react-dom": "^18.2.0"}}',
               isStreaming,
               timestamp: now,
             };
@@ -297,7 +296,6 @@ function Timer() {
 export default Timer;`,
                 },
               ],
-              dependenciesString: '{"react": "^18.2.0", "react-dom": "^18.2.0"}}',
               isStreaming,
               timestamp: now,
             };
@@ -322,8 +320,6 @@ export default Timer;`,
                   content: 'You can customize the API endpoint and items per page.',
                 },
               ],
-              dependenciesString:
-                '{"react": "^18.2.0", "react-dom": "^18.2.0", "react-router-dom": "^6.4.0", "tailwindcss": "^3.3.0"}}',
               isStreaming,
               timestamp: now,
             };
@@ -343,8 +339,6 @@ export default Timer;`,
                     "import React from 'react';\nexport default function App() { /* ... */ }",
                 },
               ],
-              dependenciesString:
-                "Here's a photo gallery app using Fireproof for storage with a grid layout and modal viewing functionality:",
               isStreaming,
               timestamp: now,
             };
@@ -367,8 +361,6 @@ export default Timer;`,
                     "import React from 'react';\nexport default function ExoplanetTracker() { /* ... */ }",
                 },
               ],
-              dependenciesString:
-                'I\'ll create an "Exoplanet Tracker" app that lets users log and track potential exoplanets they\'ve discovered or are interested in.',
               isStreaming,
               timestamp: now,
             };
@@ -388,21 +380,19 @@ export default Timer;`,
                     "import React from 'react';\nexport default function LyricsRaterApp() { /* ... */ }",
                 },
               ],
-              dependenciesString: '# Lyrics Rater App',
               isStreaming,
               timestamp: now,
             };
           }
           // Default case
           else {
-            const { segments, dependenciesString } = parseContent(rawContent);
+            const { segments } = parseContent(rawContent);
             aiMessage = {
               type: 'ai',
               text: rawContent,
               session_id: 'test-session-id',
               created_at: now,
               segments,
-              dependenciesString: dependenciesString || '{"dependencies": {}}',
               isStreaming,
               timestamp: now,
             };
@@ -431,7 +421,6 @@ describe('segmentParser utilities', () => {
     expect(result.segments.length).toBe(1);
     expect(result.segments[0].type).toBe('markdown');
     expect(result.segments[0].content).toBe(text);
-    expect(result.dependenciesString).toBeUndefined();
   });
 
   it('correctly parses content with code blocks', () => {
@@ -466,7 +455,6 @@ Here's how to use React.
 
     const result = parseContent(text);
 
-    expect(result.dependenciesString).toBe('{"react": "^18.2.0", "react-dom": "^18.2.0"}}');
     expect(result.segments.length).toBe(1);
     expect(result.segments[0].type).toBe('markdown');
     expect(result.segments[0].content.trim()).toBe("Here's how to use React.");

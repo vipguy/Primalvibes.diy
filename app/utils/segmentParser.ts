@@ -6,10 +6,8 @@ import type { Segment } from '../types/chat';
  */
 export function parseContent(text: string): {
   segments: Segment[];
-  dependenciesString: string | undefined;
 } {
   const segments: Segment[] = [];
-  let dependenciesString: string | undefined;
 
   // Extract dependencies from the beginning if they exist
   // Format 1: {"dependencies": {}}
@@ -23,19 +21,15 @@ export function parseContent(text: string): {
   const depsFormat4 = text.match(/^({"dependencies":\s*{[\s\S]*?^}})/m);
 
   if (depsFormat1 && depsFormat1[1]) {
-    dependenciesString = depsFormat1[1];
     // Remove the dependencies part from the text
     text = text.substring(text.indexOf(depsFormat1[1]) + depsFormat1[1].length).trim();
   } else if (depsFormat2 && depsFormat2[1]) {
-    dependenciesString = depsFormat2[1];
     // Remove the dependencies part from the text
     text = text.substring(text.indexOf(depsFormat2[1]) + depsFormat2[1].length).trim();
   } else if (depsFormat3 && depsFormat3[1]) {
-    dependenciesString = depsFormat3[1];
     // Remove the dependencies part from the text
     text = text.substring(text.indexOf(depsFormat3[1]) + depsFormat3[1].length).trim();
   } else if (depsFormat4 && depsFormat4[1]) {
-    dependenciesString = depsFormat4[1];
     // Remove the dependencies part from the text
     text = text.substring(text.indexOf(depsFormat4[1]) + depsFormat4[1].length).trim();
   }
@@ -95,7 +89,7 @@ export function parseContent(text: string): {
       type: 'markdown',
       content: text,
     });
-    return { segments, dependenciesString };
+    return { segments };
   }
 
   // Find the longest code block
@@ -196,7 +190,7 @@ export function parseContent(text: string): {
     });
   }
 
-  return { segments, dependenciesString };
+  return { segments };
 }
 
 /**

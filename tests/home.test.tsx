@@ -24,7 +24,6 @@ vi.mock('../app/hooks/useSimpleChat', () => ({
     sendMessage: vi.fn(),
     selectedSegments: [],
     selectedCode: null,
-    selectedDependencies: {},
     title: '',
     sessionId: null,
     selectedResponseDoc: undefined,
