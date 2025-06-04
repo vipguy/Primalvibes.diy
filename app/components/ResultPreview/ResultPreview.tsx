@@ -72,7 +72,6 @@ function ResultPreview({
         if (data.type === 'preview-ready' || data.type === 'preview-loaded') {
           // respond with the API key
           const storedKey = localStorage.getItem('vibes-openrouter-key');
-          console.log('storedKey', storedKey);
           if (storedKey) {
             const keyData = JSON.parse(storedKey);
             const iframe = document.querySelector('iframe') as HTMLIFrameElement;

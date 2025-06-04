@@ -316,13 +316,11 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
       // Get API key - this is the core of the lazy key loading pattern
       let currentApiKey: string;
       try {
-        console.log('sendMessage: Ensuring API key...');
         const keyObject = await ensureApiKey();
         if (!keyObject?.key) {
           throw new Error('API key not found after ensureApiKey call.');
         }
         currentApiKey = keyObject.key;
-        console.log('sendMessage: API key ensured.');
       } catch (err) {
         console.warn('sendMessage: Failed to ensure API key:', err);
         setNeedsLogin(true); // Prompt for login if key cannot be obtained
@@ -339,15 +337,12 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
       }
 
       // Check credits with the obtained key
-      console.log('sendMessage: Checking credits...');
       const hasSufficientCredits = await checkCredits(currentApiKey);
       if (!hasSufficientCredits) {
-        console.warn('sendMessage: Insufficient credits to send message.');
         // Error is already added by checkCredits
         setIsStreaming(false);
         return;
       }
-      console.log('sendMessage: Credits sufficient.');
 
       // Ensure we have a system prompt
       const currentSystemPrompt = await ensureSystemPrompt();
