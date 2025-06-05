@@ -1,6 +1,8 @@
 import { useState, useCallback, useRef } from 'react';
 import { createOrUpdateKeyViaEdgeFunction } from '../services/apiKeyService';
 
+import type { ApiKeyResponse } from '../services/apiKeyService';
+
 /**
  * Hook for API key management that uses dynamic key provisioning
  * @param userId - Optional user ID for associating keys with specific users
@@ -34,86 +36,58 @@ export function useApiKey(userId?: string) {
   // Internal function to fetch a new key
   const fetchNewKeyInternal = useCallback(
     async (currentKeyHashParam?: string): Promise<{ key: string; hash: string }> => {
-      let keyData: any = null;
+      // Determine which hash (if any) to send to the server
+      let hashToUse = currentKeyHashParam ?? apiKey?.hash;
 
-      try {
-        let hashToUse = currentKeyHashParam;
-        if (!hashToUse) {
-          hashToUse = apiKey?.hash;
-          if (!hashToUse) {
-            const storedData = localStorage.getItem(storageKey);
-            if (storedData) {
-              try {
-                const parsed = JSON.parse(storedData);
-                hashToUse = parsed.hash;
-              } catch (e) {
-                // Ignore parsing errors
-              }
-            }
+      if (!hashToUse) {
+        const storedData = localStorage.getItem(storageKey);
+        if (storedData) {
+          try {
+            const parsed = JSON.parse(storedData);
+            hashToUse = parsed.hash;
+          } catch {
+            /* ignore JSON parse errors */
           }
         }
+      }
 
-        const apiResponse = await createOrUpdateKeyViaEdgeFunction(userId, hashToUse);
+      const apiResponse: ApiKeyResponse = await createOrUpdateKeyViaEdgeFunction(userId, hashToUse);
 
-        if (apiResponse && typeof apiResponse === 'object') {
-          if (
-            'key' in apiResponse &&
-            typeof apiResponse.key === 'object' &&
-            apiResponse.key !== null
-          ) {
-            // apiResponse is structured like { success: bool, key: { actual_data_object } }
-            // The actual_data_object might or might not contain a 'key' string property.
-            keyData = apiResponse.key;
-          } else {
-            // apiResponse itself is expected to be the actual_data_object
-            // e.g., { key: "string"?, hash: "string", ... }
-            keyData = apiResponse;
-          }
-        } else {
-          // apiResponse is not a valid object, or null.
-          // Set keyData to apiResponse to allow downstream error handling or logging of the invalid response.
-          keyData = apiResponse; // keyData will be non-object here if apiResponse was, or null/undefined.
-        }
-      } catch (error) {
-        const err = error instanceof Error ? error : new Error('Error fetching API key data');
+      if (!apiResponse.success) {
+        const err = new Error(apiResponse.error || 'Failed to obtain API key');
+        localStorage.removeItem(storageKey);
+        setApiKey(null);
         setError(err);
         throw err;
       }
 
-      // Validate keyData and determine what to store and return
-      if (keyData && typeof keyData.key === 'string' && keyData.key.trim() !== '') {
-        // Case 1: Full key data received (key + hash + other metadata)
-        const keyToStore = {
-          ...keyData, // Contains key, hash, and other metadata from API
-          createdAt: Date.now(),
-        };
+      const keyData = apiResponse.key;
+
+      let resultingKey: { key: string; hash: string };
+
+      if (keyData.key) {
+        // New key string provided – store entire payload
+        const keyToStore = { ...keyData, createdAt: Date.now() };
         localStorage.setItem(storageKey, JSON.stringify(keyToStore));
-        const resultingKey = { key: keyData.key, hash: keyData.hash };
-        setApiKey(resultingKey);
-        return resultingKey;
-      } else if (keyData && typeof keyData.hash === 'string' && keyData.hash.trim() !== '') {
-        // Case 2: Only hash (and other metadata) received, no new 'key' string
-        // This is the "no-op success" for the key string itself, but hash/metadata might have updated.
-
-        const existingKeyString = apiKey?.key; // Retrieve current key string from state
-
-        const keyToStore = {
-          ...keyData, // Contains new hash and other metadata from API
-          key: existingKeyString, // Preserve existing key string, or undefined if none
-          createdAt: Date.now(),
-        };
-        localStorage.setItem(storageKey, JSON.stringify(keyToStore));
-
-        const resultingKey = { key: existingKeyString || '', hash: keyData.hash };
-        setApiKey(resultingKey); // Update state with new hash and preserved/empty key
-        return resultingKey;
+        resultingKey = { key: keyData.key, hash: keyData.hash };
       } else {
-        // Case 3: Invalid response (keyData is null, not an object, or missing both key and hash)
-        console.error('Invalid API key response format (keyData problematic):', keyData);
-        const err = new Error('Invalid API key response format');
-        setError(err);
-        throw err;
+        // Key string omitted – treat as silent renewal/extension
+        // Preserve existing key string (from state or storage)
+        const existingKeyString =
+          apiKey?.key ??
+          (() => {
+            try {
+              const stored = localStorage.getItem(storageKey);
+              if (stored) return JSON.parse(stored).key as string;
+            } catch {}
+            return '';
+          })();
+
+        resultingKey = { key: existingKeyString, hash: keyData.hash };
       }
+
+      setApiKey(resultingKey);
+      return resultingKey;
     },
     [userId, apiKey, storageKey, setApiKey, setError]
   );
@@ -132,8 +106,6 @@ export function useApiKey(userId?: string) {
       setApiKey({ key: storedKeyData.key, hash: storedKeyData.hash });
       return { key: storedKeyData.key, hash: storedKeyData.hash };
     }
-
-    // setError(null); // Optionally clear previous errors
 
     const fetchPromise = fetchNewKeyInternal(storedKeyData?.hash)
       .then((newKey) => {

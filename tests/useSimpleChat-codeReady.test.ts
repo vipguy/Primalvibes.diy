@@ -517,15 +517,18 @@ describe('useSimpleChat', () => {
     // Mock createOrUpdateKeyViaEdgeFunction to ensure it returns the correct structure
     vi.mocked(createOrUpdateKeyViaEdgeFunction).mockImplementation(async () => {
       return {
-        key: 'mock-api-key-for-testing',
-        hash: 'mock-hash',
-        name: 'Mock Session Key',
-        label: 'mock-session',
-        limit: 0.01,
-        disabled: false,
-        usage: 0,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        success: true,
+        key: {
+          key: 'mock-api-key-for-testing',
+          hash: 'mock-hash',
+          name: 'Mock Session Key',
+          label: 'mock-session',
+          limit: 0.01,
+          disabled: false,
+          usage: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
       };
     });
 

@@ -6,6 +6,22 @@ import { API_BASE_URL } from '../config/env';
  * Service for managing CallAI API keys through Netlify Edge Functions
  */
 
+export type ApiKeyResponse = {
+  success: boolean;
+  error?: string;
+  key: {
+    key?: string;
+    hash: string;
+    name: string;
+    label: string;
+    limit: number;
+    disabled: boolean;
+    usage: number;
+    created_at: string;
+    updated_at: string;
+  };
+};
+
 /**
  * Creates a new session key through the secure Netlify Edge Function
  * @param userId Optional user ID to associate with the key
@@ -14,17 +30,7 @@ import { API_BASE_URL } from '../config/env';
 export async function createOrUpdateKeyViaEdgeFunction(
   userId: string | undefined,
   hash?: string
-): Promise<{
-  key: string;
-  hash: string;
-  name: string;
-  label: string;
-  limit: number;
-  disabled: boolean;
-  usage: number;
-  created_at: string;
-  updated_at: string;
-}> {
+): Promise<ApiKeyResponse> {
   // Use the API_ORIGIN for cross-origin requests, or relative path for same-origin
   const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/keys` : '/api/keys';
 

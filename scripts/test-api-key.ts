@@ -15,14 +15,14 @@ async function createApiKey() {
   try {
     // Mock user ID for testing
     const testUserId = `test-${Date.now()}`;
-    const keyData = await createOrUpdateKeyViaEdgeFunction(testUserId);
+    const { key: keyData } = await createOrUpdateKeyViaEdgeFunction(testUserId);
 
     console.log('API key created successfully:');
     console.log(`- Hash: ${keyData.hash}`);
     console.log(`- Name: ${keyData.name}`);
     console.log(`- Label: ${keyData.label}`);
     console.log(`- Limit: $${keyData.limit}`);
-    console.log(`- Key: ${keyData.key.substring(0, 10)}...`);
+    console.log(`- Key: ${keyData.key?.substring(0, 10)}...`);
 
     return keyData;
   } catch (error) {
@@ -64,7 +64,7 @@ async function main() {
     const keyData = await createApiKey();
 
     // Check credits for the new key
-    const credits = await checkCredits(keyData.key);
+    const credits = await checkCredits(keyData.key!);
 
     // Return the key and credits for potential use in other scripts
     return { keyData, credits };
