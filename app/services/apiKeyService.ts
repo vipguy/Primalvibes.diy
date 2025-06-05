@@ -32,7 +32,7 @@ export async function createOrUpdateKeyViaEdgeFunction(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: 'Bearer use-vibes',
+      Authorization: 'Bearer vibes-diy',
     },
     body: JSON.stringify({
       userId,

@@ -152,12 +152,7 @@ const DatabaseData: React.FC<{ dbName: string; sessionId: string }> = ({ dbName,
     <div className="">
       <DbDebugInfo />
 
-      <DynamicTable
-        headers={headers}
-        rows={docs}
-        dbName={database.name}
-        hrefFn={() => '#'}
-      />
+      <DynamicTable headers={headers} rows={docs} dbName={database.name} hrefFn={() => '#'} />
     </div>
   );
 };
