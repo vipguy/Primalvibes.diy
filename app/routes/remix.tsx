@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router';
 import { encodeTitle } from '~/components/SessionSidebar/utils';
-import { useApiKey } from '~/hooks/useApiKey';
 import type { VibeDocument } from '~/types/chat';
-import { useAuth } from '../contexts/AuthContext';
 import { useSession } from '../hooks/useSession';
 
 export function meta() {
@@ -24,19 +22,12 @@ export default function Remix() {
   // Get database instances from hooks
   const { session, sessionDatabase, updateTitle } = useSession(undefined);
 
-  const { userPayload } = useAuth();
-
   // Get API key for title generation
-  const { apiKey } = useApiKey(userPayload?.userId);
+  // const { apiKey } = useApiKey(userPayload?.userId);
 
   // Effect to get vibe slug from path parameter and fetch code
   useEffect(() => {
-    if (!apiKey) {
-      console.error('No API key available');
-      return;
-    }
-
-    async function processVibeSlug(apiKey: string) {
+    async function processVibeSlug() {
       try {
         // Check if we have a vibe slug in the URL path
         if (!vibeSlug) {
@@ -128,8 +119,8 @@ export default function Remix() {
       }
     }
 
-    processVibeSlug(apiKey);
-  }, [apiKey]); // Add apiKey to dependency array so effect re-runs if key becomes available
+    processVibeSlug();
+  }, []);
 
   // TV Static Canvas Effect
   const canvasRef = useRef<HTMLCanvasElement>(null);
