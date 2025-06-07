@@ -30,7 +30,7 @@ const TITLE_MODEL = 'meta-llama/llama-3.1-8b-instruct';
  */
 export function useSimpleChat(sessionId: string | undefined): ChatState {
   // Get userId from auth system
-  const { userPayload, isAuthenticated } = useAuth();
+  const { userPayload, isAuthenticated, setNeedsLogin: contextSetNeedsLogin } = useAuth();
   const userId = userPayload?.userId;
 
   // Get API key
@@ -98,17 +98,15 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
   const [selectedResponseId, setSelectedResponseId] = useState<string>('');
   const [pendingAiMessage, setPendingAiMessage] = useState<ChatMessageDocument | null>(null);
   const [needsNewKey, setNeedsNewKey] = useState<boolean>(false);
-  const [needsLogin, _setNeedsLogin] = useState<boolean>(false);
 
-  // Custom setNeedsLogin that emits an event when set to true
-  const setNeedsLogin = (value: boolean) => {
-    _setNeedsLogin(value);
-    if (value) {
-      // Create a custom event to notify about needsLogin change
-      const event = new CustomEvent('needsLoginTriggered');
-      window.dispatchEvent(event);
-    }
-  };
+  // Wrapper to retain (value, reason) signature expected by other helpers
+  const setNeedsLogin = useCallback(
+    (value: boolean, reason: string) => {
+      contextSetNeedsLogin(value);
+      console.log(`setNeedsLogin: ${value} from ${reason}`);
+    },
+    [contextSetNeedsLogin]
+  );
 
   // when needsNewKey turns true, call refreshKey or indicate login needed
   useEffect(() => {
@@ -118,14 +116,14 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
           try {
             await refreshKey();
             setNeedsNewKey(false);
-            setNeedsLogin(false);
+            setNeedsLogin(false, 'refreshKey success');
           } catch (error) {
             console.error('Failed to refresh API key:', error);
-            setNeedsLogin(true); // Also set login needed if refresh fails
+            setNeedsLogin(true, 'refreshKey failure'); // Also set login needed if refresh fails
           }
         } else {
           // Not authenticated and needs a new key
-          setNeedsLogin(true);
+          setNeedsLogin(true, 'not authenticated');
         }
       }
     }
@@ -294,7 +292,6 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     title: vibeDoc?.title || '',
     needsNewKey,
     setNeedsNewKey,
-    needsLogin,
     // Error tracking
     immediateErrors,
     advisoryErrors,

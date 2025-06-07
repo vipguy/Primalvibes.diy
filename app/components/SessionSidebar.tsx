@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useAuthPopup } from '../hooks/useAuthPopup';
@@ -16,28 +16,12 @@ import { dark, light } from './colorways';
  */
 function SessionSidebar({ isVisible, onClose }: SessionSidebarProps) {
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const { isAuthenticated, isLoading } = useAuth();
-  const [needsLogin, setNeedsLogin] = useState(false);
+  const { isAuthenticated, isLoading, needsLogin, setNeedsLogin } = useAuth();
   const { isPolling, pollError, initiateLogin } = useAuthPopup();
   const { isDarkMode } = useTheme();
 
   const colorway = randomColorway();
   const rando = isDarkMode ? dark[colorway] : light[colorway];
-
-  // Listen for the needsLoginTriggered event to update needsLogin state
-  useEffect(() => {
-    const handleNeedsLoginTriggered = () => {
-      setNeedsLogin(true);
-    };
-
-    // Add event listener
-    window.addEventListener('needsLoginTriggered', handleNeedsLoginTriggered);
-
-    // Cleanup
-    return () => {
-      window.removeEventListener('needsLoginTriggered', handleNeedsLoginTriggered);
-    };
-  }, []);
 
   // Handle clicks outside the sidebar to close it
   useEffect(() => {
