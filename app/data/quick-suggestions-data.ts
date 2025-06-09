@@ -28,20 +28,20 @@ export const quickSuggestions: Suggestion[] = [
     text: 'Create a personal finance calculator with student loan and compound interest formulas, and retirement goal tracking.',
   },
   {
-    label: 'Canvas',
-    text: 'Create a canvas drawing app where users can sketch, blur, effect, save and load images.',
+    label: 'Paint',
+    text: 'Create a super simple full-screen painting app with only natural pigments on the palette and one humongous brush.',
   },
   {
-    label: 'Autodraw',
-    text: 'Text to simple SVG, sketch with a rich color palette. Show the stream as it arrives and save the results for browsing.',
+    label: 'Cook',
+    text: 'Make an AI receipe generator that uses emoji for ingredients. Give me an AI critic who will taste the recipes and score them.'
   },
   {
     label: 'Schedule',
     text: 'Two text areas, paste the availability for each person, and AI finds the best time to meet.',
   },
   {
-    label: 'Web Art',
-    text: 'Page mutator that automatically sends document.body.innerHTML to callAI to make it more interesting web art, then extracts the HTML result, updates the body, and uses DOM (not ReactDOM) functions to insert a toggleable open control panel that lists the iteration history and shows the most recent 5 lines of the current mutation stream in a fixed size area. After each response, count 10 seconds and recursively send HTML to AI again. The page should start with the technicolor transition from Wizard of Oz, "we\'re not in Kansas anymore."',
+    label: 'Weather API',
+    text: 'Use the National Weather Service API to get the weather in Key West, Florida. Render a CSS gradient to represent the sky under those conditions.',
   },
   // {
   //   label: 'Guitar',
@@ -52,12 +52,20 @@ export const quickSuggestions: Suggestion[] = [
     text: 'Create a pomodoro timer app with multiple timers, work/break intervals, and session tracking. Save time start times so I can refresh the page with running timers.',
   },
   {
-    label: 'Poetry',
-    text: 'Write a short non-rhyming poem about a topic (default butterfly) and then use it to have AI make an SVG drawing and when the drawing is complete do another poem. Keep going one at a time.',
+    label: 'Toggle',
+    text: 'Put a checkbox on a blank page. When checked, the page is white. When unchecked, the page is black.',
   },
   {
-    label: 'Galaxy Blaster',
-    text: 'Space invaders clone for mobile, with high scores, and sound effects via create oscillator.',
+    label: 'Color Picker',
+    text: 'Give me a color picker specifically for maritime and ocean colors. When I\'m happy with a color, use AI to name it. Also let me type in a color name and have AI pick an actual color.',
+  },
+  {
+    label: 'Landscape',
+    text: "Show me three quotes of famous landscape descriptions from American literature. Give me the option to render those landscapes with images using AI."
+  },
+  {
+    label: 'Cat Portrait',
+    text: 'Let me pick an emoji from a small board. Generate a photorealistic portrait of orange Persian tabby cat incorporating the selected emoji.'
   },
   {
     label: 'Music',
@@ -85,7 +93,7 @@ export const quickSuggestions: Suggestion[] = [
   },
   {
     label: '3D',
-    text: 'Use three js to create a 3D scene with editable persistent object and camera positions.',
+    text: 'Use three js to create a 3D scene of Paul Cézanne\'s The Basket of Apples.'
   },
   {
     label: 'Wildcard',
