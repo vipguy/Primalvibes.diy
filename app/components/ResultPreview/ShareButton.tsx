@@ -1,14 +1,14 @@
 import { forwardRef } from 'react';
 import { PublishIcon } from '../HeaderContent/SvgIcons';
 
-interface PublishButtonProps {
+interface ShareButtonProps {
   onClick: () => void;
   isPublishing: boolean;
   urlCopied: boolean;
   hasPublishedUrl?: boolean;
 }
 
-export const PublishButton = forwardRef<HTMLButtonElement, PublishButtonProps>(
+export const ShareButton = forwardRef<HTMLButtonElement, ShareButtonProps>(
   ({ onClick, isPublishing, urlCopied, hasPublishedUrl = false }, ref) => {
     // Button text/tooltip changes based on whether this is a first-time publish or reopening modal
     const buttonLabel = hasPublishedUrl ? 'Share App' : 'Publish';
@@ -20,7 +20,7 @@ export const PublishButton = forwardRef<HTMLButtonElement, PublishButtonProps>(
         type="button"
         onClick={onClick}
         disabled={isPublishing}
-        className="bg-glimmer text-light-primary dark:text-dark-primary flex items-center justify-center gap-1 rounded-md border border-gray-200 px-3 py-2 text-sm font-medium disabled:cursor-wait disabled:opacity-50 max-[767px]:aspect-square max-[767px]:p-2 min-[768px]:w-auto dark:border-gray-700"
+        className="bg-light-background-01 dark:bg-dark-decorative-01 text-light-secondary dark:text-dark-secondary hover:bg-light-background-02 dark:hover:bg-dark-decorative-00 focus:ring-light-border-01 dark:focus:ring-dark-border-01 flex items-center justify-center gap-1 rounded-md px-4 py-2 text-sm font-semibold shadow focus:ring-1 focus:outline-none disabled:cursor-wait disabled:opacity-50 max-[767px]:aspect-square max-[767px]:p-2 min-[768px]:w-auto"
         aria-label={urlCopied ? 'URL copied to clipboard' : buttonLabel}
         title={urlCopied ? 'URL copied to clipboard' : buttonTooltip}
       >
