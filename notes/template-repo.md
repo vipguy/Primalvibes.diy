@@ -39,7 +39,7 @@ Minimal top-level layout:
 
 Tips:
 * Keep **`name`, `version`, `description`, `repository`** fields generic so `create-vite` can rewrite them.
-* Prefer **pnpm** in `README` and `package.json` scripts (`dev`, `build`, `preview`, `lint`, `test`).
+* Prefer **npm** in `README` and `package.json` scripts (`dev`, `build`, `preview`, `lint`, `test`).
 * Don’t check in `.env` – ship an `env-template` instead.
 * If we ever need a sub-folder template we can use `fireproof-storage/eject-vibe#templates/xyz`, but flat root keeps the CLI syntax simplest.
 
@@ -65,15 +65,15 @@ Enabling the flag therefore:
 ## 4⃣ Smoke-testing before we publish
 
 ```bash
-pnpm create vite@latest my-test-app -- --template fireproof-storage/eject-vibe
+npm create vite@latest my-test-app -- --template fireproof-storage/eject-vibe
 cd my-test-app
-pnpm install
-pnpm dev
+npm install
+npm dev
 ```
 
 ✔️ The dev server should come up on `http://localhost:5173` with the starter UI and no ESLint/TypeScript errors.
 
-Run `pnpm test` and `pnpm lint` to ensure a clean slate.  Remember the team preference: **JSX props must obey the linter rule explained in /notes/testing.md**.
+Run `npm test` and `npm lint` to ensure a clean slate.  Remember the team preference: **JSX props must obey the linter rule explained in /notes/testing.md**.
 
 ---
 
