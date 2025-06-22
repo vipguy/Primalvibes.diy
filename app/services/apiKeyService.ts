@@ -33,7 +33,7 @@ export async function createOrUpdateKeyViaEdgeFunction(
   token: string
 ): Promise<ApiKeyResponse> {
   // Use the API_ORIGIN for cross-origin requests, or relative path for same-origin
-  const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/keys` : '/api/keys';
+  const endpoint = `${API_BASE_URL}/api/keys`;
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
