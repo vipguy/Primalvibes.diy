@@ -28,18 +28,22 @@ export type ApiKeyResponse = {
  * @returns The created key data
  */
 export async function createOrUpdateKeyViaEdgeFunction(
-  userId: string | undefined,
-  hash?: string
+  userId: string,
+  hash: string | undefined,
+  token: string
 ): Promise<ApiKeyResponse> {
   // Use the API_ORIGIN for cross-origin requests, or relative path for same-origin
   const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/keys` : '/api/keys';
 
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  headers.Authorization = `Bearer ${token}`;
+
   const response = await fetch(endpoint, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: 'Bearer vibes-diy',
-    },
+    headers,
     body: JSON.stringify({
       userId,
       name: userId ? `User ${userId} Session` : 'Anonymous Session',

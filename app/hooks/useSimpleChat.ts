@@ -40,7 +40,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
   // and logged-in users will get proper credit assignment based on their ID
   // Using the useApiKey hook to get API key related functionality
   // Note: ensureApiKey is the key function we need for lazy loading
-  const { ensureApiKey, refreshKey } = useApiKey(userId);
+  const { ensureApiKey, refreshKey } = useApiKey();
 
   // Get session data
   const {
@@ -108,28 +108,6 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     [contextSetNeedsLogin]
   );
 
-  // when needsNewKey turns true, call refreshKey or indicate login needed
-  useEffect(() => {
-    async function refresh() {
-      if (needsNewKey) {
-        if (isAuthenticated) {
-          try {
-            await refreshKey();
-            setNeedsNewKey(false);
-            setNeedsLogin(false, 'refreshKey success');
-          } catch (error) {
-            console.error('Failed to refresh API key:', error);
-            setNeedsLogin(true, 'refreshKey failure'); // Also set login needed if refresh fails
-          }
-        } else {
-          // Not authenticated and needs a new key
-          setNeedsLogin(true, 'not authenticated');
-        }
-      }
-    }
-    refresh();
-  }, [needsNewKey, refreshKey, isAuthenticated]);
-
   // Derive model to use from settings or default
   const modelToUse = useMemo(
     () =>
@@ -194,7 +172,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
    * @param textOverride Optional text to use instead of the current userMessage
    */
   const sendMessage = useCallback(
-    (textOverride?: string) => {
+    (textOverride?: string, skipSubmit: boolean = false) => {
       const ctx: SendMessageContext = {
         userMessage,
         mergeUserMessage,
@@ -221,7 +199,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
         titleModel: TITLE_MODEL,
         isAuthenticated,
       };
-      return sendChatMessage(ctx, textOverride);
+      return sendChatMessage(ctx, textOverride, skipSubmit);
     },
     [
       userMessage.text,
@@ -242,6 +220,38 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
       isAuthenticated,
     ]
   );
+
+  // When a login completes (isAuthenticated becomes true) and we still need a key,
+  // refresh the key and automatically retry sending the pending message.
+  useEffect(() => {
+    async function handlePostLogin() {
+      if (!needsNewKey) return;
+
+      if (!isAuthenticated) {
+        // Still not authenticated, ensure login prompt remains
+        setNeedsLogin(true, 'still not authenticated');
+        return;
+      }
+
+      try {
+        await refreshKey();
+        setNeedsNewKey(false);
+        setNeedsLogin(false, 'refreshKey success');
+
+        // If we have a pending user doc that hasn't been processed, retry send
+        if (pendingUserDoc?.text.trim()) {
+          // Resend the message using the pending user message text but skip resubmitting it to the DB
+          sendMessage(pendingUserDoc.text, true);
+        }
+      } catch (error) {
+        console.error('Failed to refresh API key after login:', error);
+        // If refresh fails, keep login state but notify user
+        setNeedsLogin(true, 'refreshKey failure');
+      }
+    }
+
+    void handlePostLogin();
+  }, [needsNewKey, isAuthenticated, refreshKey, sendMessage, pendingUserDoc, setNeedsLogin]);
 
   // Determine if code is ready for display
   const codeReady = useMemo(() => {

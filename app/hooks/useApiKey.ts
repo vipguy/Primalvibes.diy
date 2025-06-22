@@ -1,17 +1,20 @@
-import { useState, useCallback, useRef } from 'react';
-import { createOrUpdateKeyViaEdgeFunction } from '../services/apiKeyService';
-
+import { useCallback, useRef, useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import type { ApiKeyResponse } from '../services/apiKeyService';
+import { createOrUpdateKeyViaEdgeFunction } from '../services/apiKeyService';
 
 /**
  * Hook for API key management that uses dynamic key provisioning
  * @param userId - Optional user ID for associating keys with specific users
  * @returns Object containing apiKey, error, refreshKey, and ensureApiKey states
  */
-export function useApiKey(userId?: string) {
+export function useApiKey() {
   const [apiKey, setApiKey] = useState<{ key: string; hash: string } | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const loadingPromiseRef = useRef<Promise<{ key: string; hash: string }> | null>(null);
+  const { token, userPayload } = useAuth(); // Get auth token and payload
+  const userId = userPayload?.userId;
+
   // Always use a consistent storage key regardless of user ID
   const storageKey = 'vibes-openrouter-key';
 
@@ -51,7 +54,15 @@ export function useApiKey(userId?: string) {
         }
       }
 
-      const apiResponse: ApiKeyResponse = await createOrUpdateKeyViaEdgeFunction(userId, hashToUse);
+      if (!token || !userId) {
+        throw new Error('User not authenticated');
+      }
+
+      const apiResponse: ApiKeyResponse = await createOrUpdateKeyViaEdgeFunction(
+        userId,
+        hashToUse,
+        token
+      );
 
       if (!apiResponse.success) {
         const err = new Error(apiResponse.error || 'Failed to obtain API key');
@@ -89,7 +100,7 @@ export function useApiKey(userId?: string) {
       setApiKey(resultingKey);
       return resultingKey;
     },
-    [userId, apiKey, storageKey, setApiKey, setError]
+    [userId, apiKey, storageKey, setApiKey, setError, token]
   );
 
   const ensureApiKey = useCallback(async (): Promise<{ key: string; hash: string }> => {
