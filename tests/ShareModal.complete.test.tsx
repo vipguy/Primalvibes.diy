@@ -111,7 +111,7 @@ describe('ShareModal', () => {
   });
 
   it('renders the URL input and copy button when published URL exists', () => {
-    const testUrl = 'https://test-app.vibecode.garden';
+    const testUrl = 'https://test-app.vibesdiy.app';
 
     render(
       <ShareModal
@@ -163,7 +163,7 @@ describe('ShareModal', () => {
         isOpen={true}
         onClose={mockOnClose}
         buttonRef={mockButtonRef}
-        publishedAppUrl="https://test-app.vibecode.garden"
+        publishedAppUrl="https://test-app.vibesdiy.app"
         onPublish={mockOnPublish}
         isPublishing={true}
       />
@@ -262,7 +262,7 @@ describe('ShareModal', () => {
         isOpen={true}
         onClose={mockOnClose}
         buttonRef={mockButtonRef}
-        publishedAppUrl="https://test-app.vibecode.garden"
+        publishedAppUrl="https://test-app.vibesdiy.app"
         onPublish={mockOnPublish}
         isPublishing={false}
       />
@@ -289,7 +289,7 @@ describe('ShareModal', () => {
         isOpen={true}
         onClose={mockOnClose}
         buttonRef={mockButtonRef}
-        publishedAppUrl="https://test-app.vibecode.garden"
+        publishedAppUrl="https://test-app.vibesdiy.app"
         onPublish={mockOnPublish}
         isPublishing={false}
       />
@@ -308,7 +308,7 @@ describe('ShareModal', () => {
   }, 10000);
 
   it('copies URL to clipboard when clicking copy button', async () => {
-    const testUrl = 'https://test-app.vibecode.garden';
+    const testUrl = 'https://test-app.vibesdiy.app';
 
     render(
       <ShareModal
@@ -347,7 +347,7 @@ describe('ShareModal', () => {
         isOpen={true}
         onClose={mockOnClose}
         buttonRef={mockButtonRef}
-        publishedAppUrl="https://test-app.vibecode.garden"
+        publishedAppUrl="https://test-app.vibesdiy.app"
         onPublish={mockOnPublish}
         isPublishing={false}
       />
@@ -380,7 +380,7 @@ describe('ShareModal', () => {
           isOpen={false}
           onClose={mockOnClose}
           buttonRef={mockButtonRef}
-          publishedAppUrl="https://test-app.vibecode.garden"
+          publishedAppUrl="https://test-app.vibesdiy.app"
           onPublish={mockOnPublish}
           isPublishing={false}
         />
@@ -394,7 +394,7 @@ describe('ShareModal', () => {
           isOpen={true}
           onClose={mockOnClose}
           buttonRef={mockButtonRef}
-          publishedAppUrl="https://test-app.vibecode.garden"
+          publishedAppUrl="https://test-app.vibesdiy.app"
           onPublish={mockOnPublish}
           isPublishing={false}
         />

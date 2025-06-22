@@ -13,7 +13,7 @@ This document outlines the API endpoints and patterns used for managing API keys
 POST ${API_ORIGIN}/api/keys
 ```
 
-Where `API_ORIGIN` defaults to `https://vibecode.garden` or uses the local path `/api/keys` for same-origin requests.
+Where `API_ORIGIN` defaults to `https://vibesdiy.app` or uses the local path `/api/keys` for same-origin requests.
 
 ### Request Headers
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The remix route will load code from an external vibecode.garden app, create a new session with that code, and redirect users to that session - all without requiring a chat exchange.
+The remix route will load code from an external vibesdiy.app app, create a new session with that code, and redirect users to that session - all without requiring a chat exchange.
 
 ## Implementation Details
 
@@ -53,9 +53,9 @@ export default function Remix() {
         const url = new URL(referrer);
         const domain = url.hostname;
 
-        // Verify it's a vibecode.garden domain
-        if (!domain.endsWith('vibecode.garden')) {
-          setError('Invalid referrer - Only vibecode.garden apps can be remixed');
+        // Verify it's a vibesdiy.app domain
+        if (!domain.endsWith('vibesdiy.app')) {
+          setError('Invalid referrer - Only vibesdiy.app apps can be remixed');
           setIsLoading(false);
           return;
         }
@@ -82,7 +82,7 @@ export default function Remix() {
 
         // Create user message
         mergeUserMessage({
-          text: `Please help me remix ${appName}.vibecode.garden`,
+          text: `Please help me remix ${appName}.vibesdiy.app`,
         });
         await submitUserMessage();
 

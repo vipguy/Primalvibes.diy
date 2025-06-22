@@ -33,7 +33,7 @@ export function VibeCard({
           <div className="flex items-center space-x-2">
             {vibe.slug && vibe.slug !== vibe.id && (
               <a
-                href={`https://${vibe.slug}.vibecode.garden`}
+                href={`https://${vibe.slug}.vibesdiy.app`}
                 className="text-xs text-gray-500 hover:text-gray-700"
                 target="_blank"
                 rel="noopener noreferrer"

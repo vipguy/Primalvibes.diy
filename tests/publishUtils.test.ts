@@ -23,7 +23,7 @@ vi.stubGlobal('import', {
 // Mock global fetch
 const mockFetch = vi.fn().mockImplementation(async () => ({
   ok: true,
-  json: async () => ({ url: 'https://test-app.vibecode.garden' }),
+  json: async () => ({ url: 'https://test-app.vibesdiy.app' }),
 }));
 global.fetch = mockFetch;
 
@@ -45,7 +45,7 @@ global.FileReader = MockFileReader as any;
 const mockVibeDoc = {
   _id: 'vibe',
   title: 'Test App',
-  remixOf: 'original-app.vibecode.garden',
+  remixOf: 'original-app.vibesdiy.app',
 };
 
 const mockScreenshotDoc = {
@@ -118,7 +118,7 @@ describe('publishApp', () => {
     const payload = JSON.parse(options.body);
 
     // Verify remixOf is included in the payload
-    expect(payload).toHaveProperty('remixOf', 'original-app.vibecode.garden');
+    expect(payload).toHaveProperty('remixOf', 'original-app.vibesdiy.app');
     expect(payload).toHaveProperty('title', testTitle);
     expect(payload).toHaveProperty('chatId', sessionId);
   });

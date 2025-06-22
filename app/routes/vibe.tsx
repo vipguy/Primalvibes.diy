@@ -7,7 +7,7 @@ export default function VibeIframeContainer() {
     return <div className="p-4">No vibe slug provided</div>;
   }
 
-  const iframeUrl = `https://${vibeSlug}.vibecode.garden/`;
+  const iframeUrl = `https://${vibeSlug}.vibesdiy.app/`;
 
   // Format the slug for display by removing dashes and capitalizing words
   const formattedTitle = vibeSlug

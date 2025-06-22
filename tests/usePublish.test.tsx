@@ -79,7 +79,7 @@ describe('usePublish Hook', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     // Default implementation for publishApp
-    (publishApp as any).mockResolvedValue('https://test-app.vibecode.garden');
+    (publishApp as any).mockResolvedValue('https://test-app.vibesdiy.app');
   });
 
   it('initializes with correct default values', () => {
@@ -106,7 +106,7 @@ describe('usePublish Hook', () => {
   });
 
   it('initializes with provided publishedUrl', () => {
-    const initialUrl = 'https://initial-app.vibecode.garden';
+    const initialUrl = 'https://initial-app.vibesdiy.app';
 
     const { result } = renderHook(
       () =>
@@ -158,7 +158,7 @@ describe('usePublish Hook', () => {
   });
 
   it('publishes the app and updates state correctly', async () => {
-    const mockAppUrl = 'https://published-app.vibecode.garden';
+    const mockAppUrl = 'https://published-app.vibesdiy.app';
     (publishApp as any).mockResolvedValue(mockAppUrl);
 
     const { result } = renderHook(

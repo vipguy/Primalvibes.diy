@@ -45,7 +45,7 @@ export default function Remix() {
         setAppDomain(appName);
 
         // Fetch the app code
-        const appUrl = `https://${appName}.vibecode.garden/App.jsx`;
+        const appUrl = `https://${appName}.vibesdiy.app/App.jsx`;
         const response = await fetch(appUrl);
 
         if (!response.ok) {
@@ -66,7 +66,7 @@ export default function Remix() {
           _id: '0001-user-first',
           type: 'user',
           session_id: session._id,
-          text: `Please help me remix ${appName}.vibecode.garden`,
+          text: `Please help me remix ${appName}.vibesdiy.app`,
           created_at: Date.now(),
         };
         await sessionDatabase.put(userMessage);

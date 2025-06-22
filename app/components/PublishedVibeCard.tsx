@@ -15,7 +15,7 @@ export default function PublishedVibeCard({
 
   // Extract the slug from the URL (subdomain part)
   const urlParts = normalizedUrl.split('/');
-  const domain = urlParts[2] || ''; // e.g., "example.vibecode.garden"
+  const domain = urlParts[2] || ''; // e.g., "example.vibesdiy.app"
   const slug = domain.split('.')[0]; // e.g., "example"
 
   // Use provided name or extract from URL

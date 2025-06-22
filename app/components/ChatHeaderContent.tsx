@@ -32,7 +32,7 @@ function ChatHeaderContent({
         {remixOf ? (
           <>
             <a
-              href={`https://${remixOf}.vibecode.garden/`}
+              href={`https://${remixOf}.vibesdiy.app/`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-accent-02-light dark:text-accent-02-dark hover:underline"

@@ -399,7 +399,7 @@ describe('ResultPreviewHeaderContent', () => {
 
   it('passes correct props to usePublish hook', () => {
     // Mock session with a published URL
-    const publishedUrl = 'https://existing-app.vibecode.garden';
+    const publishedUrl = 'https://existing-app.vibesdiy.app';
     (useSession as any).mockReturnValue({
       session: { publishedUrl },
       docs: mockMessages,

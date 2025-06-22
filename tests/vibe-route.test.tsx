@@ -25,7 +25,7 @@ describe('Vibe Route', () => {
     // Check that the iframe has the correct src attribute
     const iframe = screen.getByTitle('Vibe: sound-panda-9086');
     expect(iframe).toBeInTheDocument();
-    expect(iframe.getAttribute('src')).toBe('https://sound-panda-9086.vibecode.garden/');
+    expect(iframe.getAttribute('src')).toBe('https://sound-panda-9086.vibesdiy.app/');
   });
 
   it('displays a header with the formatted title and Remix button', () => {
