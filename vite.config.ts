@@ -3,6 +3,7 @@ import tailwindcss from '@tailwindcss/vite';
 import type { ConfigEnv, UserConfig } from 'vite';
 import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import devtoolsJson from '@improvements/vite-plugin-devtools-json';
 
 export default defineConfig(({ command, mode }: ConfigEnv): UserConfig => {
   // Disable React Router plugin for tests or when explicitly disabled
@@ -14,6 +15,7 @@ export default defineConfig(({ command, mode }: ConfigEnv): UserConfig => {
       // Only include React Router plugin when not disabled
       ...(!disableReactRouter ? [reactRouter()] : []),
       tsconfigPaths(),
+      devtoolsJson(),
     ],
     // Define global constants
     // define: {
