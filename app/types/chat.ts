@@ -117,6 +117,7 @@ export type SystemChatMessage = ChatMessage & {
 
 // ===== Component Props =====
 export interface ChatState {
+  isEmpty: boolean;
   docs: ChatMessageDocument[];
   input: string;
   setInput: (input: string) => void;

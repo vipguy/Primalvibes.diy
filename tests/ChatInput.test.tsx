@@ -22,6 +22,7 @@ describe('ChatInput Component', () => {
 
     // Initialize mockChatState for each test with all required properties
     mockChatState = {
+      isEmpty: true,
       input: '',
       isStreaming: false,
       inputRef: inputRef,

@@ -38,6 +38,7 @@ const mockChatState: ChatState & {
     content: 'console.log("test")',
   },
   codeReady: false,
+  isEmpty: true,
   addScreenshot: () => Promise.resolve(),
   setSelectedResponseId: vi.fn(),
   setMobilePreviewShown: vi.fn(),

@@ -265,7 +265,7 @@ export default function UnifiedSession() {
           />
         }
         suggestionsComponent={
-          chatState.docs.length === 0 ? (
+          chatState.isEmpty ? (
             <QuickSuggestions onSelectSuggestion={handleSelectSuggestion} />
           ) : undefined
         }

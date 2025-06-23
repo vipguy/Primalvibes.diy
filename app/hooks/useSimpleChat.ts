@@ -306,5 +306,6 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     immediateErrors,
     advisoryErrors,
     addError,
+    isEmpty: docs.length === 0,
   };
 }

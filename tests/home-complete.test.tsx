@@ -233,6 +233,7 @@ describe('Home Route in completed state', () => {
         ],
         isStreaming: false,
       } as AiChatMessage,
+      isEmpty: false,
       ...mockChatStateProps,
     });
   });
