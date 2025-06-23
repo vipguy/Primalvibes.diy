@@ -50,7 +50,7 @@ export const CONNECT_API_URL =
 export const CLOUD_SESSION_TOKEN_PUBLIC_KEY = import.meta.env.VITE_CLOUD_SESSION_TOKEN_PUBLIC || '';
 
 // Vibes Service API
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://vibesdiy.app';
+export const API_BASE_URL = 'https://vibesdiy.app';
 
 // Chat History Database
 export const FIREPROOF_CHAT_HISTORY =
