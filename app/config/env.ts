@@ -53,5 +53,5 @@ export const CLOUD_SESSION_TOKEN_PUBLIC_KEY = import.meta.env.VITE_CLOUD_SESSION
 export const API_BASE_URL = 'https://vibesdiy.app';
 
 // Chat History Database
-export const FIREPROOF_CHAT_HISTORY =
+export const SETTINGS_DBNAME =
   (import.meta.env.VITE_VIBES_CHAT_HISTORY || 'vibes-chats') + getVersionSuffix();

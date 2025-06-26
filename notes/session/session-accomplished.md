@@ -9,7 +9,7 @@ This update implements a significant architectural improvement to the chat appli
 ### 1. Centralized Configuration
 
 - Created `app/config/env.ts` to manage environment variables in one place
-- Added `FIREPROOF_CHAT_HISTORY` constant for consistent database naming
+- Added `SETTINGS_DBNAME` constant for consistent database naming
 
 ### 2. Fireproof Session Architecture
 
@@ -38,7 +38,7 @@ This update implements a significant architectural improvement to the chat appli
 ### ChatInterface.tsx
 
 - Removed the embedded `SessionDocument` interface (moved to types)
-- Updated to use environment configuration with `FIREPROOF_CHAT_HISTORY`
+- Updated to use environment configuration with `SETTINGS_DBNAME`
 - Eliminated manual session storage logic (now handled by hooks)
 - Removed redundant effect for saving session data
 - Changed component props to match new API structure

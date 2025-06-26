@@ -14,7 +14,7 @@ const mockSubmitUserMessage = vi.fn().mockImplementation(() => {
 
 // Mock all required dependencies
 vi.mock('../app/config/env', () => ({
-  FIREPROOF_CHAT_HISTORY: 'test-chat-history',
+  SETTINGS_DBNAME: 'test-chat-history',
 }));
 
 vi.mock('use-fireproof', () => ({

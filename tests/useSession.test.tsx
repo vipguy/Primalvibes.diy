@@ -25,7 +25,7 @@ vi.mock('../app/utils/databaseManager', () => {
 
 // Mock the env module
 vi.mock('../app/config/env', () => ({
-  FIREPROOF_CHAT_HISTORY: 'test-chat-history',
+  SETTINGS_DBNAME: 'test-chat-history',
 }));
 
 // Now mock use-fireproof

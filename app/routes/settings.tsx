@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useFireproof } from 'use-fireproof';
 import { HomeIcon } from '../components/SessionSidebar/HomeIcon';
 import SimpleAppLayout from '../components/SimpleAppLayout';
-import { FIREPROOF_CHAT_HISTORY } from '../config/env';
+import { SETTINGS_DBNAME } from '../config/env';
 import { useAuth } from '../contexts/AuthContext';
 import modelsList from '../data/models.json';
 import type { UserSettings } from '../types/settings';
@@ -19,7 +19,7 @@ export function meta() {
 export default function Settings() {
   const navigate = useNavigate();
   // Use the main database directly instead of through useSession
-  const { useDocument } = useFireproof(FIREPROOF_CHAT_HISTORY);
+  const { useDocument } = useFireproof(SETTINGS_DBNAME);
   const { isAuthenticated, checkAuthStatus } = useAuth();
 
   const {

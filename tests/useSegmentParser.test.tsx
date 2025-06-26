@@ -13,7 +13,7 @@ vi.mock('../app/config/provisioning');
 // Mock the env module
 vi.mock('../app/config/env', () => ({
   CALLAI_API_KEY: 'mock-callai-api-key-for-testing',
-  FIREPROOF_CHAT_HISTORY: 'test-chat-history',
+  SETTINGS_DBNAME: 'test-chat-history',
 }));
 
 // Define shared state and reset function *outside* the mock factory

@@ -2,7 +2,7 @@
 
 ## Current Architecture
 
-Currently, the application uses a single Fireproof database (`FIREPROOF_CHAT_HISTORY`) to store all data:
+Currently, the application uses a single Fireproof database (`SETTINGS_DBNAME`) to store all data:
 
 - Session metadata
 - Screenshots
@@ -15,11 +15,11 @@ This design creates a single large database that contains all user data, which c
 
 We will implement a sharded database approach where:
 
-1. `FIREPROOF_CHAT_HISTORY` will only store session metadata (minimal data needed for the session list)
+1. `SETTINGS_DBNAME` will only store session metadata (minimal data needed for the session list)
 2. Each session will have its own dedicated database named based on the session ID
 3. All session-specific content (messages, screenshots, app code, etc.) will be stored in the session-specific database
 
-Session metadata is stored in the FIREPROOF_CHAT_HISTORY database, while all session-specific content is stored in individual `vibe-${sessionId}` databases.
+Session metadata is stored in the SETTINGS_DBNAME database, while all session-specific content is stored in individual `vibe-${sessionId}` databases.
 
 ## Required Changes
 
@@ -30,11 +30,11 @@ Create a utility function to manage database instances:
 ```typescript
 // app/utils/databaseManager.ts
 import { fireproof } from 'use-fireproof';
-import { FIREPROOF_CHAT_HISTORY } from '../config/env';
+import { SETTINGS_DBNAME } from '../config/env';
 
 // Get the main sessions database
 export const getSessionsDatabase = () => {
-  return fireproof(FIREPROOF_CHAT_HISTORY);
+  return fireproof(SETTINGS_DBNAME);
 };
 
 // Get a session-specific database
@@ -52,7 +52,7 @@ export const getSessionDatabase = (sessionId: string) => {
 // app/hooks/sidebar/useSessionList.ts
 export function useSessionList(justFavorites = false) {
   // Get sessions from main database
-  const { database, useLiveQuery } = useFireproof(FIREPROOF_CHAT_HISTORY);
+  const { database, useLiveQuery } = useFireproof(SETTINGS_DBNAME);
 
   // Query only session documents (no screenshots)
   const { docs: sessionDocs } = useLiveQuery('type', { key: 'session' });
@@ -98,7 +98,7 @@ export function useSessionList(justFavorites = false) {
 // app/hooks/useSession.ts
 export function useSession(sessionId: string | null) {
   // Main database for session metadata
-  const { database: mainDb, useDocument } = useFireproof(FIREPROOF_CHAT_HISTORY);
+  const { database: mainDb, useDocument } = useFireproof(SETTINGS_DBNAME);
 
   // Session-specific database
   const sessionDb = sessionId ? getSessionDatabase(sessionId) : null;
@@ -191,7 +191,7 @@ const saveUserMessage = async (text: string) => {
 
 1. Create a migration utility to move existing data:
 
-   - Read all data from FIREPROOF_CHAT_HISTORY
+   - Read all data from SETTINGS_DBNAME
    - For each session, create a new session-specific database
    - Move all related data (messages, screenshots) to the new database
    - Keep only session metadata in the main database
@@ -254,7 +254,7 @@ Components that need to access multiple databases or aggregate data across datab
 ```typescript
 function SessionSidebar() {
   // First, get all sessions from the main database
-  const { useLiveQuery } = useFireproof(FIREPROOF_CHAT_HISTORY);
+  const { useLiveQuery } = useFireproof(SETTINGS_DBNAME);
   const { docs: sessions } = useLiveQuery('type', { key: 'session' });
 
   // Then, manage screenshot data with useEffect and local state
@@ -294,7 +294,7 @@ Some components might need both approaches:
 ```typescript
 function SearchResults({ query }) {
   // First search session metadata (synchronous with useFireproof)
-  const { useLiveQuery: useMainQuery } = useFireproof(FIREPROOF_CHAT_HISTORY);
+  const { useLiveQuery: useMainQuery } = useFireproof(SETTINGS_DBNAME);
   const { docs: matchingSessions } = useMainQuery((doc) => {
     if (doc.type === 'session' && doc.title && doc.title.includes(query)) {
       return doc._id;
@@ -344,7 +344,7 @@ Now that I've implemented the core components of the database sharding plan, let
 Implemented Database Sharding Pattern
 I've implemented the database sharding approach as outlined in the plan, where:
 
-Session metadata remains in the FIREPROOF_CHAT_HISTORY database
+Session metadata remains in the SETTINGS_DBNAME database
 Session-specific content (messages, screenshots, app code) is stored in individual session databases named vibe-${sessionId}
 Key Components Modified:
 Database Management Layer
@@ -366,7 +366,7 @@ Added hooks for managing the migration process
 Implementation is non-destructive, preserving original data until migration is confirmed
 Data Flow in the New Architecture:
 When creating a new session:
-Session metadata goes to FIREPROOF_CHAT_HISTORY
+Session metadata goes to SETTINGS_DBNAME
 A new session database vibe-${sessionId} is created for content
 When adding content to a session:
 Messages, screenshots, and app code go to the session-specific database
