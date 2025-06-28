@@ -218,6 +218,9 @@ function StarfieldEmpty({
       {/* White overlay that fades out */}
       <div className="absolute inset-0 z-10 animate-[fadeOut_0.5s_ease-out_forwards] bg-white"></div>
 
+      {/* Full-screen clickable overlay */}
+      <a href="/vibes/mine" className="absolute inset-0 z-20 block cursor-pointer"></a>
+
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
 
       {/* EMPTY SPACE Text - Black with white shadow */}
@@ -238,7 +241,7 @@ function StarfieldEmpty({
 
       {/* Instructions overlay */}
       {userExists && (
-        <div className="pointer-events-none absolute bottom-20 left-1/2 -translate-x-1/2 transform text-center">
+        <div className="pointer-events-none absolute bottom-20 left-1/2 z-30 -translate-x-1/2 transform text-center">
           <div
             className="font-bold tracking-wider text-white"
             style={{
@@ -247,17 +250,14 @@ function StarfieldEmpty({
               fontFamily: 'Impact, Arial Black, sans-serif',
             }}
           >
-            STAR ANY PUBLISHED VIBE ON{' '}
-            <a href="/vibes/mine" className="pointer-events-auto text-blue-200 hover:text-blue-100">
-              /VIBES/MINE
-            </a>{' '}
-            TO LIST IT HERE
+            STAR ANY PUBLISHED VIBE ON <span className="text-blue-200">/VIBES/MINE</span> TO LIST IT
+            HERE
           </div>
         </div>
       )}
 
       {/* User ID display */}
-      <div className="pointer-events-none absolute top-20 left-1/2 -translate-x-1/2 transform text-center">
+      <div className="pointer-events-none absolute top-20 left-1/2 z-30 -translate-x-1/2 transform text-center">
         <div
           className="font-mono text-gray-300"
           style={{
@@ -271,16 +271,15 @@ function StarfieldEmpty({
       </div>
 
       {/* Home link */}
-      <div className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 transform">
-        <a
-          href="/"
-          className="pointer-events-auto font-mono tracking-wide text-gray-300 transition-colors hover:text-white"
+      <div className="pointer-events-none absolute bottom-8 left-1/2 z-30 -translate-x-1/2 transform">
+        <div
+          className="font-mono tracking-wide text-gray-300"
           style={{
             textShadow: '0 0 10px rgba(255, 255, 255, 0.5)',
           }}
         >
-          → HOME
-        </a>
+          GO TO /VIBES/MINE
+        </div>
       </div>
 
       {/* Epic marquee animation */}

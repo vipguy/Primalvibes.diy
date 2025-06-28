@@ -94,7 +94,7 @@ describe('VibespaceComponent', () => {
 
     expect(screen.getByText('EMPTY SPACE')).toBeInTheDocument();
     expect(screen.getByText('~nonexistentuser')).toBeInTheDocument();
-    expect(screen.getByText('→ HOME')).toBeInTheDocument();
+    expect(screen.getByText('GO TO /VIBES/MINE')).toBeInTheDocument();
     expect(screen.getByText(/STAR ANY PUBLISHED VIBE ON/i)).toBeInTheDocument();
     expect(screen.getByText('/VIBES/MINE')).toBeInTheDocument();
     expect(screen.getByText(/TO LIST IT HERE/i)).toBeInTheDocument();
@@ -105,7 +105,7 @@ describe('VibespaceComponent', () => {
 
     expect(screen.getByText('EMPTY SPACE')).toBeInTheDocument();
     expect(screen.getByText('@nonexistentuser')).toBeInTheDocument();
-    expect(screen.getByText('→ HOME')).toBeInTheDocument();
+    expect(screen.getByText('GO TO /VIBES/MINE')).toBeInTheDocument();
     expect(screen.getByText(/STAR ANY PUBLISHED VIBE ON/i)).toBeInTheDocument();
     expect(screen.getByText('/VIBES/MINE')).toBeInTheDocument();
     expect(screen.getByText(/TO LIST IT HERE/i)).toBeInTheDocument();
