@@ -7,10 +7,10 @@ export const publishedVibes = [
     name: 'Dr. Deas Drum Machine',
     slug: 'excited-wombat-4753',
   },
-  {
-    name: 'Dr. Deas Chord Synthesizer',
-    slug: 'environmental-newt-5799',
-  },
+  // {
+  //   name: 'Dr. Deas Chord Synthesizer',
+  //   slug: 'environmental-newt-5799',
+  // },
   {
     name: 'Bedtime Stories',
     slug: 'okay-bedbug-2773',
