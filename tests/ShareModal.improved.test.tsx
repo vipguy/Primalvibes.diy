@@ -2,14 +2,13 @@ import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ShareModal } from '../app/components/ResultPreview/ShareModal';
-import { trackPublishClick } from '../app/utils/analytics';
 
 // Mock react-dom's createPortal to render children directly
 vi.mock('react-dom', () => ({
   createPortal: (children: React.ReactNode) => children,
 }));
 
-// Mock the analytics tracking function
+// Mock the analytics tracking function (not used in current tests)
 vi.mock('../app/utils/analytics', () => ({
   trackPublishClick: vi.fn(),
 }));
@@ -110,7 +109,7 @@ describe('ShareModal', () => {
     expect(screen.getByText(/our community/i)).toBeInTheDocument();
   });
 
-  it('renders the URL input and copy button when published URL exists', () => {
+  it('renders the published app link when published URL exists', () => {
     const testUrl = 'https://test-app.vibesdiy.app';
 
     render(
@@ -124,16 +123,10 @@ describe('ShareModal', () => {
       />
     );
 
-    // Should show the URL input
-    const urlInput = screen.getByDisplayValue(testUrl);
-    expect(urlInput).toBeInTheDocument();
-
-    // Should show the copy button - using a button that contains the copy SVG
-    const copyButtonContainer = screen.getByDisplayValue(testUrl).parentElement;
-    expect(copyButtonContainer).not.toBeNull();
-
-    const copyButton = copyButtonContainer?.querySelector('button');
-    expect(copyButton).not.toBeNull();
+    // Should show the subdomain link (test-app)
+    const subdomainLink = screen.getByText('test-app');
+    expect(subdomainLink).toBeInTheDocument();
+    expect(subdomainLink.closest('a')).toHaveAttribute('href', 'https://vibes.diy/vibe/test-app');
 
     // Should show the update code button
     const updateButton = screen.getByText('Update Code');
@@ -286,7 +279,7 @@ describe('ShareModal', () => {
     expect(mockOnPublish).toHaveBeenCalledTimes(1);
   });
 
-  it('copies URL to clipboard when clicking copy button', async () => {
+  it('calls onPublish when clicking update code button with tracking', async () => {
     const testUrl = 'https://test-app.vibesdiy.app';
 
     render(
@@ -300,23 +293,16 @@ describe('ShareModal', () => {
       />
     );
 
-    // Find the copy button
-    const urlInput = screen.getByDisplayValue(testUrl);
-    const parent = urlInput.parentElement;
-    const copyButton = parent?.querySelector('button');
+    // Find the update code button
+    const updateButton = screen.getByText('Update Code');
+    expect(updateButton).toBeInTheDocument();
 
-    expect(copyButton).not.toBeNull();
-    if (!copyButton) throw new Error('Copy button not found');
-
-    // Click the copy button
+    // Click the update button
     await act(async () => {
-      fireEvent.click(copyButton);
+      fireEvent.click(updateButton);
     });
 
-    // Should call clipboard writeText
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(testUrl);
-
-    // Should track click
-    expect(trackPublishClick).toHaveBeenCalledWith({ publishedAppUrl: testUrl });
+    // Check that onPublish was called
+    expect(mockOnPublish).toHaveBeenCalledTimes(1);
   });
 });

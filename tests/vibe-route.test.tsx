@@ -28,7 +28,7 @@ describe('Vibe Route', () => {
     expect(iframe.getAttribute('src')).toBe('https://sound-panda-9086.vibesdiy.app/');
   });
 
-  it('displays a header with the formatted title and Remix button', () => {
+  it('renders just the iframe without header', () => {
     render(
       <MemoryRouter initialEntries={['/vibe/sound-panda-9086']}>
         <Routes>
@@ -41,5 +41,9 @@ describe('Vibe Route', () => {
     const iframe = screen.getByTitle('Vibe: sound-panda-9086');
     expect(iframe).toBeInTheDocument();
     expect(iframe.getAttribute('src')).toBe('https://sound-panda-9086.vibesdiy.app/');
+
+    // Check that there's no header or formatted title
+    expect(screen.queryByText('Sound Panda 9086')).not.toBeInTheDocument();
+    expect(screen.queryByText('Remix')).not.toBeInTheDocument();
   });
 });
