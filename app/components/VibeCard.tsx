@@ -33,7 +33,7 @@ export function VibeCard({
           <div className="flex items-center space-x-2">
             {vibe.slug && vibe.slug !== vibe.id && (
               <a
-                href={`https://${vibe.slug}.vibesdiy.app`}
+                href={`https://vibes.diy/vibe/${vibe.slug}`}
                 className="text-xs text-gray-500 hover:text-gray-700"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -44,15 +44,20 @@ export function VibeCard({
               </a>
             )}
             {vibe.publishedUrl ? (
-              <a
-                href={vibe.publishedUrl}
-                className="text-xs text-blue-500 hover:text-blue-700"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {vibe.publishedUrl && vibe.publishedUrl.split('/').pop()?.split('.')[0]}
-              </a>
+              (() => {
+                const publishedSlug = vibe.publishedUrl.split('/').pop()?.split('.')[0] || '';
+                return (
+                  <a
+                    href={`/vibe/${publishedSlug}`}
+                    className="text-xs text-blue-500 hover:text-blue-700"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {publishedSlug}
+                  </a>
+                );
+              })()
             ) : (
               <span className="text-accent-03 text-xs">Not published</span>
             )}
