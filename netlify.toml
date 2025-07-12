@@ -8,6 +8,10 @@
   framework = "#custom"
   port = 8888
 
+[[edge_functions]]
+  function = "vibe-meta"
+  path = "/vibe/*"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
