@@ -4,6 +4,14 @@ import PublishedVibeCard from './PublishedVibeCard';
 // Featured vibes data
 export const publishedVibes = [
   {
+    name: 'Dr. Deas Drum Machine',
+    url: 'https://excited-wombat-4753.vibecode.garden/',
+  },
+  {
+    name: 'Dr. Deas Chord Synthesizer',
+    url: 'https://environmental-newt-5799.vibecode.garden/',
+  },
+  {
     name: 'Bedtime Stories',
     url: 'https://okay-bedbug-2773.vibesdiy.app/',
   },
