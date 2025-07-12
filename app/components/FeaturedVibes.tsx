@@ -5,75 +5,75 @@ import PublishedVibeCard from './PublishedVibeCard';
 export const publishedVibes = [
   {
     name: 'Dr. Deas Drum Machine',
-    url: 'https://excited-wombat-4753.vibecode.garden/',
+    slug: 'excited-wombat-4753',
   },
   {
     name: 'Dr. Deas Chord Synthesizer',
-    url: 'https://environmental-newt-5799.vibecode.garden/',
+    slug: 'environmental-newt-5799',
   },
   {
     name: 'Bedtime Stories',
-    url: 'https://okay-bedbug-2773.vibesdiy.app/',
+    slug: 'okay-bedbug-2773',
   },
   {
     name: 'Chess Drills',
-    url: 'https://advanced-tahr-2423.vibesdiy.app/',
+    slug: 'advanced-tahr-2423',
   },
   {
     name: 'Napkin Sketch',
-    url: 'https://varying-peacock-7591.vibesdiy.app/',
+    slug: 'varying-peacock-7591',
   },
   {
     name: 'Bonsai Generator',
-    url: 'https://historical-wildfowl-2884.vibesdiy.app/',
+    slug: 'historical-wildfowl-2884',
   },
   {
     name: 'Reality Distortion Field',
-    url: 'https://immense-shrimp-9469.vibesdiy.app/',
+    slug: 'immense-shrimp-9469',
   },
   {
     name: 'Party Game',
-    url: 'https://cute-frog-9259.vibesdiy.app',
+    slug: 'cute-frog-9259',
   },
   {
     name: '303 Synth',
-    url: 'https://nice-peacock-7883.vibesdiy.app/',
+    slug: 'nice-peacock-7883',
   },
   {
     name: 'Color Bender',
-    url: 'https://loose-gerbil-5537.vibesdiy.app/',
+    slug: 'loose-gerbil-5537',
   },
   {
     name: 'Startup Landing',
-    url: 'https://dominant-lion-3190.vibesdiy.app/',
+    slug: 'dominant-lion-3190',
   },
   {
     name: 'Archive Radio',
-    url: 'https://minimum-sawfish-6762.vibesdiy.app',
+    slug: 'minimum-sawfish-6762',
   },
   {
     name: 'BMX Legends',
-    url: 'https://interested-barnacle-9449.vibesdiy.app',
+    slug: 'interested-barnacle-9449',
   },
   {
     name: 'Vibecode News',
-    url: 'https://smiling-barnacle-8368.vibesdiy.app/',
+    slug: 'smiling-barnacle-8368',
   },
   {
     name: 'Museum API',
-    url: 'https://global-kingfisher-4005.vibesdiy.app',
+    slug: 'global-kingfisher-4005',
   },
   {
     name: 'Ascii Camera',
-    url: 'https://physical-krill-5417.vibesdiy.app',
+    slug: 'physical-krill-5417',
   },
   {
     name: 'Moto Tempest',
-    url: 'https://proper-lemur-3368.vibesdiy.app/',
+    slug: 'proper-lemur-3368',
   },
   {
     name: 'Cosmic Canvas',
-    url: 'https://grand-platypus-4140.vibesdiy.app',
+    slug: 'grand-platypus-4140',
   },
 ];
 
@@ -93,7 +93,7 @@ export default function FeaturedVibes({ count = 3, className = '' }: FeaturedVib
     <div className={`w-full ${className}`}>
       <div className="grid grid-cols-3 gap-4">
         {filteredVibes.map((vibe) => (
-          <PublishedVibeCard key={vibe.name} publishedUrl={vibe.url} name={vibe.name} />
+          <PublishedVibeCard key={vibe.name} slug={vibe.slug} name={vibe.name} />
         ))}
       </div>
     </div>

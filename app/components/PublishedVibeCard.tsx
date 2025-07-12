@@ -2,28 +2,21 @@ import type { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 
 interface PublishedVibeCardProps {
-  publishedUrl: string;
+  slug: string;
   name?: string;
 }
 
-export default function PublishedVibeCard({
-  publishedUrl,
-  name,
-}: PublishedVibeCardProps): ReactElement {
-  // Normalize the URL by removing trailing slash if present
-  const normalizedUrl = publishedUrl.endsWith('/') ? publishedUrl.slice(0, -1) : publishedUrl;
-
-  // Extract the slug from the URL (subdomain part)
-  const urlParts = normalizedUrl.split('/');
-  const domain = urlParts[2] || ''; // e.g., "example.vibesdiy.app"
-  const slug = domain.split('.')[0]; // e.g., "example"
+export default function PublishedVibeCard({ slug, name }: PublishedVibeCardProps): ReactElement {
+  // Normalize the URL by adding iframe domain
+  const normalizedUrl = `https://${slug}.vibesdiy.app`;
+  const linkUrl = `/vibe/${slug}`;
 
   // Use provided name or extract from URL
   const vibeName = name || slug || 'Published Vibe';
 
   return (
     <div className="border-light-decorative-01 dark:border-dark-decorative-01 relative overflow-hidden rounded-md border transition-colors hover:border-blue-500">
-      <Link to={normalizedUrl} className="block h-full w-full">
+      <Link to={linkUrl} className="block h-full w-full">
         <div className="p-2 py-1">
           <div className="flex h-8 items-center justify-between">
             <h3
