@@ -7,8 +7,9 @@ interface ShareModalProps {
   onClose: () => void;
   buttonRef: React.RefObject<HTMLButtonElement | null>;
   publishedAppUrl?: string;
-  onPublish: () => Promise<void>;
+  onPublish: (shareToFirehose?: boolean) => Promise<void>;
   isPublishing: boolean;
+  isFirehoseShared?: boolean;
 }
 
 export function ShareModal({
@@ -18,16 +19,19 @@ export function ShareModal({
   publishedAppUrl: iframeUrl,
   onPublish,
   isPublishing,
+  isFirehoseShared = false,
 }: ShareModalProps) {
   const [showUpdateSuccess, setShowUpdateSuccess] = useState(false);
+  const [shareToFirehose, setShareToFirehose] = useState(isFirehoseShared);
 
   const publishedSubdomain = iframeUrl ? new URL(iframeUrl).hostname.split('.')[0] : '';
   useEffect(() => {
     // Reset state when modal opens/closes
     if (isOpen) {
       setShowUpdateSuccess(false);
+      setShareToFirehose(isFirehoseShared);
     }
-  }, [isOpen]);
+  }, [isOpen, isFirehoseShared]);
 
   const publishedAppUrl = publishedSubdomain ? `https://vibes.diy/vibe/${publishedSubdomain}` : '';
 
@@ -50,7 +54,7 @@ export function ShareModal({
 
   const handlePublish = async () => {
     try {
-      await onPublish();
+      await onPublish(shareToFirehose);
       if (publishedAppUrl) {
         setShowUpdateSuccess(true);
         trackPublishClick({ publishedAppUrl });
@@ -106,6 +110,20 @@ export function ShareModal({
               </div>
 
               <div className="mt-2">
+                <div className="mb-3">
+                  <label className="flex cursor-pointer items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={shareToFirehose}
+                      onChange={(e) => setShareToFirehose(e.target.checked)}
+                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:focus:ring-blue-600"
+                    />
+                    <span className="text-gray-700 dark:text-gray-300">Share to firehose</span>
+                  </label>
+                  <p className="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
+                    Feature on Vibes DIY social feeds
+                  </p>
+                </div>
                 <button
                   type="button"
                   onClick={handlePublish}
@@ -154,24 +172,40 @@ export function ShareModal({
               </div>
             </div>
           ) : (
-            <button
-              type="button"
-              onClick={handlePublish}
-              disabled={isPublishing}
-              className={`flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 px-4 py-2 text-sm font-bold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-violet-500 hover:via-pink-500 hover:to-orange-500 hover:shadow-xl focus:ring-4 focus:ring-violet-400/50 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 md:text-base dark:from-indigo-400 dark:via-violet-400 dark:to-fuchsia-400 ${isPublishing ? 'animate-gradient-x stripes-overlay animate-pulse' : ''}`}
-              role="menuitem"
-            >
-              <span className="flex items-center gap-3">
-                <span role="img" aria-label="disk">
-                  💽
+            <div>
+              <div className="mb-3">
+                <label className="flex cursor-pointer items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={shareToFirehose}
+                    onChange={(e) => setShareToFirehose(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:focus:ring-blue-600"
+                  />
+                  <span className="text-gray-700 dark:text-gray-300">Share to firehose</span>
+                </label>
+                <p className="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
+                  Feature on homepage
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handlePublish}
+                disabled={isPublishing}
+                className={`flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 px-4 py-2 text-sm font-bold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-violet-500 hover:via-pink-500 hover:to-orange-500 hover:shadow-xl focus:ring-4 focus:ring-violet-400/50 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 md:text-base dark:from-indigo-400 dark:via-violet-400 dark:to-fuchsia-400 ${isPublishing ? 'animate-gradient-x stripes-overlay animate-pulse' : ''}`}
+                role="menuitem"
+              >
+                <span className="flex items-center gap-3">
+                  <span role="img" aria-label="disk">
+                    💽
+                  </span>
+                  Publish App
+                  <span role="img" aria-label="disk">
+                    💽
+                  </span>
                 </span>
-                Publish App
-                <span role="img" aria-label="disk">
-                  💽
-                </span>
-              </span>
-              {/* animated background indicates progress */}
-            </button>
+                {/* animated background indicates progress */}
+              </button>
+            </div>
           )}
         </div>
       </div>

@@ -47,7 +47,12 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
   const title = propTitle || urlView;
 
   // Use the session hook to get and update session data
-  const { session, docs: messages, updatePublishedUrl } = useSession(sessionId);
+  const {
+    session,
+    docs: messages,
+    updatePublishedUrl,
+    updateFirehoseShared,
+  } = useSession(sessionId);
 
   // useViewState is now lifted, props like displayView, navigateToView, viewControls, showViewControls are passed in.
   // The useEffect syncing activeView with displayView is no longer needed.
@@ -67,6 +72,7 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
     title,
     messages,
     updatePublishedUrl,
+    updateFirehoseShared,
     publishedUrl: session.publishedUrl,
   });
 
@@ -122,6 +128,7 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
           publishedAppUrl={publishedAppUrl}
           onPublish={handlePublish}
           isPublishing={isPublishing}
+          isFirehoseShared={session.firehoseShared}
         />
       )}
     </div>

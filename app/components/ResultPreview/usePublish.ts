@@ -10,6 +10,7 @@ interface UsePublishProps {
   title: string | undefined;
   messages: ChatMessageDocument[];
   updatePublishedUrl: (url: string) => Promise<void>;
+  updateFirehoseShared?: (shared: boolean) => Promise<void>;
   publishedUrl?: string;
   userId?: string;
 }
@@ -20,6 +21,7 @@ export const usePublish = ({
   title,
   messages,
   updatePublishedUrl,
+  updateFirehoseShared,
   publishedUrl: initialPublishedUrl,
 }: UsePublishProps) => {
   const [isPublishing, setIsPublishing] = useState(false);
@@ -42,7 +44,7 @@ export const usePublish = ({
     }
   }, [publishedAppUrl]);
 
-  const handlePublish = async () => {
+  const handlePublish = async (shareToFirehose?: boolean) => {
     setIsPublishing(true);
     setUrlCopied(false);
     try {
@@ -66,8 +68,10 @@ export const usePublish = ({
         title,
         prompt,
         updatePublishedUrl,
+        updateFirehoseShared,
         userId: userPayload?.userId,
         token,
+        shareToFirehose,
       });
 
       if (appUrl) {

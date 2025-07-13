@@ -108,6 +108,17 @@ export function useSession(routedSessionId?: string) {
     [sessionDatabase, vibeDoc, mergeVibeDoc]
   );
 
+  // Update firehose shared state using the vibe document
+  const updateFirehoseShared = useCallback(
+    async (firehoseShared: boolean) => {
+      vibeDoc.firehoseShared = firehoseShared;
+
+      await sessionDatabase.put(vibeDoc);
+      mergeVibeDoc(vibeDoc);
+    },
+    [sessionDatabase, vibeDoc, mergeVibeDoc]
+  );
+
   // Add a screenshot to the session (in session-specific database)
   const addScreenshot = useCallback(
     async (screenshotData: string | null) => {
@@ -144,12 +155,14 @@ export function useSession(routedSessionId?: string) {
     _id: string;
     title: string;
     publishedUrl?: string;
+    firehoseShared?: boolean;
   }
 
   const session: SessionView = {
     _id: sessionId,
     title: vibeDoc.title,
     publishedUrl: vibeDoc.publishedUrl,
+    firehoseShared: vibeDoc.firehoseShared,
   };
 
   return {
@@ -164,6 +177,7 @@ export function useSession(routedSessionId?: string) {
     // Session management functions
     updateTitle,
     updatePublishedUrl,
+    updateFirehoseShared,
     addScreenshot,
     // Message management
     userMessage,

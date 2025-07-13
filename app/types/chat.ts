@@ -13,6 +13,7 @@ export interface VibeDocument {
   slug?: string;
   favorite?: boolean;
   publishedUrl?: string;
+  firehoseShared?: boolean;
 }
 
 // ===== Content Segment Types =====

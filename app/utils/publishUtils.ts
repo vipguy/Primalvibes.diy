@@ -39,7 +39,9 @@ export async function publishApp({
   userId,
   prompt,
   updatePublishedUrl,
+  updateFirehoseShared,
   token,
+  shareToFirehose,
 }: {
   sessionId?: string;
   code: string;
@@ -47,7 +49,9 @@ export async function publishApp({
   userId?: string;
   prompt?: string;
   updatePublishedUrl?: (url: string) => Promise<void>;
+  updateFirehoseShared?: (shared: boolean) => Promise<void>;
   token?: string | null;
+  shareToFirehose?: boolean;
 }): Promise<string | undefined> {
   try {
     if (!code || !sessionId) {
@@ -134,6 +138,7 @@ export async function publishApp({
         title,
         remixOf, // Include information about the original app if this is a remix
         screenshot: screenshotBase64, // Include the base64 screenshot if available
+        shareToFirehose, // Include the firehose sharing preference
       }),
     });
 
@@ -171,6 +176,11 @@ export async function publishApp({
       // Update the session with the published URL if callback provided
       if (updatePublishedUrl) {
         await updatePublishedUrl(appUrl);
+      }
+
+      // Update the firehose shared state if callback provided
+      if (updateFirehoseShared && shareToFirehose !== undefined) {
+        await updateFirehoseShared(shareToFirehose);
       }
 
       return appUrl;
