@@ -1,12 +1,6 @@
 import { useParams } from 'react-router-dom';
 
-export default function VibeIframeContainer() {
-  const { vibeSlug } = useParams<{ vibeSlug: string }>();
-
-  if (!vibeSlug) {
-    return <div>No vibe slug provided</div>;
-  }
-
+export function VibeIframeContainerComponent({ vibeSlug }: { vibeSlug: string }) {
   const iframeUrl = `https://${vibeSlug}.vibesdiy.app/`;
 
   return (
@@ -19,4 +13,14 @@ export default function VibeIframeContainer() {
       allowFullScreen
     />
   );
+}
+
+export default function VibeIframeContainer() {
+  const { vibeSlug } = useParams<{ vibeSlug: string }>();
+
+  if (!vibeSlug) {
+    return <div>No vibe slug provided</div>;
+  }
+
+  return <VibeIframeContainerComponent vibeSlug={vibeSlug} />;
 }
