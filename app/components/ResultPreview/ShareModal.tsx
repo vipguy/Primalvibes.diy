@@ -121,7 +121,14 @@ export function ShareModal({
                     <span className="text-gray-700 dark:text-gray-300">Share to firehose</span>
                   </label>
                   <p className="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
-                    Feature on Vibes DIY social feeds
+                    <a
+                      href="https://bsky.app/profile/therawvibes.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline dark:text-blue-400"
+                    >
+                      Feature on Vibes DIY social feeds
+                    </a>
                   </p>
                 </div>
                 <button
