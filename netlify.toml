@@ -12,6 +12,10 @@
   function = "vibe-meta"
   path = "/vibe/*"
 
+[[edge_functions]]
+  function = "vibe-meta"
+  path = "/firehose"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"

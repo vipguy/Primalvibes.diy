@@ -1,7 +1,6 @@
 import { VibeIframeContainerComponent } from './vibe';
+import { FIREHOSE_SLUG } from '../config/firehose';
 
 export default function FirehoseRoute() {
-  const hardcodedSlug = 'silent-zeus-5946';
-
-  return <VibeIframeContainerComponent vibeSlug={hardcodedSlug} />;
+  return <VibeIframeContainerComponent vibeSlug={FIREHOSE_SLUG} />;
 }
