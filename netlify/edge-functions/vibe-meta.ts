@@ -20,12 +20,12 @@ export default async (request: Request) => {
 
   try {
     const metadata = await fetchVibeMetadata(vibeSlug);
-    
+
     // Override canonical URL for firehose route
     if (url.pathname === '/firehose') {
       metadata.canonicalUrl = 'https://vibes.diy/firehose';
     }
-    
+
     const html = generateMetaHTML(metadata);
 
     return new Response(html, {

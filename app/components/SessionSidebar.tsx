@@ -8,6 +8,7 @@ import { GearIcon } from './SessionSidebar/GearIcon';
 import { HomeIcon } from './SessionSidebar/HomeIcon';
 import { InfoIcon } from './SessionSidebar/InfoIcon';
 import { StarIcon } from './SessionSidebar/StarIcon';
+import { FirehoseIcon } from './SessionSidebar/FirehoseIcon';
 import VibesDIYLogo, { randomColorway } from './VibesDIYLogo';
 import { dark, light } from './colorways';
 
@@ -98,6 +99,16 @@ function SessionSidebar({ isVisible, onClose }: SessionSidebarProps) {
               >
                 <StarIcon className="text-accent-01 mr-3 h-5 w-5" />
                 <span>My Vibes</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/firehose"
+                onClick={() => onClose()}
+                className="hover:bg-light-background-01 dark:hover:bg-dark-background-01 flex items-center rounded-md px-4 py-3 text-sm font-medium"
+              >
+                <FirehoseIcon className="text-accent-01 mr-3 h-5 w-5" />
+                <span>Firehose</span>
               </Link>
             </li>
             <li>
