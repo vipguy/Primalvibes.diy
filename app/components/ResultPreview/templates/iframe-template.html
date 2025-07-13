@@ -68,6 +68,43 @@
       };
 
       // Screenshot functionality
+      function cropToMaxAspectRatio(canvas, maxAspectRatio) {
+        const width = canvas.width;
+        const height = canvas.height;
+        const currentAspectRatio = height / width;
+
+        // If already within the max aspect ratio, return original canvas
+        if (currentAspectRatio <= maxAspectRatio) {
+          return canvas;
+        }
+
+        // Calculate new dimensions - crop from the bottom
+        const newHeight = width * maxAspectRatio;
+        const cropY = 0; // Start from top
+
+        // Create new canvas with cropped dimensions
+        const croppedCanvas = document.createElement('canvas');
+        croppedCanvas.width = width;
+        croppedCanvas.height = newHeight;
+
+        const ctx = croppedCanvas.getContext('2d');
+
+        // Draw cropped portion of original canvas
+        ctx.drawImage(
+          canvas,
+          0,
+          cropY,
+          width,
+          newHeight, // Source rectangle (crop from original)
+          0,
+          0,
+          width,
+          newHeight // Destination rectangle (full new canvas)
+        );
+
+        return croppedCanvas;
+      }
+
       function captureScreenshot() {
         // Check if html2canvas is loaded
         if (typeof html2canvas === 'undefined') {
@@ -100,7 +137,9 @@
             logging: false,
           })
             .then((canvas) => {
-              const dataURI = canvas.toDataURL();
+              // Crop to max 3:1 aspect ratio (3 times taller than wide)
+              const croppedCanvas = cropToMaxAspectRatio(canvas, 3);
+              const dataURI = croppedCanvas.toDataURL();
               window.parent.postMessage({ type: 'screenshot', data: dataURI }, '*');
             })
             .catch((err) => {
