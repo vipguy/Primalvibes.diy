@@ -2,7 +2,7 @@ import { fetchVibeMetadata, generateMetaHTML } from './utils/meta-utils.ts';
 
 // Import the hardcoded firehose slug
 // Note: This import path works for edge functions accessing app config
-const FIREHOSE_SLUG = 'silent-zeus-5946';
+const FIREHOSE_SLUG = 'satie-trumpet-8293';
 
 export default async (request: Request) => {
   const url = new URL(request.url);
