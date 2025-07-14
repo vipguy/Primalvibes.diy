@@ -1,4 +1,4 @@
 /**
  * Configuration for the firehose route
  */
-export const FIREHOSE_SLUG = 'silent-zeus-5946';
+export const FIREHOSE_SLUG = 'satie-trumpet-8293';
