@@ -12,6 +12,10 @@ export const publishedVibes = [
   //   slug: 'environmental-newt-5799',
   // },
   {
+    name: 'Ultra-Haptic',
+    slug: 'ellington-ceres-4413',
+  },
+  {
     name: 'Bedtime Stories',
     slug: 'okay-bedbug-2773',
   },
