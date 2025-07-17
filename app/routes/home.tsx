@@ -117,15 +117,18 @@ export default function UnifiedSession() {
 
       // Focus the input element and place cursor at the end after a short delay
       // to ensure the input has been updated and DOM is ready
-      setTimeout(() => {
-        if (chatState.inputRef.current) {
-          chatState.inputRef.current.focus();
+      // setTimeout(() => {
+      //   if (chatState.inputRef.current) {
+      //     chatState.inputRef.current.focus();
 
-          // Place cursor at the end of the text
-          const inputLength = chatState.inputRef.current.value.length;
-          chatState.inputRef.current.setSelectionRange(inputLength, inputLength);
-        }
-      }, 100);
+      //     // Place cursor at the end of the text
+      //     const inputLength = chatState.inputRef.current.value.length;
+      //     chatState.inputRef.current.setSelectionRange(inputLength, inputLength);
+      //   }
+      // }, 100);
+      setTimeout(() => {
+        chatState.sendMessage(promptParam);
+      }, 200);
     }
   }, [location.search, chatState.setInput]);
 
