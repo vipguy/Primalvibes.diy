@@ -12,6 +12,10 @@ export const publishedVibes = [
   //   slug: 'environmental-newt-5799',
   // },
   {
+    name: 'Trivia Showdown',
+    slug: 'atmospheric-tiger-9377',
+  },
+  {
     name: 'Ultra-Haptic',
     slug: 'ellington-ceres-4413',
   },
