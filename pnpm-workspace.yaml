@@ -1,5 +1,6 @@
 packages:
   - "call-ai/pkg"
   - "call-ai/tests"
-  - "use-vibes"
+  - "use-vibes/pkg"
+  - "use-vibes/tests"
   - "vibes.diy"

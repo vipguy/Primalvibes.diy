@@ -42,7 +42,7 @@
   ],
   "license": "Apache-2.0",
   "dependencies": {
-    "call-ai": "^0.10.1",
+    "call-ai": "workspace:0.0.0",
     "use-fireproof": "0.22.0-dev-preview",
     "uuid": "^11.1.0"
   },

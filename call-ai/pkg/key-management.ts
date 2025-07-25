@@ -2,9 +2,8 @@
  * Key management functionality for call-ai
  */
 
-import { entriesHeaders } from "../test/test-helper.js";
 import { CallAIErrorParams, Falsy } from "./types.js";
-import { callAiEnv } from "./utils.js";
+import { callAiEnv, entriesHeaders } from "./utils.js";
 
 export interface KeyMetadata {
   key: string;

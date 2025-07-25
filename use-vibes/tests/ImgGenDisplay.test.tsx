@@ -1,8 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
-import { ImgGenDisplay } from 'use-vibes';
-import { PartialImageDocument } from '../src/hooks/image-gen/types.js';
+import { ImgGenDisplay, PartialImageDocument } from 'use-vibes';
 
 // Use vi.hoisted to define mocks that need to be referenced in vi.mock
 const mockImgFile = vi.hoisted(() =>

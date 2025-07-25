@@ -16,8 +16,8 @@
     "strict": true,
     "alwaysStrict": true,
     "skipLibCheck": true,
-    "types": ["node"]
+    "types": ["node", "deno"]
   },
-  "include": ["call-ai/**/*", "test/**/*"],
-  "exclude": ["**/dist/**", "**/node_modules/**"]
+  "include": ["call-ai", "use-vibes", "vibes.diy"],
+  "exclude": ["**/dist/**", "**/node_modules/**", "**/examples/**"]
 }

@@ -25,10 +25,3 @@ export function expectOrWarn(
   }
 }
 
-export function entriesHeaders(headers: Headers) {
-  const entries: [string, string][] = [];
-  headers.forEach((value, key) => {
-    entries.push([key, value]);
-  });
-  return entries;
-}

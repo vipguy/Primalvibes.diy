@@ -1,9 +1,8 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, fireEvent, act, waitFor } from '@testing-library/react';
-import { ImgGen, ImgGenProps, UseImageGenResult } from 'use-vibes';
+import { ImgGen, ImgGenProps, UseImageGenResult, PartialImageDocument } from 'use-vibes';
 import { fireproof } from 'use-fireproof';
-import { PartialImageDocument } from '../src/hooks/image-gen/types.js';
 
 // Mock document that will be returned when ImgGen is used with a prompt
 const mockDocument: PartialImageDocument = {

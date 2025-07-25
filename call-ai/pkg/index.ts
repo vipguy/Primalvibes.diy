@@ -15,4 +15,4 @@ export { getMeta } from "./response-metadata.js";
 // Export image generation function
 export { imageGen } from "./image.js";
 
-export { callAiEnv } from "./utils.js";
+export { callAiEnv, entriesHeaders } from "./utils.js";
