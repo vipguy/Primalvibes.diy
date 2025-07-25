@@ -8,26 +8,6 @@ import { getSessionDatabaseName, updateUserVibespaceDoc } from './databaseManage
 import { normalizeComponentExports } from './normalizeComponentExports';
 
 /**
- * Transform bare import statements to use esm.sh URLs
- * @param code The source code to transform
- * @returns Transformed code with proper import URLs
- */
-function transformImports(code: string): string {
-  // Convert bare imports to esm.sh URLs
-  return code.replace(
-    /import\s+(?:(?:{[^}]*})|(?:[^{}\s]*))?\s*(?:from\s+)?['"]([^./][^'"]*)['"];?/g,
-    (match, packageName) => {
-      // Only transform bare imports (packages without ./ or / prefix)
-      if (packageName.startsWith('.') || packageName.startsWith('/')) {
-        return match;
-      }
-      // Replace with esm.sh URL
-      return match.replace(`"${packageName}"`, `"https://esm.sh/${packageName}"`);
-    }
-  );
-}
-
-/**
  * Publish an app to the server
  * @param params Parameters for publishing the app
  * @returns The published app URL if successful
@@ -114,7 +94,7 @@ export async function publishApp({
     const normalizedCode = code.replace(/\r\n/g, '\n').trim();
 
     // Transform imports to use esm.sh
-    const transformedCode = transformImports(normalizeComponentExports(normalizedCode));
+    const transformedCode = normalizeComponentExports(normalizedCode);
 
     // Prepare headers with optional Authorization
     const headers: Record<string, string> = {
