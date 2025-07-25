@@ -2,6 +2,7 @@
   "name": "call-ai",
   "version": "0.0.0",
   "description": "Lightweight library for making AI API calls with streaming support",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/fireproof-storage/call-ai.git"

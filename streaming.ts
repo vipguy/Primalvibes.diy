@@ -73,7 +73,7 @@ async function* createStreamingGenerator(
         }
 
         // Extract the JSON payload
-        const jsonStr = message.slice(6); // Remove 'data: ' prefix
+        const jsonStr = message.slice("data: ".length); // Remove 'data: ' prefix
         if (jsonStr === "[DONE]") {
           if (options.debug || globalDebug) {
             console.log(`[callAi:${PACKAGE_VERSION}] Received [DONE] signal`);
