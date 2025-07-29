@@ -1,7 +1,7 @@
 // Vitest will automatically use mocks from __mocks__ directory
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { mockUseAuth, resetMockAuthState, setMockAuthState } from '../__mocks__/useAuth';
+import { mockUseAuth, resetMockAuthState, setMockAuthState } from './__mocks__/useAuth';
 import ChatHeader from '../app/components/ChatHeaderContent';
 import MessageList from '../app/components/MessageList';
 import SessionSidebar from '../app/components/SessionSidebar';

@@ -9,7 +9,7 @@ import React from 'react';
 
 // Mock AuthContext to use the mocked useAuth implementation so components don’t require an AuthProvider
 vi.mock('../app/contexts/AuthContext', async () => {
-  const mockAuth = await import('../__mocks__/useAuth');
+  const mockAuth = await import('./__mocks__/useAuth');
   return {
     useAuth: mockAuth.mockUseAuth,
     AuthProvider: ({ children }: { children: React.ReactNode }) => children,

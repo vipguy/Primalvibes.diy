@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { mockUseAuth, resetMockAuthState } from '../__mocks__/useAuth';
+import { mockUseAuth, resetMockAuthState } from './__mocks__/useAuth';
 import { ErrorBoundary, Layout } from '../app/root';
 
 // Mock React Router components to avoid HTML validation errors
