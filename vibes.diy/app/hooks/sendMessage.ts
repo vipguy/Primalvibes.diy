@@ -9,30 +9,30 @@ import { streamAI } from '../utils/streamHandler';
 import { generateTitle } from '../utils/titleGenerator';
 
 export interface SendMessageContext {
-  userMessage: ChatMessageDocument;
-  mergeUserMessage: (msg: Partial<UserChatMessageDocument>) => void;
-  setPendingUserDoc: (doc: ChatMessageDocument) => void;
-  setIsStreaming: (v: boolean) => void;
-  ensureApiKey: () => Promise<{ key: string } | null>;
-  setNeedsLogin: (v: boolean, reason: string) => void;
-  setNeedsNewKey: (v: boolean) => void;
-  addError: (err: any) => void;
-  checkCredits: (key: string) => Promise<boolean>;
-  ensureSystemPrompt: () => Promise<string>;
-  submitUserMessage: () => Promise<any>;
-  buildMessageHistory: () => any[];
-  modelToUse: string;
-  throttledMergeAiMessage: (content: string) => void;
-  isProcessingRef: { current: boolean };
-  aiMessage: AiChatMessageDocument;
-  sessionDatabase: any;
-  setPendingAiMessage: (doc: ChatMessageDocument | null) => void;
-  setSelectedResponseId: (id: string) => void;
-  updateTitle: (title: string) => void;
-  setInput: (text: string) => void;
-  userId: string | undefined;
-  titleModel: string;
-  isAuthenticated: boolean;
+  readonly userMessage: ChatMessageDocument;
+  mergeUserMessage(msg: Partial<UserChatMessageDocument>): void;
+  setPendingUserDoc(doc: ChatMessageDocument): void;
+  setIsStreaming(v: boolean): void;
+  ensureApiKey(): Promise<{ key: string } | null>;
+  setNeedsLogin(v: boolean, reason: string): void;
+  setNeedsNewKey(v: boolean): void;
+  addError(err: Error): void;
+  checkCredits(key: string): Promise<boolean>;
+  ensureSystemPrompt(): Promise<string>;
+  submitUserMessage(): Promise<any>;
+  buildMessageHistory(): any[];
+  readonly modelToUse: string;
+  throttledMergeAiMessage(content: string): void;
+  readonly isProcessingRef: { current: boolean };
+  readonly aiMessage: AiChatMessageDocument;
+  readonly sessionDatabase: any;
+  setPendingAiMessage(doc: ChatMessageDocument | null): void;
+  setSelectedResponseId(id: string): void;
+  updateTitle(title: string): void;
+  setInput(text: string): void;
+  readonly userId: string | undefined;
+  readonly titleModel: string;
+  readonly isAuthenticated: boolean;
 }
 
 export async function sendMessage(

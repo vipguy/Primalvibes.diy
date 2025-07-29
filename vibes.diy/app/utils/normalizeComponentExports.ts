@@ -6,12 +6,12 @@
  * Handles:
  * - export default function ComponentName() {}
  * - export default class ComponentName {}
- * - export default (props) => { /* no-op */ };
+ * - export default (props) => { };
  * - export default memo(Component);
  * - export default forwardRef(...);
  * - function ComponentName() {} export default ComponentName;
  * - class ComponentName {} export default ComponentName;
- * - const ComponentName = () => { /* no-op */ }; export default ComponentName;
+ * - const ComponentName = () => { }; export default ComponentName;
  * - export default { Component: ... } (attempts to find main component)
  * - export function ComponentName() {} (converts to default)
  * - export const ComponentName = ... (converts to default)

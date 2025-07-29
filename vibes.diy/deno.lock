@@ -31,6 +31,7 @@
         "npm:isbot@^5.1.25",
         "npm:jose@^6.0.10",
         "npm:jsdom@26",
+        "npm:multiformats@^13.3.7",
         "npm:netlify-cli@^17.17.1",
         "npm:posthog-js@^1.240.6",
         "npm:prettier-plugin-tailwindcss@~0.6.11",
