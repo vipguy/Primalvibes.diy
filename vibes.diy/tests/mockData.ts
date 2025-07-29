@@ -1,15 +1,15 @@
 export const mockResultPreviewProps = {
   displayView: 'code' as const, // Changed from activeView
-  // setActiveView: () => {}, // Removed
-  onPreviewLoaded: () => {},
-  setMobilePreviewShown: () => {},
+  // setActiveView: () => { /* no-op */ }, // Removed
+  onPreviewLoaded: () => { /* no-op */ },
+  setMobilePreviewShown: () => { /* no-op */ },
 };
 
 export const mockChatStateProps = {
   codeReady: false,
   addScreenshot: () => Promise.resolve(),
-  setSelectedResponseId: () => {},
-  setNeedsNewKey: () => {},
+  setSelectedResponseId: () => { /* no-op */ },
+  setNeedsNewKey: () => { /* no-op */ },
   // Error tracking properties
   immediateErrors: [],
   advisoryErrors: [],
@@ -19,13 +19,13 @@ export const mockChatStateProps = {
 export const mockSessionSidebarProps = {
   sessionId: 'test-session-id',
   isVisible: true,
-  onClose: () => {},
+  onClose: () => { /* no-op */ },
 };
 
 export const createMockChatState = (overrides = {}) => ({
   docs: [],
   input: '',
-  setInput: () => {},
+  setInput: () => { /* no-op */ },
   inputRef: { current: null },
   sendMessage: () => Promise.resolve(),
   isStreaming: false,
@@ -39,8 +39,8 @@ export const createMockChatState = (overrides = {}) => ({
   selectedResponseDoc: undefined,
   codeReady: false,
   addScreenshot: () => Promise.resolve(),
-  setSelectedResponseId: () => {},
-  setNeedsNewKey: () => {},
+  setSelectedResponseId: () => { /* no-op */ },
+  setNeedsNewKey: () => { /* no-op */ },
   // Error tracking properties
   immediateErrors: [],
   advisoryErrors: [],

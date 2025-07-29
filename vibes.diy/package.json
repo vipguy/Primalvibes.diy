@@ -29,6 +29,7 @@
     "call-ai": "0.10.2",
     "isbot": "^5.1.25",
     "jose": "^6.0.10",
+    "multiformats": "^13.3.7",
     "posthog-js": "^1.240.6",
     "react": "^19.1.0",
     "react-cookie-consent": "^9.0.0",

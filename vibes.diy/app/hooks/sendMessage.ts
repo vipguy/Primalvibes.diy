@@ -38,7 +38,7 @@ export interface SendMessageContext {
 export async function sendMessage(
   ctx: SendMessageContext,
   textOverride?: string,
-  skipSubmit: boolean = false
+  skipSubmit = false
 ): Promise<void> {
   const {
     userMessage,

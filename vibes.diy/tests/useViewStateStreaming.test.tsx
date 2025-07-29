@@ -1,7 +1,7 @@
 // No need to import React for these tests
 import { describe, expect, test, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
-import { useViewState } from '../app/utils/ViewState';
+import { useViewState, type ViewState, type ViewStateProps } from '../app/utils/ViewState';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 
 // Mock react-router-dom hooks
@@ -30,7 +30,7 @@ describe('useViewState during streaming', () => {
     // Default location (base path)
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}`,
-    } as any);
+    } as ReturnType<typeof useLocation>);
   });
 
   afterEach(() => {
@@ -39,7 +39,7 @@ describe('useViewState during streaming', () => {
 
   test('should display code view when streaming starts for first message', () => {
     // Setup: Initial state with no code
-    let hookResult: any;
+    let hookResult: Partial<ViewState> = {};
 
     // Render hook with initial state (no streaming, no code)
     const { unmount } = renderHook(
@@ -96,9 +96,9 @@ describe('useViewState during streaming', () => {
     // Setup: start with streaming already in progress on the base path
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}`, // Base path (no view suffix)
-    } as any);
+    } as ReturnType<typeof useLocation>);
 
-    let hookResult: any;
+    let hookResult: Partial<ViewState> = {};
 
     // Initialize with streaming in progress
     const { unmount } = renderHook(
@@ -119,6 +119,10 @@ describe('useViewState during streaming', () => {
 
     // Cleanup to reset refs
     unmount();
+    if (!hookResult) {
+      throw new Error('Hook result is null');
+    }
+    hookResult = hookResult as ViewState;
 
     // Reinitialize with streaming
     const { rerender } = renderHook(
@@ -173,9 +177,9 @@ describe('useViewState during streaming', () => {
     // Set up with explicitly on code view
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}/code`,
-    } as any);
+    } as ReturnType<typeof useLocation>);
 
-    let hookResult: any;
+    let hookResult: Partial<ViewState> = {};
 
     // Initialize with streaming active and on code view
     const { unmount } = renderHook(
@@ -221,7 +225,7 @@ describe('useViewState during streaming', () => {
       code: 'console.log("test")',
       isStreaming: false, // Streaming ended
       previewReady: true, // Preview is ready
-    } as any); // Type assertion needed for test
+    }); // Type assertion needed for test
 
     // Should not navigate since we're explicitly on /code view
     expect(mockNavigate).not.toHaveBeenCalled();
@@ -231,9 +235,9 @@ describe('useViewState during streaming', () => {
     // Set up with explicitly on data view
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}/data`,
-    } as any);
+    } as ReturnType<typeof useLocation>);
 
-    let hookResult: any;
+    let hookResult: Partial<ViewState> = {};
 
     // Initialize on data view
     const { unmount } = renderHook(
@@ -289,12 +293,12 @@ describe('useViewState during streaming', () => {
     // Setup: Root URL path - no session or title params yet
     vi.mocked(useLocation).mockReturnValue({
       pathname: '/',
-    } as any);
+    } as ReturnType<typeof useLocation>);
 
     // Initial phase has no sessionId or title in params
     vi.mocked(useParams).mockReturnValue({});
 
-    let hookResult: any;
+    let hookResult: Partial<ViewState> = {}
 
     // Initialize at root with streaming starting
     const { unmount } = renderHook(
@@ -311,6 +315,9 @@ describe('useViewState during streaming', () => {
         },
       }
     );
+    if (!hookResult) {
+      throw new Error('Hook result is null');
+    }
 
     // Verify initial state
     expect(hookResult.currentView).toBe('preview'); // Default view is preview
@@ -331,7 +338,7 @@ describe('useViewState during streaming', () => {
           code: 'console.log("hello world")',
           isStreaming: true,
           previewReady: false,
-        },
+        } as ViewStateProps,
       }
     );
 
@@ -352,7 +359,7 @@ describe('useViewState during streaming', () => {
       code: 'console.log("hello world")',
       isStreaming: true,
       previewReady: false,
-    } as any); // Type assertion to bypass type checking for test
+    }); // Type assertion to bypass type checking for test
 
     // No navigation yet since streaming is still ongoing and preview isn't ready
     expect(mockNavigate).not.toHaveBeenCalled();
@@ -364,7 +371,7 @@ describe('useViewState during streaming', () => {
       code: 'console.log("hello world")',
       isStreaming: true,
       previewReady: true,
-    } as any); // Type assertion to bypass type checking for test
+    }); // Type assertion to bypass type checking for test
 
     // UPDATED BEHAVIOR: Navigate to app view whenever preview is ready, even during streaming
     expect(mockNavigate).toHaveBeenCalledWith(`/chat/${mockSessionId}/${mockTitle}/app`, {
@@ -378,7 +385,7 @@ describe('useViewState during streaming', () => {
       code: 'console.log("test")',
       isStreaming: false, // Streaming ended
       previewReady: true, // Preview is ready
-    } as any); // Type assertion needed for test
+    }); // Type assertion needed for test
 
     // NOW it should navigate to app view
     expect(mockNavigate).toHaveBeenCalledWith(`/chat/${mockSessionId}/${mockTitle}/app`, {
@@ -390,12 +397,12 @@ describe('useViewState during streaming', () => {
     // Setup: Root URL path with no session/title params yet
     vi.mocked(useLocation).mockReturnValue({
       pathname: '/',
-    } as any);
+    } as ReturnType<typeof useLocation>);
 
     // Initial phase has no sessionId or title in params (new chat)
     vi.mocked(useParams).mockReturnValue({});
 
-    let hookResult: any;
+    let hookResult: Partial<ViewState> = {};
 
     // Initialize at root, no streaming yet
     const { unmount } = renderHook(
@@ -412,6 +419,10 @@ describe('useViewState during streaming', () => {
         },
       }
     );
+       if (!hookResult) {
+      throw new Error('Hook result is null');
+    }
+    hookResult = hookResult as ViewState;
 
     // Default view should be preview (code not showing yet)
     expect(hookResult.currentView).toBe('preview');
@@ -435,6 +446,7 @@ describe('useViewState during streaming', () => {
         },
       }
     );
+ 
 
     // During initial streaming, currentView should remain preview
     // (The UI component will show code view based on isStreaming flag)
@@ -452,19 +464,19 @@ describe('useViewState during streaming', () => {
     // Even though we don't have session/title yet, we're still in initial streaming mode
     expect(mockNavigate).not.toHaveBeenCalled();
     // The component should still show code
-    expect(hookResult.viewControls.code.loading).toBe(true); // Code icon should be spinning
+    expect(hookResult.viewControls?.code.loading).toBe(true); // Code icon should be spinning
   });
 
   test('FIXED: View stays in code view when first code lines arrive during streaming', () => {
     // Setup: Root URL path with no session/title params yet
     vi.mocked(useLocation).mockReturnValue({
       pathname: '/',
-    } as any);
+    } as ReturnType<typeof useLocation>);
 
     // Initial phase has no sessionId or title in params (new chat)
     vi.mocked(useParams).mockReturnValue({});
 
-    let hookResult: any;
+    let hookResult: Partial<ViewState> = {};
 
     // Initialize at root, no streaming yet
     const { unmount } = renderHook(
@@ -496,7 +508,7 @@ describe('useViewState during streaming', () => {
           code: '',
           isStreaming: true,
           previewReady: false,
-        },
+        } as ViewStateProps
       }
     );
 
@@ -514,7 +526,7 @@ describe('useViewState during streaming', () => {
       code: 'console.log("Hello World")', // First code arrived
       isStreaming: true, // Still streaming
       previewReady: true, // THIS IS THE BUG - preview marked ready too early
-    } as any);
+    });
 
     // UPDATED BEHAVIOR: Navigate to app view whenever preview is ready, even during streaming
     expect(mockNavigate).toHaveBeenCalledWith(`/chat/${mockSessionId}/${mockTitle}/app`, {
@@ -531,7 +543,7 @@ describe('useViewState during streaming', () => {
       code: 'console.log("Hello World")',
       isStreaming: false, // Streaming has finished
       previewReady: true, // Preview is ready
-    } as any); // Type assertion needed for test
+    }); // Type assertion needed for test
 
     // NOW navigate to app view is expected
     expect(mockNavigate).toHaveBeenCalledWith(`/chat/${mockSessionId}/${mockTitle}/app`, {

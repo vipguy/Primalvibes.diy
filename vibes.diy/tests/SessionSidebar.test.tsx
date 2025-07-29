@@ -1,10 +1,11 @@
 import { act, fireEvent, screen, render } from '@testing-library/react';
 // Vitest will automatically use mocks from __mocks__ directory
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { resetMockAuthState, setMockAuthState } from '../__mocks__/useAuth';
+import { resetMockAuthState, setMockAuthState } from './__mocks__/useAuth';
 import SessionSidebar from '../app/components/SessionSidebar';
 import { mockSessionSidebarProps } from './mockData';
 import { MockThemeProvider } from './utils/MockThemeProvider';
+import React from 'react';
 
 // Mock AuthContext to use the mocked useAuth implementation so components don’t require an AuthProvider
 vi.mock('../app/contexts/AuthContext', async () => {
@@ -33,7 +34,6 @@ import { initiateAuthFlow } from '../app/utils/auth';
 
 // Mock Link component from react-router
 vi.mock('react-router', () => {
-  const React = require('react');
   return {
     Link: vi.fn(({ to, children, onClick, ...props }) => {
       // Use React.createElement instead of JSX

@@ -79,7 +79,7 @@ export default function Wild({ userId, vibes, isLoading }: BasicVibespaceProps):
   const [pulse, setPulse] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [floatingEmojis, setFloatingEmojis] = useState<
-    Array<{ id: number; x: number; y: number; emoji: string; size: number; speed: number }>
+    { id: number; x: number; y: number; emoji: string; size: number; speed: number }[]
   >([]);
   const containerRef = useRef<HTMLDivElement>(null);
 

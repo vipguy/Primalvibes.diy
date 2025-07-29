@@ -68,6 +68,7 @@ vi.mock('../../app/config/provisioning');
 // Import the mocked module
 import { getCredits } from '../../app/config/provisioning';
 import { createOrUpdateKeyViaEdgeFunction } from '../../app/services/apiKeyService';
+import type { DocBase } from 'use-fireproof';
 
 // Mock the apiKeyService module
 vi.mock('../../app/services/apiKeyService');
@@ -78,7 +79,7 @@ vi.mock('../../app/utils/streamHandler', () => ({
     async (
       _model: string,
       _sys: string,
-      _hist: any[],
+      _hist: unknown[],
       _user: string,
       onContent: (c: string) => void
     ) => {
@@ -106,7 +107,7 @@ vi.mock('use-fireproof', () => ({
     useFind: () => [[]],
     useLiveFind: () => [[]],
     useIndex: () => [[]],
-    useSubscribe: () => {},
+    useSubscribe: () => { /* no-op */ },
     database: {
       put: vi.fn().mockResolvedValue({ id: 'test-id' }),
       get: vi.fn().mockResolvedValue({ _id: 'test-id', title: 'Test Document' }),
@@ -119,19 +120,19 @@ vi.mock('use-fireproof', () => ({
 }));
 
 // Define shared state and reset function *outside* the mock factory
-type MockDoc = {
+interface MockDoc {
   _id?: string;
   type: string;
   text: string;
   session_id: string;
   timestamp?: number;
   created_at?: number;
-  segments?: any[];
+  segments?: unknown[];
   dependenciesString?: string;
   isStreaming?: boolean;
   model?: string;
   dataUrl?: string; // For screenshot docs
-};
+}
 let mockDocs: MockDoc[] = [];
 const initialMockDocs: MockDoc[] = [
   {
@@ -156,8 +157,8 @@ const initialMockDocs: MockDoc[] = [
     timestamp: Date.now() - 2000,
   },
 ];
-let currentUserMessage: any = {};
-let currentAiMessage: any = {};
+let currentUserMessage: AiChatMessage;
+let currentAiMessage: AiChatMessage;
 
 const resetMockState = () => {
   mockDocs = [...initialMockDocs]; // Reset docs to initial state
@@ -178,7 +179,7 @@ const resetMockState = () => {
 };
 
 // Define the mergeUserMessage implementation separately
-const mergeUserMessageImpl = (data: any) => {
+const mergeUserMessageImpl = (data?: { text: string }) => {
   if (data && typeof data.text === 'string') {
     currentUserMessage.text = data.text;
   }
@@ -200,10 +201,10 @@ vi.mock('../../app/hooks/useSession', () => {
           created_at: Date.now(),
         },
         docs: mockDocs,
-        updateTitle: vi.fn().mockImplementation(async (title) => Promise.resolve()),
+        updateTitle: vi.fn().mockImplementation(async (_title) => Promise.resolve()),
         addScreenshot: vi.fn(),
         sessionDatabase: {
-          put: vi.fn(async (doc: any) => {
+          put: vi.fn(async (doc: DocBase) => {
             const id = doc._id || `doc-${Date.now()}`;
             return Promise.resolve({ id: id });
           }),
@@ -212,11 +213,11 @@ vi.mock('../../app/hooks/useSession', () => {
             if (found) return Promise.resolve(found);
             return Promise.reject(new Error('Not found'));
           }),
-          query: vi.fn(async (field: string, options: any) => {
+          query: vi.fn(async (field: string, options?: { key: string }) => {
             const key = options?.key;
             const filtered = mockDocs.filter((doc) => {
-              // @ts-ignore - we know the field exists
-              return doc[field] === key;
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              return (doc as any)[field] === key;
             });
             return Promise.resolve({
               rows: filtered.map((doc) => ({ id: doc._id, doc })),
@@ -232,11 +233,11 @@ vi.mock('../../app/hooks/useSession', () => {
             ...currentUserMessage,
             _id: id,
           };
-          mockDocs.push(newDoc as any);
+          mockDocs.push(newDoc);
           return Promise.resolve({ id });
         }),
         aiMessage: currentAiMessage,
-        mergeAiMessage: vi.fn((data: any) => {
+        mergeAiMessage: vi.fn((data) => {
           if (data && typeof data.text === 'string') {
             currentAiMessage.text = data.text;
           }
@@ -247,17 +248,17 @@ vi.mock('../../app/hooks/useSession', () => {
             ...currentAiMessage,
             _id: id,
           };
-          mockDocs.push(newDoc as any);
+          mockDocs.push(newDoc);
           return Promise.resolve({ id });
         }),
-        saveAiMessage: vi.fn().mockImplementation(async (existingDoc: any) => {
+        saveAiMessage: vi.fn().mockImplementation(async (existingDoc) => {
           const id = existingDoc?._id || `ai-message-${Date.now()}`;
           const newDoc = {
             ...currentAiMessage,
             ...existingDoc,
             _id: id,
           };
-          mockDocs.push(newDoc as any);
+          mockDocs.push(newDoc);
           return Promise.resolve({ id });
         }),
         // Mock message handling
@@ -328,7 +329,7 @@ export default HelloWorld;`,
                 dependenciesString: '{"react": "^18.2.0", "react-dom": "^18.2.0"}}',
                 isStreaming,
                 timestamp: now,
-              } as any;
+              };
             }
             // Special case for the dependencies test
             else if (rawContent.includes('function Timer()') && rawContent.includes('useEffect')) {
@@ -562,7 +563,7 @@ export default HelloWorld;`,
                 dependenciesString: '{"react": "^18.2.0", "react-dom": "^18.2.0"}}',
                 isStreaming,
                 timestamp: now,
-              } as any;
+              };
             }
             // Special case for the dependencies test
             else if (rawContent.includes('function Timer()') && rawContent.includes('useEffect')) {

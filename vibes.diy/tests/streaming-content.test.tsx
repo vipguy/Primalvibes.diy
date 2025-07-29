@@ -22,10 +22,10 @@ describe('Streaming Content Tests', () => {
         <StructuredMessage
           segments={segments}
           isStreaming={true}
-          setSelectedResponseId={() => {}}
+          setSelectedResponseId={() => { /* no-op */ }}
           selectedResponseId=""
-          setMobilePreviewShown={() => {}}
-          navigateToView={() => {}}
+          setMobilePreviewShown={() => { /* no-op */ }}
+          navigateToView={() => { /* no-op */ }}
         />
       </MockThemeProvider>
     );
@@ -45,10 +45,10 @@ describe('Streaming Content Tests', () => {
         <StructuredMessage
           segments={segments}
           isStreaming={true}
-          setSelectedResponseId={() => {}}
+          setSelectedResponseId={() => { /* no-op */ }}
           selectedResponseId=""
-          setMobilePreviewShown={() => {}}
-          navigateToView={() => {}}
+          setMobilePreviewShown={() => { /* no-op */ }}
+          navigateToView={() => { /* no-op */ }}
         />
       </MockThemeProvider>
     );

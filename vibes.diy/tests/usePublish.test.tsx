@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { usePublish } from '../app/components/ResultPreview/usePublish';
 import type { AuthContextType } from '../app/contexts/AuthContext';
 import { AuthContext } from '../app/contexts/AuthContext';
@@ -79,7 +79,7 @@ describe('usePublish Hook', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     // Default implementation for publishApp
-    (publishApp as any).mockResolvedValue('https://test-app.vibesdiy.app');
+    (publishApp as Mock).mockResolvedValue('https://test-app.vibesdiy.app');
   });
 
   it('initializes with correct default values', () => {
@@ -159,7 +159,7 @@ describe('usePublish Hook', () => {
 
   it('publishes the app and updates state correctly', async () => {
     const mockAppUrl = 'https://published-app.vibesdiy.app';
-    (publishApp as any).mockResolvedValue(mockAppUrl);
+    (publishApp as Mock).mockResolvedValue(mockAppUrl);
 
     const { result } = renderHook(
       () =>
@@ -210,9 +210,9 @@ describe('usePublish Hook', () => {
 
   it('handles failure to publish gracefully', async () => {
     // Mock a failure in publishApp
-    (publishApp as any).mockRejectedValue(new Error('Failed to publish'));
+    (publishApp as Mock).mockRejectedValue(new Error('Failed to publish'));
 
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { /* no-op */ });
 
     const { result } = renderHook(
       () =>

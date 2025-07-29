@@ -43,7 +43,7 @@ const mockResponse = {
   clone: vitest.fn(function (this: typeof mockResponse) {
     return { ...this };
   }),
-};
+} as unknown as Response & { json: Mock };
 
 describe("getMeta", () => {
   beforeEach(() => {

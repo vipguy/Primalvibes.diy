@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react';
-import { useViewState } from '../app/utils/ViewState';
+import { useViewState, type ViewState } from '../app/utils/ViewState';
 import { vi, describe, test, expect, beforeEach } from 'vitest';
 
 // Mock react-router-dom hooks
@@ -41,7 +41,7 @@ describe('useViewState', () => {
     // Test app path
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}/app`,
-    } as any);
+    } as ReturnType<typeof useLocation>);
 
     const { result: appResult } = renderHook(() =>
       useViewState({
@@ -56,7 +56,7 @@ describe('useViewState', () => {
     // Test code path
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}/code`,
-    } as any);
+    } as ReturnType<typeof useLocation>);
 
     const { result: codeResult } = renderHook(() =>
       useViewState({
@@ -71,7 +71,7 @@ describe('useViewState', () => {
     // Test data path
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}/data`,
-    } as any);
+    } as ReturnType<typeof useLocation>);
 
     const { result: dataResult } = renderHook(() =>
       useViewState({
@@ -88,7 +88,7 @@ describe('useViewState', () => {
     // Setup location with /app path
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}/app`,
-    } as any);
+    } as ReturnType<typeof useLocation>);
 
     // Initialize with preview not ready
     const { result, rerender } = renderHook(() =>
@@ -118,7 +118,7 @@ describe('useViewState', () => {
     // Setup location with /code path
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}/code`,
-    } as any);
+    } as ReturnType<typeof useLocation>);
 
     // Initialize with preview not ready
     const { result, rerender } = renderHook(() =>
@@ -148,7 +148,7 @@ describe('useViewState', () => {
     // Setup location with /data path
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}/data`,
-    } as any);
+    } as ReturnType<typeof useLocation>);
 
     // Initialize with preview not ready
     const { result, rerender } = renderHook(() =>
@@ -180,10 +180,10 @@ describe('useViewState', () => {
     // Setup location with base path (no view suffix)
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}`,
-    } as any);
+    } as ReturnType<typeof useLocation>);
 
     // We need to create a fresh instance for each test to ensure refs start clean
-    let hookResult: any;
+    let hookResult: ViewState | null = null;
 
     // Initialize with preview not ready - first render creates the refs
     const { unmount } = renderHook(
@@ -241,10 +241,10 @@ describe('useViewState', () => {
     // Setup location with base path (no view suffix)
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}`,
-    } as any);
+    } as ReturnType<typeof useLocation>);
 
     // We need to create a fresh instance to ensure refs are properly tracked
-    let hookResult: any;
+    let hookResult: ViewState | null = null;
 
     // Initialize with preview not ready - first render to set up refs
     const { unmount } = renderHook(

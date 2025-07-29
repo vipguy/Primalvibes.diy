@@ -17,11 +17,11 @@ interface ExplodingBrainProps {
 }
 
 // Brain levels for the meme effect
-type BrainLevel = {
+interface BrainLevel {
   name: string;
   color: string;
   glow: string;
-};
+}
 
 const BRAIN_LEVELS: BrainLevel[] = [
   { name: 'Basic Brain', color: 'blue-400', glow: '0 0 15px rgba(59, 130, 246, 0.7)' },
@@ -39,7 +39,7 @@ export default function ExplodingBrain({
   const [brainLevel, setBrainLevel] = useState(0);
   const [brainPulse, setBrainPulse] = useState(false);
   const [neuronLines, setNeuronLines] = useState<
-    Array<{ x1: number; y1: number; x2: number; y2: number; color: string }>
+    { x1: number; y1: number; x2: number; y2: number; color: string }[]
   >([]);
   const containerRef = useRef<HTMLDivElement>(null);
 

@@ -19,6 +19,11 @@ import type {
   UseDocumentResult,
   AllDocsResult,
   ChangesResult,
+  ClockHead,
+  ChangesOptions,
+  ChangesResponse,
+  QueryOpts,
+  IndexRows,
 } from 'use-fireproof';
 
 /**
@@ -92,13 +97,13 @@ class LazyDB {
   allDocs = async <T extends DocTypes>(options?: AllDocsQueryOpts): Promise<AllDocsResponse<T>> =>
     this.inner.allDocs<T>(options);
 
-  changes = async <T extends DocTypes>(since?: any, options?: any): Promise<any> =>
+  changes = async <T extends DocTypes>(since?: ClockHead, options?: ChangesOptions): Promise<ChangesResponse<T>> =>
     this.inner.changes<T>(since, options);
 
   query = async <K extends IndexKeyType, T extends DocTypes, R extends DocFragment = T>(
     field: string,
-    options?: any
-  ): Promise<any> => this.inner.query<K, T, R>(field, options);
+    options?: QueryOpts<K>
+  ): Promise<IndexRows<K, T, R>> => this.inner.query<K, T, R>(field, options);
 
   // Write operations - ensure real DB before operation
   put = async <T extends DocTypes>(doc: T) => {
@@ -114,16 +119,16 @@ class LazyDB {
   // Handle any other method calls by forwarding them to the inner DB
   // This is a catch-all for methods not explicitly defined
   getProperty(prop: string) {
-    const innerValue = (this.inner as any)[prop];
+    const innerValue = (this.inner as unknown as Record<string, unknown>)[prop];
 
     // If it's a function, wrap it to ensure the real DB for write operations
     if (typeof innerValue === 'function') {
-      return (...args: any[]) => {
+      return (...args: unknown[]) => {
         // For methods that might write, ensure we have the real DB
         if (['put', 'bulk', 'putAttachment', 'createIndex', 'removeIndex'].includes(prop)) {
           this.ensureReal();
         }
-        return (this.inner as any)[prop](...args);
+        return (this.inner as unknown as Record<string, unknown>)[prop](...args);
       };
     }
 
@@ -132,11 +137,11 @@ class LazyDB {
   }
 
   // Handler for property access via Proxy
-  proxyHandler(prop: string | symbol): any {
+  proxyHandler(prop: string | symbol): unknown {
     const propStr = prop.toString();
     // First check if we have the property defined directly
     if (propStr in this) {
-      return (this as any)[propStr];
+      return (this as unknown as Record<string, unknown>)[propStr];
     }
 
     // Otherwise handle dynamic property access
@@ -155,7 +160,7 @@ class LazyDB {
  */
 export function useLazyFireproof(
   name: string,
-  initializeImmediately: boolean = false,
+  initializeImmediately = false,
   config: ConfigOpts = {}
 ): UseFireproof & {
   open: () => void;
@@ -185,7 +190,7 @@ export function useLazyFireproof(
 
   // Pass this stable reference to useFireproof
   // It will create hooks that call through to our wrapper
-  const api = useFireproof(dbProxy as any);
+  const api = useFireproof(dbProxy as unknown as Database);
 
   // Create hooks that automatically refresh when the database transitions from lazy to real
   // This ensures data remains consistent even when the underlying DB implementation changes
@@ -193,7 +198,7 @@ export function useLazyFireproof(
   // Custom hook that handles database transitions for LiveQuery
   function useEnhancedLiveQuery<
     T extends DocTypes,
-    K extends IndexKeyType = any,
+    K extends IndexKeyType = unknown,
     R extends DocFragment = T,
   >(mapFnOrField: string | MapFn<T>, options?: any): LiveQueryResult<T, K, R> {
     // Use a state counter to trigger refreshes when the database transitions
@@ -295,7 +300,7 @@ export function useLazyFireproof(
   }
 
   // Custom hook that handles database transitions for Changes
-  function useEnhancedChanges<T extends DocTypes>(since?: any, options?: any): ChangesResult<T> {
+  function useEnhancedChanges<T extends DocTypes>(since: ClockHead, options?: ChangesOptions): ChangesResult<T> {
     // Use a state counter to trigger refreshes when the database transitions
     const [refreshCounter, setRefreshCounter] = useState(0);
 
@@ -344,7 +349,7 @@ export function useLazyFireproof(
     (callback: (db: Database) => void) => {
       if (!ref.current) {
         console.warn('Cannot subscribe to database transitions: database not initialized');
-        return () => {};
+        return () => { /* no-op */ };
       }
       return ref.current.onTransition(callback);
     },
@@ -355,7 +360,7 @@ export function useLazyFireproof(
   useEffect(() => {
     // This ensures that when hooks subscribe to LiveQuery or document on mount
     // they'll get the right database immediately if open() was called synchronously
-    const timeout = setTimeout(() => {}, 0);
+    const timeout = setTimeout(() => { /* no-op */ }, 0);
     return () => clearTimeout(timeout);
   }, []);
 

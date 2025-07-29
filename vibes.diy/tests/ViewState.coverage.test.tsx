@@ -1,5 +1,5 @@
-import { renderHook } from '@testing-library/react';
-import { useViewState } from '../app/utils/ViewState';
+import { renderHook , act } from '@testing-library/react';
+import { useViewState, type ViewState } from '../app/utils/ViewState';
 import { vi, describe, test, expect, beforeEach } from 'vitest';
 
 // Mock react-router-dom hooks
@@ -20,7 +20,6 @@ vi.mock('../app/components/SessionSidebar/utils', () => {
 
 // Import mocked modules
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { act } from '@testing-library/react';
 
 describe('ViewState Coverage Tests', () => {
   const mockNavigate = vi.fn();
@@ -42,7 +41,7 @@ describe('ViewState Coverage Tests', () => {
     // Mock location to base path
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}`, // Not in data or code view
-    } as any);
+    } as ReturnType<typeof useLocation>);
 
     // Initialize with props
     const initialProps = {
@@ -53,7 +52,7 @@ describe('ViewState Coverage Tests', () => {
       previewReady: false, // Start with previewReady=false to test the transition
     };
 
-    let hookResult: any;
+    let hookResult: Partial<ViewState> | null = null;
 
     // First initialize with streaming state
     const { unmount } = renderHook(
@@ -100,7 +99,7 @@ describe('ViewState Coverage Tests', () => {
     // Mock location
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}`,
-    } as any);
+    } as ReturnType<typeof useLocation>);
 
     // Setup props
     const props = {
@@ -116,7 +115,7 @@ describe('ViewState Coverage Tests', () => {
 
     // Call navigateToView to navigate to data view
     act(() => {
-      result.current.navigateToView('data');
+      result.current.navigateToView?.('data');
     });
 
     // Verify navigation occurred with correct path
@@ -127,7 +126,7 @@ describe('ViewState Coverage Tests', () => {
 
     // Test preview view which should use 'app' suffix
     act(() => {
-      result.current.navigateToView('preview');
+      result.current.navigateToView?.('preview');
     });
 
     // Verify navigation with 'app' suffix
@@ -138,7 +137,7 @@ describe('ViewState Coverage Tests', () => {
     // Mock location
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}`,
-    } as any);
+    } as ReturnType<typeof useLocation>);
 
     // Setup props with data view disabled (during streaming)
     const props = {
@@ -154,7 +153,7 @@ describe('ViewState Coverage Tests', () => {
 
     // Attempt to navigate to data view (which should be disabled)
     act(() => {
-      result.current.navigateToView('data');
+      result.current.navigateToView?.('data');
     });
 
     // Verify no navigation occurred since data view is disabled
@@ -164,9 +163,9 @@ describe('ViewState Coverage Tests', () => {
     // Mock location to base path - not in data or code view
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}`,
-    } as any);
+    } as ReturnType<typeof useLocation>);
 
-    let hookResult: any;
+    let hookResult: Partial<ViewState> | null = null;
 
     // First render to establish the wasStreamingRef value as true
     const { unmount } = renderHook(

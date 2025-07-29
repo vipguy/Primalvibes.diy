@@ -6,7 +6,7 @@ import { MockThemeProvider } from './utils/MockThemeProvider';
 
 // Mock the Message component
 vi.mock('../app/components/Message', () => ({
-  default: ({ message }: any) => <div data-testid="mock-message">{message.text}</div>,
+  default: ({ message }: { message: UserChatMessage | AiChatMessage }) => <div data-testid="mock-message">{message.text}</div>,
   WelcomeScreen: () => <div data-testid="welcome-screen">Welcome Screen</div>,
 }));
 
@@ -35,10 +35,10 @@ describe('MessageList', () => {
         <MessageList
           messages={messages}
           isStreaming={false}
-          setSelectedResponseId={() => {}}
+          setSelectedResponseId={() => { /* no-op */ }}
           selectedResponseId=""
-          setMobilePreviewShown={() => {}}
-          navigateToView={() => {}}
+          setMobilePreviewShown={() => { /* no-op */ }}
+          navigateToView={() => { /* no-op */ }}
         />
       </MockThemeProvider>
     );
@@ -54,10 +54,10 @@ describe('MessageList', () => {
         <MessageList
           messages={[]}
           isStreaming={false}
-          setSelectedResponseId={() => {}}
+          setSelectedResponseId={() => { /* no-op */ }}
           selectedResponseId=""
-          setMobilePreviewShown={() => {}}
-          navigateToView={() => {}}
+          setMobilePreviewShown={() => { /* no-op */ }}
+          navigateToView={() => { /* no-op */ }}
         />
       </MockThemeProvider>
     );
@@ -93,10 +93,10 @@ describe('MessageList', () => {
         <MessageList
           messages={messages}
           isStreaming={true}
-          setSelectedResponseId={() => {}}
+          setSelectedResponseId={() => { /* no-op */ }}
           selectedResponseId=""
-          setMobilePreviewShown={() => {}}
-          navigateToView={() => {}}
+          setMobilePreviewShown={() => { /* no-op */ }}
+          navigateToView={() => { /* no-op */ }}
         />
       </MockThemeProvider>
     );
@@ -131,10 +131,10 @@ describe('MessageList', () => {
         <MessageList
           messages={messages}
           isStreaming={true}
-          setSelectedResponseId={() => {}}
+          setSelectedResponseId={() => { /* no-op */ }}
           selectedResponseId=""
-          setMobilePreviewShown={() => {}}
-          navigateToView={() => {}}
+          setMobilePreviewShown={() => { /* no-op */ }}
+          navigateToView={() => { /* no-op */ }}
         />
       </MockThemeProvider>
     );
@@ -167,10 +167,10 @@ describe('MessageList', () => {
         <MessageList
           messages={messages}
           isStreaming={true}
-          setSelectedResponseId={() => {}}
+          setSelectedResponseId={() => { /* no-op */ }}
           selectedResponseId=""
-          setMobilePreviewShown={() => {}}
-          navigateToView={() => {}}
+          setMobilePreviewShown={() => { /* no-op */ }}
+          navigateToView={() => { /* no-op */ }}
         />
       </MockThemeProvider>
     );

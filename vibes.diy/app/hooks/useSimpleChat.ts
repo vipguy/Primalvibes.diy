@@ -172,7 +172,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
    * @param textOverride Optional text to use instead of the current userMessage
    */
   const sendMessage = useCallback(
-    (textOverride?: string, skipSubmit: boolean = false) => {
+    (textOverride?: string, skipSubmit = false) => {
       const ctx: SendMessageContext = {
         userMessage,
         mergeUserMessage,

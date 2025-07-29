@@ -1,4 +1,5 @@
 /** @type {import('tailwindcss').Config} */
+
 export default {
   content: ['./app/**/*.{js,jsx,ts,tsx}'],
   darkMode: 'class',
@@ -13,5 +14,6 @@ export default {
       },
     },
   },
+  // eslint-disable-next-line @typescript-eslint/no-require-imports, no-undef
   plugins: [require('@tailwindcss/typography')],
 };

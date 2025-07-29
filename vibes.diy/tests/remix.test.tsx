@@ -71,7 +71,7 @@ vi.mock('react-router', () => ({
 }));
 
 // Mock fetch
-global.fetch = vi.fn().mockImplementation((url) => {
+global.fetch = vi.fn().mockImplementation((_url) => {
   return Promise.resolve({
     ok: true,
     text: () => Promise.resolve('export default function App() { return <div>Test App</div>; }'),

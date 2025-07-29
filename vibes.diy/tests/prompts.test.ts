@@ -64,10 +64,10 @@ describe('Prompts Utility', () => {
       await makeBaseSystemPrompt('gpt-4');
       // If we don't catch an error, the test should fail
       expect.fail('Expected makeBaseSystemPrompt to throw an error');
-    } catch (error: any) {
+    } catch (error) {
       // We expect an error to be thrown
       expect(error).toBeDefined();
-      expect(error.message).toBe('Network error');
+      expect((error as Error).message).toBe('Network error');
     }
   });
 

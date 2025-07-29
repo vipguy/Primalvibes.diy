@@ -23,12 +23,16 @@ import MessageList from '../app/components/MessageList';
 import type { ChatMessageDocument } from '../app/types/chat';
 
 // Mock component that tracks renders
-function createRenderTracker(Component: React.ComponentType<any>) {
+function createRenderTracker(Component: React.Component<{ 
+  onOpenSidebar: () => void;
+  onNewChat: () => void;
+  isStreaming: () => boolean 
+}>) {
   let renderCount = 0;
 
   // Create a wrapped component that uses the original memoized component
   // but tracks renders of the wrapper
-  const TrackedComponent = (props: any) => {
+  const TrackedComponent = (props: { isStreaming: () => boolean }) => {
     renderCount++;
     // Use the original component directly
     return <Component {...props} />;
@@ -64,8 +68,8 @@ describe('Component Memoization', () => {
       const { Component: TrackedHeader, getRenderCount } = createRenderTracker(ChatHeader);
 
       // Create stable callback functions outside the component
-      const onOpenSidebar = () => {};
-      const onNewChat = () => {};
+      const onOpenSidebar = () => { /* no-op */ };
+      const onNewChat = () => { /* no-op */ };
       const isStreaming = () => false;
 
       function TestWrapper() {

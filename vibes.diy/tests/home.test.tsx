@@ -106,13 +106,13 @@ vi.mock('../app/components/AppLayout', () => {
 vi.mock('../app/components/ChatInterface', () => {
   return {
     __esModule: true,
-    default: (props: unknown) => {
+    default: (_props: unknown) => {
       return <div data-testid="chat-interface">Chat Interface</div>;
     },
-    getChatInputComponent: (props: unknown) => {
+    getChatInputComponent: (_props: unknown) => {
       return <div data-testid="chat-input">Chat Input</div>;
     },
-    getSuggestionsComponent: (props: unknown) => {
+    getSuggestionsComponent: (_props: unknown) => {
       return <div data-testid="suggestions">Suggestions</div>;
     },
   };
@@ -122,7 +122,7 @@ vi.mock('../app/components/ChatInterface', () => {
 vi.mock('../app/components/ResultPreview/ResultPreview', () => {
   return {
     __esModule: true,
-    default: (props: unknown) => {
+    default: (_props: unknown) => {
       return <div data-testid="result-preview">Result Preview</div>;
     },
   };

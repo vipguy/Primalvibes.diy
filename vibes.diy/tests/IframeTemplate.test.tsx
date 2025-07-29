@@ -76,9 +76,9 @@ describe('Iframe Template', () => {
     // Store original methods
     const originalCreateObjectURL = URL.createObjectURL;
     // Make sure revokeObjectURL exists to avoid cleanup errors
-    const originalRevokeObjectURL = URL.revokeObjectURL || function () {};
+    const originalRevokeObjectURL = URL.revokeObjectURL || (() => { /* no-op */ });
     const originalGetItem = Storage.prototype.getItem;
-    let messageEventHandlers: Array<(event: MessageEvent) => void> = [];
+    let messageEventHandlers: ((event: MessageEvent) => void)[] = [];
 
     beforeEach(() => {
       // Clear message handlers from previous tests
@@ -103,9 +103,9 @@ describe('Iframe Template', () => {
       // Track all message event handlers added to window
       vi.spyOn(window, 'addEventListener').mockImplementation((event, handler) => {
         if (event === 'message') {
-          messageEventHandlers.push(handler as any);
+          messageEventHandlers.push(handler as (x: MessageEvent) => void);
         }
-        return undefined as any;
+        return undefined
       });
 
       // Create a realistic iframe mock that can receive and send messages
@@ -125,7 +125,7 @@ describe('Iframe Template', () => {
               close: vi.fn(),
             },
             // Create a postMessage that triggers parent's message handlers
-            postMessage: vi.fn().mockImplementation((message: any, targetOrigin: string) => {
+            postMessage: vi.fn().mockImplementation((message: unknown, _targetOrigin: string) => {
               // Simulate the iframe sending a message to the parent
               messageEventHandlers.forEach((handler) => {
                 // Create a partial MessageEvent and cast to unknown first to satisfy TypeScript
@@ -149,9 +149,9 @@ describe('Iframe Template', () => {
                   timeStamp: Date.now(),
                   type: 'message',
                   composedPath: () => [],
-                  preventDefault: () => {},
-                  stopImmediatePropagation: () => {},
-                  stopPropagation: () => {},
+                  preventDefault: () => { /* no-op */ },
+                  stopImmediatePropagation: () => { /* no-op */ },
+                  stopPropagation: () => { /* no-op */ },
                   AT_TARGET: 0,
                   BUBBLING_PHASE: 0,
                   CAPTURING_PHASE: 0,

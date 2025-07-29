@@ -24,7 +24,7 @@ vi.spyOn(ApiKeyModule, 'useApiKey').mockImplementation(
     ({
       ensureApiKey: vi.fn(),
       refreshKey: refreshKeyMock,
-    }) as any
+    }) 
 );
 
 // Import the hook *after* mocks are set up

@@ -6,12 +6,12 @@
  * Handles:
  * - export default function ComponentName() {}
  * - export default class ComponentName {}
- * - export default (props) => {};
+ * - export default (props) => { /* no-op */ };
  * - export default memo(Component);
  * - export default forwardRef(...);
  * - function ComponentName() {} export default ComponentName;
  * - class ComponentName {} export default ComponentName;
- * - const ComponentName = () => {}; export default ComponentName;
+ * - const ComponentName = () => { /* no-op */ }; export default ComponentName;
  * - export default { Component: ... } (attempts to find main component)
  * - export function ComponentName() {} (converts to default)
  * - export const ComponentName = ... (converts to default)
@@ -46,7 +46,7 @@ export function normalizeComponentExports(code: string): string {
       functionDeclaration: null as { name: string; signature: string } | null,
       // Class declaration (e.g., export default class Component {})
       classDeclaration: null as { name: string } | null,
-      // Arrow function (e.g., export default () => {})
+      // Arrow function (e.g., export default () => { /* no-op */ })
       arrowFunction: null as unknown as boolean,
       // Named function/class/var with default export (e.g., function Foo() {} export default Foo)
       namedExport: null as { type: string; name: string } | null,
@@ -130,15 +130,15 @@ export function normalizeComponentExports(code: string): string {
   const appComponentExists = state.hasAppDeclared;
 
   // Define a type for our pattern objects (for backward compatibility)
-  type PatternWithRegexTest = {
+  interface PatternWithRegexTest {
     test: RegExp;
     process: () => void;
-  };
+  }
 
-  type PatternWithFunctionTest = {
+  interface PatternWithFunctionTest {
     test: () => boolean;
     process: () => void;
-  };
+  }
 
   type Pattern = PatternWithRegexTest | PatternWithFunctionTest;
 
@@ -146,11 +146,11 @@ export function normalizeComponentExports(code: string): string {
   // Include the direct export patterns for compatibility with the rest of the code
   const patterns = {
     // Add stubs for direct patterns to prevent TypeScript errors
-    hoc: { test: /^$/, process: () => {} } as PatternWithRegexTest,
-    functionDeclaration: { test: /^$/, process: () => {} } as PatternWithRegexTest,
-    classDeclaration: { test: /^$/, process: () => {} } as PatternWithRegexTest,
-    arrowFunction: { test: /^$/, process: () => {} } as PatternWithRegexTest,
-    objectLiteral: { test: /^$/, process: () => {} } as PatternWithRegexTest,
+    hoc: { test: /^$/, process: () => { /* no-op */ } } as PatternWithRegexTest,
+    functionDeclaration: { test: /^$/, process: () => { /* no-op */ } } as PatternWithRegexTest,
+    classDeclaration: { test: /^$/, process: () => { /* no-op */ } } as PatternWithRegexTest,
+    arrowFunction: { test: /^$/, process: () => { /* no-op */ } } as PatternWithRegexTest,
+    objectLiteral: { test: /^$/, process: () => { /* no-op */ } } as PatternWithRegexTest,
 
     // Named declarations with default export
     namedFunctionDefault: {
@@ -413,7 +413,7 @@ export default App;`;
         );
       } else {
         // Keep only the last export statement
-        let lastIndex = normalizedCode.lastIndexOf('export default App');
+        const lastIndex = normalizedCode.lastIndexOf('export default App');
         normalizedCode =
           normalizedCode.substring(0, lastIndex).replace(/export\s+default\s+App;?/g, '') +
           normalizedCode.substring(lastIndex);

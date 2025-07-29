@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 import { render } from '@testing-library/react';
 import type { RenderOptions } from '@testing-library/react';
-import type { AuthContextType } from '../../app/contexts/AuthContext';
+import { type AuthContextType, AuthContext } from '../../app/contexts/AuthContext';
 import { vi } from 'vitest';
 
 export const createAuthContextValue = (
@@ -27,8 +27,6 @@ export const renderWithAuth = (
 
   const wrapper = ({ children }: { children: React.ReactNode }) => {
     // Lazy require inside component body to ensure module fully initialized
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { AuthContext } = require('../../app/contexts/AuthContext');
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
   };
   return { ...render(ui, { wrapper, ...options }), authValue: value };

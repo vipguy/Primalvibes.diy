@@ -3,6 +3,7 @@ import { describe, it, vi } from 'vitest';
 import { createWrapper, formatAsSSE } from './setup';
 import { useSimpleChat } from '../../app/hooks/useSimpleChat';
 import { useSession } from '../../app/hooks/useSession';
+import type { ChatMessageDocument } from '~/types/chat';
 
 describe('useSimpleChat', () => {
   it('handles pending AI message state correctly', async () => {
@@ -29,7 +30,7 @@ describe('useSimpleChat', () => {
     const mockPut = vi.fn(async () => {
       return Promise.resolve({ id: generatedId });
     });
-    (vi.mocked(useSession)(undefined) as any).sessionDatabase.put = mockPut;
+    (vi.mocked(useSession)(undefined)).sessionDatabase.put = mockPut as unknown as ReturnType<typeof useSession>['sessionDatabase']['put'];
 
     act(() => {
       result.current.setInput('Trigger stream');
@@ -40,20 +41,14 @@ describe('useSimpleChat', () => {
 
     act(() => {
       const sessionHookResult = vi.mocked(useSession)(undefined);
-      const mockDocs = (sessionHookResult as any).docs as Array<{
-        _id: string;
-        type: string;
-        text: string;
-        session_id: string;
-        timestamp: number;
-      }>;
+      const mockDocs = (sessionHookResult).docs 
       const docToAdd = {
         _id: generatedId,
         type: 'ai',
         text: mockResponseText,
         session_id: 'test-session-id',
-        timestamp: Date.now(),
-      };
+        created_at: Date.now(),
+      } as ChatMessageDocument;
       mockDocs.push(docToAdd);
       result.current.setInput('');
     });

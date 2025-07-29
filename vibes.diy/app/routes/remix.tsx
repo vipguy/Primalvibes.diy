@@ -88,7 +88,7 @@ export default function Remix() {
         await sessionDatabase.put(aiMessage);
 
         // Generate a better title based on the code content
-        let finalTitle = `Remix of ${appName}`;
+        const finalTitle = `Remix of ${appName}`;
         // try {
         //   // Parse the content to get segments
         //   const { segments } = parseContent(aiMessage.text);

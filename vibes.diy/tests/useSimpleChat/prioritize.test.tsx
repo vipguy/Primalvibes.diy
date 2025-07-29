@@ -25,7 +25,7 @@ describe('useSimpleChat', () => {
     const mockPendingPut = vi.fn(async () => {
       return Promise.resolve({ id: pendingId });
     });
-    (vi.mocked(useSession)(undefined) as any).sessionDatabase.put = mockPendingPut;
+    (vi.mocked(useSession)(undefined)).sessionDatabase.put = mockPendingPut;
 
     act(() => {
       result.current.setInput('trigger pending');
@@ -34,11 +34,11 @@ describe('useSimpleChat', () => {
       await result.current.sendMessage();
     });
 
-    const originalPut = vi.fn(async (doc: any) => {
+    const originalPut = vi.fn(async (doc) => {
       const id = doc._id || `ai-message-${Date.now()}`;
       return Promise.resolve({ id });
     });
-    (vi.mocked(useSession)(undefined) as any).sessionDatabase.put = originalPut;
+    (vi.mocked(useSession)(undefined)).sessionDatabase.put = originalPut;
 
     await act(async () => {
       result.current.setSelectedResponseId('');
@@ -55,7 +55,7 @@ describe('useSimpleChat', () => {
       });
     });
 
-    await waitFor(() => {});
+    await waitFor(() => { /* no-op */ });
 
     await act(async () => {
       Object.defineProperty(result.current, 'aiMessage', {
@@ -70,7 +70,7 @@ describe('useSimpleChat', () => {
       });
     });
 
-    await waitFor(() => {});
+    await waitFor(() => { /* no-op */ });
 
     await act(async () => {
       result.current.setSelectedResponseId(olderDocId);

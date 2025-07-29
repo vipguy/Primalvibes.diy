@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach, type Mock } from 'vitest';
 import * as auth from '../app/utils/auth';
 
 // Mock the jose module
@@ -18,8 +18,8 @@ vi.mock('react-hot-toast', () => ({
 import * as jose from 'jose';
 
 // Helper for setting up import.meta.env
-function setEnv(vars: Record<string, any>) {
-  (import.meta as any).env = { ...vars };
+function setEnv(vars: Record<string, string>) {
+  (import.meta as { env: Record<string, string> }).env = { ...vars };
 }
 
 describe('auth utils', () => {
@@ -37,7 +37,7 @@ describe('auth utils', () => {
 
       // Setup the jwt verification result with a token that won't trigger token extension
       // (far from expiration)
-      (jose.jwtVerify as any).mockResolvedValueOnce({
+      (jose.jwtVerify as Mock).mockResolvedValueOnce({
         protectedHeader: { alg: 'ES256' },
         payload: {
           exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now
@@ -60,7 +60,7 @@ describe('auth utils', () => {
 
     it('returns null for invalid token', async () => {
       setEnv({ VITE_CLOUD_SESSION_TOKEN_PUBLIC: 'zabc' });
-      (jose.jwtVerify as any).mockRejectedValueOnce(new Error('bad token'));
+      (jose.jwtVerify as Mock).mockRejectedValueOnce(new Error('bad token'));
 
       const result = await auth.verifyToken('bad.token');
       expect(result).toBeNull();
@@ -68,7 +68,7 @@ describe('auth utils', () => {
 
     it('returns null for expired token', async () => {
       setEnv({ VITE_CLOUD_SESSION_TOKEN_PUBLIC: 'zabc' });
-      (jose.jwtVerify as any).mockResolvedValueOnce({
+      (jose.jwtVerify as Mock).mockResolvedValueOnce({
         protectedHeader: { alg: 'ES256' },
         payload: {
           exp: Math.floor(Date.now() / 1000) - 10, // expired token
@@ -95,7 +95,7 @@ describe('auth utils', () => {
       });
 
       // Setup basic JWT verification for a valid token
-      (jose.jwtVerify as any).mockResolvedValue({
+      (jose.jwtVerify as Mock).mockResolvedValue({
         protectedHeader: { alg: 'ES256' },
         payload: {
           exp: Math.floor(Date.now() / 1000) + 3600, // Valid expiration
@@ -124,7 +124,7 @@ describe('auth utils', () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({ token: 'new.extended.token' }),
-      }) as any;
+      })
 
       // Test the extendToken function directly
       const result = await auth.extendToken('old.token');
@@ -149,20 +149,20 @@ describe('auth utils', () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({ token: 'newtoken123' }),
-      }) as any;
+      }) 
       const result = await auth.extendToken('oldtoken');
       expect(result).toBe('newtoken123');
       expect(window.localStorage.getItem('auth_token')).toBe('newtoken123');
     });
     it('returns null on network error', async () => {
       setEnv({ VITE_CONNECT_API_URL: 'https://api' });
-      global.fetch = vi.fn().mockRejectedValue(new Error('fail')) as any;
+      global.fetch = vi.fn().mockRejectedValue(new Error('fail')) 
       const result = await auth.extendToken('token');
       expect(result).toBeNull();
     });
     it('returns null on invalid response', async () => {
       setEnv({ VITE_CONNECT_API_URL: 'https://api' });
-      global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) }) as any;
+      global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) })
       const result = await auth.extendToken('token');
       expect(result).toBeNull();
     });
@@ -172,7 +172,7 @@ describe('auth utils', () => {
     it('returns connectUrl and resultId and sets sessionStorage', () => {
       // Set the connect URL environment variable
       setEnv({ VITE_CONNECT_URL: 'http://localhost:3000/token' });
-      vi.spyOn(window, 'location', 'get').mockReturnValue({ pathname: '/not/callback' } as any);
+      vi.spyOn(window, 'location', 'get').mockReturnValue({ pathname: '/not/callback' } as typeof window.location );
 
       const result = auth.initiateAuthFlow();
       expect(result).toBeTruthy();
@@ -182,7 +182,7 @@ describe('auth utils', () => {
     });
 
     it('returns null if already on callback page', () => {
-      vi.spyOn(window, 'location', 'get').mockReturnValue({ pathname: '/auth/callback' } as any);
+      vi.spyOn(window, 'location', 'get').mockReturnValue({ pathname: '/auth/callback' } as typeof window.location );
       const result = auth.initiateAuthFlow();
       expect(result).toBeNull();
     });
@@ -198,7 +198,7 @@ describe('auth utils', () => {
           ok: true,
           json: async () => (called < 2 ? {} : { token: 'tok123' }),
         });
-      }) as any;
+      })
 
       // Toast is already mocked at the top of the file
 
@@ -208,7 +208,7 @@ describe('auth utils', () => {
 
     it('returns null if timed out', async () => {
       setEnv({ VITE_CONNECT_API_URL: 'https://api' });
-      global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) }) as any;
+      global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) })
 
       const token = await auth.pollForAuthToken('resultid', 1, 5);
       expect(token).toBeNull();

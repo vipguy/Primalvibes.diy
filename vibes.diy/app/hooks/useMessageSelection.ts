@@ -160,10 +160,10 @@ export function useMessageSelection({
   const filteredDocs = docs.filter(
     (doc: any) => doc.type === 'ai' || doc.type === 'user' || doc.type === 'system'
   );
-  const buildMessageHistory = useCallback((): Array<{
+  const buildMessageHistory = useCallback((): {
     role: 'user' | 'assistant' | 'system';
     content: string;
-  }> => {
+  }[] => {
     // Map all messages to the correct format first
     const allMessages = filteredDocs.map((msg: any) => {
       const role =

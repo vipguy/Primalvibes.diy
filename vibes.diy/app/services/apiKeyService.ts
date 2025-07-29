@@ -6,7 +6,7 @@ import { API_BASE_URL } from '../config/env';
  * Service for managing CallAI API keys through Netlify Edge Functions
  */
 
-export type ApiKeyResponse = {
+export interface ApiKeyResponse {
   success: boolean;
   error?: string;
   key: {
@@ -20,7 +20,7 @@ export type ApiKeyResponse = {
     created_at: string;
     updated_at: string;
   };
-};
+}
 
 /**
  * Creates a new session key through the secure Netlify Edge Function

@@ -4,6 +4,7 @@ import React from 'react';
 
 // Import our module setup which configures the use-fireproof mock
 import './moduleSetup';
+import type { LinkProps } from 'react-router';
 
 // Mock the makeBaseSystemPrompt function
 vi.mock('../app/prompts', () => ({
@@ -43,14 +44,14 @@ vi.mock('react-router', () => ({
   useNavigate: () => vi.fn(),
   useLocation: () => ({ pathname: '/' }),
   useParams: () => ({}),
-  Link: ({ children, to, ...props }: any) =>
+  Link: ({ children, to, ...props }: LinkProps) =>
     React.createElement('a', { href: to, ...props }, children),
 }));
 
 vi.mock('react-router-dom', () => ({
-  Link: ({ children, to, ...props }: any) =>
+  Link: ({ children, to, ...props }: LinkProps) =>
     React.createElement('a', { href: to, ...props }, children),
-  NavLink: ({ children, to, ...props }: any) =>
+  NavLink: ({ children, to, ...props }: LinkProps) =>
     React.createElement('a', { href: to, ...props }, children),
   useNavigate: () => vi.fn(),
   useLocation: () => ({ pathname: '/' }),
@@ -93,7 +94,6 @@ Object.assign(navigator, {
 
 // Mock TextEncoder if needed
 if (typeof TextEncoder === 'undefined') {
-  // @ts-ignore - We're mocking TextEncoder for the test environment
   global.TextEncoder = class TextEncoder {
     encoding = 'utf-8';
     encode(text: string): Uint8Array {

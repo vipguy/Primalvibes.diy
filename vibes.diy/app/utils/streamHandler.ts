@@ -20,12 +20,12 @@ import { type Message, callAI } from 'call-ai';
 export async function streamAI(
   model: string,
   systemPrompt: string,
-  messageHistory: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>,
+  messageHistory: { role: 'user' | 'assistant' | 'system'; content: string }[],
   userMessage: string,
   onContent: (content: string) => void,
   apiKey: string,
   userId?: string,
-  setNeedsLogin?: (value: boolean, reason: string) => void
+  // setNeedsLogin?: (value: boolean, reason: string) => void
 ): Promise<string> {
   // Stream process starts
 

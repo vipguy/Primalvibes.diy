@@ -17,19 +17,19 @@ export interface VibeDocument {
 }
 
 // ===== Content Segment Types =====
-export type Segment = {
+export interface Segment {
   type: 'markdown' | 'code';
   content: string;
-};
+}
 
 // ===== Document Types =====
 
-export type BaseChatMessageDocument = {
+export interface BaseChatMessageDocument {
   _id?: string;
   session_id: string;
   text: string;
   created_at: number;
-};
+}
 
 export type UserChatMessageDocument = BaseChatMessageDocument & {
   type: 'user';
@@ -77,12 +77,12 @@ export interface SessionDocument extends DocTypes {
   created_at: number;
   favorite?: boolean; // Added favorite property for starring sessions
   publishedUrl?: string; // URL where the app is published
-  messages?: Array<{
+  messages?: {
     text: string;
     type: 'user' | 'ai' | 'system';
     code?: string;
     dependencies?: Record<string, string>;
-  }>;
+  }[];
 }
 
 /**
@@ -104,9 +104,10 @@ export type UserChatMessage = ChatMessage & {
 
 // Enhanced AiChatMessage type with segments for structured display
 export type AiChatMessage = ChatMessage & {
-  type: 'ai';
+  type: 'ai' | "user";
   segments?: Segment[];
   isStreaming?: boolean;
+  dependenciesString?: string;
 };
 
 // System message type for errors and important system notifications

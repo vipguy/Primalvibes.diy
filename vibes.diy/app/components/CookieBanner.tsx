@@ -5,6 +5,8 @@ import { GA_TRACKING_ID } from '../config/env';
 import { useCookieConsent } from '../contexts/CookieConsentContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { initGA, pageview } from '../utils/analytics';
+import { CookieConsent as CookieConsentType } from 'react-cookie-consent';
+// import type { CookieConsentProps } from 'react-cookie-consent/dist/CookieConsent.props';
 
 // We'll use any type for dynamic imports to avoid TypeScript errors with the cookie consent component
 
@@ -15,8 +17,8 @@ export default function CookieBanner() {
   const { isDarkMode } = useTheme();
 
   // Dynamic import for client-side only
-  const [CookieConsent, setCookieConsent] = useState<any>(null);
-  const [getCookieConsentValue, setGetCookieConsentValue] = useState<any>(null);
+  const [CookieConsent, setCookieConsent] = useState<(React.Component<typeof CookieConsentType["defaultProps"]>)|null>(null);
+  const [getCookieConsentValue, setGetCookieConsentValue] = useState<((name?: string) => string|undefined)|null>(null);
 
   const posthog = usePostHog();
 
@@ -62,15 +64,15 @@ export default function CookieBanner() {
 
       // Define window.dataLayer with proper TypeScript type
       interface WindowWithDataLayer extends Window {
-        dataLayer: any[];
-        gtag: (...args: any[]) => void;
+        dataLayer: unknown[];
+        gtag: (...args: unknown[]) => void;
       }
 
       const windowWithDataLayer = window as unknown as WindowWithDataLayer;
       windowWithDataLayer.dataLayer = windowWithDataLayer.dataLayer || [];
 
-      function gtag(...args: any[]) {
-        windowWithDataLayer.dataLayer.push(arguments);
+      function gtag(...args: unknown[]) {
+        windowWithDataLayer.dataLayer.push(args);
       }
 
       windowWithDataLayer.gtag = gtag;

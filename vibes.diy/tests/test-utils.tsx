@@ -3,10 +3,10 @@ import { render } from '@testing-library/react';
 import type { RenderOptions } from '@testing-library/react';
 
 // Create a mock CookieConsentContext
-type CookieConsentContextType = {
+interface CookieConsentContextType {
   messageHasBeenSent: boolean;
   setMessageHasBeenSent: (value: boolean) => void;
-};
+}
 
 // Create a React Context with the same name as the app's context
 export const CookieConsentContext = React.createContext<CookieConsentContextType | undefined>(

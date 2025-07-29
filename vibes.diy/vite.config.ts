@@ -5,7 +5,7 @@ import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import devtoolsJson from '@improvements/vite-plugin-devtools-json';
 
-export default defineConfig(({ command, mode }: ConfigEnv): UserConfig => {
+export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
   // Disable React Router plugin for tests or when explicitly disabled
   const disableReactRouter = mode === 'test' || process.env.DISABLE_REACT_ROUTER === 'true';
 

@@ -4,20 +4,21 @@
 import { importJWK, jwtVerify } from 'jose';
 import toast from 'react-hot-toast';
 import { CLOUD_SESSION_TOKEN_PUBLIC_KEY, CONNECT_API_URL, CONNECT_URL } from '../config/env';
+import { base58btc } from 'multiformats/bases/base58';
 
 // Export the interface
 export interface TokenPayload {
   email?: string; // Assuming email might be added or needed later
   userId: string;
-  tenants: Array<{
+  tenants: {
     id: string;
     role: string;
-  }>;
-  ledgers: Array<{
+  }[];
+  ledgers: {
     id: string;
     role: string;
     right: string;
-  }>;
+  }[];
   iat: number;
   iss: string;
   aud: string;
@@ -25,7 +26,7 @@ export interface TokenPayload {
 }
 
 // Base58 alphabet for base58btc
-const BASE58BTC_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+// const BASE58BTC_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 
 // Define JWK type
 interface JWK {
@@ -45,37 +46,38 @@ interface JWK {
  * @returns {Uint8Array} - The decoded bytes
  */
 function base58btcDecode(str: string): Uint8Array {
-  // Remove the 'z' prefix for base58btc if present
-  let input = str;
-  if (input.startsWith('z')) {
-    input = input.slice(1);
-  }
+  return base58btc.decode(str);
+  // // Remove the 'z' prefix for base58btc if present
+  // let input = str;
+  // if (input.startsWith('z')) {
+  //   input = input.slice(1);
+  // }
 
-  let num = BigInt(0);
-  for (let i = 0; i < input.length; i++) {
-    const char = input[i];
-    const value = BASE58BTC_ALPHABET.indexOf(char);
-    if (value === -1) throw new Error(`Invalid base58 character: ${char}`);
-    num = num * BigInt(58) + BigInt(value);
-  }
+  // // let num = BigInt(0);
+  // // for (let i = 0; i < input.length; i++) {
+  // //   const char = input[i];
+  // //   const value = BASE58BTC_ALPHABET.indexOf(char);
+  // //   if (value === -1) throw new Error(`Invalid base58 character: ${char}`);
+  // //   num = num * BigInt(58) + BigInt(value);
+  // // }
 
-  // Convert to bytes
-  const bytes = [];
-  while (num > 0) {
-    bytes.unshift(Number(num % BigInt(256)));
-    num = num / BigInt(256);
-  }
+  // // // Convert to bytes
+  // // const bytes = [];
+  // // while (num > 0) {
+  // //   bytes.unshift(Number(num % BigInt(256)));
+  // //   num = num / BigInt(256);
+  // // }
 
-  // Account for leading zeros in the input
-  for (let i = 0; i < input.length; i++) {
-    if (input[i] === '1') {
-      bytes.unshift(0);
-    } else {
-      break;
-    }
-  }
+  // // // Account for leading zeros in the input
+  // // for (let i = 0; i < input.length; i++) {
+  // //   if (input[i] === '1') {
+  // //     bytes.unshift(0);
+  // //   } else {
+  // //     break;
+  // //   }
+  // // }
 
-  return new Uint8Array(bytes);
+  // return new Uint8Array(bytes);
 }
 
 /**

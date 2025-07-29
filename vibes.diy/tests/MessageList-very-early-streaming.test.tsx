@@ -9,20 +9,20 @@ beforeEach(() => {
 });
 
 // Mock the Message component to match real implementation
-vi.mock('../app/components/Message', () => ({
-  default: ({ message }: any) => (
-    <div data-testid={`message-${message._id}`}>
-      {message.segments &&
-        message.segments.map((segment: any, i: number) => (
-          <div key={i} data-testid={segment.type}>
-            {segment.content}
-          </div>
-        ))}
-      {message.text && !message.segments?.length && <div>{message.text}</div>}
-    </div>
-  ),
-  WelcomeScreen: () => <div data-testid="welcome-screen">Welcome Screen</div>,
-}));
+// vi.mock('../app/components/Message', () => ({
+//   default: ({ message }: any) => (
+//     <div data-testid={`message-${message._id}`}>
+//       {message.segments &&
+//         message.segments.map((segment: any, i: number) => (
+//           <div key={i} data-testid={segment.type}>
+//             {segment.content}
+//           </div>
+//         ))}
+//       {message.text && !message.segments?.length && <div>{message.text}</div>}
+//     </div>
+//   ),
+//   WelcomeScreen: () => <div data-testid="welcome-screen">Welcome Screen</div>,
+// }));
 
 describe('MessageList Real-World Streaming Tests', () => {
   test('should display minimal content at stream start', () => {
@@ -50,16 +50,16 @@ describe('MessageList Real-World Streaming Tests', () => {
         <MessageList
           messages={messages}
           isStreaming={true}
-          setSelectedResponseId={() => {}}
+          setSelectedResponseId={() => { /* no-op */ }}
           selectedResponseId=""
-          setMobilePreviewShown={() => {}}
-          navigateToView={() => {}}
+          setMobilePreviewShown={() => { /* no-op */ }}
+          navigateToView={() => { /* no-op */ }}
         />
       </MockThemeProvider>
     );
 
     // Check if we see the minimal content in the DOM
-    const messageContent = screen.queryByText(/\{\"/);
+    const messageContent = screen.queryByText(/\{"/);
     expect(messageContent).toBeInTheDocument();
 
     // Log the DOM structure to see what's actually rendered
@@ -71,7 +71,7 @@ describe('MessageList Real-World Streaming Tests', () => {
     }
 
     // This is what we want - but it might fail if the app has a bug
-    expect(screen.getByText(/\{\"/)).toBeInTheDocument();
+    expect(screen.getByText(/\{"/)).toBeInTheDocument();
   });
 
   test('should update UI as more content streams in', () => {
@@ -102,10 +102,10 @@ describe('MessageList Real-World Streaming Tests', () => {
         <MessageList
           messages={messages}
           isStreaming={true}
-          setSelectedResponseId={() => {}}
+          setSelectedResponseId={() => { /* no-op */ }}
           selectedResponseId=""
-          setMobilePreviewShown={() => {}}
-          navigateToView={() => {}}
+          setMobilePreviewShown={() => { /* no-op */ }}
+          navigateToView={() => { /* no-op */ }}
         />
       </MockThemeProvider>
     );
@@ -148,10 +148,10 @@ describe('MessageList Real-World Streaming Tests', () => {
         <MessageList
           messages={messages}
           isStreaming={true}
-          setSelectedResponseId={() => {}}
+          setSelectedResponseId={() => { /* no-op */ }}
           selectedResponseId=""
-          setMobilePreviewShown={() => {}}
-          navigateToView={() => {}}
+          setMobilePreviewShown={() => { /* no-op */ }}
+          navigateToView={() => { /* no-op */ }}
         />
       </MockThemeProvider>
     );
@@ -183,10 +183,10 @@ describe('MessageList Real-World Streaming Tests', () => {
         <MessageList
           messages={messages}
           isStreaming={true}
-          setSelectedResponseId={() => {}}
+          setSelectedResponseId={() => { /* no-op */ }}
           selectedResponseId=""
-          setMobilePreviewShown={() => {}}
-          navigateToView={() => {}}
+          setMobilePreviewShown={() => { /* no-op */ }}
+          navigateToView={() => { /* no-op */ }}
         />
       </MockThemeProvider>
     );

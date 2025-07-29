@@ -33,7 +33,7 @@ vi.mock('use-fireproof', () => ({
     useFind: () => [[]],
     useLiveFind: () => [[]],
     useIndex: () => [[]],
-    useSubscribe: () => {},
+    useSubscribe: () => { /* no-op */ },
     database: {
       put: vi.fn().mockResolvedValue({ id: 'test-id' }),
       get: vi.fn().mockResolvedValue({ _id: 'test-id', title: 'Test Document' }),
@@ -46,18 +46,18 @@ vi.mock('use-fireproof', () => ({
 }));
 
 // Define shared state and reset function *outside* the mock factory
-type MockDoc = {
+interface MockDoc {
   _id?: string;
   type: string;
   text: string;
   session_id: string;
   timestamp?: number;
   created_at?: number;
-  segments?: Array<Record<string, unknown>>;
+  segments?: Record<string, unknown>[];
   dependenciesString?: string;
   isStreaming?: boolean;
   model?: string;
-};
+}
 let mockDocs: MockDoc[] = [];
 const initialMockDocs: MockDoc[] = [
   {
@@ -138,7 +138,7 @@ vi.mock('../app/hooks/useSession', () => {
           created_at: Date.now(),
         },
         docs: mockDocs,
-        updateTitle: vi.fn().mockImplementation(async (title) => Promise.resolve()),
+        updateTitle: vi.fn().mockImplementation(async (_title) => Promise.resolve()),
         addScreenshot: vi.fn(),
         // Keep database mock simple
         sessionDatabase: {
@@ -155,8 +155,7 @@ vi.mock('../app/hooks/useSession', () => {
           query: vi.fn(async (field: string, options: Record<string, unknown>) => {
             const key = options?.key;
             const filtered = mockDocs.filter((doc) => {
-              // @ts-ignore - we know the field exists
-              return doc[field] === key;
+              return (doc as unknown as Record<string, unknown>)[field] === key;
             });
             return Promise.resolve({
               rows: filtered.map((doc) => ({ id: doc._id, doc })),

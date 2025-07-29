@@ -111,7 +111,7 @@ Object.defineProperty(window, 'location', {
 
 // Mock components used in the Home component
 vi.mock('../app/components/ChatInterface', () => ({
-  default: ({ chatState, sessionId, onSessionCreated }: ChatInterfaceProps) => (
+  default: ({ onSessionCreated }: ChatInterfaceProps) => (
     <div data-testid="mock-chat-interface">
       <button
         type="button"
@@ -125,7 +125,7 @@ vi.mock('../app/components/ChatInterface', () => ({
 }));
 
 vi.mock('../app/components/ResultPreview/ResultPreview', () => ({
-  default: ({ code, dependencies, isStreaming, sessionId }: ResultPreviewProps) => (
+  default: ({ code, }: ResultPreviewProps) => (
     <div data-testid="mock-result-preview">
       <div data-testid="code-line-count">{code.split('\n').length} lines of code</div>
       <div data-testid="code-content">{code.substring(0, 50)}...</div>

@@ -45,10 +45,10 @@ describe('MessageList streaming tests', () => {
         <MessageList
           messages={messages}
           isStreaming={true}
-          setSelectedResponseId={() => {}}
+          setSelectedResponseId={() => { /* no-op */ }}
           selectedResponseId=""
-          setMobilePreviewShown={() => {}}
-          navigateToView={() => {}}
+          setMobilePreviewShown={() => { /* no-op */ }}
+          navigateToView={() => { /* no-op */ }}
         />
       </MockThemeProvider>
     );
@@ -78,10 +78,10 @@ describe('MessageList streaming tests', () => {
         <MessageList
           messages={messages}
           isStreaming={true}
-          setSelectedResponseId={() => {}}
+          setSelectedResponseId={() => { /* no-op */ }}
           selectedResponseId=""
-          setMobilePreviewShown={() => {}}
-          navigateToView={() => {}}
+          setMobilePreviewShown={() => { /* no-op */ }}
+          navigateToView={() => { /* no-op */ }}
         />
       </MockThemeProvider>
     );
@@ -116,10 +116,10 @@ describe('MessageList streaming tests', () => {
         <MessageList
           messages={messages}
           isStreaming={true}
-          setSelectedResponseId={() => {}}
+          setSelectedResponseId={() => { /* no-op */ }}
           selectedResponseId=""
-          setMobilePreviewShown={() => {}}
-          navigateToView={() => {}}
+          setMobilePreviewShown={() => { /* no-op */ }}
+          navigateToView={() => { /* no-op */ }}
         />
       </MockThemeProvider>
     );

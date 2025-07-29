@@ -1,4 +1,4 @@
-import { fireproof } from 'use-fireproof';
+import { fireproof, type DocBase } from 'use-fireproof';
 import { updateUserVibespaceDoc } from './databaseManager';
 import type { VibeDocument } from '../types/chat';
 import { encodeTitle } from '../components/SessionSidebar/utils';
@@ -41,7 +41,9 @@ export async function loadVibeScreenshot(
     });
 
     if (result.rows.length > 0) {
-      const screenshotDoc = result.rows[0].doc as any;
+      const screenshotDoc = result.rows[0].doc as DocBase & {
+        _files?: { screenshot?: { file: () => Promise<File>; type: string } };
+      };
 
       // Get the screenshot file if available
       if (screenshotDoc._files && screenshotDoc._files.screenshot) {
@@ -148,12 +150,8 @@ export async function listLocalVibes(): Promise<LocalVibe[]> {
  * @returns Promise that resolves when the database is deleted
  */
 export async function deleteVibeDatabase(vibeId: string): Promise<void> {
-  try {
-    const dbName = `fp.vibe-${vibeId}`;
-    await indexedDB.deleteDatabase(dbName);
-  } catch (error) {
-    throw error;
-  }
+  const dbName = `fp.vibe-${vibeId}`;
+  await indexedDB.deleteDatabase(dbName);
 }
 
 /**
@@ -163,52 +161,48 @@ export async function deleteVibeDatabase(vibeId: string): Promise<void> {
  * @returns Promise that resolves to the updated vibe document
  */
 export async function toggleVibeFavorite(vibeId: string, userId?: string): Promise<VibeDocument> {
-  try {
-    // Open the Fireproof database for this vibe
-    const db = fireproof('vibe-' + vibeId);
+  // Open the Fireproof database for this vibe
+  const db = fireproof('vibe-' + vibeId);
 
-    // Get the current vibe document
-    const vibeDoc = (await db.get('vibe')) as VibeDocument;
+  // Get the current vibe document
+  const vibeDoc = (await db.get('vibe')) as VibeDocument;
 
-    // Toggle the favorite status
-    const updatedVibeDoc = {
-      ...vibeDoc,
-      favorite: !vibeDoc.favorite,
-    };
+  // Toggle the favorite status
+  const updatedVibeDoc = {
+    ...vibeDoc,
+    favorite: !vibeDoc.favorite,
+  };
 
-    // Save the updated document
-    await db.put(updatedVibeDoc);
+  // Save the updated document
+  await db.put(updatedVibeDoc);
 
-    // If userId is provided AND the vibe has been published, update the user's space database
-    if (userId && vibeDoc.publishedUrl) {
-      try {
-        // Extract the slug from the publishedUrl if available
-        const slug = vibeDoc.publishedUrl.split('/').pop()?.split('.')[0] || '';
+  // If userId is provided AND the vibe has been published, update the user's space database
+  if (userId && vibeDoc.publishedUrl) {
+    try {
+      // Extract the slug from the publishedUrl if available
+      const slug = vibeDoc.publishedUrl.split('/').pop()?.split('.')[0] || '';
 
-        // No need to fetch screenshots - they can be accessed via publishedUrl + 'screenshot.png'
+      // No need to fetch screenshots - they can be accessed via publishedUrl + 'screenshot.png'
 
-        // Use the shared utility function to update the user's vibespace
-        await updateUserVibespaceDoc(userId, slug, {
-          id: vibeId, // Preserve the original vibeId
-          favorite: updatedVibeDoc.favorite,
-          title: vibeDoc.title,
-          slug: slug,
-          remixOf: vibeDoc.remixOf, // Include remixOf field
-          publishedUrl: vibeDoc.publishedUrl,
-          createdAt: vibeDoc.created_at,
-        });
+      // Use the shared utility function to update the user's vibespace
+      await updateUserVibespaceDoc(userId, slug, {
+        id: vibeId, // Preserve the original vibeId
+        favorite: updatedVibeDoc.favorite,
+        title: vibeDoc.title,
+        slug: slug,
+        remixOf: vibeDoc.remixOf, // Include remixOf field
+        publishedUrl: vibeDoc.publishedUrl,
+        createdAt: vibeDoc.created_at,
+      });
 
-        // Successfully updated the vibe in user's space
-      } catch (spaceError) {
-        // Handle error but don't fail the entire operation
-        // Silently continue if update to user space fails
-      }
-    } else if (userId) {
-      // Skip updates for unpublished vibes
+      // Successfully updated the vibe in user's space
+    } catch (spaceError) {
+      // Handle error but don't fail the entire operation
+      // Silently continue if update to user space fails
     }
-
-    return updatedVibeDoc;
-  } catch (error) {
-    throw error;
+  } else if (userId) {
+    // Skip updates for unpublished vibes
   }
+
+  return updatedVibeDoc;
 }

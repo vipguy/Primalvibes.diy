@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import DynamicTable from './DynamicTable';
 import { headersForDocs } from './dynamicTableHelpers';
 // Import Fireproof for database access
-import { useFireproof } from 'use-fireproof';
+import { useFireproof, type DocBase } from 'use-fireproof';
 // Import the monkey patch utility
 import { applyIndexedDBPatch } from './indexedDBMonkeyPatch';
 
@@ -50,7 +50,7 @@ const DatabaseData: React.FC<{ dbName: string; sessionId: string }> = ({ dbName,
   // and the patch will handle the namespacing at the IndexedDB.open level
   const { database } = useFireproof(dbName);
 
-  const [docs, setDocs] = useState<any[]>([]);
+  const [docs, setDocs] = useState<DocBase[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   // Fetch documents function - separated so it can be called manually if needed
   const fetchDocs = async () => {

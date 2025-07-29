@@ -38,12 +38,15 @@ export const event = (category: string, action: string, label?: string, value?: 
   }
 };
 
+type WindowWithGtag = typeof window & {
+  gtag: (...args: unknown[]) => void;
+}
 /**
  * Track a Google Ads conversion event
  * @param eventName - Name of the event
  * @param eventParams - Optional parameters for the event
  */
-export const trackEvent = (eventName: string, eventParams?: Record<string, any>): void => {
+export const trackEvent = (eventName: string, eventParams?: Record<string, unknown>): void => {
   // Check if gtag is available (script exists and function is defined)
   if (typeof window === 'undefined') return;
 
@@ -51,11 +54,11 @@ export const trackEvent = (eventName: string, eventParams?: Record<string, any>)
   const hasGTagScript = !!document.querySelector('script[src*="googletagmanager.com/gtag/js"]');
 
   // Check if the gtag function is defined
-  const hasGTagFunction = typeof (window as any).gtag === 'function';
+  const hasGTagFunction = typeof (window as WindowWithGtag).gtag === 'function';
 
   // Only fire the event if both conditions are met (which implies consent was given)
   if (hasGTagScript && hasGTagFunction) {
-    const gtag = (window as any).gtag as (...args: any[]) => void;
+    const gtag = (window as WindowWithGtag).gtag
     gtag('event', eventName, eventParams);
   }
 };
@@ -64,7 +67,7 @@ export const trackEvent = (eventName: string, eventParams?: Record<string, any>)
  * Track auth button click
  * @param additionalParams - Optional additional parameters
  */
-export const trackAuthClick = (additionalParams?: Record<string, any>): void => {
+export const trackAuthClick = (additionalParams?: Record<string, unknown>): void => {
   trackEvent('auth', {
     send_to: GA_TRACKING_ID,
     ...additionalParams,
@@ -75,7 +78,7 @@ export const trackAuthClick = (additionalParams?: Record<string, any>): void => 
  * Track publish button click
  * @param additionalParams - Optional additional parameters
  */
-export const trackPublishClick = (additionalParams?: Record<string, any>): void => {
+export const trackPublishClick = (additionalParams?: Record<string, unknown>): void => {
   trackEvent('publish', {
     send_to: GA_TRACKING_ID,
     ...additionalParams,
@@ -89,7 +92,7 @@ export const trackPublishClick = (additionalParams?: Record<string, any>): void 
  */
 export const trackChatInputClick = (
   messageLength: number,
-  additionalParams?: Record<string, any>
+  additionalParams?: Record<string, unknown>
 ): void => {
   trackEvent('chat', {
     send_to: GA_TRACKING_ID,
@@ -107,7 +110,7 @@ export const trackChatInputClick = (
 export const trackErrorEvent = (
   errorType: string,
   message: string,
-  details?: Record<string, any>
+  details?: Record<string, unknown>
 ): void => {
   trackEvent('error', {
     send_to: GA_TRACKING_ID,

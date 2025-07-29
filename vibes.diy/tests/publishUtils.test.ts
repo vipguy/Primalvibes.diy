@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { normalizeComponentExports } from '../app/utils/normalizeComponentExports';
 import { publishApp } from '../app/utils/publishUtils';
 
@@ -40,13 +40,13 @@ class MockFileReader {
   onerror: ((error: Error) => void) | null = null;
   result: string | null = null;
 
-  readAsDataURL(file: Blob): void {
+  readAsDataURL(_file: Blob): void {
     this.result = 'data:image/png;base64,mockScreenshotBase64Data';
     if (this.onload) this.onload();
   }
 }
 
-global.FileReader = MockFileReader as any;
+global.FileReader = MockFileReader as typeof FileReader;// as any;
 
 // Setup mock Fireproof database and query results
 const mockVibeDoc = {
@@ -87,9 +87,9 @@ describe('publishApp', () => {
 
     mockFireproofDb.query.mockResolvedValue(mockQueryResult);
 
-    (fireproof as any).mockReturnValue(mockFireproofDb);
-    (getSessionDatabaseName as any).mockReturnValue('test-session-db');
-    (normalizeComponentExports as any).mockImplementation((code: string) => code);
+    (fireproof as Mock).mockReturnValue(mockFireproofDb);
+    (getSessionDatabaseName as Mock).mockReturnValue('test-session-db');
+    (normalizeComponentExports as Mock).mockImplementation((code: string) => code);
 
     // Re-setup fetch mock after reset
     mockFetch.mockImplementation(async () => ({

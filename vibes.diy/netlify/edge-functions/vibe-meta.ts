@@ -9,7 +9,7 @@ export default async (request: Request) => {
   let vibeSlug: string;
 
   // Check if this is a /vibe/* route
-  const vibeMatch = url.pathname.match(/^\/vibe\/([^\/]+)$/);
+  const vibeMatch = url.pathname.match(/^\/vibe\/([^/]+)$/);
   if (vibeMatch) {
     vibeSlug = vibeMatch[1];
   } else if (url.pathname === '/firehose') {

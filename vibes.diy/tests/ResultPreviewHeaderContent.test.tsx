@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import type { ChatMessageDocument } from '../app/types/chat';
 
 // Mock all imports before importing the component to test
@@ -30,19 +30,19 @@ vi.mock('../app/components/ResultPreview/BackButton', () => ({
 }));
 
 vi.mock('../app/components/ResultPreview/ViewControls', () => ({
-  ViewControls: ({ viewControls, currentView }: { viewControls: any; currentView: string }) => {
+  ViewControls: ({ viewControls, currentView }: { viewControls: ViewState; currentView: string }) => {
     // Handle both the old array format and the new object format
     const controls = Array.isArray(viewControls)
       ? viewControls
-      : Object.entries(viewControls).map(([key, value]: [string, any]) => ({
+      : Object.entries(viewControls).map(([key, value]: [string, ViewTypeItem]) => ({
           id: key,
-          label: value.label,
+          // label: value.label,
           ...value,
         }));
 
     return (
       <div data-testid="view-controls" data-view={currentView}>
-        {controls.map((control: any, i: number) => (
+        {controls.map((control, i: number) => (
           <span key={i} data-control-id={control.id}>
             {control.label}
           </span>
@@ -93,7 +93,7 @@ vi.mock('../app/components/ResultPreview/ShareModal', () => ({
         publishedAppUrl,
         onPublish,
         isPublishing,
-        buttonRef,
+        // buttonRef,
       }: {
         isOpen: boolean;
         onClose: () => void;
@@ -118,7 +118,7 @@ vi.mock('../app/components/ResultPreview/ShareModal', () => ({
 import ResultPreviewHeaderContent from '../app/components/ResultPreview/ResultPreviewHeaderContent';
 import { useParams } from 'react-router';
 import { useSession } from '../app/hooks/useSession';
-import { useViewState } from '../app/utils/ViewState';
+import { useViewState, type ViewState, type ViewTypeItem } from '../app/utils/ViewState';
 import { usePublish } from '../app/components/ResultPreview/usePublish';
 
 describe('ResultPreviewHeaderContent', () => {
@@ -169,22 +169,22 @@ describe('ResultPreviewHeaderContent', () => {
     vi.resetAllMocks();
 
     // Default mocks
-    (useParams as any).mockReturnValue({ sessionId: 'url-session-id', view: 'url-view' });
+    (useParams as Mock).mockReturnValue({ sessionId: 'url-session-id', view: 'url-view' });
 
-    (useSession as any).mockReturnValue({
+    (useSession as Mock).mockReturnValue({
       session: mockSession,
       docs: mockMessages,
       updatePublishedUrl: mockUpdatePublishedUrl,
     });
 
-    (useViewState as any).mockReturnValue({
+    (useViewState as Mock).mockReturnValue({
       currentView: 'preview',
       displayView: 'preview',
       viewControls: mockViewControls,
       showViewControls: true,
     });
 
-    (usePublish as any).mockReturnValue({
+    (usePublish as Mock).mockReturnValue({
       isPublishing: false,
       urlCopied: false,
       publishedAppUrl: undefined,
@@ -242,7 +242,7 @@ describe('ResultPreviewHeaderContent', () => {
 
   it('uses title from props over URL params when available', () => {
     // Mock the usePublish hook to verify it receives the proper title
-    (usePublish as any).mockReturnValue({
+    (usePublish as Mock).mockReturnValue({
       isPublishing: false,
       urlCopied: false,
       publishedAppUrl: undefined,
@@ -277,7 +277,7 @@ describe('ResultPreviewHeaderContent', () => {
 
   it('updates activeView when displayView changes', () => {
     // Mock displayView different from activeView
-    (useViewState as any).mockReturnValue({
+    (useViewState as Mock).mockReturnValue({
       currentView: 'preview',
       displayView: 'code', // Different from activeView
       viewControls: mockViewControls,
@@ -400,7 +400,7 @@ describe('ResultPreviewHeaderContent', () => {
   it('passes correct props to usePublish hook', () => {
     // Mock session with a published URL
     const publishedUrl = 'https://existing-app.vibesdiy.app';
-    (useSession as any).mockReturnValue({
+    (useSession as Mock).mockReturnValue({
       session: { publishedUrl },
       docs: mockMessages,
       updatePublishedUrl: mockUpdatePublishedUrl,

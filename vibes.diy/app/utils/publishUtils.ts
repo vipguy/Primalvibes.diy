@@ -7,6 +7,16 @@ import { API_BASE_URL } from '../config/env';
 import { getSessionDatabaseName, updateUserVibespaceDoc } from './databaseManager';
 import { normalizeComponentExports } from './normalizeComponentExports';
 
+interface PublishDoc {
+  remixOf?: string;
+  favorite: boolean;
+  _files?: {
+    screenshot?: {
+      file: () => Promise<File>;
+    };
+  };
+}
+
 /**
  * Publish an app to the server
  * @param params Parameters for publishing the app
@@ -45,7 +55,7 @@ export async function publishApp({
     // Try to get the vibe document which might contain remixOf information
     let remixOf = null;
     try {
-      const vibeDoc = (await sessionDb.get('vibe')) as any;
+      const vibeDoc = (await sessionDb.get<PublishDoc>('vibe')) 
       if (vibeDoc && vibeDoc.remixOf) {
         remixOf = vibeDoc.remixOf;
       }
@@ -66,13 +76,13 @@ export async function publishApp({
 
     // Check if we have a screenshot document
     if (result.rows.length > 0) {
-      const screenshotDoc = result.rows[0].doc as any; // Cast to any to handle Fireproof types
+      const screenshotDoc = result.rows[0].doc
 
       // Check if the screenshot document has a file in _files.screenshot
-      if (screenshotDoc._files && screenshotDoc._files.screenshot) {
+      if (screenshotDoc?._files && screenshotDoc._files.screenshot) {
         try {
           // Get the File object using the file() method - Fireproof specific API
-          const screenshotFile = await (screenshotDoc._files.screenshot as any).file();
+          const screenshotFile = await screenshotDoc._files.screenshot?.file();
 
           // Read the file as a buffer using FileReader
           const buffer = await new Promise<string>((resolve, reject) => {
@@ -136,7 +146,7 @@ export async function publishApp({
       const docId = `app-${data.app.slug}`;
 
       // Try to get the existing document to preserve metadata like favorite status
-      const existingDoc = (await userVibespaceDb.get(docId).catch(() => null)) as any;
+      const existingDoc = (await userVibespaceDb.get<PublishDoc>(docId).catch(() => null))
 
       // Use the shared utility function to update the user's vibespace
       if (userId) {

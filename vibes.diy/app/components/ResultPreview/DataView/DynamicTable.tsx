@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export default function DynamicTable({
-  hrefFn,
+  // hrefFn,
   dbName,
   headers,
   rows,
   th = '_id',
-  link = ['_id'],
-  onRowClick = () => {},
+  // link = ['_id'],
+  onRowClick = () => { /* no-op */ },
 }: any) {
   return (
     <div className="relative mt-[40px] max-h-[calc(100vh-140px)] overflow-x-auto overflow-y-auto">

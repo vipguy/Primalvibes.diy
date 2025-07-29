@@ -53,7 +53,7 @@
   "dependencies": {
     "call-ai": "workspace:0.0.0",
     "react-dom": "^19.1.0",
-    "use-fireproof": "0.22.0-dev-preview",
+    "use-fireproof": "0.20.5",
     "use-vibes": "workspace:0.0.0"
   }
 }

@@ -9,24 +9,35 @@ export const isMobileViewport = () => {
 
 export type ViewType = 'preview' | 'code' | 'data';
 
-export type ViewControlsType = {
-  [key in ViewType]: {
+export interface ViewTypeItem {
     enabled: boolean;
     icon: string;
     label: string;
     loading?: boolean; // Made loading optional
-  };
-};
+  }
 
-export function useViewState(props: {
+export type ViewControlsType = Record<ViewType, ViewTypeItem>;
+
+export interface ViewState {
+  readonly currentView: ViewType;
+  readonly displayView: ViewType;
+  readonly navigateToView: (view: ViewType) => void;
+  readonly viewControls: ViewControlsType;
+  readonly showViewControls: boolean;
+  readonly sessionId: string;
+  readonly encodedTitle: string;
+}
+
+export interface ViewStateProps {
   sessionId?: string;
   title?: string;
   code: string;
   isStreaming: boolean;
   previewReady: boolean;
   isIframeFetching?: boolean;
-  initialLoad?: boolean;
-}) {
+}
+
+export function useViewState(props: Partial<ViewStateProps>): Partial<ViewState> {
   const { sessionId: paramSessionId, title: paramTitle } = useParams<{
     sessionId: string;
     title: string;
@@ -63,9 +74,10 @@ export function useViewState(props: {
     // First message (no previous code), show code view when code starts streaming
     // We don't change the URL path so it can later auto-navigate to app view
     if (
+      props && 
       props.isStreaming &&
       !wasStreamingRef.current &&
-      (!hadCodeRef.current || props.code.length === 0) &&
+      (!hadCodeRef.current || props.code?.length === 0) &&
       // Don't auto-switch on mobile
       !isMobileViewport()
     ) {
@@ -107,9 +119,9 @@ export function useViewState(props: {
   }, []);
 
   // Access control data
-  const viewControls = {
+  const viewControls: ViewControlsType = {
     preview: {
-      enabled: props.previewReady,
+      enabled: !!props.previewReady,
       icon: 'app-icon',
       label: 'App',
       loading: props.isIframeFetching,
@@ -118,7 +130,7 @@ export function useViewState(props: {
       enabled: true,
       icon: 'code-icon',
       label: 'Code',
-      loading: props.isStreaming && !props.previewReady && props.code.length > 0,
+      loading: !!(props && props.isStreaming && !props.previewReady && props.code && props.code.length > 0),
     },
     data: {
       enabled: !props.isStreaming,
@@ -140,7 +152,7 @@ export function useViewState(props: {
 
   // Only show view controls when we have content or a valid session
   const showViewControls =
-    (props.code && props.code.length > 0) || (sessionId && sessionId.length > 0);
+    !!((props.code && props.code.length > 0) || (sessionId && sessionId.length > 0));
 
   // Determine what view should be displayed (may differ from URL-based currentView)
   // If user has explicitly navigated to a view (indicated by URL path), respect that choice

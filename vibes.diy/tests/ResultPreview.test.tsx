@@ -26,7 +26,7 @@ vi.mock('@codesandbox/sandpack-react', () => ({
   SandpackPreview: () => <div data-testid="sandpack-preview">Preview</div>,
   useSandpack: () => ({
     sandpack: { activeFile: '/App.jsx' },
-    listen: vi.fn().mockReturnValue(() => {}),
+    listen: vi.fn().mockReturnValue(() => { /* no-op */ }),
   }),
 }));
 
@@ -524,8 +524,8 @@ describe('ResultPreview', () => {
           codeReady={true}
           displayView="code" // Changed from activeView
           // setActiveView={setActiveView} // Removed
-          onPreviewLoaded={() => {}}
-          setMobilePreviewShown={() => {}}
+          onPreviewLoaded={() => { /* no-op */ }}
+          setMobilePreviewShown={() => { /* no-op */ }}
         />
       </MockThemeProvider>
     );

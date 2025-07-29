@@ -8,8 +8,45 @@ import type {
 import { getSessionDatabaseName } from '../utils/databaseManager';
 import { useLazyFireproof } from './useLazyFireproof';
 import { encodeTitle } from '../components/SessionSidebar/utils';
+import type { Database, DocResponse, DocWithId } from 'use-fireproof';
 
-export function useSession(routedSessionId?: string) {
+interface SessionView {
+  _id: string;
+  title: string;
+  publishedUrl?: string;
+  firehoseShared?: boolean;
+}
+
+interface UseSession {
+  // // Session information
+  session: SessionView;
+  docs: ChatMessageDocument[];
+
+  // // Databases
+  sessionDatabase: Database;
+  openSessionDatabase: () => void;
+
+  // // Session management functions
+  updateTitle: (title: string) => Promise<void>;
+  updatePublishedUrl: (publishedUrl: string) => Promise<void>;
+  updateFirehoseShared: (firehoseShared: boolean) => Promise<void>;
+  addScreenshot: (screenshotData: string | null) => Promise<void>;
+  // // Message management
+  userMessage: UserChatMessageDocument;
+  submitUserMessage: () => Promise<void>;
+  mergeUserMessage: (newDoc: Partial<UserChatMessageDocument>) => void;
+  // saveUserMessage: (newDoc: UserChatMessageDocument) => Promise<void>;
+  aiMessage: AiChatMessageDocument;
+  submitAiMessage: (e?: Event) => Promise<void>;
+  mergeAiMessage: (newDoc: Partial<AiChatMessageDocument>) => void;
+  saveAiMessage: (
+    existingDoc?: DocWithId<AiChatMessageDocument> | undefined
+  ) => Promise<DocResponse>;
+  // // Vibe document management
+  vibeDoc: VibeDocument;
+}
+
+export function useSession(routedSessionId?: string): UseSession {
   const [generatedSessionId] = useState(
     () =>
       `${Date.now().toString(36).padStart(9, 'f')}${Math.random().toString(36).slice(2, 11).padEnd(9, '0')}`
@@ -150,13 +187,6 @@ export function useSession(routedSessionId?: string) {
   const wrappedSubmitUserMessage = useCallback(async () => {
     return submitUserMessage();
   }, [submitUserMessage]);
-
-  interface SessionView {
-    _id: string;
-    title: string;
-    publishedUrl?: string;
-    firehoseShared?: boolean;
-  }
 
   const session: SessionView = {
     _id: sessionId,

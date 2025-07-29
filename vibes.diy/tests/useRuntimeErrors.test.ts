@@ -7,8 +7,8 @@ describe('useRuntimeErrors', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Mock console.log to avoid cluttering test output
-    vi.spyOn(console, 'log').mockImplementation(() => {});
-    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'log').mockImplementation(() => { /* no-op */ });
+    vi.spyOn(console, 'error').mockImplementation(() => { /* no-op */ });
   });
 
   test('should initialize with empty error arrays', () => {
