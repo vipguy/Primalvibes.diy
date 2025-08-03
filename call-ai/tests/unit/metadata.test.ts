@@ -2,21 +2,7 @@ import { beforeEach, describe, expect, it, Mock, vitest } from "vitest";
 import { callAi, getMeta, ModelId, ResponseMeta } from "call-ai";
 
 // Mock global fetch
-global.fetch = vitest.fn();
-
-// Simple mock for TextDecoder
-global.TextDecoder = vitest.fn().mockImplementation(() => ({
-  decode: vitest.fn((value) => {
-    // Basic mock implementation without recursion
-    if (value instanceof Uint8Array) {
-      // Convert the Uint8Array to a simple string
-      return Array.from(value)
-        .map((byte) => String.fromCharCode(byte))
-        .join("");
-    }
-    return "";
-  }),
-}));
+const mock = { fetch: vitest.fn() };
 
 // Mock ReadableStream
 const mockReader = {
@@ -48,7 +34,7 @@ const mockResponse = {
 describe("getMeta", () => {
   beforeEach(() => {
     vitest.clearAllMocks();
-    (global.fetch as Mock).mockResolvedValue(mockResponse);
+    mock.fetch.mockResolvedValue(mockResponse);
   });
 
   it("should return metadata for non-streaming responses", async () => {
@@ -66,6 +52,7 @@ describe("getMeta", () => {
     const options = {
       apiKey: "test-api-key",
       model: "openai/gpt-4o",
+      mock,
     };
 
     // Call the API
@@ -152,6 +139,7 @@ describe("getMeta", () => {
     const firstResponse = await callAi("First prompt", {
       apiKey: "test-api-key",
       model: "openai/gpt-4",
+      mock,
     });
 
     // Set up second mock response
@@ -164,6 +152,7 @@ describe("getMeta", () => {
     const secondResponse = await callAi("Second prompt", {
       apiKey: "test-api-key",
       model: "openai/gpt-3.5-turbo",
+      mock,
     });
 
     // Get metadata for both responses

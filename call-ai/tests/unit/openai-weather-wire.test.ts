@@ -1,10 +1,8 @@
-import fs from "fs";
-import path from "path";
 import { callAi, Schema } from "call-ai";
-import { beforeEach, describe, expect, it, Mock, vitest } from "vitest";
+import { beforeEach, describe, expect, it, vitest } from "vitest";
 
 // Mock fetch to use our fixture files
-global.fetch = vitest.fn();
+const mock = { fetch: vitest.fn() };
 
 describe("OpenAI Weather Streaming Tests", () => {
   // Read fixtures
@@ -15,17 +13,31 @@ describe("OpenAI Weather Streaming Tests", () => {
   //   ),
   // );
 
-  const weatherResponseFixture = fs.readFileSync(path.join(__dirname, "../fixtures/openai-weather-response.json"), "utf8");
+  // const weatherResponseFixture = fs.readFileSync(path.join(__dirname, "../fixtures/openai-weather-response.json"), "utf8");
+
+  function weatherResponseFixture() {
+    return fetch("http://localhost:15731/fixtures/openai-weather-response.txt")
+      .then(async (r) => {
+        const text = await r.text();
+        // console.log("OpenAI Weather Response:", text);
+        return text;
+      })
+      .catch((e) => {
+        console.error("Error fetching OpenAI weather response:", e);
+        throw e;
+      });
+  }
 
   beforeEach(() => {
     // Reset mocks
-    (global.fetch as Mock).mockClear();
+    mock.fetch.mockClear();
 
     // Mock successful response for streaming request
-    (global.fetch as Mock).mockImplementation(async (_url, options) => {
+    mock.fetch.mockImplementation(async (_url, options) => {
       const requestBody = JSON.parse(options.body as string);
 
       if (requestBody.stream) {
+        const responseText = await weatherResponseFixture();
         // Mock streaming response with our weather fixtures
         return {
           ok: true,
@@ -33,7 +45,7 @@ describe("OpenAI Weather Streaming Tests", () => {
           body: {
             getReader: () => {
               // Stream reader that returns chunks from our fixture
-              const chunks = weatherResponseFixture
+              const chunks = responseText
                 .split("data: ")
                 .filter((chunk) => chunk.trim() !== "")
                 .map((chunk) => {
@@ -54,8 +66,8 @@ describe("OpenAI Weather Streaming Tests", () => {
               };
             },
           },
-          text: async () => weatherResponseFixture,
-          json: async () => JSON.parse(weatherResponseFixture),
+          text: async () => weatherResponseFixture(),
+          json: async () => JSON.parse(await weatherResponseFixture()),
         };
       } else {
         throw new Error("Non-streaming request not expected in this test");
@@ -88,6 +100,7 @@ describe("OpenAI Weather Streaming Tests", () => {
       model: "openai/gpt-4o",
       schema: schema,
       stream: true,
+      mock,
     })) as AsyncGenerator<string, string, unknown>;
 
     // Verify that we get a generator back

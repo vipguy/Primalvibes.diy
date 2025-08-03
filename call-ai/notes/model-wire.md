@@ -197,10 +197,12 @@ This document captures the differences in how various LLM models handle structur
 ## Recommendations
 
 1. **For OpenAI GPT-4o and Gemini models**:
+
    - Use the JSON schema format as designed
    - Streaming works well token by token with GPT-4o
 
 2. **For Claude, Llama3, DeepSeek, and GPT-4 Turbo models**:
+
    - Prefer using the system message approach
    - Include explicit instruction to return only JSON
 
@@ -242,7 +244,7 @@ We have tests failing for the following reasons:
 ```typescript
 function prepareRequestParams(
   prompt: string | Message[],
-  options: CallAIOptions = {},
+  options: CallAIOptions = {}
 ): { endpoint: string; requestOptions: RequestInit } {
   // ... existing code ...
 

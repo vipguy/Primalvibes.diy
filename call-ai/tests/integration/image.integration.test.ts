@@ -1,4 +1,4 @@
-import { callAi, callAiEnv } from "call-ai";
+import { callAi, callAiEnv, Message } from "call-ai";
 import { it, describe, expect } from "vitest";
 
 // Skip tests if no API key is available
@@ -9,10 +9,10 @@ const itif = (condition: boolean) => (condition ? it : it.skip);
 const TIMEOUT = 20000;
 
 // Define message type for callAi
-interface Message {
-  role: "user" | "system" | "assistant";
-  content: string;
-}
+// interface Message {
+//   role: "user" | "system" | "assistant";
+//   content: string;
+// }
 
 describe("Vision Model Tests", () => {
   // Simple test prompt for vision model

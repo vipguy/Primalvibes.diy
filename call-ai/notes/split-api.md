@@ -21,7 +21,7 @@ The refactoring got stuck on two main issues:
    ```typescript
    // This test passes with the original implementation but fails with our refactored version
    it("should handle errors during API call for streaming", async () => {
-     (global.fetch as jest.Mock).mockRejectedValue(new Error("Network error"));
+     (mock.fetch as jest.Mock).mockRejectedValue(new Error("Network error"));
 
      try {
        const options = { apiKey: "test-api-key", stream: true };

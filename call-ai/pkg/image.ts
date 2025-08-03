@@ -3,7 +3,7 @@
  * Integration with custom image generation API
  */
 import { ImageGenOptions, ImageResponse } from "./types.js";
-import { callAiEnv } from "./utils.js";
+import { callAiEnv, callAiFetch } from "./utils.js";
 import { PACKAGE_VERSION } from "./version.js";
 
 // Import package version for debugging (same as main API)
@@ -33,7 +33,7 @@ export async function imageGen(prompt: string, options: ImageGenOptions = {}): P
       const origin = customOrigin || (typeof document !== "undefined" ? document.location.origin : "");
       const generateEndpoint = `${origin}/api/openai-image/generate`;
 
-      const response = await fetch(generateEndpoint, {
+      const response = await callAiFetch(options)(generateEndpoint, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${apiKey}`,
@@ -75,7 +75,7 @@ export async function imageGen(prompt: string, options: ImageGenOptions = {}): P
       const origin = customOrigin || (typeof document !== "undefined" ? document.location.origin : "");
       const editEndpoint = `${origin}/api/openai-image/edit`;
 
-      const response = await fetch(editEndpoint, {
+      const response = await callAiFetch(options)(editEndpoint, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${apiKey}`,

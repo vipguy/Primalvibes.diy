@@ -22,10 +22,12 @@ Based on model-chooser-new.md, I'm refactoring the codebase to use a cleaner str
 ### Completed changes:
 
 1. Created a `ModelStrategy` interface to define how each model family handles structured output:
+
    - `prepareRequest`: Modifies the request with appropriate schema formatting
    - `processResponse`: Handles parsing/extracting JSON from responses
 
 2. Implemented concrete strategies for different model families:
+
    - `openAIStrategy`: For OpenAI models using native JSON schema
    - `geminiStrategy`: For Google Gemini models using JSON schema
    - `claudeStrategy`: For Anthropic Claude models using tool mode
@@ -35,15 +37,18 @@ Based on model-chooser-new.md, I'm refactoring the codebase to use a cleaner str
 3. Created a `chooseSchemaStrategy` function to select the appropriate strategy based on model name
 
 4. Refactored `prepareRequestParams` to use the strategy pattern:
+
    - Eliminated multiple model detection flags
    - Consolidated duplicated schema processing code
    - Made code more maintainable with clear separation of concerns
 
 5. Refactored `processResponseContent` to use the strategy pattern:
+
    - Eliminated duplicated JSON extraction logic
    - Delegated response processing to the appropriate strategy
 
 6. Updated `callAi` to properly handle forced streaming for Claude:
+
    - Added `bufferStreamingResults` function for cases where we need streaming internally but the caller requested non-streaming
    - Preserved the API contract while improving reliability
 

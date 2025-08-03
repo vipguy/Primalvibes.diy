@@ -1,10 +1,8 @@
-import fs from "fs";
-import path from "path";
 import { callAi, Schema, Message } from "call-ai";
-import { Mock, vitest, expect, describe, it, beforeEach } from "vitest";
+import { vitest, expect, describe, it, beforeEach } from "vitest";
 
 // Mock fetch to use our fixture files
-global.fetch = vitest.fn();
+const mock = { fetch: vitest.fn() };
 
 describe("GPT-4 Turbo Wire Protocol Tests", () => {
   // Read fixtures
@@ -15,22 +13,21 @@ describe("GPT-4 Turbo Wire Protocol Tests", () => {
   //   ),
   // );
 
-  const gpt4turboSystemResponseFixture = fs.readFileSync(
-    path.join(__dirname, "../fixtures/gpt4turbo-system-response.json"),
-    "utf8",
-  );
+  function gpt4turboSystemResponseFixture() {
+    return fetch("http://localhost:15731/fixtures/gpt4turbo-system-response.json").then((r) => r.json());
+  }
 
   beforeEach(() => {
     // Reset mocks
-    (global.fetch as Mock).mockClear();
+    mock.fetch.mockClear();
 
     // Mock successful response
-    (global.fetch as Mock).mockImplementation(async () => {
+    mock.fetch.mockImplementation(async () => {
       return {
         ok: true,
         status: 200,
-        text: async () => gpt4turboSystemResponseFixture,
-        json: async () => JSON.parse(gpt4turboSystemResponseFixture),
+        text: async () => gpt4turboSystemResponseFixture().then((r) => JSON.stringify(r)),
+        json: async () => gpt4turboSystemResponseFixture(),
       };
     });
   });
@@ -54,13 +51,14 @@ describe("GPT-4 Turbo Wire Protocol Tests", () => {
       model: "openai/gpt-4-turbo",
       schema: schema,
       forceSystemMessage: true,
+      mock,
     });
 
     // Verify fetch was called
-    expect(global.fetch).toHaveBeenCalled();
+    expect(mock.fetch).toHaveBeenCalled();
 
     // Get the request body that was passed to fetch
-    const actualRequestBody = JSON.parse((global.fetch as Mock).mock.calls[0][1].body);
+    const actualRequestBody = JSON.parse(mock.fetch.mock.calls[0][1].body);
 
     // Check that we're using system messages
     expect(actualRequestBody.messages).toBeTruthy();
@@ -97,6 +95,7 @@ describe("GPT-4 Turbo Wire Protocol Tests", () => {
       {
         apiKey: "test-api-key",
         model: "openai/gpt-4-turbo",
+        mock,
       },
     );
 
@@ -137,6 +136,7 @@ describe("GPT-4 Turbo Wire Protocol Tests", () => {
       apiKey: "test-api-key",
       model: "openai/gpt-4-turbo",
       schema: schema,
+      mock,
     });
 
     // Verify the result
@@ -177,13 +177,14 @@ describe("GPT-4 Turbo Wire Protocol Tests", () => {
       apiKey: "test-api-key",
       model: "openai/gpt-4-turbo",
       schema: schema,
+      mock,
     });
 
     // Verify fetch was called
-    expect(global.fetch).toHaveBeenCalled();
+    expect(mock.fetch).toHaveBeenCalled();
 
     // Get the request body that was passed to fetch
-    const actualRequestBody = JSON.parse((global.fetch as Mock).mock.calls[0][1].body);
+    const actualRequestBody = JSON.parse(mock.fetch.mock.calls[0][1].body);
 
     // Check that we're sending messages
     expect(actualRequestBody.messages).toBeTruthy();

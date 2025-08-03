@@ -39,20 +39,22 @@ const opts = tseslint.config(
       import: importPlugin,
     },
 
-
     rules: {
- "@typescript-eslint/no-unused-vars": ["error", {
-      "argsIgnorePattern": "^_",
-      "varsIgnorePattern": "^_",
-      "caughtErrors": "none"
-    }],
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrors: "none",
+        },
+      ],
       // "no-console": ["warn"],
       "import/no-duplicates": ["error"],
     },
   },
   {
     rules: {
-      "no-restricted-globals": ["error"] //, "URL", "TextDecoder", "TextEncoder"],
+      "no-restricted-globals": ["error"], //, "URL", "TextDecoder", "TextEncoder"],
     },
   },
 );

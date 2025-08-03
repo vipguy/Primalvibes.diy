@@ -1,10 +1,8 @@
-import fs from "fs";
-import path from "path";
 import { callAi, Schema, Message } from "call-ai";
-import { Mock, vitest, expect, describe, it, beforeEach } from "vitest";
+import { vitest, expect, describe, it, beforeEach } from "vitest";
 
 // Mock fetch to use our fixture files
-global.fetch = vitest.fn();
+const mock = { fetch: vitest.fn() };
 
 describe("DeepSeek Wire Protocol Tests", () => {
   // Read fixtures
@@ -15,7 +13,9 @@ describe("DeepSeek Wire Protocol Tests", () => {
   //   ),
   // );
 
-  const deepseekResponseFixture = fs.readFileSync(path.join(__dirname, "../fixtures/deepseek-response.json"), "utf8");
+  function deepseekResponseFixture() {
+    return fetch("http://localhost:15731/fixtures/deepseek-response.json").then((r) => r.json());
+  }
 
   // const deepseekSystemRequestFixture = JSON.parse(
   //   fs.readFileSync(
@@ -24,19 +24,22 @@ describe("DeepSeek Wire Protocol Tests", () => {
   //   ),
   // );
 
-  const deepseekSystemResponseFixture = fs.readFileSync(path.join(__dirname, "../fixtures/deepseek-system-response.json"), "utf8");
+  // const deepseekSystemResponseFixture = fs.readFileSync(path.join(__dirname, "../fixtures/deepseek-system-response.json"), "utf8");
+  function deepseekSystemResponseFixture() {
+    return fetch("http://localhost:15731/fixtures/deepseek-system-response.json").then((r) => r.json());
+  }
 
   beforeEach(() => {
     // Reset mocks
-    (global.fetch as Mock).mockClear();
+    mock.fetch.mockClear();
 
     // Mock successful response
-    (global.fetch as Mock).mockImplementation(async () => {
+    mock.fetch.mockImplementation(async () => {
       return {
         ok: true,
         status: 200,
-        text: async () => deepseekResponseFixture,
-        json: async () => JSON.parse(deepseekResponseFixture),
+        text: async () => deepseekResponseFixture().then((r) => JSON.stringify(r)),
+        json: async () => deepseekResponseFixture(),
       };
     });
   });
@@ -59,13 +62,14 @@ describe("DeepSeek Wire Protocol Tests", () => {
       apiKey: "test-api-key",
       model: "deepseek/deepseek-chat",
       schema: schema,
+      mock,
     });
 
     // Verify fetch was called
-    expect(global.fetch).toHaveBeenCalled();
+    expect(mock.fetch).toHaveBeenCalled();
 
     // Get the request body that was passed to fetch
-    const actualRequestBody = JSON.parse((global.fetch as Mock).mock.calls[0][1].body);
+    const actualRequestBody = JSON.parse(mock.fetch.mock.calls[0][1].body);
 
     // Check that we're using system message approach rather than JSON schema format
     expect(actualRequestBody.messages).toBeTruthy();
@@ -91,12 +95,12 @@ describe("DeepSeek Wire Protocol Tests", () => {
 
   it("should correctly handle DeepSeek response with schema", async () => {
     // Update mock to return proper response
-    (global.fetch as Mock).mockImplementationOnce(async () => {
+    mock.fetch.mockImplementationOnce(async () => {
       return {
         ok: true,
         status: 200,
-        text: async () => deepseekResponseFixture,
-        json: async () => JSON.parse(deepseekResponseFixture),
+        text: async () => deepseekResponseFixture().then((r) => JSON.stringify(r)),
+        json: async () => deepseekResponseFixture(),
       };
     });
 
@@ -117,6 +121,7 @@ describe("DeepSeek Wire Protocol Tests", () => {
       apiKey: "test-api-key",
       model: "deepseek/deepseek-chat",
       schema: schema,
+      mock,
     });
 
     // Parse the DeepSeek response fixture to get expected content
@@ -137,12 +142,12 @@ describe("DeepSeek Wire Protocol Tests", () => {
 
   it("should handle system message approach with DeepSeek", async () => {
     // Update mock to return system message response
-    (global.fetch as Mock).mockImplementationOnce(async () => {
+    mock.fetch.mockImplementationOnce(async () => {
       return {
         ok: true,
         status: 200,
-        text: async () => deepseekSystemResponseFixture,
-        json: async () => JSON.parse(deepseekSystemResponseFixture),
+        text: async () => deepseekSystemResponseFixture().then((r) => JSON.stringify(r)),
+        json: async () => deepseekSystemResponseFixture(),
       };
     });
 
@@ -162,6 +167,7 @@ describe("DeepSeek Wire Protocol Tests", () => {
       {
         apiKey: "test-api-key",
         model: "deepseek/deepseek-chat",
+        mock,
       },
     );
 

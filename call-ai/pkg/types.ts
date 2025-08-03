@@ -356,10 +356,16 @@ export interface CallAIOptions {
   readonly topP?: number;
   response_format?: { type: "json_object" };
 
+  readonly mock?: Mocks;
+
   /**
    * Any additional options to pass to the API
    */
   [key: string]: unknown;
+}
+
+export interface Mocks {
+  readonly fetch?: typeof fetch;
 }
 
 export interface AIResponse {
@@ -430,6 +436,8 @@ export interface ImageGenOptions {
    * Enable debug logging
    */
   readonly debug?: boolean;
+
+  readonly mock?: Mocks;
 }
 
 /**

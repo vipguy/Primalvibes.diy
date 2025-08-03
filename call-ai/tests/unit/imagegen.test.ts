@@ -7,24 +7,25 @@
 import { vitest, describe, test, expect, beforeEach } from "vitest";
 import { imageGen } from "call-ai";
 
-// Mock fetch for testing
-global.fetch = vitest.fn<typeof global.fetch>(() =>
-  Promise.resolve({
-    ok: true,
-    status: 200,
-    statusText: "OK",
-    json: () =>
-      Promise.resolve({
-        created: Date.now(),
-        data: [
-          {
-            b64_json: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", // 1x1 px transparent PNG
-            revised_prompt: "Generated image based on prompt",
-          },
-        ],
-      }),
-  } as Response),
-);
+const mock = {
+  fetch: vitest.fn<typeof fetch>(() =>
+    Promise.resolve({
+      ok: true,
+      status: 200,
+      statusText: "OK",
+      json: () =>
+        Promise.resolve({
+          created: Date.now(),
+          data: [
+            {
+              b64_json: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", // 1x1 px transparent PNG
+              revised_prompt: "Generated image based on prompt",
+            },
+          ],
+        }),
+    } as Response),
+  ),
+};
 
 describe("imageGen function", () => {
   beforeEach(() => {
@@ -40,12 +41,13 @@ describe("imageGen function", () => {
       const result = await imageGen(prompt, {
         apiKey: "VIBES_DIY",
         model: "gpt-image-1",
+        mock,
       });
 
       // Verify the fetch call was made correctly
-      expect(fetch).toHaveBeenCalledTimes(1);
-      expect(fetch).toHaveBeenCalledWith(
-        "/api/openai-image/generate",
+      expect(mock.fetch).toHaveBeenCalledTimes(1);
+      expect(mock.fetch).toHaveBeenCalledWith(
+        expect.stringMatching("/api/openai-image/generate"),
         expect.objectContaining({
           method: "POST",
           headers: expect.objectContaining({
@@ -83,12 +85,13 @@ describe("imageGen function", () => {
         apiKey: "VIBES_DIY",
         model: "gpt-image-1",
         images: mockFiles,
+        mock,
       });
 
       // Verify the fetch call was made correctly
-      expect(fetch).toHaveBeenCalledTimes(1);
-      expect(fetch).toHaveBeenCalledWith(
-        "/api/openai-image/edit",
+      expect(mock.fetch).toHaveBeenCalledTimes(1);
+      expect(mock.fetch).toHaveBeenCalledWith(
+        expect.stringMatching("/api/openai-image/edit"),
         expect.objectContaining({
           method: "POST",
           headers: expect.objectContaining({

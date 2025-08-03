@@ -2,8 +2,8 @@
  * Key management functionality for call-ai
  */
 
-import { CallAIErrorParams, Falsy } from "./types.js";
-import { callAiEnv, entriesHeaders } from "./utils.js";
+import { CallAIErrorParams, Falsy, Mocks } from "./types.js";
+import { callAiEnv, callAiFetch, entriesHeaders } from "./utils.js";
 
 export interface KeyMetadata {
   key: string;
@@ -15,20 +15,22 @@ export interface KeyMetadata {
 }
 
 // Internal key store to keep track of the latest key
-const keyStore = {
-  // Default key from environment or config
-  current: undefined as string | undefined,
-  // The refresh endpoint URL - defaults to vibecode.garden
-  refreshEndpoint: "https://vibecode.garden",
-  // Authentication token for refresh endpoint - defaults to use-vibes
-  refreshToken: "use-vibes" as string | Falsy,
-  // Flag to prevent concurrent refresh attempts
-  isRefreshing: false,
-  // Timestamp of last refresh attempt (to prevent too frequent refreshes)
-  lastRefreshAttempt: 0,
-  // Storage for key metadata (useful for future top-up implementation)
-  metadata: {} as Record<string, Partial<KeyMetadata>>,
-};
+export function keyStore() {
+  return {
+    // Default key from environment or config
+    current: undefined as string | undefined,
+    // The refresh endpoint URL - defaults to vibecode.garden
+    refreshEndpoint: "https://vibecode.garden",
+    // Authentication token for refresh endpoint - defaults to use-vibes
+    refreshToken: "use-vibes" as string | Falsy,
+    // Flag to prevent concurrent refresh attempts
+    isRefreshing: false,
+    // Timestamp of last refresh attempt (to prevent too frequent refreshes)
+    lastRefreshAttempt: 0,
+    // Storage for key metadata (useful for future top-up implementation)
+    metadata: {} as Record<string, Partial<KeyMetadata>>,
+  };
+}
 
 // Global debug flag
 let globalDebug = false;
@@ -38,14 +40,14 @@ let globalDebug = false;
  */
 function initKeyStore() {
   // Initialize with environment variables if available
-  keyStore.current = callAiEnv.CALLAI_API_KEY;
-  keyStore.refreshEndpoint = callAiEnv.CALLAI_REFRESH_ENDPOINT ?? "https://vibecode.garden";
-  keyStore.refreshToken = callAiEnv.CALL_AI_REFRESH_TOKEN ?? "use-vibes";
+  keyStore().current = callAiEnv.CALLAI_API_KEY;
+  keyStore().refreshEndpoint = callAiEnv.CALLAI_REFRESH_ENDPOINT ?? "https://vibecode.garden";
+  keyStore().refreshToken = callAiEnv.CALL_AI_REFRESH_TOKEN ?? "use-vibes";
   globalDebug = !!callAiEnv.CALLAI_DEBUG;
 }
 
 // Initialize on module load
-initKeyStore();
+// initKeyStore();
 
 /**
  * Check if an error indicates we need a new API key
@@ -127,6 +129,7 @@ function isNewKeyError(ierror: unknown, debug = false): boolean {
  * @returns Object containing the API key and topup flag
  */
 async function refreshApiKey(
+  options: { mock?: Mocks },
   currentKey: string | Falsy,
   endpoint: string | Falsy,
   refreshToken: string | Falsy,
@@ -142,16 +145,20 @@ async function refreshApiKey(
   }
 
   // Check if we're already in the process of refreshing (to prevent parallel refreshes)
-  if (keyStore.isRefreshing) {
+  if (keyStore().isRefreshing) {
     if (debug) {
       console.log("API key refresh already in progress, waiting...");
     }
     // Wait for refresh to complete (simple polling)
     return new Promise((resolve) => {
       const checkInterval = setInterval(() => {
-        if (!keyStore.isRefreshing && keyStore.current) {
+        if (!keyStore().isRefreshing && keyStore().current) {
           clearInterval(checkInterval);
-          resolve({ apiKey: keyStore.current, topup: false });
+          const ck = keyStore().current;
+          if (!ck) {
+            throw new Error("API key refresh failed");
+          }
+          resolve({ apiKey: ck, topup: false });
         }
       }, 100);
     });
@@ -159,7 +166,7 @@ async function refreshApiKey(
 
   // Rate limit key refresh to prevent overloading the service
   const now = Date.now();
-  const timeSinceLastRefresh = now - keyStore.lastRefreshAttempt;
+  const timeSinceLastRefresh = now - keyStore().lastRefreshAttempt;
   const minRefreshInterval = 2000; // 2 seconds minimum interval between refreshes
 
   if (timeSinceLastRefresh < minRefreshInterval) {
@@ -171,8 +178,8 @@ async function refreshApiKey(
   }
 
   // Set refreshing flag and update last attempt timestamp
-  keyStore.isRefreshing = true;
-  keyStore.lastRefreshAttempt = Date.now();
+  keyStore().isRefreshing = true;
+  keyStore().lastRefreshAttempt = Date.now();
 
   // Process API paths
   const apiPath = "/api/keys";
@@ -205,7 +212,7 @@ async function refreshApiKey(
     }
 
     // Make the request
-    const response = await fetch(url, {
+    const response = await callAiFetch(options)(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -264,7 +271,7 @@ async function refreshApiKey(
     }
 
     // Update the key store with the string value
-    keyStore.current = newKey;
+    keyStore().current = newKey;
 
     // Determine if this was a top-up (using existing key) or new key
     // For the new API response format, hash is in data.key.hash
@@ -272,7 +279,7 @@ async function refreshApiKey(
     const isTopup = currentKey && hashValue && hashValue === getHashFromKey(currentKey);
 
     // Reset refreshing flag
-    keyStore.isRefreshing = false;
+    keyStore().isRefreshing = false;
 
     return {
       apiKey: newKey, // Return the string key, not the object
@@ -280,7 +287,7 @@ async function refreshApiKey(
     };
   } catch (error) {
     // Reset refreshing flag
-    keyStore.isRefreshing = false;
+    keyStore().isRefreshing = false;
     throw error;
   }
 }
@@ -291,8 +298,8 @@ async function refreshApiKey(
 function getHashFromKey(key: string): string | null {
   if (!key) return null;
   // Simple implementation: just look up in our metadata store
-  const metaKey = Object.keys(keyStore.metadata).find((k) => k === key);
-  return metaKey ? keyStore.metadata[metaKey].hash || null : null;
+  const metaKey = Object.keys(keyStore().metadata).find((k) => k === key);
+  return metaKey ? keyStore().metadata[metaKey].hash || null : null;
 }
 
 /**
@@ -302,7 +309,7 @@ function storeKeyMetadata(data: KeyMetadata): void {
   if (!data || !data.key) return;
 
   // Store metadata with the key as the dictionary key
-  keyStore.metadata[data.key] = {
+  keyStore().metadata[data.key] = {
     hash: data.hash,
     created: data.created || Date.now(),
     expires: data.expires,
@@ -311,4 +318,4 @@ function storeKeyMetadata(data: KeyMetadata): void {
   };
 }
 
-export { keyStore, globalDebug, initKeyStore, isNewKeyError, refreshApiKey, getHashFromKey, storeKeyMetadata };
+export { globalDebug, initKeyStore, isNewKeyError, refreshApiKey, getHashFromKey, storeKeyMetadata };

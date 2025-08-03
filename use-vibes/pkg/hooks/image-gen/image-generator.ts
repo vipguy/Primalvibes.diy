@@ -203,7 +203,10 @@ export function createImageGenerator(requestHash: string) {
       // Log a debug message if debug is enabled
       if (debug) {
         console.log(
-          `[imageGenerator] Generating image with prompt: "${promptText.slice(0, 30)}...", options:`,
+          `[imageGenerator] Generating image with prompt: "${promptText.slice(
+            0,
+            30
+          )}...", options:`,
           {
             ...genOptions,
             hasImages: genOptions?.images ? 'Yes' : 'No',

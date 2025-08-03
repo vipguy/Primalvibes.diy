@@ -87,7 +87,7 @@ Modify to check and use the key from keyStore when available:
 ```typescript
 function prepareRequestParams(
   prompt: string | Message[],
-  options: CallAIOptions,
+  options: CallAIOptions
 ): {
   /* ... existing return type ... */
 } {
@@ -116,7 +116,7 @@ async function handleApiError(
   error: any,
   context: string,
   debug: boolean = false,
-  options: { apiKey?: string; endpoint?: string } = {},
+  options: { apiKey?: string; endpoint?: string } = {}
 ): Promise<void> {
   if (debug) {
     console.error(`[callAi:${context}]:`, error);
@@ -187,7 +187,7 @@ async function handleApiError(
 async function refreshApiKey(
   currentKey: string | null,
   endpoint: string,
-  refreshToken: string | null,
+  refreshToken: string | null
 ): Promise<{ apiKey: string; topup: boolean }> {
   try {
     // Prepare headers with authentication

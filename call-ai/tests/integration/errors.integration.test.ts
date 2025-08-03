@@ -1,8 +1,8 @@
-import { callAi } from "call-ai";
+import { callAi, callAiEnv } from "call-ai";
 import { assert, describe, expect, it, vitest } from "vitest";
 
 // Skip tests if no API key is available
-const haveApiKey = process.env.CALLAI_API_KEY;
+const haveApiKey = callAiEnv.CALLAI_API_KEY;
 const itif = (condition: boolean) => (condition ? it : it.skip);
 
 // Timeout for individual test

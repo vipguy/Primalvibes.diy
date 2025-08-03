@@ -1,3 +1,5 @@
-import { dotenv } from "zx";
+// import { dotenv } from "zx";
+// import * as process from 'node:process'
 
-dotenv.config("../../.env");
+// console.log("XXXX", process);
+// dotenv.config("../../.env");

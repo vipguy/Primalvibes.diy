@@ -2,41 +2,36 @@ import { vitest, describe, it, expect, beforeEach, Mock, assert } from "vitest";
 import { callAi, Message, Schema } from "call-ai";
 
 // Mock global fetch
-global.fetch = vitest.fn();
-
-// Simple mock for TextDecoder
-global.TextDecoder = vitest.fn().mockImplementation(() => ({
-  decode: vitest.fn((value) => {
-    // Basic mock implementation without recursion
-    if (value instanceof Uint8Array) {
-      // Convert the Uint8Array to a simple string
-      return Array.from(value)
-        .map((byte) => String.fromCharCode(byte))
-        .join("");
-    }
-    return "";
-  }),
-}));
-
-// Mock ReadableStream
-const mockReader = {
-  read: vitest.fn(),
-};
-
-const mockResponse = {
-  json: vitest.fn(),
-  body: {
-    getReader: vitest.fn().mockReturnValue(mockReader),
-  },
-  ok: true, // Ensure response is treated as successful
-  status: 200,
-  statusText: "OK",
-};
 
 describe("callAi", () => {
+  let mock: { fetch: Mock };
+  let mockResponse: {
+    json: Mock;
+    body: {
+      getReader: () => ReadableStreamDefaultReader;
+    };
+    ok: true;
+    status: 200;
+    statusText: "OK";
+  };
+  let mockReader: {
+    read: Mock;
+  };
   beforeEach(() => {
-    vitest.clearAllMocks();
-    (global.fetch as Mock).mockResolvedValue(mockResponse);
+    mock = { fetch: vitest.fn() };
+    mockReader = {
+      read: vitest.fn(),
+    };
+    mockResponse = {
+      json: vitest.fn(),
+      body: {
+        getReader: vitest.fn().mockReturnValue(mockReader),
+      } as unknown as ReadableStream,
+      ok: true, // Ensure response is treated as successful
+      status: 200,
+      statusText: "OK",
+    };
+    mock.fetch.mockResolvedValue(mockResponse);
   });
 
   it("should handle API key requirement for non-streaming", async () => {
@@ -46,12 +41,12 @@ describe("callAi", () => {
     });
 
     try {
-      await callAi("Hello, AI");
+      await callAi("Hello, AI", { mock });
       // If we get here, the test should fail because an error should have been thrown
       assert.fail("Expected an error to be thrown");
     } catch (error) {
       // Error should be thrown because no API key was provided
-      expect((error as Error).message).toContain("fail is not defined");
+      expect((error as Error).message).toContain("API key is required");
     }
   });
 
@@ -59,12 +54,12 @@ describe("callAi", () => {
     mockReader.read.mockResolvedValueOnce({ done: true });
 
     try {
-      await callAi("Hello, AI", { stream: true });
+      await callAi("Hello, AI", { stream: true, mock });
       // If we get here, the test should fail because an error should have been thrown
       assert.fail("Expected an error to be thrown");
     } catch (error) {
       // Error should be thrown because no API key was provided
-      expect((error as Error).message).toContain("fail is not defined");
+      expect((error as Error).message).toContain("API key is required");
     }
   });
 
@@ -74,6 +69,7 @@ describe("callAi", () => {
       apiKey: "test-api-key",
       model: "test-model",
       temperature: 0.7,
+      mock,
     };
 
     mockResponse.json.mockResolvedValue({
@@ -82,8 +78,8 @@ describe("callAi", () => {
 
     await callAi(prompt, options);
 
-    expect(global.fetch).toHaveBeenCalledTimes(1);
-    expect(global.fetch).toHaveBeenCalledWith(
+    expect(mock.fetch).toHaveBeenCalledTimes(1);
+    expect(mock.fetch).toHaveBeenCalledWith(
       "https://openrouter.ai/api/v1/chat/completions",
       expect.objectContaining({
         method: "POST",
@@ -96,7 +92,7 @@ describe("callAi", () => {
       }),
     );
 
-    const body = JSON.parse((global.fetch as Mock).mock.calls[0][1].body);
+    const body = JSON.parse(mock.fetch.mock.calls[0][1].body);
     expect(body.model).toBe("test-model");
     expect(body.messages).toEqual([{ role: "user", content: "Hello, AI" }]);
     expect(body.temperature).toBe(0.7);
@@ -110,6 +106,8 @@ describe("callAi", () => {
       model: "test-model",
       temperature: 0.7,
       stream: true,
+      // debug: true,
+      mock,
     };
 
     // Mock successful response to avoid errors
@@ -118,9 +116,9 @@ describe("callAi", () => {
     const generator = callAi(prompt, options) as unknown as AsyncGenerator<string, string, unknown>;
     await generator.next();
 
-    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(mock.fetch).toHaveBeenCalledTimes(1);
 
-    const body = JSON.parse((global.fetch as Mock).mock.calls[0][1].body);
+    const body = JSON.parse(mock.fetch.mock.calls[0][1].body);
     expect(body.model).toBe("test-model");
     expect(body.messages).toEqual([{ role: "user", content: "Hello, AI" }]);
     expect(body.temperature).toBe(0.7);
@@ -132,7 +130,7 @@ describe("callAi", () => {
       { role: "system", content: "You are a helpful assistant" },
       { role: "user", content: "Hello" },
     ];
-    const options = { apiKey: "test-api-key", stream: true };
+    const options = { apiKey: "test-api-key", stream: true, mock };
 
     // Mock successful response to avoid errors
     mockReader.read.mockResolvedValueOnce({ done: true });
@@ -140,7 +138,7 @@ describe("callAi", () => {
     const generator = callAi(messages, options) as unknown as AsyncGenerator<string, string, unknown>;
     await generator.next();
 
-    const body = JSON.parse((global.fetch as Mock).mock.calls[0][1].body);
+    const body = JSON.parse(mock.fetch.mock.calls[0][1].body);
     expect(body.messages).toEqual(messages);
   });
 
@@ -158,6 +156,7 @@ describe("callAi", () => {
       stream: true,
       model: "openai/gpt-4o", // Explicitly use OpenAI model to ensure JSON schema is used
       schema: schema,
+      mock,
     };
 
     // Mock successful response to avoid errors
@@ -166,7 +165,7 @@ describe("callAi", () => {
     const generator = callAi("Get user info", options) as unknown as AsyncGenerator<string, string, unknown>;
     await generator.next();
 
-    const body = JSON.parse((global.fetch as Mock).mock.calls[0][1].body);
+    const body = JSON.parse(mock.fetch.mock.calls[0][1].body);
     expect(body.response_format.type).toBe("json_schema");
     expect(body.response_format.json_schema.schema.required).toEqual(["name"]);
   });
@@ -185,6 +184,7 @@ describe("callAi", () => {
       apiKey: "test-api-key",
       model: "openai/gpt-4o", // Explicitly use OpenAI model
       schema: todoSchema,
+      mock,
     };
 
     mockResponse.json.mockResolvedValue({
@@ -199,7 +199,7 @@ describe("callAi", () => {
 
     await callAi("Give me a todo list for learning React", options);
 
-    const body = JSON.parse((global.fetch as Mock).mock.calls[0][1].body);
+    const body = JSON.parse(mock.fetch.mock.calls[0][1].body);
     expect(body.response_format.type).toBe("json_schema");
     expect(body.response_format.json_schema.schema.properties).toEqual(todoSchema.properties);
   });
@@ -244,6 +244,7 @@ describe("callAi", () => {
       model: "openai/gpt-4o", // Use OpenAI model explicitly
       stream: true,
       schema: alienSchema,
+      mock,
     };
 
     // Mock successful response
@@ -252,7 +253,7 @@ describe("callAi", () => {
     const generator = callAi(messages, options) as unknown as AsyncGenerator<string, string, unknown>;
     await generator.next();
 
-    const body = JSON.parse((global.fetch as Mock).mock.calls[0][1].body);
+    const body = JSON.parse(mock.fetch.mock.calls[0][1].body);
     expect(body.response_format.type).toBe("json_schema");
     // The schema is processed with additionalProperties and required fields
     // So we just check that the main structure is preserved
@@ -273,6 +274,7 @@ describe("callAi", () => {
     const options = {
       apiKey: "test-api-key",
       skipRetry: true, // Prevent fallback retry mechanism for tests
+      mock,
     };
 
     const result = await callAi("Hello", options);
@@ -293,6 +295,7 @@ describe("callAi", () => {
       apiKey: "test-api-key",
       model: "openai/gpt-4o", // Explicitly use OpenAI model
       schema: schemaWithName,
+      mock,
     };
 
     mockResponse.json.mockResolvedValue({
@@ -301,7 +304,7 @@ describe("callAi", () => {
 
     await callAi("Test with schema name", options);
 
-    const body = JSON.parse((global.fetch as Mock).mock.calls[0][1].body);
+    const body = JSON.parse(mock.fetch.mock.calls[0][1].body);
     expect(body.response_format.type).toBe("json_schema");
     expect(body.response_format.json_schema.name).toBe("test_schema");
   });
@@ -317,6 +320,7 @@ describe("callAi", () => {
       apiKey: "test-api-key",
       model: "openai/gpt-4o", // Explicitly use OpenAI model
       schema: schemaWithoutName,
+      mock,
     };
 
     mockResponse.json.mockResolvedValue({
@@ -325,7 +329,7 @@ describe("callAi", () => {
 
     await callAi("Test without schema name", options);
 
-    const body = JSON.parse((global.fetch as Mock).mock.calls[0][1].body);
+    const body = JSON.parse(mock.fetch.mock.calls[0][1].body);
     expect(body.response_format.type).toBe("json_schema");
     expect(body.response_format.json_schema.name).toBe("result");
   });
@@ -341,6 +345,7 @@ describe("callAi", () => {
       apiKey: "test-api-key",
       model: "openai/gpt-4o", // Explicitly use OpenAI model
       schema: schemaWithoutName,
+      mock,
     };
 
     mockResponse.json.mockResolvedValue({
@@ -349,7 +354,7 @@ describe("callAi", () => {
 
     await callAi("Generate content with schema", options);
 
-    const body = JSON.parse((global.fetch as Mock).mock.calls[0][1].body);
+    const body = JSON.parse(mock.fetch.mock.calls[0][1].body);
     expect(body.response_format.type).toBe("json_schema");
     expect(body.response_format.json_schema.name).toBe("result");
   });
@@ -363,6 +368,7 @@ describe("callAi", () => {
       apiKey: "test-api-key",
       model: "openai/gpt-4o", // Explicitly use OpenAI model
       schema: emptySchema,
+      mock,
     };
 
     mockResponse.json.mockResolvedValue({
@@ -371,7 +377,7 @@ describe("callAi", () => {
 
     await callAi("Test with empty schema", options);
 
-    const body = JSON.parse((global.fetch as Mock).mock.calls[0][1].body);
+    const body = JSON.parse(mock.fetch.mock.calls[0][1].body);
     expect(body.response_format.type).toBe("json_schema");
     expect(body.response_format.json_schema.name).toBe("result");
     expect(body.response_format.json_schema.schema.properties).toEqual({});
@@ -390,6 +396,7 @@ describe("callAi", () => {
       apiKey: "test-api-key",
       model: "openai/gpt-4o", // Explicitly use OpenAI model
       schema: schema,
+      mock,
     };
 
     mockResponse.json.mockResolvedValue({
@@ -404,15 +411,15 @@ describe("callAi", () => {
 
     await callAi("Test with additionalProperties", options);
 
-    const body = JSON.parse((global.fetch as Mock).mock.calls[0][1].body);
+    const body = JSON.parse(mock.fetch.mock.calls[0][1].body);
     expect(body.response_format.json_schema.schema.additionalProperties).toBe(true);
   });
 
   it("should handle errors during API call for non-streaming", async () => {
-    (global.fetch as Mock).mockRejectedValue(new Error("Network error"));
+    mock.fetch.mockRejectedValue(new Error("Network error"));
 
     try {
-      const options = { apiKey: "test-api-key" };
+      const options = { apiKey: "test-api-key", mock };
       await callAi("Hello", options);
       // If we get here, the test should fail because an error should have been thrown
       assert.fail("Expected an error to be thrown");
@@ -423,10 +430,10 @@ describe("callAi", () => {
   });
 
   it("should handle errors during API call for streaming", async () => {
-    (global.fetch as Mock).mockRejectedValue(new Error("Network error"));
+    mock.fetch.mockRejectedValue(new Error("Network error"));
 
     try {
-      const options = { apiKey: "test-api-key", stream: true };
+      const options = { apiKey: "test-api-key", stream: true, mock };
       await callAi("Hello", options);
       // If we get here, the test should fail because an error should have been thrown
       assert.fail("Expected an error to be thrown");
@@ -437,7 +444,7 @@ describe("callAi", () => {
   });
 
   it("should default to streaming mode (false) if not specified", async () => {
-    const options = { apiKey: "test-api-key" };
+    const options = { apiKey: "test-api-key", mock };
 
     mockResponse.json.mockResolvedValue({
       choices: [{ message: { content: "Hello, I am an AI" } }],
@@ -445,7 +452,7 @@ describe("callAi", () => {
 
     await callAi("Hello", options);
 
-    const body = JSON.parse((global.fetch as Mock).mock.calls[0][1].body);
+    const body = JSON.parse(mock.fetch.mock.calls[0][1].body);
     expect(body.stream).toBe(false);
   });
 
@@ -475,6 +482,7 @@ describe("callAi", () => {
       // GPT-4-Turbo uses system message approach by default
       model: "openai/gpt-4o", // Use GPT-4o instead, which uses JSON schema
       schema: schema,
+      mock,
     };
 
     mockResponse.json.mockResolvedValue({
@@ -489,7 +497,7 @@ describe("callAi", () => {
 
     await callAi("Create a themed music playlist", options);
 
-    const body = JSON.parse((global.fetch as Mock).mock.calls[0][1].body);
+    const body = JSON.parse(mock.fetch.mock.calls[0][1].body);
     expect(body.response_format.type).toBe("json_schema");
     // Check that schema property exists in json_schema containing the schema definition
     expect(body.response_format.json_schema.schema).toBeDefined();
@@ -523,6 +531,7 @@ describe("callAi", () => {
       model: "openai/gpt-4o", // Explicitly use OpenAI model
       stream: true,
       schema: schema,
+      mock,
     };
 
     // Mock response and reader behavior more comprehensively
@@ -552,8 +561,8 @@ describe("callAi", () => {
       },
     };
 
-    // Override the global.fetch mock for this test
-    (global.fetch as Mock).mockResolvedValueOnce(mockResponseWithBody);
+    // Override the mock.fetch mock for this test
+    mock.fetch.mockResolvedValueOnce(mockResponseWithBody);
 
     const generator = callAi("What is the weather?", options) as unknown as AsyncGenerator<string, string, unknown>;
 
@@ -566,7 +575,7 @@ describe("callAi", () => {
     }
 
     // Verify request format
-    const body = JSON.parse((global.fetch as Mock).mock.calls[0][1].body);
+    const body = JSON.parse(mock.fetch.mock.calls[0][1].body);
     expect(body.response_format.type).toBe("json_schema");
     expect(body.response_format.json_schema.name).toBe("weather");
     expect(body.stream).toBe(true);

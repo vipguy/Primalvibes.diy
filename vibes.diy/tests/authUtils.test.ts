@@ -124,7 +124,7 @@ describe('auth utils', () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({ token: 'new.extended.token' }),
-      })
+      });
 
       // Test the extendToken function directly
       const result = await auth.extendToken('old.token');
@@ -149,20 +149,20 @@ describe('auth utils', () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({ token: 'newtoken123' }),
-      }) 
+      });
       const result = await auth.extendToken('oldtoken');
       expect(result).toBe('newtoken123');
       expect(window.localStorage.getItem('auth_token')).toBe('newtoken123');
     });
     it('returns null on network error', async () => {
       setEnv({ VITE_CONNECT_API_URL: 'https://api' });
-      global.fetch = vi.fn().mockRejectedValue(new Error('fail')) 
+      global.fetch = vi.fn().mockRejectedValue(new Error('fail'));
       const result = await auth.extendToken('token');
       expect(result).toBeNull();
     });
     it('returns null on invalid response', async () => {
       setEnv({ VITE_CONNECT_API_URL: 'https://api' });
-      global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) })
+      global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
       const result = await auth.extendToken('token');
       expect(result).toBeNull();
     });
@@ -172,7 +172,9 @@ describe('auth utils', () => {
     it('returns connectUrl and resultId and sets sessionStorage', () => {
       // Set the connect URL environment variable
       setEnv({ VITE_CONNECT_URL: 'http://localhost:3000/token' });
-      vi.spyOn(window, 'location', 'get').mockReturnValue({ pathname: '/not/callback' } as typeof window.location );
+      vi.spyOn(window, 'location', 'get').mockReturnValue({
+        pathname: '/not/callback',
+      } as typeof window.location);
 
       const result = auth.initiateAuthFlow();
       expect(result).toBeTruthy();
@@ -182,7 +184,9 @@ describe('auth utils', () => {
     });
 
     it('returns null if already on callback page', () => {
-      vi.spyOn(window, 'location', 'get').mockReturnValue({ pathname: '/auth/callback' } as typeof window.location );
+      vi.spyOn(window, 'location', 'get').mockReturnValue({
+        pathname: '/auth/callback',
+      } as typeof window.location);
       const result = auth.initiateAuthFlow();
       expect(result).toBeNull();
     });
@@ -198,7 +202,7 @@ describe('auth utils', () => {
           ok: true,
           json: async () => (called < 2 ? {} : { token: 'tok123' }),
         });
-      })
+      });
 
       // Toast is already mocked at the top of the file
 
@@ -208,7 +212,7 @@ describe('auth utils', () => {
 
     it('returns null if timed out', async () => {
       setEnv({ VITE_CONNECT_API_URL: 'https://api' });
-      global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) })
+      global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
 
       const token = await auth.pollForAuthToken('resultid', 1, 5);
       expect(token).toBeNull();

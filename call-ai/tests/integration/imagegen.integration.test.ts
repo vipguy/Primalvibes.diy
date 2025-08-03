@@ -1,11 +1,11 @@
 /// <reference lib="DOM" />
 import { imageGen } from "call-ai";
-import { describe, it, expect, vitest, beforeEach, Mock } from "vitest";
+import { describe, it, expect, vitest, beforeEach } from "vitest";
 
 // Add type declaration for Node.js require
+const mock = { fetch: vitest.fn() };
 
 // Configure fetch mock
-global.fetch = vitest.fn<typeof global.fetch>();
 
 // Mock response for image generation
 const mockImageResponse = {
@@ -21,12 +21,12 @@ const mockImageResponse = {
 describe("Image Generation Integration Tests", () => {
   beforeEach(() => {
     // Reset fetch mocks before each test
-    (global.fetch as Mock).mockClear();
+    mock.fetch.mockClear();
   });
 
   it("should generate an image with a text prompt", async () => {
     // Set up fetch mock for image generation
-    (global.fetch as Mock).mockResolvedValueOnce({
+    mock.fetch.mockResolvedValueOnce({
       json: async () => mockImageResponse,
       ok: true,
       status: 200,
@@ -70,7 +70,7 @@ describe("Image Generation Integration Tests", () => {
     );
 
     // Verify request body content
-    const mockCall = (global.fetch as Mock).mock.calls[0] as [unknown, { body: string }];
+    const mockCall = mock.fetch.mock.calls[0] as [unknown, { body: string }];
     const requestBody = JSON.parse(mockCall[1].body);
     expect(requestBody.prompt).toBe(testPrompt);
     expect(requestBody.model).toBe("gpt-image-1");
@@ -80,7 +80,7 @@ describe("Image Generation Integration Tests", () => {
 
   it("should handle image editing with multiple input images", async () => {
     // Set up fetch mock for image editing
-    (global.fetch as Mock).mockResolvedValueOnce({
+    mock.fetch.mockResolvedValueOnce({
       json: async () => mockImageResponse,
       status: 200,
       ok: true,

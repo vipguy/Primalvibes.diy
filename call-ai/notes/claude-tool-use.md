@@ -9,11 +9,13 @@ This document explores the approach of using Claude's Tool Use functionality (al
 The library has gone through several approaches for getting structured output from Claude:
 
 1. **System Message Approach** (previous default): Adding a system message instructing Claude to return JSON in a specific format.
+
    - Works reliably in practice
    - Simple implementation
    - Now replaced by tool mode
 
 2. **JSON Schema Approach** (attempted): Using `response_format.json_schema`, similar to OpenAI's implementation.
+
    - Showed inconsistent behavior with Claude
    - Required special handling of required fields
    - Produced errors like: `Invalid schema for response_format 'person': In context=(), 'required' is required to be supplied and to be an array including every key in properties.`
@@ -28,6 +30,7 @@ The library has gone through several approaches for getting structured output fr
 The implementation now automatically uses tool mode whenever a Claude model is detected with a schema:
 
 1. When a request is made to a Claude model with a schema, we:
+
    - Create a tool definition with the schema as its input_schema
    - Force Claude to use this tool via tool_choice
    - Extract the structured data from the tool_use response

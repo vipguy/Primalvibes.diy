@@ -6,6 +6,7 @@ This document describes how call-ai selects and handles different AI models and 
 
 - **User-specified Model**: If the user provides `options.model`, that exact model is always used
 - **Default Model** (when no model specified):
+
   - With schema: `openai/gpt-4o` is used
   - Without schema: `openrouter/auto` (OpenRouter's auto-routing)
 

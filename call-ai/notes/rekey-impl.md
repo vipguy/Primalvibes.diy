@@ -46,7 +46,7 @@ CALL_AI_REFRESH_TOKEN=use-vibes                 # Default auth token
 async function refreshApiKey(
   currentKey: string | null,
   endpoint: string,
-  refreshToken: string | null,
+  refreshToken: string | null
 ): Promise<{ apiKey: string; topup: boolean }> {
   try {
     // Prepare headers with authentication
@@ -240,7 +240,7 @@ async function handleApiError(
   error: any,
   context: string,
   debug: boolean = false,
-  options: { apiKey?: string; endpoint?: string; skipRefresh?: boolean } = {},
+  options: { apiKey?: string; endpoint?: string; skipRefresh?: boolean } = {}
 ): Promise<void> {
   if (debug) {
     console.error(`[callAi:${context}]:`, error);
@@ -352,7 +352,7 @@ async function handleTopupKey(requestData, provisioningKey) {
       {
         status: 200,
         headers: { "Content-Type": "application/json" },
-      },
+      }
     );
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), {

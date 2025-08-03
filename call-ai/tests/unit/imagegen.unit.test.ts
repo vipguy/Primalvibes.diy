@@ -1,8 +1,20 @@
-import { Mock, vitest, describe, it, expect, beforeEach, beforeAll, assert } from "vitest";
+import { vitest, describe, it, expect, beforeEach, beforeAll, assert } from "vitest";
 import { imageGen } from "call-ai";
 
 // Mock fetch
-global.fetch = vitest.fn();
+const mock = {
+  fetch: vitest.fn(),
+  Blob: vitest.fn(),
+  File: vitest.fn(),
+  FormData: {
+    append: vitest.fn(),
+    delete: vitest.fn(),
+    get: vitest.fn(),
+    getAll: vitest.fn(),
+    has: vitest.fn(),
+    set: vitest.fn(),
+  },
+};
 
 // Create mock objects in setup to avoid TypeScript errors
 // let mockBlobInstance: any;
@@ -26,23 +38,23 @@ beforeAll(() => {
   };
 
   // Use a simple class implementation that Jest's objectContaining can properly match
-  class MockFormData {
-    append = vitest.fn();
-    delete = vitest.fn();
-    get = vitest.fn();
-    getAll = vitest.fn();
-    has = vitest.fn();
-    set = vitest.fn();
-  }
+  // class MockFormData {
+  //   append = vitest.fn();
+  //   delete = vitest.fn();
+  //   get = vitest.fn();
+  //   getAll = vitest.fn();
+  //   has = vitest.fn();
+  //   set = vitest.fn();
+  // }
 
   // Mock constructors
-  global.Blob = vitest.fn().mockImplementation(() => mockBlobInstance); //as any;
-  global.File = vitest.fn().mockImplementation((_, name, options) => {
+  mock.Blob.mockImplementation(() => mockBlobInstance); //as any;
+  mock.File.mockImplementation((_, name, options) => {
     return { ...mockFileInstance, name, type: options?.type || "image/png" };
   }); //as any;
 
   // For FormData, create a new instance each time
-  global.FormData = MockFormData as unknown as typeof FormData;
+  // mock.FormData = MockFormData as unknown as typeof FormData;
 });
 
 // Mock response for successful image generation
@@ -59,7 +71,7 @@ const mockImageResponse = {
 describe("imageGen", () => {
   beforeEach(() => {
     vitest.clearAllMocks();
-    (global.fetch as Mock).mockResolvedValue({
+    mock.fetch.mockResolvedValue({
       ok: true,
       status: 200,
       statusText: "OK",
@@ -73,14 +85,15 @@ describe("imageGen", () => {
       apiKey: "VIBES_DIY",
       model: "gpt-image-1",
       debug: true,
+      mock,
     };
 
     const result = await imageGen(prompt, options);
 
     // Check that fetch was called with the correct parameters
-    expect(global.fetch).toHaveBeenCalledTimes(1);
-    expect(global.fetch).toHaveBeenCalledWith(
-      "/api/openai-image/generate",
+    expect(mock.fetch).toHaveBeenCalledTimes(1);
+    expect(mock.fetch).toHaveBeenCalledWith(
+      expect.stringMatching("/api/openai-image/generate"),
       expect.objectContaining({
         method: "POST",
         headers: expect.objectContaining({
@@ -91,7 +104,7 @@ describe("imageGen", () => {
     );
 
     // Check request body
-    const requestBody = JSON.parse((global.fetch as Mock).mock.calls[0][1].body);
+    const requestBody = JSON.parse(mock.fetch.mock.calls[0][1].body);
     expect(requestBody).toEqual({
       model: "gpt-image-1",
       prompt: "A children's book drawing of a veterinarian using a stethoscope to listen to the heartbeat of a baby otter.",
@@ -119,14 +132,15 @@ describe("imageGen", () => {
       images: mockFiles,
       size: "1024x1024",
       debug: true,
+      mock,
     };
 
     const result = await imageGen(prompt, options);
 
     // Check that fetch was called with the correct parameters
-    expect(global.fetch).toHaveBeenCalledTimes(1);
-    expect(global.fetch).toHaveBeenCalledWith(
-      "/api/openai-image/edit",
+    expect(mock.fetch).toHaveBeenCalledTimes(1);
+    expect(mock.fetch).toHaveBeenCalledWith(
+      expect.stringMatching("/api/openai-image/edit"),
       expect.objectContaining({
         method: "POST",
         headers: expect.objectContaining({
@@ -143,7 +157,7 @@ describe("imageGen", () => {
 
   it("should handle errors from the image generation API", async () => {
     // Mock a failed response
-    (global.fetch as Mock).mockResolvedValue({
+    mock.fetch.mockResolvedValue({
       ok: false,
       status: 400,
       statusText: "Bad Request",
@@ -153,7 +167,7 @@ describe("imageGen", () => {
     const prompt = "This prompt will cause an error";
 
     try {
-      await imageGen(prompt, { apiKey: "VIBES_DIY" });
+      await imageGen(prompt, { apiKey: "VIBES_DIY", mock });
       assert.fail("Expected the image generation to throw an error");
     } catch (error) {
       expect((error as Error).message).toContain("Image generation failed");
@@ -163,7 +177,7 @@ describe("imageGen", () => {
 
   it("should handle errors from the image editing API", async () => {
     // Mock a failed response
-    (global.fetch as Mock).mockResolvedValue({
+    mock.fetch.mockResolvedValue({
       ok: false,
       status: 400,
       statusText: "Bad Request",
@@ -178,6 +192,7 @@ describe("imageGen", () => {
       await imageGen(prompt, {
         apiKey: "VIBES_DIY",
         images: mockFiles,
+        mock,
       });
       assert.fail("Expected the image editing to throw an error");
     } catch (error) {

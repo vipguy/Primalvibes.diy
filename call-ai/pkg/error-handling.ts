@@ -2,7 +2,7 @@
  * Error handling utilities for call-ai
  */
 import { keyStore, globalDebug, isNewKeyError, refreshApiKey } from "./key-management.js";
-import { CallAIError, CallAIErrorParams } from "./types.js";
+import { CallAIError, CallAIErrorParams, Mocks } from "./types.js";
 
 // Standardized API error handler
 // @param error The error object
@@ -19,6 +19,7 @@ async function handleApiError(
     skipRefresh?: boolean;
     refreshToken?: string;
     updateRefreshToken?: (currentToken: string) => Promise<string>;
+    mock?: Mocks;
   } = {},
 ): Promise<void> {
   const error = ierror as CallAIErrorParams;
@@ -61,17 +62,17 @@ async function handleApiError(
 
     try {
       // Use provided key/endpoint/refreshToken or fallback to global configuration
-      const currentKey = options.apiKey || keyStore.current;
-      const endpoint = options.endpoint || keyStore.refreshEndpoint;
-      const refreshToken = options.refreshToken || keyStore.refreshToken;
+      const currentKey = options.apiKey || keyStore().current;
+      const endpoint = options.endpoint || keyStore().refreshEndpoint;
+      const refreshToken = options.refreshToken || keyStore().refreshToken;
 
       // First attempt to refresh the API key
       try {
-        const { apiKey, topup } = await refreshApiKey(currentKey, endpoint, refreshToken, debug);
+        const { apiKey, topup } = await refreshApiKey(options, currentKey, endpoint, refreshToken, debug);
 
         // Update the key in the store (if not already set by refreshApiKey)
-        if (keyStore.current !== apiKey) {
-          keyStore.current = apiKey;
+        if (keyStore().current !== apiKey) {
+          keyStore().current = apiKey;
         }
 
         if (debug) {
@@ -97,14 +98,14 @@ async function handleApiError(
               }
 
               // Update the stored refresh token
-              keyStore.refreshToken = newRefreshToken;
+              keyStore().refreshToken = newRefreshToken;
 
               // Try again with the new token
-              const { apiKey, topup } = await refreshApiKey(currentKey, endpoint, newRefreshToken, debug);
+              const { apiKey, topup } = await refreshApiKey(options, currentKey, endpoint, newRefreshToken, debug);
 
               // Update the key in the store
-              if (keyStore.current !== apiKey) {
-                keyStore.current = apiKey;
+              if (keyStore().current !== apiKey) {
+                keyStore().current = apiKey;
               }
 
               if (debug) {
@@ -141,7 +142,9 @@ async function handleApiError(
       }
       // Create a more detailed error from the original one
       const detailedError = new CallAIError({
-        message: `${errorMessage} (Key refresh failed: ${refreshError instanceof Error ? refreshError.message : String(refreshError)})`,
+        message: `${errorMessage} (Key refresh failed: ${
+          refreshError instanceof Error ? refreshError.message : String(refreshError)
+        })`,
         originalError: error,
         refreshError,
         status: status || 401,

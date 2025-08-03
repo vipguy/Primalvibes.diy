@@ -126,7 +126,7 @@ function applyJsonSchemaStrategy(requestParams: any, schema: Schema, messages: M
     required: requiredFields,
     additionalProperties: schema.additionalProperties !== undefined ? schema.additionalProperties : false,
     ...Object.fromEntries(
-      Object.entries(schema).filter(([key]) => !["name", "properties", "required", "additionalProperties"].includes(key)),
+      Object.entries(schema).filter(([key]) => !["name", "properties", "required", "additionalProperties"].includes(key))
     ),
   });
 
@@ -178,7 +178,7 @@ Putting it all together:
 ```typescript
 function prepareRequestParams(
   prompt: string | Message[],
-  options: CallAIOptions,
+  options: CallAIOptions
 ): {
   apiKey: string;
   model: string;

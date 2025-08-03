@@ -1,36 +1,43 @@
-import fs from "node:fs";
-import path from "node:path";
 import { callAi, Schema } from "call-ai";
-import { beforeEach, describe, expect, it, Mock, vitest } from "vitest";
+import { assert, beforeEach, describe, expect, it, vitest } from "vitest";
 
 // Mock fetch to use our fixture files
-global.fetch = vitest.fn();
+const mock = { fetch: vitest.fn() };
 
 describe("OpenAI Wire Protocol Tests", () => {
   // Read fixtures
-  const openaiRequestFixture = JSON.parse(fs.readFileSync(path.join(__dirname, "../fixtures/openai-request.json"), "utf8"));
+  function openaiRequestFixture() {
+    return fetch("http://localhost:15731/fixtures/openai-request.json").then((r) => r.json());
+  }
 
-  const openaiResponseFixture = fs.readFileSync(path.join(__dirname, "../fixtures/openai-response.json"), "utf8");
+  function openaiResponseFixture() {
+    return fetch("http://localhost:15731/fixtures/openai-response.json").then((r) => r.json());
+  }
 
-  // const openaiStreamRequestFixture = JSON.parse(
-  //   fs.readFileSync(
-  //     path.join(__dirname, "fixtures/openai-stream-request.json"),
-  //     "utf8",
-  //   ),
-  // );
-
-  const openaiStreamResponseFixture = fs.readFileSync(path.join(__dirname, "../fixtures/openai-stream-response.json"), "utf8");
+  async function openaiStreamResponseFixture() {
+    return fetch("http://localhost:15731/fixtures/openai-stream-response.txt")
+      .then(async (r) => {
+        const text = await r.text();
+        // console.log("OpenAI Stream Response:", text);
+        return text;
+      })
+      .catch((e) => {
+        console.error("Error fetching OpenAI stream response:", e);
+        throw e;
+      });
+  }
 
   beforeEach(() => {
     // Reset mocks
-    (global.fetch as Mock).mockClear();
+    mock.fetch.mockClear();
 
     // Mock successful response for regular request
-    (global.fetch as Mock).mockImplementation(async (_url, options) => {
+    mock.fetch.mockImplementation(async (_url, options) => {
       const requestBody = JSON.parse(options.body as string);
 
       // let responseText;
       if (requestBody.stream) {
+        const fixture = await openaiStreamResponseFixture();
         // Mock streaming response
         // In a real test, we'd need to properly mock a ReadableStream
         return {
@@ -39,7 +46,7 @@ describe("OpenAI Wire Protocol Tests", () => {
           body: {
             getReader: () => {
               // Stream reader that returns chunks from our fixture
-              const chunks = openaiStreamResponseFixture
+              const chunks = fixture
                 .split("data: ")
                 .filter((chunk) => chunk.trim() !== "")
                 .map((chunk) => {
@@ -48,6 +55,7 @@ describe("OpenAI Wire Protocol Tests", () => {
                 });
 
               let chunkIndex = 0;
+              // console.log("Chunks:", await openaiStreamResponseFixture());
 
               return {
                 read: async () => {
@@ -60,16 +68,18 @@ describe("OpenAI Wire Protocol Tests", () => {
               };
             },
           },
-          text: async () => openaiStreamResponseFixture,
-          json: async () => JSON.parse(openaiStreamResponseFixture),
+          text: async () => openaiStreamResponseFixture(),
+          json: async () => {
+            throw new Error("Not implemented");
+          }, // JSON.parse(openaiStreamResponseFixture()),
         };
       } else {
         // Standard response
         return {
           ok: true,
           status: 200,
-          text: async () => openaiResponseFixture,
-          json: async () => JSON.parse(openaiResponseFixture),
+          text: async () => openaiResponseFixture().then((r) => JSON.stringify(r)),
+          json: async () => openaiResponseFixture(),
         };
       }
     });
@@ -93,24 +103,27 @@ describe("OpenAI Wire Protocol Tests", () => {
       apiKey: "test-api-key",
       model: "openai/gpt-4o",
       schema: schema,
+      mock,
     });
 
     // Verify fetch was called
-    expect(global.fetch).toHaveBeenCalled();
+    expect(mock.fetch).toHaveBeenCalled();
 
     // Get the request body that was passed to fetch
-    const actualRequestBody = JSON.parse((global.fetch as Mock).mock.calls[0][1].body);
+    const actualRequestBody = JSON.parse(mock.fetch.mock.calls[0][1].body);
 
+    const expectedRequestBody = await openaiRequestFixture();
+    console.log("Actual Request Body:", expectedRequestBody);
     // Check that the essential parts match our fixture
-    expect(actualRequestBody.model).toEqual(openaiRequestFixture.model);
-    expect(actualRequestBody.messages).toEqual(openaiRequestFixture.messages);
-    expect(actualRequestBody.response_format.type).toEqual(openaiRequestFixture.response_format.type);
+    expect(actualRequestBody.model).toEqual(expectedRequestBody.model);
+    expect(actualRequestBody.messages).toEqual(expectedRequestBody.messages);
+    expect(actualRequestBody.response_format.type).toEqual(expectedRequestBody.response_format.type);
 
     // Deep compare the json_schema part of response_format
-    expect(actualRequestBody.response_format.json_schema.name).toEqual(openaiRequestFixture.response_format.json_schema.name);
+    expect(actualRequestBody.response_format.json_schema.name).toEqual(expectedRequestBody.response_format.json_schema.name);
 
     expect(actualRequestBody.response_format.json_schema.schema.properties).toEqual(
-      openaiRequestFixture.response_format.json_schema.schema.properties,
+      expectedRequestBody.response_format.json_schema.schema.properties,
     );
   });
 
@@ -132,11 +145,12 @@ describe("OpenAI Wire Protocol Tests", () => {
       apiKey: "test-api-key",
       model: "openai/gpt-4o",
       schema: schema,
+      mock,
     });
 
     // Parse the OpenAI response fixture to get expected content
-    const responseObj = JSON.parse(openaiResponseFixture);
-    const responseContent = responseObj.choices[0].message.content;
+    const responseObj = await openaiResponseFixture();
+    const responseContent = (await responseObj).choices[0].message.content;
     const expectedData = JSON.parse(responseContent);
 
     // Verify the result
@@ -166,12 +180,17 @@ describe("OpenAI Wire Protocol Tests", () => {
     };
 
     // Call the library with OpenAI model and streaming
-    const generator = (await callAi("Give me a short book recommendation in the requested format.", {
+    const generator = await callAi("Give me a short book recommendation in the requested format.", {
       apiKey: "test-api-key",
       model: "openai/gpt-4o",
       schema: schema,
       stream: true,
-    })) as AsyncGenerator<string, string, unknown>;
+      mock,
+    }); //as AsyncGenerator<string, string, unknown>;
+    if (typeof generator === "string") {
+      assert("Expected generator, got string");
+      return;
+    }
 
     // Verify that we get a generator back
     expect(generator).toBeTruthy();
@@ -209,13 +228,14 @@ describe("OpenAI Wire Protocol Tests", () => {
       apiKey: "test-api-key",
       model: "openai/gpt-4o",
       schema: schema,
+      mock,
     });
 
     // Verify fetch was called
-    expect(global.fetch).toHaveBeenCalled();
+    expect(mock.fetch).toHaveBeenCalled();
 
     // Get the request body that was passed to fetch
-    const actualRequestBody = JSON.parse((global.fetch as Mock).mock.calls[0][1].body);
+    const actualRequestBody = JSON.parse(mock.fetch.mock.calls[0][1].body);
 
     // GPT-4o should use response_format.json_schema for schema handling
     expect(actualRequestBody.response_format).toBeTruthy();
@@ -248,13 +268,14 @@ describe("OpenAI Wire Protocol Tests", () => {
       model: "openai/gpt-4o",
       schema: schema,
       useToolMode: true, // Custom option to enable tool mode for OpenAI
+      mock,
     });
 
     // Verify fetch was called
-    expect(global.fetch).toHaveBeenCalled();
+    expect(mock.fetch).toHaveBeenCalled();
 
     // Get the request body that was passed to fetch
-    const actualRequestBody = JSON.parse((global.fetch as Mock).mock.calls[0][1].body);
+    const actualRequestBody = JSON.parse(mock.fetch.mock.calls[0][1].body);
 
     // If tool mode is enabled for OpenAI, it should use tools format
     if (actualRequestBody.tools) {

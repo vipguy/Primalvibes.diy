@@ -1,22 +1,9 @@
-import { vitest, describe, it, expect, beforeEach, Mock } from "vitest";
+import { vitest, describe, it, expect, beforeEach, assert } from "vitest";
 import { callAi } from "call-ai";
+import { HttpHeader } from "@adviser/cement";
 
 // Mock global fetch
-global.fetch = vitest.fn();
-
-// Simple mock for TextDecoder
-global.TextDecoder = vitest.fn().mockImplementation(() => ({
-  decode: vitest.fn((value) => {
-    // Basic mock implementation without recursion
-    if (value instanceof Uint8Array) {
-      // Convert the Uint8Array to a simple string
-      return Array.from(value)
-        .map((byte) => String.fromCharCode(byte))
-        .join("");
-    }
-    return "";
-  }),
-}));
+const mock = { fetch: vitest.fn() };
 
 describe("Claude JSON Property Splitting Test", () => {
   beforeEach(() => {
@@ -38,18 +25,33 @@ describe("Claude JSON Property Splitting Test", () => {
           languages: { type: "array", items: { type: "string" } },
         },
       },
+      mock,
     };
 
     // Create a simple mock that focuses on the specific property splitting issue
-    const mockResponse = {
+    const mockResponse: Response = {
       clone: () => mockResponse,
       ok: true,
       status: 200,
-      headers: {
-        forEach: vitest.fn(),
+      headers: HttpHeader.from({ "content-type": "application/json" }).AsHeaders(),
+      // forEach: vitest.fn(),
+      // },
+      text: async function (this: Response) {
+        let result = "";
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const reader = this.body!.getReader();
+        while (true) {
+          const x = await reader.read();
+          // console.log("Reading...", x);
+          const { done, value } = x;
+          if (done) break;
+          result += new TextDecoder().decode(value);
+        }
+        // console.log("xxxx", result);
+        return result;
       },
       body: {
-        getReader: vitest.fn().mockReturnValue({
+        getReader: () => ({
           read: vitest
             .fn()
             // Streaming setup chunk
@@ -83,13 +85,18 @@ describe("Claude JSON Property Splitting Test", () => {
               done: true,
             }),
         }),
-      },
-    };
+      } as unknown as ReadableStream<Uint8Array>,
+    } as unknown as Response;
 
-    // Override global.fetch mock for this test
-    (global.fetch as Mock).mockResolvedValueOnce(mockResponse);
+    // Override mock.fetch mock for this test
+    mock.fetch.mockResolvedValueOnce(mockResponse);
 
-    const generator = (await callAi("Provide information about France.", options)) as AsyncGenerator<string, string, unknown>;
+    const generator = await callAi("Provide information about France.", options); // as AsyncGenerator<string, string, unknown>;
+
+    if (typeof generator === "string") {
+      assert("Expected generator, got string");
+      return;
+    }
 
     // The expected final parsed result
     const expectedResult = {

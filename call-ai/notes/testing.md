@@ -61,9 +61,11 @@ This helps distinguish between:
 Based on our debugging, we identified several types of root causes:
 
 1. **Schema Compatibility Issues**: Different AI models interpret schema validation differently.
+
    - Solution: Implement recursive schema validation that handles nested objects properly.
 
 2. **Field Name Inconsistency**: Models sometimes use variations of field names (e.g., `high_temp` vs `high`).
+
    - Solution: Either make tests flexible enough to handle variations or make schema validation stricter.
 
 3. **API Streaming Limitations**: Some models don't support schema validation with streaming properly.

@@ -6,6 +6,7 @@ import { globalDebug, keyStore, initKeyStore } from "./key-management.js";
 import { handleApiError, checkForInvalidModelError } from "./error-handling.js";
 import { responseMetadata, boxString } from "./response-metadata.js";
 import { PACKAGE_VERSION } from "./version.js";
+import { callAiFetch } from "./utils.js";
 
 // Import package version for debugging
 const FALLBACK_MODEL = "openrouter/auto";
@@ -119,7 +120,7 @@ async function callAINonStreaming(prompt: string | Message[], options: CallAIOpt
 
   try {
     // Make the API request - matching original implementation structure
-    const response = await fetch(url, {
+    const response = await callAiFetch(options)(url, {
       method: "POST",
       headers,
       body: JSON.stringify(requestBody),
@@ -198,7 +199,7 @@ async function callAINonStreaming(prompt: string | Message[], options: CallAIOpt
     });
 
     // If handleApiError refreshed the key, we want to retry with the new key
-    if (keyStore.current && keyStore.current !== apiKey) {
+    if (keyStore().current && keyStore().current !== apiKey) {
       if (debug) {
         console.log(`[callAi:${PACKAGE_VERSION}] Retrying with refreshed API key`);
       }
@@ -208,7 +209,7 @@ async function callAINonStreaming(prompt: string | Message[], options: CallAIOpt
         prompt,
         {
           ...options,
-          apiKey: keyStore.current,
+          apiKey: keyStore().current,
         },
         isRetry, // Preserve retry status
       );

@@ -2,21 +2,7 @@ import { callAi } from "call-ai";
 import { describe, it, expect, beforeEach, vitest, Mock } from "vitest";
 
 // Mock global fetch
-global.fetch = vitest.fn();
-
-// Simple mock for TextDecoder
-global.TextDecoder = vitest.fn().mockImplementation(() => ({
-  decode: vitest.fn((value) => {
-    // Basic mock implementation without recursion
-    if (value instanceof Uint8Array) {
-      // Convert the Uint8Array to a simple string
-      return Array.from(value)
-        .map((byte) => String.fromCharCode(byte))
-        .join("");
-    }
-    return "";
-  }),
-}));
+const mock = { fetch: vitest.fn() };
 
 describe("Claude Streaming JSON Property Splitting Test", () => {
   beforeEach(() => {
@@ -95,8 +81,8 @@ describe("Claude Streaming JSON Property Splitting Test", () => {
       },
     };
 
-    // Override the global.fetch mock for this test
-    (global.fetch as Mock).mockResolvedValueOnce(mockResponse);
+    // Override the mock.fetch mock for this test
+    mock.fetch.mockResolvedValueOnce(mockResponse);
 
     const generator = (await callAi("Provide information about France.", options)) as AsyncGenerator<string, string, unknown>;
 
@@ -188,8 +174,8 @@ describe("Claude Streaming JSON Property Splitting Test", () => {
       },
     };
 
-    // Override the global.fetch mock for this test
-    (global.fetch as Mock).mockResolvedValueOnce(mockResponseWithSplitValues);
+    // Override the mock.fetch mock for this test
+    mock.fetch.mockResolvedValueOnce(mockResponseWithSplitValues);
 
     const generator = (await callAi("Provide information about France.", options)) as AsyncGenerator<string, string, unknown>;
 
@@ -272,8 +258,8 @@ describe("Claude Streaming JSON Property Splitting Test", () => {
       },
     };
 
-    // Override the global.fetch mock for this test
-    (global.fetch as Mock).mockResolvedValueOnce(mockResponseWithMissingValue);
+    // Override the mock.fetch mock for this test
+    mock.fetch.mockResolvedValueOnce(mockResponseWithMissingValue);
 
     const generator = (await callAi("Provide information about France.", options)) as AsyncGenerator<string, string, unknown>;
 

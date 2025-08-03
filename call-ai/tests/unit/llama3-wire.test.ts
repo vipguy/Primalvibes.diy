@@ -1,11 +1,9 @@
-import fs from "fs";
-import path from "path";
 import { callAi, Schema, Message } from "call-ai";
-import { describe, beforeEach, Mock, it, expect, vitest } from "vitest";
+import { describe, beforeEach, it, expect, vitest } from "vitest";
 // import { vitest } from "vitest";
 
 // Mock fetch to use our fixture files
-global.fetch = vitest.fn();
+const mock = { fetch: vitest.fn() };
 
 describe("Llama3 Wire Protocol Tests", () => {
   // Read fixtures
@@ -16,7 +14,9 @@ describe("Llama3 Wire Protocol Tests", () => {
   //   ),
   // );
 
-  const llama3ResponseFixture = fs.readFileSync(path.join(__dirname, "../fixtures/llama3-response.json"), "utf8");
+  function llama3ResponseFixture() {
+    return fetch("http://localhost:15731/fixtures/llama3-response.json").then((r) => r.json());
+  }
 
   // const llama3SystemRequestFixture = JSON.parse(
   //   fs.readFileSync(
@@ -25,19 +25,21 @@ describe("Llama3 Wire Protocol Tests", () => {
   //   ),
   // );
 
-  const llama3SystemResponseFixture = fs.readFileSync(path.join(__dirname, "../fixtures/llama3-system-response.json"), "utf8");
+  function llama3SystemResponseFixture() {
+    return fetch("http://localhost:15731/fixtures/llama3-system-response.json").then((r) => r.json());
+  }
 
   beforeEach(() => {
     // Reset mocks
-    (global.fetch as Mock).mockClear();
+    mock.fetch.mockClear();
 
     // Mock successful response
-    (global.fetch as Mock).mockImplementation(async () => {
+    mock.fetch.mockImplementation(async () => {
       return {
         ok: true,
         status: 200,
-        text: async () => llama3ResponseFixture,
-        json: async () => JSON.parse(llama3ResponseFixture),
+        text: async () => llama3ResponseFixture().then((r) => JSON.stringify(r)),
+        json: async () => llama3ResponseFixture(),
       };
     });
   });
@@ -60,13 +62,14 @@ describe("Llama3 Wire Protocol Tests", () => {
       apiKey: "test-api-key",
       model: "meta-llama/llama-3.3-70b-instruct",
       schema: schema,
+      mock,
     });
 
     // Verify fetch was called
-    expect(global.fetch).toHaveBeenCalled();
+    expect(mock.fetch).toHaveBeenCalled();
 
     // Get the request body that was passed to fetch
-    const actualRequestBody = JSON.parse((global.fetch as Mock).mock.calls[0][1].body);
+    const actualRequestBody = JSON.parse(mock.fetch.mock.calls[0][1].body);
 
     // Check that we're using system message approach rather than JSON schema format
     expect(actualRequestBody.messages).toBeTruthy();
@@ -92,12 +95,12 @@ describe("Llama3 Wire Protocol Tests", () => {
 
   it("should correctly handle Llama3 response with schema", async () => {
     // Update mock to return proper response
-    (global.fetch as Mock).mockImplementationOnce(async () => {
+    mock.fetch.mockImplementationOnce(async () => {
       return {
         ok: true,
         status: 200,
-        text: async () => llama3ResponseFixture,
-        json: async () => JSON.parse(llama3ResponseFixture),
+        text: async () => llama3ResponseFixture().then((r) => JSON.stringify(r)),
+        json: async () => llama3ResponseFixture(),
       };
     });
 
@@ -118,10 +121,11 @@ describe("Llama3 Wire Protocol Tests", () => {
       apiKey: "test-api-key",
       model: "meta-llama/llama-3.3-70b-instruct",
       schema: schema,
+      mock,
     });
 
     // Parse the Llama3 response fixture to get expected content
-    // const responseObj = JSON.parse(llama3ResponseFixture);
+    // const responseObj = JSON.parse(llama3ResponseFixture());
     // const responseContent = responseObj.choices[0].message.content;
 
     // Verify the result
@@ -138,12 +142,12 @@ describe("Llama3 Wire Protocol Tests", () => {
 
   it("should handle system message approach with Llama3", async () => {
     // Update mock to return system message response
-    (global.fetch as Mock).mockImplementationOnce(async () => {
+    mock.fetch.mockImplementationOnce(async () => {
       return {
         ok: true,
         status: 200,
-        text: async () => llama3SystemResponseFixture,
-        json: async () => JSON.parse(llama3SystemResponseFixture),
+        text: async () => llama3SystemResponseFixture().then((r) => JSON.stringify(r)),
+        json: async () => llama3SystemResponseFixture(),
       };
     });
 
@@ -163,6 +167,7 @@ describe("Llama3 Wire Protocol Tests", () => {
       {
         apiKey: "test-api-key",
         model: "meta-llama/llama-3.3-70b-instruct",
+        mock,
       },
     );
 

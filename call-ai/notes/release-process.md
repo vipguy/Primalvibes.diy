@@ -22,6 +22,7 @@ This document outlines the steps to create a new release of the call-ai package.
    - Use `major` for breaking changes (X.0.0)
 
 2. This will:
+
    - Update the version in package.json
    - Create a new git commit
    - Create a new git tag

@@ -31,4 +31,8 @@ export { ImgGenModal } from './components/ImgGenUtils/ImgGenModal.jsx';
 
 export { ImgGenDisplayPlaceholder } from './components/ImgGenUtils/ImgGenDisplayPlaceholder.js';
 
-export { type UseImageGenOptions, type UseImageGenResult, type PartialImageDocument } from './hooks/image-gen/types.js';
+export {
+  type UseImageGenOptions,
+  type UseImageGenResult,
+  type PartialImageDocument,
+} from './hooks/image-gen/types.js';

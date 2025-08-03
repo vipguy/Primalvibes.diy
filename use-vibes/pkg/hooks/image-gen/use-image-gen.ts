@@ -363,7 +363,9 @@ async function loadOrGenerateImage({
 
             // Clear any existing request with the same prompt from the cache
             // This ensures we don't get a cached result
-            const requestKey = `${currentPromptText}-${JSON.stringify(getRelevantOptions(options))}`;
+            const requestKey = `${currentPromptText}-${JSON.stringify(
+              getRelevantOptions(options)
+            )}`;
 
             cleanupRequestKey(requestKey);
 

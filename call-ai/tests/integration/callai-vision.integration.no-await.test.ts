@@ -1,6 +1,4 @@
 import { callAi, ContentItem, callAiEnv } from "call-ai";
-import fs from "fs";
-import path from "path";
 import { itif } from "../test-helper.js";
 import { describe, expect } from "vitest";
 
@@ -10,6 +8,14 @@ const haveApiKey = callAiEnv.CALLAI_API_KEY;
 // Timeout for image recognition tests
 const TIMEOUT = 30000;
 
+async function blobToBase64(blob: Blob) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.readAsDataURL(blob);
+  });
+}
+
 describe("Call-AI Vision Recognition", () => {
   itif(Boolean(haveApiKey))(
     "should analyze cat.png with callAi function",
@@ -17,9 +23,9 @@ describe("Call-AI Vision Recognition", () => {
       console.log("Testing vision recognition with callAi");
 
       // Read the image file and convert to base64
-      const imagePath = path.resolve(__dirname, "../fixtures/cat.png");
-      const imageBuffer = fs.readFileSync(imagePath);
-      const base64Image = imageBuffer.toString("base64");
+      const imageBuffer = await fetch("http://localhost:15731/fixtures/cat.png").then((r) => r.blob());
+      const base64Image = await blobToBase64(imageBuffer);
+      console.log("Base64 image length:", base64Image);
       const dataUri = `data:image/png;base64,${base64Image}`;
 
       console.log("Image loaded and converted to base64");

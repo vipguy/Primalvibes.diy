@@ -198,7 +198,9 @@ export function ControlsBar({
               {/* Version indicator - only display if we have versions */}
               {totalVersions > 1 && (
                 <span
-                  className={`imggen-version-indicator version-indicator ${versionFlash ? 'imggen-version-flash' : ''}`}
+                  className={`imggen-version-indicator version-indicator ${
+                    versionFlash ? 'imggen-version-flash' : ''
+                  }`}
                   aria-live="polite"
                 >
                   {versionIndex + 1} / {totalVersions}

@@ -19,5 +19,11 @@
     "types": ["node", "deno"]
   },
   "include": ["call-ai", "use-vibes", "vibes.diy"],
-  "exclude": ["**/dist/**", "**/node_modules/**", "**/examples/**", "**/.react-router/**", "**/.netlify/**"]
+  "exclude": [
+    "**/dist/**",
+    "**/node_modules/**",
+    "**/examples/**",
+    "**/.react-router/**",
+    "**/.netlify/**"
+  ]
 }

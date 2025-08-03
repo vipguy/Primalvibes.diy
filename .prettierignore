@@ -7,3 +7,5 @@ scripts/
 **/.esm-cache/**
 **/dist/**
 **/coverage/**
+**/.react-router/
+**/.netlify/

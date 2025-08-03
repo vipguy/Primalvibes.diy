@@ -1171,7 +1171,7 @@
 +    
 +    await callAi('Create a themed music playlist', options);
 +    
-+    const body = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
++    const body = JSON.parse((mock.fetch as jest.Mock).mock.calls[0][1].body);
 +    expect(body.response_format.type).toBe('json_schema');
 +    // Check that schema property exists in json_schema containing the schema definition
 +    expect(body.response_format.json_schema.schema).toBeDefined();

@@ -3,6 +3,7 @@
  */
 
 import { ProcessedSchema } from "./types.js";
+// import { process } from 'node:process';
 
 /**
  * Recursively adds additionalProperties: false to all object types in a schema
@@ -60,28 +61,55 @@ export function recursivelyAddAdditionalProperties(schema: ProcessedSchema): Pro
 }
 
 class CallAIEnv {
+  envFromProcess() {
+    return (globalThis.process?.env as Record<string, string>) || {};
+  }
+
+  envFromImportMeta() {
+    return (import.meta as unknown as { env: Record<string, string> })?.env || {};
+  }
+
+  envFromWindow() {
+    return (globalThis.window as unknown as { env: Record<string, string> })?.env || {};
+  }
+
+  setup() {
+    const envs = [];
+    try {
+      envs.push(this.envFromProcess());
+    } catch (e) {
+      /* no-op */
+    }
+    try {
+      envs.push(this.envFromImportMeta());
+    } catch (e) {
+      /* no-op */
+    }
+    try {
+      envs.push(this.envFromWindow());
+    } catch (e) {
+      /* no-op */
+    }
+    return envs;
+  }
+
+  readonly envs: Record<string, string>[] = this.setup();
+
   private getEnv(key: string): string | undefined {
-    const wEnv = this.getEnvFromWindow(key);
-    if (wEnv) return wEnv;
-
-    if (process && process.env) {
-      return process.env[key];
+    for (const prefix of ["", "VITE_"]) {
+      for (const env of this.envs) {
+        if (env && env[prefix + key]) {
+          return env[prefix + key];
+        }
+      }
     }
-    console.warn("[callAi] Environment variable not found:", key);
+    // console.warn("[callAi] Environment variable not found:", key)
     return undefined;
   }
 
-  private getWindow(): (Window & { callAi?: { API_KEY: string } }) | undefined {
-    return globalThis.window ? globalThis.window : undefined;
-  }
-
-  private getEnvFromWindow(key: string): string | undefined {
-    const window = this.getWindow();
-    if (window && key in window) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return (window as any)[key];
-    }
-    return undefined;
+  overrideEnv(env: Record<string, string>) {
+    // reset envs
+    this.envs.splice(0, this.envs.length, env);
   }
 
   readonly def = {
@@ -100,12 +128,15 @@ class CallAIEnv {
   }
 
   get CALLAI_API_KEY() {
-    return (
+    const x =
       this.getEnv("CALLAI_API_KEY") ??
       this.getEnv("OPENROUTER_API_KEY") ??
-      this.getWindow()?.callAi?.API_KEY ??
-      this.getEnv("LOW_BALANCE_OPENROUTER_API_KEY")
-    );
+      (this.envFromWindow()?.callAi as unknown as { API_KEY: string })?.API_KEY ??
+      this.getEnv("LOW_BALANCE_OPENROUTER_API_KEY");
+    if (x) {
+      console.log("[callAi] Using API key from", x, this.envs.length, new Error().stack);
+    }
+    return x;
   }
   get CALLAI_REFRESH_ENDPOINT() {
     return this.getEnv("CALLAI_REFRESH_ENDPOINT");
@@ -140,4 +171,8 @@ export function entriesHeaders(headers: Headers) {
     entries.push([key, value]);
   });
   return entries;
+}
+
+export function callAiFetch(options: { mock?: { fetch?: typeof fetch } }): typeof fetch {
+  return options.mock?.fetch || globalThis.fetch;
 }
