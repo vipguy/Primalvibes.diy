@@ -1,6 +1,6 @@
 /* eslint-disable no-useless-escape */
 import { callAi } from "call-ai";
-import { describe, it, expect, beforeEach, vi} from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 
 // Mock global fetch
 const global = globalThis;

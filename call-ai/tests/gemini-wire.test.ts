@@ -33,8 +33,7 @@ describe("Gemini Wire Protocol Tests", () => {
     globalFetch.mockClear();
 
     // Mock successful response
-    globalFetch
-    .mockImplementation(async (_url, _options) => {
+    globalFetch.mockImplementation(async (_url, _options) => {
       return {
         ok: true,
         status: 200,

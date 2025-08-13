@@ -9,10 +9,10 @@ export default {
   //collectCoverageFrom: ["src/**/*.ts", "!src/**/*.d.ts", "!src/**/*.test.ts"],
   //coverageThreshold: {
   //  global: {
-   //   branches: 55,
-    //  functions: 80,
-    //  lines: 65,
-    //  statements: 65,
-    //},
+  //   branches: 55,
+  //  functions: 80,
+  //  lines: 65,
+  //  statements: 65,
+  //},
   //},
 };

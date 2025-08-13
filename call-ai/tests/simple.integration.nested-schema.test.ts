@@ -1,4 +1,4 @@
-import { expect, it, describe, } from "vitest";
+import { expect, it, describe } from "vitest";
 import { callAi, getMeta, Message } from "call-ai";
 import { dotenv } from "zx";
 

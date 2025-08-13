@@ -1,6 +1,6 @@
 import { callAi } from "call-ai";
 import { dotenv } from "zx";
-import { describe, expect, it, vi, } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { fail } from "assert";
 
 // Load environment variables from .env file if present

@@ -1,6 +1,6 @@
 import { callAi, Message, Schema } from "call-ai";
 import { dotenv } from "zx";
-import { describe, expect, it, beforeEach, vi, Mock, } from "vitest";
+import { describe, expect, it, beforeEach, vi, Mock } from "vitest";
 import { fail } from "assert";
 
 dotenv.config();
