@@ -1,6 +1,6 @@
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { render } from '@testing-library/react';
-import IframeScrollController from '../app/components/ResultPreview/IframeScrollController';
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
+import { render } from "@testing-library/react";
+import IframeScrollController from "../app/components/ResultPreview/IframeScrollController";
 
 // Mock ResizeObserver since it's not available in the test environment
 class MockResizeObserver {
@@ -29,14 +29,14 @@ Element.prototype.getBoundingClientRect = vi.fn().mockReturnValue({
 
 Element.prototype.scrollTo = vi.fn();
 
-describe('IframeScrollController', () => {
+describe("IframeScrollController", () => {
   beforeEach(() => {
     // Setup DOM structure that SandpackScrollController would expect
-    const rootDiv = document.createElement('div');
-    rootDiv.className = 'sp-wrapper';
+    const rootDiv = document.createElement("div");
+    rootDiv.className = "sp-wrapper";
 
-    const previewContainer = document.createElement('div');
-    previewContainer.className = 'sp-preview-container';
+    const previewContainer = document.createElement("div");
+    previewContainer.className = "sp-preview-container";
     rootDiv.appendChild(previewContainer);
 
     document.body.appendChild(rootDiv);
@@ -44,36 +44,36 @@ describe('IframeScrollController', () => {
 
   afterEach(() => {
     // Clean up
-    document.body.innerHTML = '';
+    document.body.innerHTML = "";
 
     // Remove the style element if it was added
-    const styleElement = document.getElementById('highlight-style');
+    const styleElement = document.getElementById("highlight-style");
     if (styleElement) {
       styleElement.remove();
     }
   });
 
-  it('renders without crashing', () => {
+  it("renders without crashing", () => {
     render(<IframeScrollController isStreaming={false} />);
 
     // Check that the highlight style is added
-    const styleElement = document.getElementById('highlight-style');
+    const styleElement = document.getElementById("highlight-style");
     expect(styleElement).not.toBeNull();
   });
 
-  it('renders with streaming enabled', () => {
+  it("renders with streaming enabled", () => {
     render(<IframeScrollController isStreaming={true} />);
 
     // Component renders without errors
-    const styleElement = document.getElementById('highlight-style');
+    const styleElement = document.getElementById("highlight-style");
     expect(styleElement).not.toBeNull();
   });
 
-  it('adds highlight style to the document', () => {
+  it("adds highlight style to the document", () => {
     render(<IframeScrollController isStreaming={false} />);
 
-    const styleElement = document.getElementById('highlight-style');
+    const styleElement = document.getElementById("highlight-style");
     expect(styleElement).not.toBeNull();
-    expect(styleElement?.textContent).toContain('.cm-line-highlighted');
+    expect(styleElement?.textContent).toContain(".cm-line-highlighted");
   });
 });

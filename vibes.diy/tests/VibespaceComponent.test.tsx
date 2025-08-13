@@ -1,48 +1,48 @@
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
-import { MemoryRouter } from 'react-router-dom';
-import VibespaceComponent from '../app/components/VibespaceComponent';
+import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { MemoryRouter } from "react-router-dom";
+import VibespaceComponent from "../app/components/VibespaceComponent";
 
 // Mock the Fireproof hook
-vi.mock('use-fireproof', () => ({
+vi.mock("use-fireproof", () => ({
   useFireproof: vi.fn(() => ({
     useAllDocs: vi.fn(() => ({ docs: [] })),
   })),
 }));
 
 // Mock the vibespace theme components
-vi.mock('../app/components/vibespace/Basic', () => ({
+vi.mock("../app/components/vibespace/Basic", () => ({
   default: ({ userId }: { userId: string }) => (
     <div data-testid="basic-theme">Basic theme for {userId}</div>
   ),
 }));
 
-vi.mock('../app/components/vibespace/Wild', () => ({
+vi.mock("../app/components/vibespace/Wild", () => ({
   default: ({ userId }: { userId: string }) => (
     <div data-testid="wild-theme">Wild theme for {userId}</div>
   ),
 }));
 
-vi.mock('../app/components/vibespace/ExplodingBrain', () => ({
+vi.mock("../app/components/vibespace/ExplodingBrain", () => ({
   default: ({ userId }: { userId: string }) => (
     <div data-testid="brain-theme">Brain theme for {userId}</div>
   ),
 }));
 
-vi.mock('../app/components/vibespace/Cyberpunk', () => ({
+vi.mock("../app/components/vibespace/Cyberpunk", () => ({
   default: ({ userId }: { userId: string }) => (
     <div data-testid="cyberpunk-theme">Cyberpunk theme for {userId}</div>
   ),
 }));
 
 // Mock Canvas API for jsdom
-Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
+Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
   value: vi.fn(() => ({
-    fillStyle: '',
+    fillStyle: "",
     fillRect: vi.fn(),
-    strokeStyle: '',
+    strokeStyle: "",
     lineWidth: 0,
-    lineCap: '',
+    lineCap: "",
     beginPath: vi.fn(),
     moveTo: vi.fn(),
     lineTo: vi.fn(),
@@ -55,12 +55,12 @@ Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
     translate: vi.fn(),
     rotate: vi.fn(),
     shadowBlur: 0,
-    shadowColor: '',
+    shadowColor: "",
   })),
 });
 
 // Mock VibesDIYLogo
-vi.mock('../app/components/VibesDIYLogo', () => ({
+vi.mock("../app/components/VibesDIYLogo", () => ({
   default: ({ height }: { height: number }) => (
     <div data-testid="vibes-logo" style={{ height: `${height}px` }}>
       Vibes DIY Logo
@@ -69,7 +69,7 @@ vi.mock('../app/components/VibesDIYLogo', () => ({
 }));
 
 // Mock SimpleAppLayout
-vi.mock('../app/components/SimpleAppLayout', () => ({
+vi.mock("../app/components/SimpleAppLayout", () => ({
   default: ({
     children,
     headerLeft,
@@ -84,69 +84,78 @@ vi.mock('../app/components/SimpleAppLayout', () => ({
   ),
 }));
 
-const renderWithRouter = (component: React.ReactElement, initialEntries = ['/']) => {
-  return render(<MemoryRouter initialEntries={initialEntries}>{component}</MemoryRouter>);
+const renderWithRouter = (
+  component: React.ReactElement,
+  initialEntries = ["/"],
+) => {
+  return render(
+    <MemoryRouter initialEntries={initialEntries}>{component}</MemoryRouter>,
+  );
 };
 
-describe('VibespaceComponent', () => {
-  it('should render starfield for user with no vibes (tildeId)', () => {
+describe("VibespaceComponent", () => {
+  it("should render starfield for user with no vibes (tildeId)", () => {
     renderWithRouter(<VibespaceComponent tildeId="nonexistentuser" />);
 
-    expect(screen.getByText('EMPTY SPACE')).toBeInTheDocument();
-    expect(screen.getByText('~nonexistentuser')).toBeInTheDocument();
-    expect(screen.getByText('GO TO /VIBES/MINE')).toBeInTheDocument();
+    expect(screen.getByText("EMPTY SPACE")).toBeInTheDocument();
+    expect(screen.getByText("~nonexistentuser")).toBeInTheDocument();
+    expect(screen.getByText("GO TO /VIBES/MINE")).toBeInTheDocument();
     expect(screen.getByText(/STAR ANY PUBLISHED VIBE ON/i)).toBeInTheDocument();
-    expect(screen.getByText('/VIBES/MINE')).toBeInTheDocument();
+    expect(screen.getByText("/VIBES/MINE")).toBeInTheDocument();
     expect(screen.getByText(/TO LIST IT HERE/i)).toBeInTheDocument();
   });
 
-  it('should render starfield for user with no vibes (atId)', () => {
+  it("should render starfield for user with no vibes (atId)", () => {
     renderWithRouter(<VibespaceComponent atId="nonexistentuser" />);
 
-    expect(screen.getByText('EMPTY SPACE')).toBeInTheDocument();
-    expect(screen.getByText('@nonexistentuser')).toBeInTheDocument();
-    expect(screen.getByText('GO TO /VIBES/MINE')).toBeInTheDocument();
+    expect(screen.getByText("EMPTY SPACE")).toBeInTheDocument();
+    expect(screen.getByText("@nonexistentuser")).toBeInTheDocument();
+    expect(screen.getByText("GO TO /VIBES/MINE")).toBeInTheDocument();
     expect(screen.getByText(/STAR ANY PUBLISHED VIBE ON/i)).toBeInTheDocument();
-    expect(screen.getByText('/VIBES/MINE')).toBeInTheDocument();
+    expect(screen.getByText("/VIBES/MINE")).toBeInTheDocument();
     expect(screen.getByText(/TO LIST IT HERE/i)).toBeInTheDocument();
   });
 
-  it('should render invalid user space message when no ID provided', () => {
+  it("should render invalid user space message when no ID provided", () => {
     renderWithRouter(<VibespaceComponent />);
 
-    expect(screen.getByText('Invalid user space')).toBeInTheDocument();
+    expect(screen.getByText("Invalid user space")).toBeInTheDocument();
   });
 
-  it('should accept clean user IDs without prefix symbols', () => {
+  it("should accept clean user IDs without prefix symbols", () => {
     // Test that the component receives clean IDs (no ~ or @ prefix)
     renderWithRouter(<VibespaceComponent tildeId="z2KBppKuUFKYxQvuj9" />);
 
     // Should show the clean ID with the appropriate prefix in the starfield
-    expect(screen.getByText('~z2KBppKuUFKYxQvuj9')).toBeInTheDocument();
-    expect(screen.getByText('EMPTY SPACE')).toBeInTheDocument();
+    expect(screen.getByText("~z2KBppKuUFKYxQvuj9")).toBeInTheDocument();
+    expect(screen.getByText("EMPTY SPACE")).toBeInTheDocument();
   });
 
-  it('should handle @ prefix correctly', () => {
+  it("should handle @ prefix correctly", () => {
     renderWithRouter(<VibespaceComponent atId="someuser123" />);
 
     // Should show the clean ID with @ prefix
-    expect(screen.getByText('@someuser123')).toBeInTheDocument();
-    expect(screen.getByText('EMPTY SPACE')).toBeInTheDocument();
+    expect(screen.getByText("@someuser123")).toBeInTheDocument();
+    expect(screen.getByText("EMPTY SPACE")).toBeInTheDocument();
   });
 
-  it('should render canvas element for starfield animation', () => {
-    const { container } = renderWithRouter(<VibespaceComponent tildeId="testuser" />);
+  it("should render canvas element for starfield animation", () => {
+    const { container } = renderWithRouter(
+      <VibespaceComponent tildeId="testuser" />,
+    );
 
-    const canvas = container.querySelector('canvas');
+    const canvas = container.querySelector("canvas");
     expect(canvas).toBeInTheDocument();
-    expect(canvas).toHaveClass('absolute', 'inset-0', 'h-full', 'w-full');
+    expect(canvas).toHaveClass("absolute", "inset-0", "h-full", "w-full");
   });
 
-  it('should have starfield animation styles', () => {
+  it("should have starfield animation styles", () => {
     renderWithRouter(<VibespaceComponent tildeId="testuser" />);
 
     // Check that starfield container has the right classes
-    const starfieldContainer = screen.getByText('EMPTY SPACE').closest('.h-screen');
-    expect(starfieldContainer).toHaveClass('bg-black');
+    const starfieldContainer = screen
+      .getByText("EMPTY SPACE")
+      .closest(".h-screen");
+    expect(starfieldContainer).toHaveClass("bg-black");
   });
 });

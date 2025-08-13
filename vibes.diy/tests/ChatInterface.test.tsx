@@ -1,8 +1,8 @@
-import { render } from '@testing-library/react';
-import { vi, describe, it, expect } from 'vitest';
-import ChatInterface from '../app/components/ChatInterface';
-import type { ChatState } from '../app/types/chat';
-import { mockChatStateProps } from './mockData';
+import { render } from "@testing-library/react";
+import { vi, describe, it, expect } from "vitest";
+import ChatInterface from "../app/components/ChatInterface";
+import type { ChatState } from "../app/types/chat";
+import { mockChatStateProps } from "./mockData";
 
 /**
  * Tests for the ChatInterface component
@@ -10,7 +10,7 @@ import { mockChatStateProps } from './mockData';
  */
 
 // Mock the useFireproof hook
-vi.mock('use-fireproof', () => ({
+vi.mock("use-fireproof", () => ({
   useFireproof: () => ({
     database: {},
     useLiveQuery: () => ({ docs: [] }),
@@ -24,17 +24,17 @@ const mockChatState: ChatState & {
 } = {
   ...mockChatStateProps,
   docs: [],
-  input: '',
+  input: "",
   setInput: vi.fn(),
   isStreaming: false,
   inputRef: { current: null },
   sendMessage: vi.fn(),
-  title: 'test title',
-  sessionId: 'test-session-id',
+  title: "test title",
+  sessionId: "test-session-id",
   selectedResponseDoc: undefined,
   selectedSegments: [],
   selectedCode: {
-    type: 'code',
+    type: "code",
     content: 'console.log("test")',
   },
   codeReady: false,
@@ -45,8 +45,8 @@ const mockChatState: ChatState & {
   navigateToView: vi.fn(),
 };
 
-describe('ChatInterface Component', () => {
-  it('renders without crashing', () => {
+describe("ChatInterface Component", () => {
+  it("renders without crashing", () => {
     // This test passes now that we've fixed the 'input is not defined' error
     // by properly destructuring input from chatState
     const { container } = render(<ChatInterface {...mockChatState} />);

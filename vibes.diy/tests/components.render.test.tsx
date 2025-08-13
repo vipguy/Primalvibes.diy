@@ -1,22 +1,34 @@
 // Vitest will automatically use mocks from __mocks__ directory
-import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { mockUseAuth, resetMockAuthState, setMockAuthState } from './__mocks__/useAuth';
-import ChatHeader from '../app/components/ChatHeaderContent';
-import MessageList from '../app/components/MessageList';
-import SessionSidebar from '../app/components/SessionSidebar';
-import type { AuthContextType } from '../app/contexts/AuthContext';
-import type { AiChatMessage, ChatMessageDocument, UserChatMessage } from '../app/types/chat';
-import { mockSessionSidebarProps } from './mockData';
-import { MockThemeProvider } from './utils/MockThemeProvider';
-import React from 'react';
+import { fireEvent, render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  mockUseAuth,
+  resetMockAuthState,
+  setMockAuthState,
+} from "./__mocks__/useAuth";
+import ChatHeader from "../app/components/ChatHeaderContent";
+import MessageList from "../app/components/MessageList";
+import SessionSidebar from "../app/components/SessionSidebar";
+import type { AuthContextType } from "../app/contexts/AuthContext";
+import type {
+  AiChatMessage,
+  ChatMessageDocument,
+  UserChatMessage,
+} from "../app/types/chat";
+import { mockSessionSidebarProps } from "./mockData";
+import { MockThemeProvider } from "./utils/MockThemeProvider";
+import React from "react";
 
 // Mock dependencies
-vi.mock('react-markdown', () => {
+vi.mock("react-markdown", () => {
   return {
     default: vi.fn(({ children }: { children: string }) => {
       // Use React.createElement instead of JSX
-      return React.createElement('div', { 'data-testid': 'markdown' }, children);
+      return React.createElement(
+        "div",
+        { "data-testid": "markdown" },
+        children,
+      );
     }),
   };
 });
@@ -25,23 +37,23 @@ vi.mock('react-markdown', () => {
 window.HTMLElement.prototype.scrollIntoView = vi.fn();
 
 // Mock the useAuth hook for SessionSidebar
-vi.mock('../app/contexts/AuthContext', () => ({
+vi.mock("../app/contexts/AuthContext", () => ({
   useAuth: mockUseAuth,
   AuthProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
 // Mock the useSessionMessages hook for MessageList
-vi.mock('../app/hooks/useSessionMessages', () => {
+vi.mock("../app/hooks/useSessionMessages", () => {
   return {
     useSessionMessages: (sessionId: string | null) => {
       // Check the sessionId to determine what to return
-      if (sessionId === 'streaming-session') {
+      if (sessionId === "streaming-session") {
         return {
           messages: [
             {
-              type: 'ai',
-              text: 'I am thinking...',
-              segments: [{ type: 'markdown', content: 'I am thinking...' }],
+              type: "ai",
+              text: "I am thinking...",
+              segments: [{ type: "markdown", content: "I am thinking..." }],
               isStreaming: true,
               timestamp: Date.now(),
             },
@@ -51,13 +63,13 @@ vi.mock('../app/hooks/useSessionMessages', () => {
           updateAiMessage: vi.fn(),
         };
       }
-      if (sessionId === 'empty-session-streaming') {
+      if (sessionId === "empty-session-streaming") {
         return {
           messages: [
-            { type: 'user', text: 'Hello', timestamp: Date.now() },
+            { type: "user", text: "Hello", timestamp: Date.now() },
             {
-              type: 'ai',
-              text: '',
+              type: "ai",
+              text: "",
               segments: [],
               isStreaming: true,
               timestamp: Date.now(),
@@ -68,14 +80,14 @@ vi.mock('../app/hooks/useSessionMessages', () => {
           updateAiMessage: vi.fn(),
         };
       }
-      if (sessionId === 'test-session') {
+      if (sessionId === "test-session") {
         return {
           messages: [
-            { type: 'user', text: 'Hello', timestamp: Date.now() },
+            { type: "user", text: "Hello", timestamp: Date.now() },
             {
-              type: 'ai',
-              text: 'Hi there',
-              segments: [{ type: 'markdown', content: 'Hi there' }],
+              type: "ai",
+              text: "Hi there",
+              segments: [{ type: "markdown", content: "Hi there" }],
               timestamp: Date.now(),
             },
           ],
@@ -99,14 +111,14 @@ const onOpenSidebar = vi.fn();
 
 // Wrapper providing controlled context value
 
-describe('Component Rendering', () => {
+describe("Component Rendering", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     resetMockAuthState();
   });
 
-  describe('ChatHeader', () => {
-    it('renders without crashing', () => {
+  describe("ChatHeader", () => {
+    it("renders without crashing", () => {
       render(
         <MockThemeProvider>
           <ChatHeader
@@ -115,12 +127,12 @@ describe('Component Rendering', () => {
             isStreaming={false}
             codeReady={false}
           />
-        </MockThemeProvider>
+        </MockThemeProvider>,
       );
-      expect(screen.getByText('Test Chat')).toBeInTheDocument();
+      expect(screen.getByText("Test Chat")).toBeInTheDocument();
     });
 
-    it('applies tooltip classes correctly', () => {
+    it("applies tooltip classes correctly", () => {
       render(
         <MockThemeProvider>
           <ChatHeader
@@ -129,14 +141,14 @@ describe('Component Rendering', () => {
             isStreaming={false}
             codeReady={false}
           />
-        </MockThemeProvider>
+        </MockThemeProvider>,
       );
       expect(
-        screen.getByText('New Vibe', { selector: 'span.pointer-events-none' })
+        screen.getByText("New Vibe", { selector: "span.pointer-events-none" }),
       ).toBeInTheDocument();
     });
 
-    it('handles new chat button click', () => {
+    it("handles new chat button click", () => {
       render(
         <MockThemeProvider>
           <ChatHeader
@@ -145,11 +157,11 @@ describe('Component Rendering', () => {
             isStreaming={false}
             codeReady={false}
           />
-        </MockThemeProvider>
+        </MockThemeProvider>,
       );
 
       // Just verify the new vibe button exists since we can't easily mock document.location
-      const newVibeButton = screen.getByLabelText('New Vibe');
+      const newVibeButton = screen.getByLabelText("New Vibe");
       expect(newVibeButton).toBeInTheDocument();
 
       // Note: we can't reliably test the navigation in JSDOM environment
@@ -157,18 +169,18 @@ describe('Component Rendering', () => {
     });
   });
 
-  describe('SessionSidebar', () => {
+  describe("SessionSidebar", () => {
     const authenticatedState: Partial<AuthContextType> = {
       isAuthenticated: true,
       isLoading: false,
       userPayload: {
-        userId: 'test-user',
+        userId: "test-user",
         exp: 9999,
         tenants: [],
         ledgers: [],
         iat: 1234567890,
-        iss: 'FP_CLOUD',
-        aud: 'PUBLIC',
+        iss: "FP_CLOUD",
+        aud: "PUBLIC",
       },
     };
     const unauthenticatedState: Partial<AuthContextType> = {
@@ -177,72 +189,76 @@ describe('Component Rendering', () => {
       userPayload: null,
     };
 
-    it('renders in hidden state', async () => {
+    it("renders in hidden state", async () => {
       const props = { ...mockSessionSidebarProps, isVisible: false };
       setMockAuthState(authenticatedState);
       render(
         <MockThemeProvider>
           <SessionSidebar {...props} />
-        </MockThemeProvider>
+        </MockThemeProvider>,
       );
-      const sidebarElement = await screen.findByTestId('session-sidebar');
-      expect(sidebarElement).toHaveClass('-translate-x-full');
+      const sidebarElement = await screen.findByTestId("session-sidebar");
+      expect(sidebarElement).toHaveClass("-translate-x-full");
     });
 
-    it('renders in visible state', async () => {
+    it("renders in visible state", async () => {
       const props = { ...mockSessionSidebarProps, isVisible: true };
       setMockAuthState(authenticatedState);
       render(
         <MockThemeProvider>
           <SessionSidebar {...props} />
-        </MockThemeProvider>
+        </MockThemeProvider>,
       );
-      const sidebarElement = await screen.findByTestId('session-sidebar');
-      expect(sidebarElement).not.toHaveClass('-translate-x-full');
+      const sidebarElement = await screen.findByTestId("session-sidebar");
+      expect(sidebarElement).not.toHaveClass("-translate-x-full");
     });
 
-    it('shows navigation menu items when authenticated', async () => {
+    it("shows navigation menu items when authenticated", async () => {
       const props = { ...mockSessionSidebarProps, isVisible: true };
       setMockAuthState(authenticatedState);
       render(
         <MockThemeProvider>
           <SessionSidebar {...props} />
-        </MockThemeProvider>
+        </MockThemeProvider>,
       );
-      expect(await screen.findByText('Settings')).toBeInTheDocument();
-      expect(screen.getByText('Home')).toBeInTheDocument();
-      expect(screen.getByText('My Vibes')).toBeInTheDocument();
-      expect(screen.getByText('About')).toBeInTheDocument();
+      expect(await screen.findByText("Settings")).toBeInTheDocument();
+      expect(screen.getByText("Home")).toBeInTheDocument();
+      expect(screen.getByText("My Vibes")).toBeInTheDocument();
+      expect(screen.getByText("About")).toBeInTheDocument();
     });
 
-    it('shows Login button when not authenticated', async () => {
+    it("shows Login button when not authenticated", async () => {
       const props = { ...mockSessionSidebarProps, isVisible: true };
       setMockAuthState(unauthenticatedState);
       render(
         <MockThemeProvider>
           <SessionSidebar {...props} />
-        </MockThemeProvider>
+        </MockThemeProvider>,
       );
-      expect(await screen.findByText('Log in')).toBeInTheDocument();
-      expect(screen.queryByText('Settings')).not.toBeInTheDocument();
+      expect(await screen.findByText("Log in")).toBeInTheDocument();
+      expect(screen.queryByText("Settings")).not.toBeInTheDocument();
     });
 
-    it('has a close button that works', () => {
+    it("has a close button that works", () => {
       const onCloseMock = vi.fn();
-      const props = { ...mockSessionSidebarProps, isVisible: true, onClose: onCloseMock };
+      const props = {
+        ...mockSessionSidebarProps,
+        isVisible: true,
+        onClose: onCloseMock,
+      };
       setMockAuthState(authenticatedState);
       render(
         <MockThemeProvider>
           <SessionSidebar {...props} />
-        </MockThemeProvider>
+        </MockThemeProvider>,
       );
-      fireEvent.click(screen.getByLabelText('Close sidebar'));
+      fireEvent.click(screen.getByLabelText("Close sidebar"));
       expect(onCloseMock).toHaveBeenCalled();
     });
   });
 
-  describe('MessageList', () => {
-    it('renders empty list', () => {
+  describe("MessageList", () => {
+    it("renders empty list", () => {
       render(
         <MockThemeProvider>
           <MessageList
@@ -259,30 +275,30 @@ describe('Component Rendering', () => {
               /* no-op */
             }}
           />
-        </MockThemeProvider>
+        </MockThemeProvider>,
       );
 
       // Verify the container is rendered but empty
-      const messageContainer = document.querySelector('.flex-col.space-y-4');
+      const messageContainer = document.querySelector(".flex-col.space-y-4");
       expect(messageContainer).toBeInTheDocument();
       expect(messageContainer?.children.length).toBe(0);
     });
 
-    it('renders messages correctly', () => {
+    it("renders messages correctly", () => {
       const messages = [
         {
-          type: 'user' as const,
-          text: 'Hello',
-          _id: 'user-1',
-          session_id: 'test-session',
+          type: "user" as const,
+          text: "Hello",
+          _id: "user-1",
+          session_id: "test-session",
           created_at: Date.now(),
         } as UserChatMessage,
         {
-          type: 'ai' as const,
-          text: 'Hi there',
-          _id: 'ai-1',
-          segments: [{ type: 'markdown', content: 'Hi there' }],
-          session_id: 'test-session',
+          type: "ai" as const,
+          text: "Hi there",
+          _id: "ai-1",
+          segments: [{ type: "markdown", content: "Hi there" }],
+          session_id: "test-session",
           created_at: Date.now(),
         } as AiChatMessage,
       ];
@@ -303,28 +319,28 @@ describe('Component Rendering', () => {
               /* no-op */
             }}
           />
-        </MockThemeProvider>
+        </MockThemeProvider>,
       );
-      expect(screen.getByText('Hello')).toBeInTheDocument();
-      expect(screen.getByText('Hi there')).toBeInTheDocument();
+      expect(screen.getByText("Hello")).toBeInTheDocument();
+      expect(screen.getByText("Hi there")).toBeInTheDocument();
     });
 
-    it('renders placeholder text when streaming with no content', () => {
+    it("renders placeholder text when streaming with no content", () => {
       const messages = [
         {
-          type: 'user' as const,
-          text: 'Hello',
-          _id: 'user-2',
-          session_id: 'test-session',
+          type: "user" as const,
+          text: "Hello",
+          _id: "user-2",
+          session_id: "test-session",
           created_at: Date.now(),
         } as UserChatMessage,
         {
-          type: 'ai' as const,
-          text: '',
-          _id: 'ai-2',
+          type: "ai" as const,
+          text: "",
+          _id: "ai-2",
           segments: [],
           isStreaming: true,
-          session_id: 'test-session',
+          session_id: "test-session",
           created_at: Date.now(),
         } as AiChatMessage,
       ];
@@ -345,22 +361,22 @@ describe('Component Rendering', () => {
               /* no-op */
             }}
           />
-        </MockThemeProvider>
+        </MockThemeProvider>,
       );
       // The Message component in our test displays "Processing response..." in a markdown element
       // when there's no content but streaming is true
-      expect(screen.getAllByTestId('markdown').length).toBeGreaterThan(0);
+      expect(screen.getAllByTestId("markdown").length).toBeGreaterThan(0);
     });
 
-    it('renders streaming message', () => {
+    it("renders streaming message", () => {
       const messages = [
         {
-          type: 'ai' as const,
-          text: 'I am thinking...',
-          _id: 'streaming-1',
-          segments: [{ type: 'markdown', content: 'I am thinking...' }],
+          type: "ai" as const,
+          text: "I am thinking...",
+          _id: "streaming-1",
+          segments: [{ type: "markdown", content: "I am thinking..." }],
           isStreaming: true,
-          session_id: 'test-session',
+          session_id: "test-session",
           created_at: Date.now(),
         } as AiChatMessage,
       ];
@@ -381,12 +397,12 @@ describe('Component Rendering', () => {
               /* no-op */
             }}
           />
-        </MockThemeProvider>
+        </MockThemeProvider>,
       );
-      expect(screen.getByText('I am thinking...')).toBeInTheDocument();
+      expect(screen.getByText("I am thinking...")).toBeInTheDocument();
     });
 
-    it('renders without crashing', () => {
+    it("renders without crashing", () => {
       render(
         <MockThemeProvider>
           <MessageList
@@ -403,21 +419,21 @@ describe('Component Rendering', () => {
               /* no-op */
             }}
           />
-        </MockThemeProvider>
+        </MockThemeProvider>,
       );
     });
 
-    it('renders messages with no streaming', () => {
+    it("renders messages with no streaming", () => {
       const messages = [
         {
-          _id: '1',
-          type: 'user',
-          text: 'Hello, world!',
+          _id: "1",
+          type: "user",
+          text: "Hello, world!",
         },
         {
-          _id: '2',
-          type: 'ai',
-          text: 'Hi there!',
+          _id: "2",
+          type: "ai",
+          text: "Hi there!",
         },
       ] as ChatMessageDocument[];
 
@@ -437,21 +453,21 @@ describe('Component Rendering', () => {
               /* no-op */
             }}
           />
-        </MockThemeProvider>
+        </MockThemeProvider>,
       );
     });
 
-    it('renders messages with streaming', () => {
+    it("renders messages with streaming", () => {
       const messages = [
         {
-          _id: '1',
-          type: 'user',
-          text: 'Hello, world!',
+          _id: "1",
+          type: "user",
+          text: "Hello, world!",
         },
         {
-          _id: '2',
-          type: 'ai',
-          text: 'Hi there!',
+          _id: "2",
+          type: "ai",
+          text: "Hi there!",
         },
       ] as ChatMessageDocument[];
 
@@ -471,19 +487,19 @@ describe('Component Rendering', () => {
               /* no-op */
             }}
           />
-        </MockThemeProvider>
+        </MockThemeProvider>,
       );
     });
 
-    it('renders AI messages with streaming segments', () => {
+    it("renders AI messages with streaming segments", () => {
       const messages = [
         {
-          _id: '1',
-          type: 'ai',
-          text: 'This is a streaming message',
+          _id: "1",
+          type: "ai",
+          text: "This is a streaming message",
           segments: [
-            { type: 'markdown', content: 'This is a ' },
-            { type: 'code', content: 'const x = "streaming message";' },
+            { type: "markdown", content: "This is a " },
+            { type: "code", content: 'const x = "streaming message";' },
           ],
         },
       ] as unknown as ChatMessageDocument[];
@@ -504,22 +520,22 @@ describe('Component Rendering', () => {
               /* no-op */
             }}
           />
-        </MockThemeProvider>
+        </MockThemeProvider>,
       );
     });
 
-    it('MessageList renders correctly with segments', () => {
+    it("MessageList renders correctly with segments", () => {
       const messages = [
         {
-          _id: 'user1',
-          type: 'user' as const,
-          text: 'Hello',
+          _id: "user1",
+          type: "user" as const,
+          text: "Hello",
         },
         {
-          _id: 'ai1',
-          type: 'ai' as const,
-          text: 'This is a test',
-          segments: [{ type: 'markdown', content: 'This is a test' }],
+          _id: "ai1",
+          type: "ai" as const,
+          text: "This is a test",
+          segments: [{ type: "markdown", content: "This is a test" }],
         },
       ] as unknown as ChatMessageDocument[];
 
@@ -539,11 +555,11 @@ describe('Component Rendering', () => {
               /* no-op */
             }}
           />
-        </MockThemeProvider>
+        </MockThemeProvider>,
       );
 
-      expect(screen.getByText('Hello')).toBeInTheDocument();
-      expect(screen.getByText('This is a test')).toBeInTheDocument();
+      expect(screen.getByText("Hello")).toBeInTheDocument();
+      expect(screen.getByText("This is a test")).toBeInTheDocument();
     });
   });
 });

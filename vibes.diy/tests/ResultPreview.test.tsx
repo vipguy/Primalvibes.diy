@@ -1,8 +1,8 @@
-import { vi, describe, it, expect, beforeEach, afterAll } from 'vitest';
-import { render, screen, act, waitFor } from '@testing-library/react';
-import ResultPreview from '../app/components/ResultPreview/ResultPreview';
-import { mockResultPreviewProps } from './mockData';
-import { MockThemeProvider } from './utils/MockThemeProvider';
+import { vi, describe, it, expect, beforeEach, afterAll } from "vitest";
+import { render, screen, act, waitFor } from "@testing-library/react";
+import ResultPreview from "../app/components/ResultPreview/ResultPreview";
+import { mockResultPreviewProps } from "./mockData";
+import { MockThemeProvider } from "./utils/MockThemeProvider";
 
 // Mock clipboard API
 Object.assign(navigator, {
@@ -12,20 +12,22 @@ Object.assign(navigator, {
 });
 
 // Mock URL methods that aren't available in test environment
-const mockObjectUrl = 'mock-blob-url';
+const mockObjectUrl = "mock-blob-url";
 URL.createObjectURL = vi.fn().mockReturnValue(mockObjectUrl);
 URL.revokeObjectURL = vi.fn();
 
 // Mock SandpackProvider and related components
-vi.mock('@codesandbox/sandpack-react', () => ({
+vi.mock("@codesandbox/sandpack-react", () => ({
   SandpackProvider: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="sandpack-provider">{children}</div>
   ),
-  SandpackLayout: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  SandpackLayout: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
   SandpackCodeEditor: () => <div data-testid="sandpack-editor">Editor</div>,
   SandpackPreview: () => <div data-testid="sandpack-preview">Preview</div>,
   useSandpack: () => ({
-    sandpack: { activeFile: '/App.jsx' },
+    sandpack: { activeFile: "/App.jsx" },
     listen: vi.fn().mockReturnValue(() => {
       /* no-op */
     }),
@@ -33,25 +35,25 @@ vi.mock('@codesandbox/sandpack-react', () => ({
 }));
 
 // Mock WelcomeScreen
-vi.mock('../app/components/ResultPreview/WelcomeScreen', () => ({
+vi.mock("../app/components/ResultPreview/WelcomeScreen", () => ({
   default: () => <div data-testid="welcome-screen">Welcome Screen Content</div>,
 }));
 
 // Mock the Sandpack scroll controller
-vi.mock('../app/components/ResultPreview/SandpackScrollController', () => ({
+vi.mock("../app/components/ResultPreview/SandpackScrollController", () => ({
   default: () => null,
 }));
 
 // Mock iframe behavior
 
 // Mock the IframeContent component to avoid iframe issues in tests
-vi.mock('../app/components/ResultPreview/IframeContent', () => ({
+vi.mock("../app/components/ResultPreview/IframeContent", () => ({
   default: ({ activeView }: { activeView: string }) => (
     <div data-testid="sandpack-provider" className="h-full">
       <div
         style={{
-          visibility: activeView === 'preview' ? 'visible' : 'hidden',
-          position: activeView === 'preview' ? 'static' : 'absolute',
+          visibility: activeView === "preview" ? "visible" : "hidden",
+          position: activeView === "preview" ? "static" : "absolute",
         }}
       >
         <iframe data-testid="preview-iframe" title="Preview" />
@@ -59,8 +61,8 @@ vi.mock('../app/components/ResultPreview/IframeContent', () => ({
       <div
         data-testid="sandpack-editor"
         style={{
-          visibility: activeView === 'code' ? 'visible' : 'hidden',
-          position: activeView === 'code' ? 'static' : 'absolute',
+          visibility: activeView === "code" ? "visible" : "hidden",
+          position: activeView === "code" ? "static" : "absolute",
         }}
       >
         Code Editor Content
@@ -90,8 +92,8 @@ beforeEach(() => {
 
   // Mock localStorage to return a valid API key
   Storage.prototype.getItem = function (key) {
-    if (key === 'vibes-openrouter-key') {
-      return JSON.stringify({ key: 'test-api-key', hash: 'test-hash' });
+    if (key === "vibes-openrouter-key") {
+      return JSON.stringify({ key: "test-api-key", hash: "test-hash" });
     }
     return originalGetItem.call(this, key);
   };
@@ -103,148 +105,170 @@ afterAll(() => {
   Storage.prototype.getItem = originalGetItem;
 });
 
-describe('ResultPreview', () => {
-  it('renders without crashing', () => {
+describe("ResultPreview", () => {
+  it("renders without crashing", () => {
     // Use non-empty code to ensure the editor is shown
     render(
       <MockThemeProvider>
-        <ResultPreview code="console.log('test');" {...mockResultPreviewProps} />
-      </MockThemeProvider>
+        <ResultPreview
+          code="console.log('test');"
+          {...mockResultPreviewProps}
+        />
+      </MockThemeProvider>,
     );
 
     // Now the sandpack editor should be visible
-    expect(screen.getByTestId('sandpack-editor')).toBeInTheDocument();
+    expect(screen.getByTestId("sandpack-editor")).toBeInTheDocument();
     // Don't check for preview since it might not be available in the test environment
     // expect(screen.getByTestId('sandpack-preview')).toBeDefined();
   });
 
-  it('displays welcome screen when code is empty', () => {
+  it("displays welcome screen when code is empty", () => {
     const { container } = render(
       <MockThemeProvider>
-        <ResultPreview code={''} {...mockResultPreviewProps} />
-      </MockThemeProvider>
+        <ResultPreview code={""} {...mockResultPreviewProps} />
+      </MockThemeProvider>,
     );
 
     // Instead of finding by role, check that the container has the expected structure
-    expect(container.querySelector('div.h-full > div.h-full')).toBeInTheDocument();
+    expect(
+      container.querySelector("div.h-full > div.h-full"),
+    ).toBeInTheDocument();
   });
 
-  it('handles streaming state correctly', () => {
+  it("handles streaming state correctly", () => {
     const code = 'const test = "Streaming";';
 
     render(
       <MockThemeProvider>
-        <ResultPreview code={code} isStreaming={true} {...mockResultPreviewProps} />
-      </MockThemeProvider>
+        <ResultPreview
+          code={code}
+          isStreaming={true}
+          {...mockResultPreviewProps}
+        />
+      </MockThemeProvider>,
     );
 
     // Just verify it renders without errors
-    expect(screen.getAllByTestId('sandpack-provider')[0]).toBeDefined();
+    expect(screen.getAllByTestId("sandpack-provider")[0]).toBeDefined();
   });
 
-  it('passes dependencies to SandpackProvider', () => {
+  it("passes dependencies to SandpackProvider", () => {
     const code = 'console.log("test");';
     const dependencies = {
-      react: '^18.0.0',
-      'react-dom': '^18.0.0',
+      react: "^18.0.0",
+      "react-dom": "^18.0.0",
     };
 
     render(
       <MockThemeProvider>
-        <ResultPreview code={code} dependencies={dependencies} {...mockResultPreviewProps} />
-      </MockThemeProvider>
+        <ResultPreview
+          code={code}
+          dependencies={dependencies}
+          {...mockResultPreviewProps}
+        />
+      </MockThemeProvider>,
     );
 
     // Just verify it renders without errors
-    expect(screen.getAllByTestId('sandpack-provider')[0]).toBeDefined();
+    expect(screen.getAllByTestId("sandpack-provider")[0]).toBeDefined();
   });
 
-  it('calls onShare when share button is clicked', () => {
+  it("calls onShare when share button is clicked", () => {
     // Skipping test since toolbar with share button has been removed
     // In the future, this would be added to a different component or the header
     expect(true).toBe(true);
   });
 
-  it('shows welcome screen with empty code', () => {
+  it("shows welcome screen with empty code", () => {
     const { container } = render(
       <MockThemeProvider>
         <ResultPreview code="" {...mockResultPreviewProps} />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Instead of finding by role, check that the container has the expected structure
-    expect(container.querySelector('div.h-full > div.h-full')).toBeInTheDocument();
+    expect(
+      container.querySelector("div.h-full > div.h-full"),
+    ).toBeInTheDocument();
   });
 
-  it('shows a share button when onShare is provided and code is not empty', () => {
+  it("shows a share button when onShare is provided and code is not empty", () => {
     // Skipping test since toolbar with share button has been removed
     expect(true).toBe(true);
   });
 
-  it('updates display when code changes', () => {
+  it("updates display when code changes", () => {
     const { rerender } = render(
       <MockThemeProvider>
         <ResultPreview code="" {...mockResultPreviewProps} />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
     rerender(
       <MockThemeProvider>
-        <ResultPreview code="console.log('test');" {...mockResultPreviewProps} />
-      </MockThemeProvider>
+        <ResultPreview
+          code="console.log('test');"
+          {...mockResultPreviewProps}
+        />
+      </MockThemeProvider>,
     );
 
     // Just verify it renders without errors
-    expect(screen.getAllByTestId('sandpack-provider')[0]).toBeDefined();
+    expect(screen.getAllByTestId("sandpack-provider")[0]).toBeDefined();
   });
 
-  it('renders with code content', () => {
+  it("renders with code content", () => {
     const code = 'const test = "Hello World";';
 
     render(
       <MockThemeProvider>
         <ResultPreview code={code} {...mockResultPreviewProps} />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Skip button checks since toolbar has been removed
-    expect(screen.getByTestId('sandpack-editor')).toBeInTheDocument();
+    expect(screen.getByTestId("sandpack-editor")).toBeInTheDocument();
   });
 
-  it('handles copy to clipboard', async () => {
+  it("handles copy to clipboard", async () => {
     // Skipping test since toolbar with copy button has been removed
     expect(true).toBe(true);
   });
 
-  it('renders with custom dependencies', async () => {
+  it("renders with custom dependencies", async () => {
     const code = 'import React from "react";';
     const dependencies = {
-      react: '^18.0.0',
-      'react-dom': '^18.0.0',
+      react: "^18.0.0",
+      "react-dom": "^18.0.0",
     };
 
     render(
       <MockThemeProvider>
-        <ResultPreview code={code} dependencies={dependencies} {...mockResultPreviewProps} />
-      </MockThemeProvider>
+        <ResultPreview
+          code={code}
+          dependencies={dependencies}
+          {...mockResultPreviewProps}
+        />
+      </MockThemeProvider>,
     );
 
     // Use getAllByTestId to handle multiple elements
-    expect(screen.getAllByTestId('sandpack-provider')[0]).toBeInTheDocument();
+    expect(screen.getAllByTestId("sandpack-provider")[0]).toBeInTheDocument();
 
     // Skip button check since toolbar has been removed
-    expect(screen.getByTestId('sandpack-editor')).toBeInTheDocument();
+    expect(screen.getByTestId("sandpack-editor")).toBeInTheDocument();
   });
 
-  it('handles share functionality', () => {
+  it("handles share functionality", () => {
     // Skipping test since share button has been removed
     expect(true).toBe(true);
   });
 
-  it('receives preview-ready message from iframe when content loads', async () => {
+  it("receives preview-ready message from iframe when content loads", async () => {
     // Setup message event listener before rendering
     const previewReadyHandler = vi.fn();
-    window.addEventListener('message', (event) => {
-      if (event.data?.type === 'preview-ready') {
+    window.addEventListener("message", (event) => {
+      if (event.data?.type === "preview-ready") {
         previewReadyHandler(event.data);
       }
     });
@@ -270,12 +294,12 @@ describe('ResultPreview', () => {
     render(
       <MockThemeProvider>
         <ResultPreview {...testProps} />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Manually trigger the message that would come from the iframe
-    const previewReadyEvent = new MessageEvent('message', {
-      data: { type: 'preview-ready' },
+    const previewReadyEvent = new MessageEvent("message", {
+      data: { type: "preview-ready" },
     });
 
     // Wrap in act() to handle React state updates properly
@@ -285,99 +309,123 @@ describe('ResultPreview', () => {
 
     // Wait for the event to be processed
     await waitFor(() => {
-      expect(previewReadyHandler).toHaveBeenCalledWith({ type: 'preview-ready' });
+      expect(previewReadyHandler).toHaveBeenCalledWith({
+        type: "preview-ready",
+      });
     });
 
     // The onPreviewLoaded callback should have been called
     expect(mockSetPreviewLoaded).toHaveBeenCalled();
   });
 
-  it('handles edge case with empty code', () => {
+  it("handles edge case with empty code", () => {
     const { container } = render(
       <MockThemeProvider>
         <ResultPreview code="" {...mockResultPreviewProps} />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Instead of finding by role, check that the container has the expected structure
-    expect(container.querySelector('div.h-full > div.h-full')).toBeInTheDocument();
+    expect(
+      container.querySelector("div.h-full > div.h-full"),
+    ).toBeInTheDocument();
   });
 
-  it('renders empty state correctly', () => {
+  it("renders empty state correctly", () => {
     const { container } = render(
       <MockThemeProvider>
         <ResultPreview code="" {...mockResultPreviewProps} />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
     // Update snapshot to match new structure
     expect(container).toMatchSnapshot();
   });
 
-  it('handles dependencies correctly', () => {
+  it("handles dependencies correctly", () => {
     const code = `function App() { return <div>Hello World</div>; }`;
     const dependencies = {
-      react: '17.0.2',
-      'react-dom': '17.0.2',
+      react: "17.0.2",
+      "react-dom": "17.0.2",
     };
     render(
       <MockThemeProvider>
-        <ResultPreview code={code} dependencies={dependencies} {...mockResultPreviewProps} />
-      </MockThemeProvider>
+        <ResultPreview
+          code={code}
+          dependencies={dependencies}
+          {...mockResultPreviewProps}
+        />
+      </MockThemeProvider>,
     );
 
     // Dependencies should be passed to the Sandpack component
-    expect(screen.queryByText(/Welcome to the preview/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Welcome to the preview/i),
+    ).not.toBeInTheDocument();
   });
 
-  it('displays code correctly', () => {
+  it("displays code correctly", () => {
     const code = `function App() { return <div>Hello World</div>; }`;
     render(
       <MockThemeProvider>
         <ResultPreview code={code} {...mockResultPreviewProps} />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Code should be processed and displayed in the editor
-    expect(screen.queryByText(/Welcome to the preview/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Welcome to the preview/i),
+    ).not.toBeInTheDocument();
   });
 
-  it('shows welcome screen for empty code', () => {
+  it("shows welcome screen for empty code", () => {
     const { container } = render(
       <MockThemeProvider>
         <ResultPreview code="" {...mockResultPreviewProps} />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Instead of finding by role, check that the container has the expected structure
-    expect(container.querySelector('div.h-full > div.h-full')).toBeInTheDocument();
+    expect(
+      container.querySelector("div.h-full > div.h-full"),
+    ).toBeInTheDocument();
   });
 
-  it('renders code properly', () => {
+  it("renders code properly", () => {
     render(
       <MockThemeProvider>
-        <ResultPreview code="console.log('test');" {...mockResultPreviewProps} />
-      </MockThemeProvider>
+        <ResultPreview
+          code="console.log('test');"
+          {...mockResultPreviewProps}
+        />
+      </MockThemeProvider>,
     );
-    expect(screen.queryByText(/Welcome to the preview/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Welcome to the preview/i),
+    ).not.toBeInTheDocument();
   });
 
-  it('handles code updates correctly', () => {
+  it("handles code updates correctly", () => {
     const { rerender } = render(
       <MockThemeProvider>
         <ResultPreview code="" {...mockResultPreviewProps} />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
     rerender(
       <MockThemeProvider>
-        <ResultPreview code="console.log('test');" {...mockResultPreviewProps} />
-      </MockThemeProvider>
+        <ResultPreview
+          code="console.log('test');"
+          {...mockResultPreviewProps}
+        />
+      </MockThemeProvider>,
     );
 
     // Should change from welcome screen to code display
-    expect(screen.queryByText(/Welcome to the preview/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Welcome to the preview/i),
+    ).not.toBeInTheDocument();
   });
 
-  it('handles screenshot capture requests', () => {
+  it("handles screenshot capture requests", () => {
     const onScreenshotCaptured = vi.fn();
     const code = `function App() { return <div>Hello World</div>; }`;
     render(
@@ -387,36 +435,40 @@ describe('ResultPreview', () => {
           onScreenshotCaptured={onScreenshotCaptured}
           {...mockResultPreviewProps}
         />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Simulate screenshot message
     act(() => {
       window.dispatchEvent(
-        new MessageEvent('message', {
-          data: { type: 'screenshot', data: 'base64-data' },
-        })
+        new MessageEvent("message", {
+          data: { type: "screenshot", data: "base64-data" },
+        }),
       );
     });
 
-    expect(onScreenshotCaptured).toHaveBeenCalledWith('base64-data');
+    expect(onScreenshotCaptured).toHaveBeenCalledWith("base64-data");
   });
 
-  it('handles preview loaded event', async () => {
+  it("handles preview loaded event", async () => {
     const onPreviewLoaded = vi.fn();
     const code = `function App() { return <div>Hello World</div>; }`;
     render(
       <MockThemeProvider>
-        <ResultPreview code={code} {...mockResultPreviewProps} onPreviewLoaded={onPreviewLoaded} />
-      </MockThemeProvider>
+        <ResultPreview
+          code={code}
+          {...mockResultPreviewProps}
+          onPreviewLoaded={onPreviewLoaded}
+        />
+      </MockThemeProvider>,
     );
 
     // Simulate preview loaded message
     act(() => {
       window.dispatchEvent(
-        new MessageEvent('message', {
-          data: { type: 'preview-loaded' },
-        })
+        new MessageEvent("message", {
+          data: { type: "preview-loaded" },
+        }),
       );
     });
 
@@ -425,23 +477,29 @@ describe('ResultPreview', () => {
     });
   });
 
-  it('passes dependencies to Sandpack', () => {
+  it("passes dependencies to Sandpack", () => {
     const code = `function App() { return <div>Hello World</div>; }`;
     const dependencies = {
-      react: '17.0.2',
-      'react-dom': '17.0.2',
+      react: "17.0.2",
+      "react-dom": "17.0.2",
     };
     render(
       <MockThemeProvider>
-        <ResultPreview code={code} dependencies={dependencies} {...mockResultPreviewProps} />
-      </MockThemeProvider>
+        <ResultPreview
+          code={code}
+          dependencies={dependencies}
+          {...mockResultPreviewProps}
+        />
+      </MockThemeProvider>,
     );
 
     // Dependencies should be configured in Sandpack
-    expect(screen.queryByText(/Welcome to the preview/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Welcome to the preview/i),
+    ).not.toBeInTheDocument();
   });
 
-  it('passes API key to iframe when preview-ready message is received', async () => {
+  it("passes API key to iframe when preview-ready message is received", async () => {
     // Mock document.querySelector to return a mock iframe
     const mockIframe = {
       contentWindow: {
@@ -450,38 +508,42 @@ describe('ResultPreview', () => {
     };
     const originalQuerySelector = document.querySelector;
     document.querySelector = vi.fn().mockImplementation((selector) => {
-      if (selector === 'iframe') {
+      if (selector === "iframe") {
         return mockIframe;
       }
       return originalQuerySelector(selector);
     });
 
     // We need to spoof the API key that would come from config
-    vi.mock('../app/config/env', () => ({
-      CALLAI_API_KEY: 'test-api-key-12345',
+    vi.mock("../app/config/env", () => ({
+      CALLAI_API_KEY: "test-api-key-12345",
     }));
 
     const code = `function App() { return <div>API Key Test</div>; }`;
     render(
       <MockThemeProvider>
-        <ResultPreview code={code} codeReady={true} {...mockResultPreviewProps} />
-      </MockThemeProvider>
+        <ResultPreview
+          code={code}
+          codeReady={true}
+          {...mockResultPreviewProps}
+        />
+      </MockThemeProvider>,
     );
 
     // Simulate preview-ready message from iframe
     act(() => {
       window.dispatchEvent(
-        new MessageEvent('message', {
-          data: { type: 'preview-ready' },
-        })
+        new MessageEvent("message", {
+          data: { type: "preview-ready" },
+        }),
       );
     });
 
     // Verify that the API key was sent to the iframe
     await waitFor(() => {
       expect(mockIframe.contentWindow.postMessage).toHaveBeenCalledWith(
-        { type: 'callai-api-key', key: expect.any(String) },
-        '*'
+        { type: "callai-api-key", key: expect.any(String) },
+        "*",
       );
     });
 
@@ -489,30 +551,34 @@ describe('ResultPreview', () => {
     document.querySelector = originalQuerySelector;
   });
 
-  it('displays the code editor initially', () => {
+  it("displays the code editor initially", () => {
     const code = `function App() { return <div>Hello World</div>; }`;
     render(
       <MockThemeProvider>
         <ResultPreview code={code} {...mockResultPreviewProps} />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Should default to code view
-    expect(screen.queryByText(/Welcome to the preview/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Welcome to the preview/i),
+    ).not.toBeInTheDocument();
   });
 
-  it('shows welcome screen when no code is provided', () => {
+  it("shows welcome screen when no code is provided", () => {
     const { container } = render(
       <MockThemeProvider>
         <ResultPreview code="" {...mockResultPreviewProps} />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Instead of finding by role, check that the container has the expected structure
-    expect(container.querySelector('div.h-full > div.h-full')).toBeInTheDocument();
+    expect(
+      container.querySelector("div.h-full > div.h-full"),
+    ).toBeInTheDocument();
   });
 
-  it('renders with a simple code snippet', () => {
+  it("renders with a simple code snippet", () => {
     const code = 'const test = "Hello";';
     // const setActiveView = vi.fn(); // Removed as it's no longer used
 
@@ -533,10 +599,10 @@ describe('ResultPreview', () => {
             /* no-op */
           }}
         />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Now the sandpack editor should be visible
-    expect(screen.getByTestId('sandpack-editor')).toBeDefined();
+    expect(screen.getByTestId("sandpack-editor")).toBeDefined();
   });
 });

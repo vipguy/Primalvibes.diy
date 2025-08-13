@@ -1,21 +1,29 @@
-import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
-import { normalizeComponentExports } from '../app/utils/normalizeComponentExports';
-import { publishApp } from '../app/utils/publishUtils';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+  type Mock,
+} from "vitest";
+import { normalizeComponentExports } from "../app/utils/normalizeComponentExports";
+import { publishApp } from "../app/utils/publishUtils";
 
 // Mock dependencies
-vi.mock('use-fireproof');
-vi.mock('../app/utils/databaseManager');
-vi.mock('../app/utils/normalizeComponentExports');
+vi.mock("use-fireproof");
+vi.mock("../app/utils/databaseManager");
+vi.mock("../app/utils/normalizeComponentExports");
 
 // Import mocked modules
-import { fireproof } from 'use-fireproof';
-import { getSessionDatabaseName } from '../app/utils/databaseManager';
+import { fireproof } from "use-fireproof";
+import { getSessionDatabaseName } from "../app/utils/databaseManager";
 
 // We need to mock the import.meta.env
-vi.stubGlobal('import', {
+vi.stubGlobal("import", {
   meta: {
     env: {
-      VITE_API_BASE_URL: 'http://test-api-url',
+      VITE_API_BASE_URL: "http://test-api-url",
     },
   },
 });
@@ -27,9 +35,9 @@ const mockFetch = vi.fn().mockImplementation(async () => ({
   json: async () => ({
     success: true,
     app: {
-      slug: 'test-app-slug',
+      slug: "test-app-slug",
     },
-    appUrl: 'https://test-app-slug.vibesdiy.app',
+    appUrl: "https://test-app-slug.vibesdiy.app",
   }),
 }));
 global.fetch = mockFetch;
@@ -41,7 +49,7 @@ class MockFileReader {
   result: string | null = null;
 
   readAsDataURL(_file: Blob): void {
-    this.result = 'data:image/png;base64,mockScreenshotBase64Data';
+    this.result = "data:image/png;base64,mockScreenshotBase64Data";
     if (this.onload) this.onload();
   }
 }
@@ -50,17 +58,21 @@ global.FileReader = MockFileReader as typeof FileReader; // as any;
 
 // Setup mock Fireproof database and query results
 const mockVibeDoc = {
-  _id: 'vibe',
-  title: 'Test App',
-  remixOf: 'original-app.vibesdiy.app',
+  _id: "vibe",
+  title: "Test App",
+  remixOf: "original-app.vibesdiy.app",
 };
 
 const mockScreenshotDoc = {
-  _id: 'screenshot-1',
-  type: 'screenshot',
+  _id: "screenshot-1",
+  type: "screenshot",
   _files: {
     screenshot: {
-      file: vi.fn().mockResolvedValue(new Blob(['mockScreenshotData'], { type: 'image/png' })),
+      file: vi
+        .fn()
+        .mockResolvedValue(
+          new Blob(["mockScreenshotData"], { type: "image/png" }),
+        ),
     },
   },
 };
@@ -74,22 +86,24 @@ const mockFireproofDb = {
   query: vi.fn(),
 };
 
-describe('publishApp', () => {
+describe("publishApp", () => {
   beforeEach(() => {
     // Reset all mocks before each test
     vi.resetAllMocks();
 
     // Setup our mocks with default behavior
     mockFireproofDb.get.mockImplementation(async (id) => {
-      if (id === 'vibe') return mockVibeDoc;
-      throw new Error('Doc not found');
+      if (id === "vibe") return mockVibeDoc;
+      throw new Error("Doc not found");
     });
 
     mockFireproofDb.query.mockResolvedValue(mockQueryResult);
 
     (fireproof as Mock).mockReturnValue(mockFireproofDb);
-    (getSessionDatabaseName as Mock).mockReturnValue('test-session-db');
-    (normalizeComponentExports as Mock).mockImplementation((code: string) => code);
+    (getSessionDatabaseName as Mock).mockReturnValue("test-session-db");
+    (normalizeComponentExports as Mock).mockImplementation(
+      (code: string) => code,
+    );
 
     // Re-setup fetch mock after reset
     mockFetch.mockImplementation(async () => ({
@@ -98,9 +112,9 @@ describe('publishApp', () => {
       json: async () => ({
         success: true,
         app: {
-          slug: 'test-app-slug',
+          slug: "test-app-slug",
         },
-        appUrl: 'https://test-app-slug.vibesdiy.app',
+        appUrl: "https://test-app-slug.vibesdiy.app",
       }),
     }));
     global.fetch = mockFetch;
@@ -110,14 +124,15 @@ describe('publishApp', () => {
     vi.clearAllMocks();
   });
 
-  it('includes remixOf metadata in the API payload when publishing an app with remix info', async () => {
+  it("includes remixOf metadata in the API payload when publishing an app with remix info", async () => {
     // Arrange: Setup a test case with remix metadata present
-    const sessionId = 'test-session-id';
-    const testCode = 'const App = () => <div>Hello World</div>; export default App;';
-    const testTitle = 'Remixed Test App';
+    const sessionId = "test-session-id";
+    const testCode =
+      "const App = () => <div>Hello World</div>; export default App;";
+    const testTitle = "Remixed Test App";
     const updatePublishedUrl = vi.fn();
-    const userId = 'test-user-id';
-    const testPrompt = 'Create a hello world app';
+    const userId = "test-user-id";
+    const testPrompt = "Create a hello world app";
 
     // Act: Call the publishApp function
     await publishApp({
@@ -127,7 +142,7 @@ describe('publishApp', () => {
       userId,
       prompt: testPrompt,
       updatePublishedUrl,
-      token: 'test-jwt-token',
+      token: "test-jwt-token",
     });
 
     // Assert: Check that fetch was called and included remixOf in the payload
@@ -138,27 +153,28 @@ describe('publishApp', () => {
     const payload = JSON.parse(options.body);
 
     // Verify remixOf is included in the payload
-    expect(payload).toHaveProperty('remixOf', 'original-app.vibesdiy.app');
-    expect(payload).toHaveProperty('title', testTitle);
-    expect(payload).toHaveProperty('chatId', sessionId);
+    expect(payload).toHaveProperty("remixOf", "original-app.vibesdiy.app");
+    expect(payload).toHaveProperty("title", testTitle);
+    expect(payload).toHaveProperty("chatId", sessionId);
   });
 
-  it('handles the case when no remix metadata is present', async () => {
+  it("handles the case when no remix metadata is present", async () => {
     // Arrange: Setup without remix metadata
-    const sessionId = 'no-remix-session';
-    const testCode = 'const App = () => <div>Original App</div>; export default App;';
-    const testTitle = 'Original Test App';
+    const sessionId = "no-remix-session";
+    const testCode =
+      "const App = () => <div>Original App</div>; export default App;";
+    const testTitle = "Original Test App";
 
     // Mock Fireproof to throw an error when trying to get the vibe doc
-    mockFireproofDb.get.mockRejectedValueOnce(new Error('Doc not found'));
+    mockFireproofDb.get.mockRejectedValueOnce(new Error("Doc not found"));
 
     // Act: Call the publishApp function
     await publishApp({
       sessionId,
       code: testCode,
       title: testTitle,
-      userId: 'test-user-id',
-      prompt: 'Create an original app',
+      userId: "test-user-id",
+      prompt: "Create an original app",
       token: null,
     });
 
@@ -172,18 +188,19 @@ describe('publishApp', () => {
     expect(payload.remixOf).toBeNull();
   });
 
-  it('includes screenshot in the API payload when available', async () => {
+  it("includes screenshot in the API payload when available", async () => {
     // Arrange - screenshot is already set up in the mock
-    const sessionId = 'test-session-id';
-    const testCode = 'const App = () => <div>App with Screenshot</div>; export default App;';
+    const sessionId = "test-session-id";
+    const testCode =
+      "const App = () => <div>App with Screenshot</div>; export default App;";
 
     // Act: Call the publishApp function
     await publishApp({
       sessionId,
       code: testCode,
-      userId: 'test-user-id',
-      prompt: 'Create an app with screenshot',
-      token: 'test-token',
+      userId: "test-user-id",
+      prompt: "Create an app with screenshot",
+      token: "test-token",
     });
 
     // Assert: Check that the screenshot was included
@@ -193,21 +210,22 @@ describe('publishApp', () => {
     const payload = JSON.parse(options.body);
 
     // Verify screenshot is included in the payload
-    expect(payload).toHaveProperty('screenshot', 'mockScreenshotBase64Data');
+    expect(payload).toHaveProperty("screenshot", "mockScreenshotBase64Data");
   });
 
-  it('includes Authorization header when token is provided', async () => {
+  it("includes Authorization header when token is provided", async () => {
     // Arrange
-    const sessionId = 'test-session-id';
-    const testCode = 'const App = () => <div>Authenticated App</div>; export default App;';
-    const testToken = 'test-jwt-token-123';
+    const sessionId = "test-session-id";
+    const testCode =
+      "const App = () => <div>Authenticated App</div>; export default App;";
+    const testToken = "test-jwt-token-123";
 
     // Act: Call the publishApp function with token
     await publishApp({
       sessionId,
       code: testCode,
-      userId: 'test-user-id',
-      prompt: 'Create an app with authentication',
+      userId: "test-user-id",
+      prompt: "Create an app with authentication",
       token: testToken,
     });
 
@@ -215,21 +233,25 @@ describe('publishApp', () => {
     expect(mockFetch).toHaveBeenCalled();
 
     const [_url, options] = mockFetch.mock.calls[0];
-    expect(options.headers).toHaveProperty('Authorization', `Bearer ${testToken}`);
-    expect(options.headers).toHaveProperty('Content-Type', 'application/json');
+    expect(options.headers).toHaveProperty(
+      "Authorization",
+      `Bearer ${testToken}`,
+    );
+    expect(options.headers).toHaveProperty("Content-Type", "application/json");
   });
 
-  it('does not include Authorization header when token is null', async () => {
+  it("does not include Authorization header when token is null", async () => {
     // Arrange
-    const sessionId = 'test-session-id';
-    const testCode = 'const App = () => <div>Unauthenticated App</div>; export default App;';
+    const sessionId = "test-session-id";
+    const testCode =
+      "const App = () => <div>Unauthenticated App</div>; export default App;";
 
     // Act: Call the publishApp function without token
     await publishApp({
       sessionId,
       code: testCode,
-      userId: 'test-user-id',
-      prompt: 'Create an app without authentication',
+      userId: "test-user-id",
+      prompt: "Create an app without authentication",
       token: null,
     });
 
@@ -237,7 +259,7 @@ describe('publishApp', () => {
     expect(mockFetch).toHaveBeenCalled();
 
     const [_url, options] = mockFetch.mock.calls[0];
-    expect(options.headers).not.toHaveProperty('Authorization');
-    expect(options.headers).toHaveProperty('Content-Type', 'application/json');
+    expect(options.headers).not.toHaveProperty("Authorization");
+    expect(options.headers).toHaveProperty("Content-Type", "application/json");
   });
 });

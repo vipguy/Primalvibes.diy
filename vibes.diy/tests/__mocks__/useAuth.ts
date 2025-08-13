@@ -1,19 +1,19 @@
-import { vi } from 'vitest';
-import type { AuthContextType } from '../app/contexts/AuthContext';
+import { vi } from "vitest";
+import type { AuthContextType } from "../app/contexts/AuthContext";
 
 // Default authenticated state
 export const defaultAuthenticatedState: AuthContextType = {
   isAuthenticated: true,
   isLoading: false,
-  token: 'mock-token',
+  token: "mock-token",
   userPayload: {
-    userId: 'test-user-id',
+    userId: "test-user-id",
     exp: 9999999999,
     tenants: [],
     ledgers: [],
     iat: 1234567890,
-    iss: 'FP_CLOUD',
-    aud: 'PUBLIC',
+    iss: "FP_CLOUD",
+    aud: "PUBLIC",
   },
   needsLogin: false,
   setNeedsLogin: vi.fn(),
@@ -34,7 +34,9 @@ export const defaultUnauthenticatedState: AuthContextType = {
 };
 
 // Create a mock implementation that can be customized per test
-export const mockUseAuth = vi.fn().mockImplementation(() => defaultAuthenticatedState);
+export const mockUseAuth = vi
+  .fn()
+  .mockImplementation(() => defaultAuthenticatedState);
 
 // Export a function to easily update the mock state
 export const setMockAuthState = (state: Partial<AuthContextType>) => {

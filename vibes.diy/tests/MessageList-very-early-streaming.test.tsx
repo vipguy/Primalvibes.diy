@@ -1,8 +1,12 @@
-import { render, screen } from '@testing-library/react';
-import MessageList from '../app/components/MessageList';
-import { vi, describe, test, expect, beforeEach } from 'vitest';
-import type { UserChatMessage, AiChatMessage, ChatMessageDocument } from '../app/types/chat';
-import { MockThemeProvider } from './utils/MockThemeProvider';
+import { render, screen } from "@testing-library/react";
+import MessageList from "../app/components/MessageList";
+import { vi, describe, test, expect, beforeEach } from "vitest";
+import type {
+  UserChatMessage,
+  AiChatMessage,
+  ChatMessageDocument,
+} from "../app/types/chat";
+import { MockThemeProvider } from "./utils/MockThemeProvider";
 
 beforeEach(() => {
   window.HTMLElement.prototype.scrollIntoView = vi.fn();
@@ -24,23 +28,23 @@ beforeEach(() => {
 //   WelcomeScreen: () => <div data-testid="welcome-screen">Welcome Screen</div>,
 // }));
 
-describe('MessageList Real-World Streaming Tests', () => {
-  test('should display minimal content at stream start', () => {
+describe("MessageList Real-World Streaming Tests", () => {
+  test("should display minimal content at stream start", () => {
     const messages = [
       {
-        type: 'user',
-        text: 'Create a quiz app',
-        _id: 'user-1',
-        session_id: 'test-session',
+        type: "user",
+        text: "Create a quiz app",
+        _id: "user-1",
+        session_id: "test-session",
         created_at: Date.now(),
       } as UserChatMessage,
       {
-        type: 'ai',
+        type: "ai",
         text: '{"',
-        _id: '1',
-        segments: [{ type: 'markdown', content: '{"' }],
+        _id: "1",
+        segments: [{ type: "markdown", content: '{"' }],
         isStreaming: true,
-        session_id: 'test-session',
+        session_id: "test-session",
         created_at: Date.now(),
       } as AiChatMessage,
     ];
@@ -61,7 +65,7 @@ describe('MessageList Real-World Streaming Tests', () => {
             /* no-op */
           }}
         />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Check if we see the minimal content in the DOM
@@ -69,9 +73,11 @@ describe('MessageList Real-World Streaming Tests', () => {
     expect(messageContent).toBeInTheDocument();
 
     // Log the DOM structure to see what's actually rendered
-    const messageContainer = document.querySelector('[data-testid="message-1"]');
+    const messageContainer = document.querySelector(
+      '[data-testid="message-1"]',
+    );
     if (messageContainer) {
-      expect(messageContainer.innerHTML).toContain('{');
+      expect(messageContainer.innerHTML).toContain("{");
     } else {
       expect(messageContainer).not.toBeNull();
     }
@@ -80,25 +86,26 @@ describe('MessageList Real-World Streaming Tests', () => {
     expect(screen.getByText(/\{"/)).toBeInTheDocument();
   });
 
-  test('should update UI as more content streams in', () => {
-    const content = '{"dependencies": {}}\n\nThis quiz app allows users to create';
+  test("should update UI as more content streams in", () => {
+    const content =
+      '{"dependencies": {}}\n\nThis quiz app allows users to create';
     expect(content.length).toBeGreaterThan(0);
 
     const messages = [
       {
-        type: 'user',
-        text: 'Create a quiz app',
-        _id: 'user-2',
-        session_id: 'test-session',
+        type: "user",
+        text: "Create a quiz app",
+        _id: "user-2",
+        session_id: "test-session",
         created_at: Date.now(),
       } as UserChatMessage,
       {
-        type: 'ai',
+        type: "ai",
         text: content,
-        _id: '2',
-        segments: [{ type: 'markdown', content }],
+        _id: "2",
+        segments: [{ type: "markdown", content }],
         isStreaming: true,
-        session_id: 'test-session',
+        session_id: "test-session",
         created_at: Date.now(),
       } as AiChatMessage,
     ];
@@ -119,38 +126,40 @@ describe('MessageList Real-World Streaming Tests', () => {
             /* no-op */
           }}
         />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Check if we see the content
-    expect(screen.getByText(/This quiz app allows users to create/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/This quiz app allows users to create/),
+    ).toBeInTheDocument();
   });
 
-  test('should display both markdown and code when segments are present', () => {
+  test("should display both markdown and code when segments are present", () => {
     const markdownContent =
       '{"dependencies": {}}\n\nThis quiz app allows users to create quizzes with timed questions and track scores. Users can create new quizzes, add questions with multiple choice options, and then take quizzes to track their scores.';
-    const codeContent = 'import React, { useState, use';
+    const codeContent = "import React, { useState, use";
 
     expect(markdownContent.length + codeContent.length + 8).toBeGreaterThan(0);
 
     const messages = [
       {
-        type: 'user',
-        text: 'Create a quiz app',
-        _id: 'user-3',
-        session_id: 'test-session',
+        type: "user",
+        text: "Create a quiz app",
+        _id: "user-3",
+        session_id: "test-session",
         created_at: Date.now(),
       } as UserChatMessage,
       {
-        type: 'ai',
+        type: "ai",
         text: `${markdownContent}\n\n\`\`\`js\n${codeContent}`,
-        _id: '3',
+        _id: "3",
         segments: [
-          { type: 'markdown', content: markdownContent },
-          { type: 'code', content: codeContent },
+          { type: "markdown", content: markdownContent },
+          { type: "code", content: codeContent },
         ],
         isStreaming: true,
-        session_id: 'test-session',
+        session_id: "test-session",
         created_at: Date.now(),
       } as AiChatMessage,
     ];
@@ -171,7 +180,7 @@ describe('MessageList Real-World Streaming Tests', () => {
             /* no-op */
           }}
         />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Check if we see both types of content
@@ -182,17 +191,17 @@ describe('MessageList Real-World Streaming Tests', () => {
     expect(codeElement).toBeInTheDocument();
   });
 
-  test('should handle streaming with zero length content', () => {
+  test("should handle streaming with zero length content", () => {
     const messages = [
       {
-        type: 'user',
-        text: 'Hello',
-        _id: 'user1',
+        type: "user",
+        text: "Hello",
+        _id: "user1",
       },
       {
-        type: 'ai',
-        text: '',
-        _id: 'ai1',
+        type: "ai",
+        text: "",
+        _id: "ai1",
       },
     ] as ChatMessageDocument[];
 
@@ -212,7 +221,7 @@ describe('MessageList Real-World Streaming Tests', () => {
             /* no-op */
           }}
         />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // ... rest of the test ...

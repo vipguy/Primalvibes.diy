@@ -1,15 +1,15 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { makeBaseSystemPrompt } from '../app/prompts';
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { makeBaseSystemPrompt } from "../app/prompts";
 
 // Mock the import.meta.glob function
-vi.mock('../app/prompts', async () => {
+vi.mock("../app/prompts", async () => {
   // Create a mock implementation that simulates the behavior of the original
   const llmsModules = {
-    './llms/module1.json': {
-      default: { llmsTxtUrl: 'https://example.com/llm1.txt', label: 'llm1' },
+    "./llms/module1.json": {
+      default: { llmsTxtUrl: "https://example.com/llm1.txt", label: "llm1" },
     },
-    './llms/module2.json': {
-      default: { llmsTxtUrl: 'https://example.com/llm2.txt', label: 'llm2' },
+    "./llms/module2.json": {
+      default: { llmsTxtUrl: "https://example.com/llm2.txt", label: "llm2" },
     },
   };
 
@@ -17,9 +17,9 @@ vi.mock('../app/prompts', async () => {
   return {
     makeBaseSystemPrompt: async (
       model: string,
-      sessionDoc?: { stylePrompt?: string; userPrompt?: string }
+      sessionDoc?: { stylePrompt?: string; userPrompt?: string },
     ) => {
-      let concatenatedLlmsTxt = '';
+      let concatenatedLlmsTxt = "";
       const llmsList = Object.values(llmsModules).map((mod) => mod.default);
 
       // Simulate the LLM text fetching and caching
@@ -32,10 +32,10 @@ Mock documentation for ${llm.label}
       }
 
       // Get style prompt from session document if available
-      const stylePrompt = sessionDoc?.stylePrompt || 'DIY zine';
+      const stylePrompt = sessionDoc?.stylePrompt || "DIY zine";
 
       // Get user prompt from session document if available
-      const userPrompt = sessionDoc?.userPrompt || '';
+      const userPrompt = sessionDoc?.userPrompt || "";
 
       return `
 You are an AI assistant tasked with creating React components. You should create components that:
@@ -62,7 +62,7 @@ ${
     ? `${userPrompt}
 
 `
-    : ''
+    : ""
 }IMPORTANT: You are working in one JavaScript file, use tailwind classes for styling.
 
 Provide a title and brief explanation followed by the component code. The component should demonstrate proper Fireproof integration with real-time updates and proper data persistence. Follow it with a longer description of the app's purpose and detailed instructions how to use it (with occasional bold or italic for emphasis). 
@@ -88,37 +88,38 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('Settings and Prompt Integration', () => {
-  it('generates a base system prompt with default values when no settings provided', async () => {
-    const model = 'test-model';
+describe("Settings and Prompt Integration", () => {
+  it("generates a base system prompt with default values when no settings provided", async () => {
+    const model = "test-model";
     const prompt = await makeBaseSystemPrompt(model);
 
     // Check that the prompt includes the default style
-    expect(prompt).toContain('have a DIY zine vibe');
+    expect(prompt).toContain("have a DIY zine vibe");
 
     // Should not contain any user prompt content
-    expect(prompt).not.toContain('Custom user instructions');
+    expect(prompt).not.toContain("Custom user instructions");
   });
 
-  it('uses style prompt from settings document when provided', async () => {
-    const model = 'test-model';
+  it("uses style prompt from settings document when provided", async () => {
+    const model = "test-model";
     const settingsDoc = {
-      _id: 'user_settings',
-      stylePrompt: 'synthwave (80s digital aesthetic)',
+      _id: "user_settings",
+      stylePrompt: "synthwave (80s digital aesthetic)",
     };
 
     const prompt = await makeBaseSystemPrompt(model, settingsDoc);
 
     // Check that the prompt includes the custom style
-    expect(prompt).toContain('have a synthwave (80s digital aesthetic) vibe');
-    expect(prompt).not.toContain('DIY zine');
+    expect(prompt).toContain("have a synthwave (80s digital aesthetic) vibe");
+    expect(prompt).not.toContain("DIY zine");
   });
 
-  it('includes user prompt from settings document when provided', async () => {
-    const model = 'test-model';
-    const userPromptText = 'Always include a dark mode toggle in your components';
+  it("includes user prompt from settings document when provided", async () => {
+    const model = "test-model";
+    const userPromptText =
+      "Always include a dark mode toggle in your components";
     const settingsDoc = {
-      _id: 'user_settings',
+      _id: "user_settings",
       userPrompt: userPromptText,
     };
 
@@ -128,12 +129,12 @@ describe('Settings and Prompt Integration', () => {
     expect(prompt).toContain(userPromptText);
   });
 
-  it('combines both style and user prompts when both are provided', async () => {
-    const model = 'test-model';
-    const stylePromptText = 'brutalist web (raw, grid-heavy)';
-    const userPromptText = 'Include accessibility features in all components';
+  it("combines both style and user prompts when both are provided", async () => {
+    const model = "test-model";
+    const stylePromptText = "brutalist web (raw, grid-heavy)";
+    const userPromptText = "Include accessibility features in all components";
     const settingsDoc = {
-      _id: 'user_settings',
+      _id: "user_settings",
       stylePrompt: stylePromptText,
       userPrompt: userPromptText,
     };
@@ -143,27 +144,27 @@ describe('Settings and Prompt Integration', () => {
     // Check that the prompt includes both custom settings
     expect(prompt).toContain(`have a ${stylePromptText} vibe`);
     expect(prompt).toContain(userPromptText);
-    expect(prompt).not.toContain('DIY zine');
+    expect(prompt).not.toContain("DIY zine");
   });
 
-  it('handles empty settings document gracefully', async () => {
-    const model = 'test-model';
-    const settingsDoc = { _id: 'user_settings' };
+  it("handles empty settings document gracefully", async () => {
+    const model = "test-model";
+    const settingsDoc = { _id: "user_settings" };
 
     const prompt = await makeBaseSystemPrompt(model, settingsDoc);
 
     // Should fall back to defaults
-    expect(prompt).toContain('have a DIY zine vibe');
+    expect(prompt).toContain("have a DIY zine vibe");
   });
 
-  it('includes LLM documentation in the prompt', async () => {
-    const model = 'test-model';
+  it("includes LLM documentation in the prompt", async () => {
+    const model = "test-model";
     const prompt = await makeBaseSystemPrompt(model);
 
     // Check that the LLM documentation is included
-    expect(prompt).toContain('<llm1-docs>');
-    expect(prompt).toContain('<llm2-docs>');
-    expect(prompt).toContain('Mock documentation for llm1');
-    expect(prompt).toContain('Mock documentation for llm2');
+    expect(prompt).toContain("<llm1-docs>");
+    expect(prompt).toContain("<llm2-docs>");
+    expect(prompt).toContain("Mock documentation for llm1");
+    expect(prompt).toContain("Mock documentation for llm2");
   });
 });

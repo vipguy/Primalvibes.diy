@@ -1,11 +1,13 @@
-import React, { useRef, useEffect } from 'react';
-import { useFireproof } from 'use-fireproof';
-import { callAI } from 'call-ai';
+import React, { useRef, useEffect } from "react";
+import { useFireproof } from "use-fireproof";
+import { callAI } from "call-ai";
 
 const App = () => {
-  const { useDocument, useLiveQuery } = useFireproof('guitar-solos');
-  const { doc, merge, submit } = useDocument({ notes: [], title: '' });
-  const audioCtx = useRef(new (window.AudioContext || window.webkitAudioContext)());
+  const { useDocument, useLiveQuery } = useFireproof("guitar-solos");
+  const { doc, merge, submit } = useDocument({ notes: [], title: "" });
+  const audioCtx = useRef(
+    new (window.AudioContext || window.webkitAudioContext)(),
+  );
   const modulator = useRef(null);
   const modulationGain = useRef(null);
   const carrier = useRef(null);
@@ -28,11 +30,11 @@ const App = () => {
     distortion.current = audioCtx.current.createWaveShaper();
     lfo.current = audioCtx.current.createOscillator();
 
-    modulator.current.type = 'sawtooth';
-    carrier.current.type = 'sawtooth';
-    lfo.current.type = 'sine';
+    modulator.current.type = "sawtooth";
+    carrier.current.type = "sawtooth";
+    lfo.current.type = "sine";
 
-    distortion.current.oversample = '4x';
+    distortion.current.oversample = "4x";
     distortion.current.curve = makeDistortionCurve(500);
 
     modulator.current.connect(modulationGain).connect(carrier.current.detune);
@@ -62,19 +64,22 @@ const App = () => {
 
   const playGuitarSolo = () => {
     const notes = [
-      659.25, 783.99, 659.25, 783.99, 659.25, 783.99, 659.25, 870.62, 783.99, 659.25, 740.0, 783.99,
-      870.62, 783.99, 659.25, 870.62, 987.77, 870.62, 783.99, 870.62, 987.77, 1046.5, 987.77,
-      870.62, 740.0, 659.25, 740.0, 783.99, 870.62, 783.99, 659.25, 740.0, 783.99, 870.62, 783.99,
-      659.25, 783.99, 659.25, 783.99, 659.25, 870.62, 783.99, 659.25, 740.0, 783.99, 870.62, 783.99,
-      659.25, 870.62, 987.77, 870.62, 783.99, 870.62, 987.77, 1046.5, 987.77, 870.62, 740.0, 659.25,
-      740.0, 783.99, 870.62, 783.99, 659.25, 740.0, 783.99, 870.62, 783.99, 659.25, 783.99, 659.25,
+      659.25, 783.99, 659.25, 783.99, 659.25, 783.99, 659.25, 870.62, 783.99,
+      659.25, 740.0, 783.99, 870.62, 783.99, 659.25, 870.62, 987.77, 870.62,
+      783.99, 870.62, 987.77, 1046.5, 987.77, 870.62, 740.0, 659.25, 740.0,
+      783.99, 870.62, 783.99, 659.25, 740.0, 783.99, 870.62, 783.99, 659.25,
+      783.99, 659.25, 783.99, 659.25, 870.62, 783.99, 659.25, 740.0, 783.99,
+      870.62, 783.99, 659.25, 870.62, 987.77, 870.62, 783.99, 870.62, 987.77,
+      1046.5, 987.77, 870.62, 740.0, 659.25, 740.0, 783.99, 870.62, 783.99,
+      659.25, 740.0, 783.99, 870.62, 783.99, 659.25, 783.99, 659.25,
     ];
 
     const phraseDurations = [0.25, 0.5, 0.75, 1, 1.25];
     let time = audioCtx.current.currentTime;
 
     notes.forEach((note, index) => {
-      const duration = phraseDurations[Math.floor(Math.random() * phraseDurations.length)];
+      const duration =
+        phraseDurations[Math.floor(Math.random() * phraseDurations.length)];
       const modulationDepth = 50 + 20 * Math.random();
       const wahSweep = 100 + 300 * Math.random();
 
@@ -83,11 +88,23 @@ const App = () => {
       gainNode.current.gain.setValueAtTime(0.5, time);
       gainNode.current.gain.exponentialRampToValueAtTime(0.1, time + duration);
       carrier.current.frequency.setValueAtTime(note, time);
-      carrier.current.frequency.exponentialRampToValueAtTime(note * 1.05, time + duration / 2);
-      carrier.current.frequency.exponentialRampToValueAtTime(note, time + duration);
+      carrier.current.frequency.exponentialRampToValueAtTime(
+        note * 1.05,
+        time + duration / 2,
+      );
+      carrier.current.frequency.exponentialRampToValueAtTime(
+        note,
+        time + duration,
+      );
       filter.current.frequency.setValueAtTime(wahSweep, time);
-      filter.current.frequency.exponentialRampToValueAtTime(1000 + wahSweep, time + duration / 2);
-      filter.current.frequency.exponentialRampToValueAtTime(wahSweep, time + duration);
+      filter.current.frequency.exponentialRampToValueAtTime(
+        1000 + wahSweep,
+        time + duration / 2,
+      );
+      filter.current.frequency.exponentialRampToValueAtTime(
+        wahSweep,
+        time + duration,
+      );
 
       time += duration;
     });
@@ -114,11 +131,14 @@ const App = () => {
 
   return (
     <div className="mx-auto max-w-screen-xl rounded-lg bg-white p-6 shadow-lg">
-      <h1 className="mb-4 text-center text-4xl font-bold">Hendrix-Like Guitar Solos Generator</h1>
+      <h1 className="mb-4 text-center text-4xl font-bold">
+        Hendrix-Like Guitar Solos Generator
+      </h1>
       <p className="mb-4 text-lg italic">
-        This app generates Hendrix-like guitar solos using the Web Audio API. It creates expressive
-        bends, wah-wah effects, feedback, and scheduled phrases with human-like timing variations to
-        mimic iconic 1960s rock guitar solos.
+        This app generates Hendrix-like guitar solos using the Web Audio API. It
+        creates expressive bends, wah-wah effects, feedback, and scheduled
+        phrases with human-like timing variations to mimic iconic 1960s rock
+        guitar solos.
       </p>
       <form onSubmit={handleSubmit} className="mb-4">
         <label htmlFor="title" className="mb-2 block font-semibold">

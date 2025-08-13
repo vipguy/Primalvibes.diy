@@ -3,4 +3,5 @@ packages:
   - "call-ai/tests"
   - "use-vibes/pkg"
   - "use-vibes/tests"
-  - "vibes.diy"
+  - "vibes.diy/pkg"
+  - "vibes.diy/tests"

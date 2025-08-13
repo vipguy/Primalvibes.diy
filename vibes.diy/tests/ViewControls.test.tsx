@@ -1,32 +1,38 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
-import { ViewControls } from '../app/components/ResultPreview/ViewControls';
+import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { ViewControls } from "../app/components/ResultPreview/ViewControls";
 
-describe('ViewControls', () => {
+describe("ViewControls", () => {
   const mockViewControls = {
     preview: {
       enabled: true,
-      icon: 'app-icon',
-      label: 'App',
+      icon: "app-icon",
+      label: "App",
       loading: false,
     },
     code: {
       enabled: true,
-      icon: 'code-icon',
-      label: 'Code',
+      icon: "code-icon",
+      label: "Code",
       loading: false,
     },
     data: {
       enabled: true,
-      icon: 'data-icon',
-      label: 'Data',
+      icon: "data-icon",
+      label: "Data",
       loading: false,
     },
   };
 
   // Mock the SVG icons
-  vi.mock('../app/components/HeaderContent/SvgIcons', () => ({
-    PreviewIcon: ({ className }: { className: string; isLoading?: boolean; title?: string }) => (
+  vi.mock("../app/components/HeaderContent/SvgIcons", () => ({
+    PreviewIcon: ({
+      className,
+    }: {
+      className: string;
+      isLoading?: boolean;
+      title?: string;
+    }) => (
       <span data-testid="preview-icon" className={className}>
         Preview Icon
       </span>
@@ -43,37 +49,39 @@ describe('ViewControls', () => {
     ),
   }));
 
-  it('renders all view controls', () => {
-    render(<ViewControls viewControls={mockViewControls} currentView="preview" />);
+  it("renders all view controls", () => {
+    render(
+      <ViewControls viewControls={mockViewControls} currentView="preview" />,
+    );
 
     // Check that all buttons are rendered
-    expect(screen.getByText('App')).toBeInTheDocument();
-    expect(screen.getByText('Code')).toBeInTheDocument();
-    expect(screen.getByText('Data')).toBeInTheDocument();
+    expect(screen.getByText("App")).toBeInTheDocument();
+    expect(screen.getByText("Code")).toBeInTheDocument();
+    expect(screen.getByText("Data")).toBeInTheDocument();
 
     // Check that the icons are rendered
-    expect(screen.getByTestId('preview-icon')).toBeInTheDocument();
-    expect(screen.getByTestId('code-icon')).toBeInTheDocument();
-    expect(screen.getByTestId('data-icon')).toBeInTheDocument();
+    expect(screen.getByTestId("preview-icon")).toBeInTheDocument();
+    expect(screen.getByTestId("code-icon")).toBeInTheDocument();
+    expect(screen.getByTestId("data-icon")).toBeInTheDocument();
   });
 
-  it('highlights the current view', () => {
+  it("highlights the current view", () => {
     render(<ViewControls viewControls={mockViewControls} currentView="code" />);
 
     // Get all buttons
-    const appButton = screen.getByText('App').closest('button');
-    const codeButton = screen.getByText('Code').closest('button');
-    const dataButton = screen.getByText('Data').closest('button');
+    const appButton = screen.getByText("App").closest("button");
+    const codeButton = screen.getByText("Code").closest("button");
+    const dataButton = screen.getByText("Data").closest("button");
 
     // Check that the code button has the active class
-    expect(codeButton?.className).toContain('bg-light-background-00');
+    expect(codeButton?.className).toContain("bg-light-background-00");
 
     // Check that the other buttons don't have the active class
-    expect(appButton?.className).not.toContain('bg-light-background-00');
-    expect(dataButton?.className).not.toContain('bg-light-background-00');
+    expect(appButton?.className).not.toContain("bg-light-background-00");
+    expect(dataButton?.className).not.toContain("bg-light-background-00");
   });
 
-  it('disables buttons when enabled is false', () => {
+  it("disables buttons when enabled is false", () => {
     const disabledControls = {
       ...mockViewControls,
       data: {
@@ -82,12 +90,14 @@ describe('ViewControls', () => {
       },
     };
 
-    render(<ViewControls viewControls={disabledControls} currentView="preview" />);
+    render(
+      <ViewControls viewControls={disabledControls} currentView="preview" />,
+    );
 
     // Get all buttons
-    const appButton = screen.getByText('App').closest('button');
-    const codeButton = screen.getByText('Code').closest('button');
-    const dataButton = screen.getByText('Data').closest('button');
+    const appButton = screen.getByText("App").closest("button");
+    const codeButton = screen.getByText("Code").closest("button");
+    const dataButton = screen.getByText("Data").closest("button");
 
     // Check that the data button is disabled
     expect(dataButton).toBeDisabled();
@@ -97,27 +107,31 @@ describe('ViewControls', () => {
     expect(codeButton).not.toBeDisabled();
   });
 
-  it('calls onClick handler when a button is clicked', () => {
+  it("calls onClick handler when a button is clicked", () => {
     const mockOnClick = vi.fn();
 
     render(
-      <ViewControls viewControls={mockViewControls} currentView="preview" onClick={mockOnClick} />
+      <ViewControls
+        viewControls={mockViewControls}
+        currentView="preview"
+        onClick={mockOnClick}
+      />,
     );
 
     // Click the Code button
-    fireEvent.click(screen.getByText('Code'));
+    fireEvent.click(screen.getByText("Code"));
 
     // Check that the onClick handler was called with the correct view
-    expect(mockOnClick).toHaveBeenCalledWith('code');
+    expect(mockOnClick).toHaveBeenCalledWith("code");
 
     // Click the Data button
-    fireEvent.click(screen.getByText('Data'));
+    fireEvent.click(screen.getByText("Data"));
 
     // Check that the onClick handler was called with the correct view
-    expect(mockOnClick).toHaveBeenCalledWith('data');
+    expect(mockOnClick).toHaveBeenCalledWith("data");
   });
 
-  it('properly navigates between views when onClick is provided', () => {
+  it("properly navigates between views when onClick is provided", () => {
     // This test simulates the fix we implemented for the navigation issue
     const mockNavigateToView = vi.fn();
 
@@ -126,17 +140,17 @@ describe('ViewControls', () => {
         viewControls={mockViewControls}
         currentView="preview"
         onClick={mockNavigateToView}
-      />
+      />,
     );
 
     // Test navigation to code view
-    fireEvent.click(screen.getByText('Code'));
-    expect(mockNavigateToView).toHaveBeenCalledWith('code');
+    fireEvent.click(screen.getByText("Code"));
+    expect(mockNavigateToView).toHaveBeenCalledWith("code");
     mockNavigateToView.mockClear();
 
     // Test navigation to data view
-    fireEvent.click(screen.getByText('Data'));
-    expect(mockNavigateToView).toHaveBeenCalledWith('data');
+    fireEvent.click(screen.getByText("Data"));
+    expect(mockNavigateToView).toHaveBeenCalledWith("data");
     mockNavigateToView.mockClear();
 
     // Render with a different current view
@@ -145,7 +159,7 @@ describe('ViewControls', () => {
         viewControls={mockViewControls}
         currentView="code"
         onClick={mockNavigateToView}
-      />
+      />,
     );
     unmount();
 
@@ -155,27 +169,27 @@ describe('ViewControls', () => {
         viewControls={mockViewControls}
         currentView="code"
         onClick={mockNavigateToView}
-      />
+      />,
     );
 
     // Test navigation to app view - use a more specific selector
     // Get the button that contains the App text and has the preview icon
-    const appButtons = screen.getAllByText('App');
+    const appButtons = screen.getAllByText("App");
     const appButton = appButtons.find((el) => {
       // Find the button that contains the preview icon
-      const button = el.closest('button');
+      const button = el.closest("button");
       return button && button.querySelector('[data-testid="preview-icon"]');
     });
 
     if (appButton) {
       fireEvent.click(appButton);
-      expect(mockNavigateToView).toHaveBeenCalledWith('preview');
+      expect(mockNavigateToView).toHaveBeenCalledWith("preview");
     } else {
-      throw new Error('App button with preview icon not found');
+      throw new Error("App button with preview icon not found");
     }
   });
 
-  it('does not call onClick when disabled button is clicked', () => {
+  it("does not call onClick when disabled button is clicked", () => {
     const mockOnClick = vi.fn();
     const disabledControls = {
       ...mockViewControls,
@@ -186,11 +200,15 @@ describe('ViewControls', () => {
     };
 
     render(
-      <ViewControls viewControls={disabledControls} currentView="preview" onClick={mockOnClick} />
+      <ViewControls
+        viewControls={disabledControls}
+        currentView="preview"
+        onClick={mockOnClick}
+      />,
     );
 
     // Try to click the disabled Data button
-    const dataButton = screen.getByText('Data').closest('button');
+    const dataButton = screen.getByText("Data").closest("button");
     if (dataButton) {
       fireEvent.click(dataButton);
     }

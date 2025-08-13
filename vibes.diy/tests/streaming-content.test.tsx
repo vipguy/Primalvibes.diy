@@ -1,18 +1,18 @@
-import { describe, test, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import StructuredMessage from '../app/components/StructuredMessage';
-import type { Segment } from '../app/types/chat';
-import { MockThemeProvider } from './utils/MockThemeProvider';
+import { describe, test, expect } from "vitest";
+import { render, screen } from "@testing-library/react";
+import StructuredMessage from "../app/components/StructuredMessage";
+import type { Segment } from "../app/types/chat";
+import { MockThemeProvider } from "./utils/MockThemeProvider";
 
-describe('Streaming Content Tests', () => {
-  test('renders code and markdown segments', () => {
+describe("Streaming Content Tests", () => {
+  test("renders code and markdown segments", () => {
     const segments: Segment[] = [
       {
-        type: 'markdown',
-        content: 'This is a markdown segment',
+        type: "markdown",
+        content: "This is a markdown segment",
       },
       {
-        type: 'code',
+        type: "code",
         content: 'const x = "hello";',
       },
     ];
@@ -33,17 +33,19 @@ describe('Streaming Content Tests', () => {
             /* no-op */
           }}
         />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Ensure both segments are rendered
-    expect(screen.getByText('This is a markdown segment')).toBeInTheDocument();
+    expect(screen.getByText("This is a markdown segment")).toBeInTheDocument();
     expect(screen.getByText('const x = "hello";')).toBeInTheDocument();
   });
 
-  test('shows markdown content immediately when streaming', () => {
+  test("shows markdown content immediately when streaming", () => {
     // Arrange: Create a test message with some markdown content
-    const segments = [{ type: 'markdown', content: 'This is a test message' }] as Segment[];
+    const segments = [
+      { type: "markdown", content: "This is a test message" },
+    ] as Segment[];
 
     // Act: Render the component with streaming flag
     render(
@@ -62,11 +64,11 @@ describe('Streaming Content Tests', () => {
             /* no-op */
           }}
         />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Assert: The content should be visible
-    expect(screen.getByText('This is a test message')).toBeInTheDocument();
+    expect(screen.getByText("This is a test message")).toBeInTheDocument();
   });
 
   test('should not show "Thinking..." when content is available', () => {

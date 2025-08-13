@@ -19,7 +19,9 @@
     "build": "core-cli tsc",
     "lint": "eslint .",
     "test": "vitest --run",
-    "format": "prettier ."
+    "format": "prettier .",
+    "pack": "echo skip pack",
+    "publish": "echo skip publish"
   },
   "keywords": [
     "ai",

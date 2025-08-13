@@ -1,9 +1,9 @@
-import { renderHook, act } from '@testing-library/react';
-import { useViewState, type ViewState } from '../app/utils/ViewState';
-import { vi, describe, test, expect, beforeEach } from 'vitest';
+import { renderHook, act } from "@testing-library/react";
+import { useViewState, type ViewState } from "../app/utils/ViewState";
+import { vi, describe, test, expect, beforeEach } from "vitest";
 
 // Mock react-router-dom hooks
-vi.mock('react-router-dom', () => {
+vi.mock("react-router-dom", () => {
   return {
     useNavigate: vi.fn(),
     useParams: vi.fn(),
@@ -12,19 +12,19 @@ vi.mock('react-router-dom', () => {
 });
 
 // Mock encodeTitle from utils
-vi.mock('../app/components/SessionSidebar/utils', () => {
+vi.mock("../app/components/SessionSidebar/utils", () => {
   return {
     encodeTitle: vi.fn((title) => title), // Simple mock that returns the title unchanged
   };
 });
 
 // Import mocked modules
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 
-describe('ViewState Coverage Tests', () => {
+describe("ViewState Coverage Tests", () => {
   const mockNavigate = vi.fn();
-  const mockSessionId = 'test-session-123';
-  const mockTitle = 'test-title';
+  const mockSessionId = "test-session-123";
+  const mockTitle = "test-title";
 
   beforeEach(() => {
     vi.resetAllMocks();
@@ -37,7 +37,7 @@ describe('ViewState Coverage Tests', () => {
     });
   });
 
-  test('should navigate to app view when previewReady becomes true and user is not in data or code view', () => {
+  test("should navigate to app view when previewReady becomes true and user is not in data or code view", () => {
     // Mock location to base path
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}`, // Not in data or code view
@@ -62,7 +62,7 @@ describe('ViewState Coverage Tests', () => {
       },
       {
         initialProps: initialProps,
-      }
+      },
     );
 
     // Cleanup to reset refs
@@ -76,7 +76,7 @@ describe('ViewState Coverage Tests', () => {
       },
       {
         initialProps: initialProps,
-      }
+      },
     );
 
     // Clear any initial navigation calls
@@ -90,12 +90,15 @@ describe('ViewState Coverage Tests', () => {
     });
 
     // Verify navigation to app view occurred
-    expect(mockNavigate).toHaveBeenCalledWith(`/chat/${mockSessionId}/${mockTitle}/app`, {
-      replace: true,
-    });
+    expect(mockNavigate).toHaveBeenCalledWith(
+      `/chat/${mockSessionId}/${mockTitle}/app`,
+      {
+        replace: true,
+      },
+    );
   });
 
-  test('should navigate to specified view when navigateToView is called with valid session', () => {
+  test("should navigate to specified view when navigateToView is called with valid session", () => {
     // Mock location
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}`,
@@ -115,25 +118,29 @@ describe('ViewState Coverage Tests', () => {
 
     // Call navigateToView to navigate to data view
     act(() => {
-      result.current.navigateToView?.('data');
+      result.current.navigateToView?.("data");
     });
 
     // Verify navigation occurred with correct path
-    expect(mockNavigate).toHaveBeenCalledWith(`/chat/${mockSessionId}/${mockTitle}/data`);
+    expect(mockNavigate).toHaveBeenCalledWith(
+      `/chat/${mockSessionId}/${mockTitle}/data`,
+    );
 
     // Clear mock for next test
     mockNavigate.mockClear();
 
     // Test preview view which should use 'app' suffix
     act(() => {
-      result.current.navigateToView?.('preview');
+      result.current.navigateToView?.("preview");
     });
 
     // Verify navigation with 'app' suffix
-    expect(mockNavigate).toHaveBeenCalledWith(`/chat/${mockSessionId}/${mockTitle}/app`);
+    expect(mockNavigate).toHaveBeenCalledWith(
+      `/chat/${mockSessionId}/${mockTitle}/app`,
+    );
   });
 
-  test('should not navigate when view is disabled', () => {
+  test("should not navigate when view is disabled", () => {
     // Mock location
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}`,
@@ -153,13 +160,13 @@ describe('ViewState Coverage Tests', () => {
 
     // Attempt to navigate to data view (which should be disabled)
     act(() => {
-      result.current.navigateToView?.('data');
+      result.current.navigateToView?.("data");
     });
 
     // Verify no navigation occurred since data view is disabled
     expect(mockNavigate).not.toHaveBeenCalled();
   });
-  test('should navigate to app view when streaming ends and user is not in data or code view', () => {
+  test("should navigate to app view when streaming ends and user is not in data or code view", () => {
     // Mock location to base path - not in data or code view
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}`,
@@ -181,7 +188,7 @@ describe('ViewState Coverage Tests', () => {
           isStreaming: true, // Initially streaming
           previewReady: false, // Start with previewReady=false to test the transition
         },
-      }
+      },
     );
 
     // Cleanup to reset refs
@@ -201,7 +208,7 @@ describe('ViewState Coverage Tests', () => {
           isStreaming: true, // Still streaming
           previewReady: false, // Start with previewReady=false to test the transition
         },
-      }
+      },
     );
 
     // Clear any initial navigation calls
@@ -217,8 +224,11 @@ describe('ViewState Coverage Tests', () => {
     });
 
     // Verify navigation to app view occurred
-    expect(mockNavigate).toHaveBeenCalledWith(`/chat/${mockSessionId}/${mockTitle}/app`, {
-      replace: true,
-    });
+    expect(mockNavigate).toHaveBeenCalledWith(
+      `/chat/${mockSessionId}/${mockTitle}/app`,
+      {
+        replace: true,
+      },
+    );
   });
 });

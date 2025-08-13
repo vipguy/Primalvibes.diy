@@ -16,7 +16,9 @@
     "build": "tsc",
     "test": "vitest --run",
     "test:integration": "vitest simple.integration",
-    "test:all": "pnpm test && pnpm test:integration"
+    "test:all": "pnpm test && pnpm test:integration",
+    "pack": "echo skip pack",
+    "publish": "echo skip publish"
   },
   "keywords": [
     "ai",

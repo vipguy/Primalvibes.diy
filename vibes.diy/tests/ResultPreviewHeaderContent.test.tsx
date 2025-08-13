@@ -1,27 +1,27 @@
-import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
-import type { ChatMessageDocument } from '../app/types/chat';
+import React from "react";
+import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
+import type { ChatMessageDocument } from "../app/types/chat";
 
 // Mock all imports before importing the component to test
-vi.mock('react-router', () => ({
+vi.mock("react-router", () => ({
   useParams: vi.fn(),
 }));
 
-vi.mock('../app/hooks/useSession', () => ({
+vi.mock("../app/hooks/useSession", () => ({
   useSession: vi.fn(),
 }));
 
-vi.mock('../app/utils/ViewState', () => ({
+vi.mock("../app/utils/ViewState", () => ({
   useViewState: vi.fn(),
 }));
 
-vi.mock('../app/components/ResultPreview/usePublish', () => ({
+vi.mock("../app/components/ResultPreview/usePublish", () => ({
   usePublish: vi.fn(),
 }));
 
 // Mock child components
-vi.mock('../app/components/ResultPreview/BackButton', () => ({
+vi.mock("../app/components/ResultPreview/BackButton", () => ({
   BackButton: ({ onBackClick }: { onBackClick: () => void }) => (
     <button data-testid="back-button" onClick={onBackClick}>
       Back
@@ -29,7 +29,7 @@ vi.mock('../app/components/ResultPreview/BackButton', () => ({
   ),
 }));
 
-vi.mock('../app/components/ResultPreview/ViewControls', () => ({
+vi.mock("../app/components/ResultPreview/ViewControls", () => ({
   ViewControls: ({
     viewControls,
     currentView,
@@ -40,11 +40,13 @@ vi.mock('../app/components/ResultPreview/ViewControls', () => ({
     // Handle both the old array format and the new object format
     const controls = Array.isArray(viewControls)
       ? viewControls
-      : Object.entries(viewControls).map(([key, value]: [string, ViewTypeItem]) => ({
-          id: key,
-          // label: value.label,
-          ...value,
-        }));
+      : Object.entries(viewControls).map(
+          ([key, value]: [string, ViewTypeItem]) => ({
+            id: key,
+            // label: value.label,
+            ...value,
+          }),
+        );
 
     return (
       <div data-testid="view-controls" data-view={currentView}>
@@ -58,7 +60,7 @@ vi.mock('../app/components/ResultPreview/ViewControls', () => ({
   },
 }));
 
-vi.mock('../app/components/ResultPreview/ShareButton', () => ({
+vi.mock("../app/components/ResultPreview/ShareButton", () => ({
   ShareButton: vi
     .fn()
     .mockImplementation(
@@ -79,17 +81,17 @@ vi.mock('../app/components/ResultPreview/ShareButton', () => ({
           data-testid="publish-button"
           onClick={onClick}
           disabled={isPublishing}
-          data-copied={urlCopied ? 'true' : 'false'}
-          data-has-url={hasPublishedUrl ? 'true' : 'false'}
+          data-copied={urlCopied ? "true" : "false"}
+          data-has-url={hasPublishedUrl ? "true" : "false"}
           ref={ref}
         >
-          {isPublishing ? 'Publishing...' : urlCopied ? 'Copied!' : 'Publish'}
+          {isPublishing ? "Publishing..." : urlCopied ? "Copied!" : "Publish"}
         </button>
-      )
+      ),
     ),
 }));
 
-vi.mock('../app/components/ResultPreview/ShareModal', () => ({
+vi.mock("../app/components/ResultPreview/ShareModal", () => ({
   ShareModal: vi.fn().mockImplementation(
     ({
       isOpen,
@@ -108,24 +110,32 @@ vi.mock('../app/components/ResultPreview/ShareModal', () => ({
     }) =>
       isOpen ? (
         <div data-testid="share-modal">
-          <span>URL: {publishedAppUrl || 'none'}</span>
+          <span>URL: {publishedAppUrl || "none"}</span>
           <button onClick={onClose}>Close</button>
-          <button onClick={onPublish} disabled={isPublishing} data-testid="modal-publish-button">
-            {isPublishing ? 'Publishing...' : 'Publish'}
+          <button
+            onClick={onPublish}
+            disabled={isPublishing}
+            data-testid="modal-publish-button"
+          >
+            {isPublishing ? "Publishing..." : "Publish"}
           </button>
         </div>
-      ) : null
+      ) : null,
   ),
 }));
 
 // Import after all mocks are set up
-import ResultPreviewHeaderContent from '../app/components/ResultPreview/ResultPreviewHeaderContent';
-import { useParams } from 'react-router';
-import { useSession } from '../app/hooks/useSession';
-import { useViewState, type ViewState, type ViewTypeItem } from '../app/utils/ViewState';
-import { usePublish } from '../app/components/ResultPreview/usePublish';
+import ResultPreviewHeaderContent from "../app/components/ResultPreview/ResultPreviewHeaderContent";
+import { useParams } from "react-router";
+import { useSession } from "../app/hooks/useSession";
+import {
+  useViewState,
+  type ViewState,
+  type ViewTypeItem,
+} from "../app/utils/ViewState";
+import { usePublish } from "../app/components/ResultPreview/usePublish";
 
-describe('ResultPreviewHeaderContent', () => {
+describe("ResultPreviewHeaderContent", () => {
   // Common mocks and props
   // const mockSetActiveView = vi.fn(); // Removed as setActiveView is no longer a prop
   const mockSetMobilePreviewShown = vi.fn();
@@ -139,25 +149,25 @@ describe('ResultPreviewHeaderContent', () => {
   const mockNavigateToView = vi.fn();
   const mockViewControlsMap = {
     preview: {
-      id: 'preview',
-      label: 'Preview',
-      icon: 'eye',
+      id: "preview",
+      label: "Preview",
+      icon: "eye",
       enabled: true,
       loading: false,
       navigateTo: vi.fn(),
     },
     code: {
-      id: 'code',
-      label: 'Code',
-      icon: 'code',
+      id: "code",
+      label: "Code",
+      icon: "code",
       enabled: true,
       loading: false,
       navigateTo: vi.fn(),
     },
     data: {
-      id: 'data',
-      label: 'Data',
-      icon: 'database',
+      id: "data",
+      label: "Data",
+      icon: "database",
       enabled: true,
       loading: false,
       navigateTo: vi.fn(),
@@ -165,15 +175,18 @@ describe('ResultPreviewHeaderContent', () => {
   };
 
   const mockViewControls = [
-    { id: 'preview', label: 'Preview', active: true },
-    { id: 'code', label: 'Code', active: false },
+    { id: "preview", label: "Preview", active: true },
+    { id: "code", label: "Code", active: false },
   ];
 
   beforeEach(() => {
     vi.resetAllMocks();
 
     // Default mocks
-    (useParams as Mock).mockReturnValue({ sessionId: 'url-session-id', view: 'url-view' });
+    (useParams as Mock).mockReturnValue({
+      sessionId: "url-session-id",
+      view: "url-view",
+    });
 
     (useSession as Mock).mockReturnValue({
       session: mockSession,
@@ -182,8 +195,8 @@ describe('ResultPreviewHeaderContent', () => {
     });
 
     (useViewState as Mock).mockReturnValue({
-      currentView: 'preview',
-      displayView: 'preview',
+      currentView: "preview",
+      displayView: "preview",
       viewControls: mockViewControls,
       showViewControls: true,
     });
@@ -199,7 +212,7 @@ describe('ResultPreviewHeaderContent', () => {
     });
   });
 
-  it('renders with default props', () => {
+  it("renders with default props", () => {
     render(
       <ResultPreviewHeaderContent
         previewReady={true}
@@ -210,21 +223,21 @@ describe('ResultPreviewHeaderContent', () => {
         isStreaming={false}
         code="const App = () => <div>Test</div>"
         setMobilePreviewShown={mockSetMobilePreviewShown}
-      />
+      />,
     );
 
     // Check for basic elements that should be present
-    const backButton = screen.getByTestId('back-button');
+    const backButton = screen.getByTestId("back-button");
     expect(backButton).toBeInTheDocument();
 
-    const viewControls = screen.getByTestId('view-controls');
+    const viewControls = screen.getByTestId("view-controls");
     expect(viewControls).toBeInTheDocument();
 
     // Modal should not be visible initially
-    expect(screen.queryByTestId('share-modal')).not.toBeInTheDocument();
+    expect(screen.queryByTestId("share-modal")).not.toBeInTheDocument();
   });
 
-  it('uses session ID from props over URL params when available', () => {
+  it("uses session ID from props over URL params when available", () => {
     render(
       <ResultPreviewHeaderContent
         previewReady={true}
@@ -237,14 +250,14 @@ describe('ResultPreviewHeaderContent', () => {
         setMobilePreviewShown={mockSetMobilePreviewShown}
         sessionId="prop-session-id"
         title="prop-title"
-      />
+      />,
     );
 
     // Should use prop session ID
-    expect(useSession).toHaveBeenCalledWith('prop-session-id');
+    expect(useSession).toHaveBeenCalledWith("prop-session-id");
   });
 
-  it('uses title from props over URL params when available', () => {
+  it("uses title from props over URL params when available", () => {
     // Mock the usePublish hook to verify it receives the proper title
     (usePublish as Mock).mockReturnValue({
       isPublishing: false,
@@ -268,22 +281,22 @@ describe('ResultPreviewHeaderContent', () => {
         setMobilePreviewShown={mockSetMobilePreviewShown}
         sessionId="prop-session-id"
         title="prop-title"
-      />
+      />,
     );
 
     // Instead of checking useViewState, verify that usePublish gets the correct title
     expect(usePublish).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: 'prop-title',
-      })
+        title: "prop-title",
+      }),
     );
   });
 
-  it('updates activeView when displayView changes', () => {
+  it("updates activeView when displayView changes", () => {
     // Mock displayView different from activeView
     (useViewState as Mock).mockReturnValue({
-      currentView: 'preview',
-      displayView: 'code', // Different from activeView
+      currentView: "preview",
+      displayView: "code", // Different from activeView
       viewControls: mockViewControls,
       showViewControls: true,
     });
@@ -298,11 +311,11 @@ describe('ResultPreviewHeaderContent', () => {
         isStreaming={false}
         code="const App = () => <div>Test</div>"
         setMobilePreviewShown={mockSetMobilePreviewShown}
-      />
+      />,
     );
   });
 
-  it('handles back button click when streaming', () => {
+  it("handles back button click when streaming", () => {
     render(
       <ResultPreviewHeaderContent
         previewReady={true}
@@ -314,18 +327,18 @@ describe('ResultPreviewHeaderContent', () => {
         code="const App = () => <div>Test</div>"
         setMobilePreviewShown={mockSetMobilePreviewShown}
         setUserClickedBack={mockSetUserClickedBack}
-      />
+      />,
     );
 
     // Click the back button
-    fireEvent.click(screen.getByTestId('back-button'));
+    fireEvent.click(screen.getByTestId("back-button"));
 
     // Should call both callbacks
     expect(mockSetUserClickedBack).toHaveBeenCalledWith(true);
     expect(mockSetMobilePreviewShown).toHaveBeenCalledWith(false);
   });
 
-  it('does not call setUserClickedBack when not streaming', () => {
+  it("does not call setUserClickedBack when not streaming", () => {
     render(
       <ResultPreviewHeaderContent
         previewReady={true}
@@ -337,11 +350,11 @@ describe('ResultPreviewHeaderContent', () => {
         code="const App = () => <div>Test</div>"
         setMobilePreviewShown={mockSetMobilePreviewShown}
         setUserClickedBack={mockSetUserClickedBack}
-      />
+      />,
     );
 
     // Click the back button
-    fireEvent.click(screen.getByTestId('back-button'));
+    fireEvent.click(screen.getByTestId("back-button"));
 
     // Should not call setUserClickedBack
     expect(mockSetUserClickedBack).not.toHaveBeenCalled();
@@ -349,7 +362,7 @@ describe('ResultPreviewHeaderContent', () => {
     expect(mockSetMobilePreviewShown).toHaveBeenCalledWith(false);
   });
 
-  it('does not show view controls when showViewControls is false', () => {
+  it("does not show view controls when showViewControls is false", () => {
     render(
       <ResultPreviewHeaderContent
         previewReady={true}
@@ -360,14 +373,14 @@ describe('ResultPreviewHeaderContent', () => {
         isStreaming={false}
         code="const App = () => <div>Test</div>"
         setMobilePreviewShown={mockSetMobilePreviewShown}
-      />
+      />,
     );
 
     // View controls should not be rendered
-    expect(screen.queryByTestId('view-controls')).not.toBeInTheDocument();
+    expect(screen.queryByTestId("view-controls")).not.toBeInTheDocument();
   });
 
-  it('does not show publish button when previewReady is false', () => {
+  it("does not show publish button when previewReady is false", () => {
     render(
       <ResultPreviewHeaderContent
         previewReady={false} // Not ready
@@ -378,32 +391,32 @@ describe('ResultPreviewHeaderContent', () => {
         isStreaming={false}
         code="const App = () => <div>Test</div>"
         setMobilePreviewShown={mockSetMobilePreviewShown}
-      />
+      />,
     );
 
     // Publish button should not be rendered
-    expect(screen.queryByTestId('publish-button')).not.toBeInTheDocument();
+    expect(screen.queryByTestId("publish-button")).not.toBeInTheDocument();
   });
 
-  it('shows share modal when isShareModalOpen is true', () => {
+  it("shows share modal when isShareModalOpen is true", () => {
     // Skip this test as it's tricky to test with createPortal being used in the ShareModal
     // The functionality is covered by manual testing
     // The component works correctly in the application
   });
 
-  it('calls toggleShareModal when publish button is clicked', () => {
+  it("calls toggleShareModal when publish button is clicked", () => {
     // Skip this test since we've encountered issues with the mocking of the ref
     // The functionality is already covered by other tests
   });
 
-  it('passes publishedAppUrl to ShareButton when available', () => {
+  it("passes publishedAppUrl to ShareButton when available", () => {
     // Skip this test since we've encountered issues with the mocking of the ref
     // The functionality is already covered by other tests
   });
 
-  it('passes correct props to usePublish hook', () => {
+  it("passes correct props to usePublish hook", () => {
     // Mock session with a published URL
-    const publishedUrl = 'https://existing-app.vibesdiy.app';
+    const publishedUrl = "https://existing-app.vibesdiy.app";
     (useSession as Mock).mockReturnValue({
       session: { publishedUrl },
       docs: mockMessages,
@@ -422,14 +435,14 @@ describe('ResultPreviewHeaderContent', () => {
         setMobilePreviewShown={mockSetMobilePreviewShown}
         sessionId="test-session"
         title="Test App"
-      />
+      />,
     );
 
     // Check that usePublish was called with the right props
     expect(usePublish).toHaveBeenCalledWith({
-      sessionId: 'test-session',
-      code: 'const App = () => <div>Test</div>',
-      title: 'Test App',
+      sessionId: "test-session",
+      code: "const App = () => <div>Test</div>",
+      title: "Test App",
       messages: mockMessages,
       updatePublishedUrl: mockUpdatePublishedUrl,
       publishedUrl,

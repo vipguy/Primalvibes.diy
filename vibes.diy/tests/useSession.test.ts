@@ -1,6 +1,6 @@
-import { renderHook } from '@testing-library/react';
-import { useSession } from '../app/hooks/useSession';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { renderHook } from "@testing-library/react";
+import { useSession } from "../app/hooks/useSession";
+import { vi, describe, it, expect, beforeEach } from "vitest";
 
 // Mock the database opening function - this is what we need to track
 const mockOpen = vi.fn();
@@ -13,24 +13,24 @@ const mockSubmitUserMessage = vi.fn().mockImplementation(() => {
 });
 
 // Mock all required dependencies
-vi.mock('../app/config/env', () => ({
-  SETTINGS_DBNAME: 'test-chat-history',
+vi.mock("../app/config/env", () => ({
+  SETTINGS_DBNAME: "test-chat-history",
 }));
 
-vi.mock('use-fireproof', () => ({
+vi.mock("use-fireproof", () => ({
   useFireproof: () => ({
     useDocument: () => ({
-      doc: { _id: 'test-id', type: 'session' },
+      doc: { _id: "test-id", type: "session" },
       merge: vi.fn(),
     }),
     database: { get: vi.fn(), put: vi.fn() },
   }),
 }));
 
-vi.mock('../app/hooks/useLazyFireproof', () => ({
+vi.mock("../app/hooks/useLazyFireproof", () => ({
   useLazyFireproof: () => ({
     useDocument: () => ({
-      doc: { _id: 'test-id', type: 'user' },
+      doc: { _id: "test-id", type: "user" },
       merge: vi.fn(),
       submit: mockSubmitUserMessage, // Use our special mock that calls open()
       save: vi.fn(),
@@ -41,22 +41,24 @@ vi.mock('../app/hooks/useLazyFireproof', () => ({
   }),
 }));
 
-vi.mock('../app/utils/databaseManager', () => ({
-  getSessionDatabaseName: vi.fn().mockImplementation((id) => `session-${id || 'default'}`),
+vi.mock("../app/utils/databaseManager", () => ({
+  getSessionDatabaseName: vi
+    .fn()
+    .mockImplementation((id) => `session-${id || "default"}`),
 }));
 
 // Simple tests that focus on the core session ID transition behavior
-describe('useSession', () => {
+describe("useSession", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should open database with provided sessionId', () => {
-    renderHook(() => useSession('test-id'));
+  it("should open database with provided sessionId", () => {
+    renderHook(() => useSession("test-id"));
     expect(mockOpen).toHaveBeenCalled();
   });
 
-  it('should generate sessionId but not open database when not provided', () => {
+  it("should generate sessionId but not open database when not provided", () => {
     const { result } = renderHook(() => useSession(undefined));
     // Verify we have a session ID generated (in the session document)
     expect(result.current.session._id).toBeTruthy();
@@ -78,7 +80,7 @@ describe('useSession', () => {
    * The database should ONLY be created when the user takes an action that requires persistence
    * or when they visit an existing session with content.
    */
-  it('should follow lazy database creation pattern for optimal user experience', async () => {
+  it("should follow lazy database creation pattern for optimal user experience", async () => {
     const { result } = renderHook(() => useSession(undefined));
 
     // Step 1: Initially no database should be created
@@ -101,19 +103,19 @@ describe('useSession', () => {
    * After sending the first message with no session ID in the URL, the URL updates and the hook
    * should detect and use that new ID
    */
-  it('should detect sessionId changes and reopen the database', () => {
+  it("should detect sessionId changes and reopen the database", () => {
     // Start with no session ID (first message scenario)
     const { rerender } = renderHook(
       // We use any to avoid TypeScript complexity with hook return types
       ({ id }) => useSession(id),
-      { initialProps: { id: undefined } }
+      { initialProps: { id: undefined } },
     );
 
     // Reset the mock counter after initial render
     mockOpen.mockClear();
 
     // Simulate URL update with new session ID (after first message response)
-    rerender({ id: 'new-session-id' });
+    rerender({ id: "new-session-id" });
 
     // Verify our fix works: the database should be opened again with the new ID
     expect(mockOpen).toHaveBeenCalled();

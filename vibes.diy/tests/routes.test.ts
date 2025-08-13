@@ -1,8 +1,8 @@
-import { describe, it, expect } from 'vitest';
-import routes from '../app/routes';
+import { describe, it, expect } from "vitest";
+import routes from "../app/routes";
 
-describe('Routes', () => {
-  it('defines the correct routes', () => {
+describe("Routes", () => {
+  it("defines the correct routes", () => {
     // Check that routes is an array
     expect(Array.isArray(routes)).toBe(true);
 
@@ -14,7 +14,7 @@ describe('Routes', () => {
     expect(indexRoute).toBeDefined();
 
     // Check that the route has a file property that includes unified-session.tsx
-    expect(indexRoute).toHaveProperty('file');
-    expect(indexRoute.file).toContain('home.tsx');
+    expect(indexRoute).toHaveProperty("file");
+    expect(indexRoute.file).toContain("home.tsx");
   });
 });

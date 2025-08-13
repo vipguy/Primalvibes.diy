@@ -1,6 +1,6 @@
-import { act, render, screen } from '@testing-library/react';
-import React, { useContext } from 'react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { act, render, screen } from "@testing-library/react";
+import React, { useContext } from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Create a controlled context for testing
 const TestContext = React.createContext<{ isStreaming: () => boolean }>({
@@ -11,16 +11,18 @@ const useTestContext = () => useContext(TestContext);
 // No need to mock ChatContext anymore
 
 // Mock other dependencies
-vi.mock('react-markdown', () => ({
-  default: ({ children }: { children: string }) => <div data-testid="markdown">{children}</div>,
+vi.mock("react-markdown", () => ({
+  default: ({ children }: { children: string }) => (
+    <div data-testid="markdown">{children}</div>
+  ),
 }));
 
 // Using the centralized mock from __mocks__/use-fireproof.ts
 
 // Now import components after mocks
-import ChatHeader from '../app/components/ChatHeaderContent';
-import MessageList from '../app/components/MessageList';
-import type { ChatMessageDocument } from '../app/types/chat';
+import ChatHeader from "../app/components/ChatHeaderContent";
+import MessageList from "../app/components/MessageList";
+import type { ChatMessageDocument } from "../app/types/chat";
 
 // Mock component that tracks renders
 function createRenderTracker(
@@ -28,7 +30,7 @@ function createRenderTracker(
     onOpenSidebar: () => void;
     onNewChat: () => void;
     isStreaming: () => boolean;
-  }>
+  }>,
 ) {
   let renderCount = 0;
 
@@ -53,21 +55,30 @@ function createRenderTracker(
 }
 
 // Update the test component to use TestContext
-function TestComponent({ renderCount }: { renderCount: React.MutableRefObject<number> }) {
+function TestComponent({
+  renderCount,
+}: {
+  renderCount: React.MutableRefObject<number>;
+}) {
   renderCount.current += 1;
   const { isStreaming } = useTestContext();
-  return <div data-testid="test-component">{isStreaming() ? 'Generating' : 'Idle'}</div>;
+  return (
+    <div data-testid="test-component">
+      {isStreaming() ? "Generating" : "Idle"}
+    </div>
+  );
 }
 
-describe('Component Memoization', () => {
-  describe('ChatHeader Memoization', () => {
+describe("Component Memoization", () => {
+  describe("ChatHeader Memoization", () => {
     beforeEach(() => {
       // No need to mock useTestContext
     });
 
-    it('does not re-render when props are unchanged', async () => {
+    it("does not re-render when props are unchanged", async () => {
       // Create a wrapper component for testing
-      const { Component: TrackedHeader, getRenderCount } = createRenderTracker(ChatHeader);
+      const { Component: TrackedHeader, getRenderCount } =
+        createRenderTracker(ChatHeader);
 
       // Create stable callback functions outside the component
       const onOpenSidebar = () => {
@@ -104,20 +115,20 @@ describe('Component Memoization', () => {
 
       // Force parent re-render
       await act(async () => {
-        getByTestId('rerender-trigger').click();
+        getByTestId("rerender-trigger").click();
       });
 
       // ChatHeader should not re-render
       expect(getRenderCount()).toBe(1);
     });
 
-    it('should not re-render when context value changes but component does not use that value', () => {
+    it("should not re-render when context value changes but component does not use that value", () => {
       const renderCount = { current: 0 };
 
       const { rerender } = render(
         <TestContext.Provider value={{ isStreaming: () => false }}>
           <TestComponent renderCount={renderCount} />
-        </TestContext.Provider>
+        </TestContext.Provider>,
       );
 
       const initialRenderCount = renderCount.current;
@@ -126,17 +137,19 @@ describe('Component Memoization', () => {
       rerender(
         <TestContext.Provider value={{ isStreaming: () => true }}>
           <TestComponent renderCount={renderCount} />
-        </TestContext.Provider>
+        </TestContext.Provider>,
       );
 
       // The component should have re-rendered because it uses isStreaming
       expect(renderCount.current).toBe(initialRenderCount + 1);
-      expect(screen.getByTestId('test-component')).toHaveTextContent('Generating');
+      expect(screen.getByTestId("test-component")).toHaveTextContent(
+        "Generating",
+      );
     });
   });
 
-  describe('SessionSidebar Memoization', () => {
-    it.skip('does not re-render when props are unchanged', async () => {
+  describe("SessionSidebar Memoization", () => {
+    it.skip("does not re-render when props are unchanged", async () => {
       // TODO: Define or import withRenderTracking and mockSessionSidebarProps if needed for this test.
       // const TrackedSidebar = withRenderTracking(SessionSidebar, 'SessionSidebar');
       // const props = { ...mockSessionSidebarProps, isVisible: true, onClose: stableOnClose };
@@ -144,15 +157,16 @@ describe('Component Memoization', () => {
     });
   });
 
-  describe('MessageList Memoization', () => {
-    it('does not re-render when props are unchanged', async () => {
-      const { Component: TrackedMessageList, getRenderCount } = createRenderTracker(MessageList);
+  describe("MessageList Memoization", () => {
+    it("does not re-render when props are unchanged", async () => {
+      const { Component: TrackedMessageList, getRenderCount } =
+        createRenderTracker(MessageList);
       const initialMessages: ChatMessageDocument[] = [
         {
-          _id: 'user-1',
-          text: 'Hello',
-          type: 'user',
-          session_id: 'test-session',
+          _id: "user-1",
+          text: "Hello",
+          type: "user",
+          session_id: "test-session",
           created_at: Date.now(),
         },
       ];
@@ -186,21 +200,22 @@ describe('Component Memoization', () => {
 
       // Force parent re-render
       await act(async () => {
-        getByTestId('rerender-trigger').click();
+        getByTestId("rerender-trigger").click();
       });
 
       // MessageList should not re-render
       expect(getRenderCount()).toBe(1);
     });
 
-    it('does re-render when messages array changes', async () => {
-      const { Component: TrackedMessageList, getRenderCount } = createRenderTracker(MessageList);
+    it("does re-render when messages array changes", async () => {
+      const { Component: TrackedMessageList, getRenderCount } =
+        createRenderTracker(MessageList);
       const initialMessages: ChatMessageDocument[] = [
         {
-          _id: 'user-1',
-          text: 'Hello',
-          type: 'user',
-          session_id: 'test-session',
+          _id: "user-1",
+          text: "Hello",
+          type: "user",
+          session_id: "test-session",
           created_at: Date.now(),
         },
       ];
@@ -212,10 +227,10 @@ describe('Component Memoization', () => {
           setMessages([
             ...messages,
             {
-              _id: 'ai-1',
-              text: 'New message',
-              type: 'ai',
-              session_id: 'test-session',
+              _id: "ai-1",
+              text: "New message",
+              type: "ai",
+              session_id: "test-session",
               created_at: Date.now(),
             },
           ]);
@@ -236,7 +251,7 @@ describe('Component Memoization', () => {
 
       // Add a new message
       await act(async () => {
-        getByTestId('add-message').click();
+        getByTestId("add-message").click();
       });
 
       // MessageList should re-render with new messages

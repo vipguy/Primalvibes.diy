@@ -1,9 +1,17 @@
-import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
-import { listLocalVibes, deleteVibeDatabase } from '../app/utils/vibeUtils';
-import type { LocalVibe } from '../app/utils/vibeUtils';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+  type Mock,
+} from "vitest";
+import { listLocalVibes, deleteVibeDatabase } from "../app/utils/vibeUtils";
+import type { LocalVibe } from "../app/utils/vibeUtils";
 
 // Mock vibeUtils module
-vi.mock('../app/utils/vibeUtils', () => {
+vi.mock("../app/utils/vibeUtils", () => {
   return {
     listLocalVibes: vi.fn(),
     deleteVibeDatabase: vi.fn().mockResolvedValue(undefined),
@@ -13,41 +21,47 @@ vi.mock('../app/utils/vibeUtils', () => {
 // Mock indexedDB after the vibeUtils mock is set up
 const mockIndexedDB = {
   databases: vi.fn().mockResolvedValue([
-    { name: 'fp.vibe-test1', version: 1 },
-    { name: 'fp.vibe-test2', version: 1 },
-    { name: 'fp.other-db', version: 1 },
+    { name: "fp.vibe-test1", version: 1 },
+    { name: "fp.vibe-test2", version: 1 },
+    { name: "fp.other-db", version: 1 },
   ]),
   deleteDatabase: vi.fn().mockImplementation(() => Promise.resolve()),
 };
-vi.stubGlobal('indexedDB', mockIndexedDB);
+vi.stubGlobal("indexedDB", mockIndexedDB);
 
 // Set up test data
 const mockVibes: LocalVibe[] = [
   {
-    id: 'test1',
-    title: 'Test Vibe 1',
-    encodedTitle: 'test-vibe-1',
-    slug: 'original-vibe',
+    id: "test1",
+    title: "Test Vibe 1",
+    encodedTitle: "test-vibe-1",
+    slug: "original-vibe",
     created: new Date(1713632400000).toISOString(),
     screenshot: {
-      file: () => Promise.resolve(new File(['test'], 'screenshot.png', { type: 'image/png' })),
-      type: 'image/png',
+      file: () =>
+        Promise.resolve(
+          new File(["test"], "screenshot.png", { type: "image/png" }),
+        ),
+      type: "image/png",
     },
   },
   {
-    id: 'test2',
-    title: 'Test Vibe 2',
-    encodedTitle: 'test-vibe-2',
-    slug: 'original-vibe',
+    id: "test2",
+    title: "Test Vibe 2",
+    encodedTitle: "test-vibe-2",
+    slug: "original-vibe",
     created: new Date(1713632400000).toISOString(),
     screenshot: {
-      file: () => Promise.resolve(new File(['test'], 'screenshot.png', { type: 'image/png' })),
-      type: 'image/png',
+      file: () =>
+        Promise.resolve(
+          new File(["test"], "screenshot.png", { type: "image/png" }),
+        ),
+      type: "image/png",
     },
   },
 ];
 
-describe('vibeUtils', () => {
+describe("vibeUtils", () => {
   beforeEach(() => {
     vi.resetAllMocks();
 
@@ -59,21 +73,21 @@ describe('vibeUtils', () => {
     vi.clearAllMocks();
   });
 
-  describe('listLocalVibes', () => {
-    it('should return vibe information', async () => {
+  describe("listLocalVibes", () => {
+    it("should return vibe information", async () => {
       // Act
       const vibes = await listLocalVibes();
 
       // Assert
       expect(vibes.length).toBe(2);
-      expect(vibes[0].id).toBe('test1');
-      expect(vibes[0].title).toBe('Test Vibe 1');
-      expect(vibes[0].slug).toBe('original-vibe');
+      expect(vibes[0].id).toBe("test1");
+      expect(vibes[0].title).toBe("Test Vibe 1");
+      expect(vibes[0].slug).toBe("original-vibe");
       expect(vibes[0].created).toBeDefined();
       expect(vibes[0].screenshot).toBeDefined();
     });
 
-    it('should handle empty database list', async () => {
+    it("should handle empty database list", async () => {
       // Arrange
       (listLocalVibes as Mock).mockResolvedValueOnce([]);
 
@@ -84,7 +98,7 @@ describe('vibeUtils', () => {
       expect(vibes.length).toBe(0);
     });
 
-    it('should handle errors gracefully', async () => {
+    it("should handle errors gracefully", async () => {
       // Arrange
       (listLocalVibes as Mock).mockResolvedValueOnce([]);
 
@@ -96,21 +110,25 @@ describe('vibeUtils', () => {
     });
   });
 
-  describe('deleteVibeDatabase', () => {
-    it('should delete the database with the correct ID', async () => {
+  describe("deleteVibeDatabase", () => {
+    it("should delete the database with the correct ID", async () => {
       // Act
-      await deleteVibeDatabase('test-vibe-id');
+      await deleteVibeDatabase("test-vibe-id");
 
       // Assert
-      expect(deleteVibeDatabase).toHaveBeenCalledWith('test-vibe-id');
+      expect(deleteVibeDatabase).toHaveBeenCalledWith("test-vibe-id");
     });
 
-    it('should handle errors and rethrow them', async () => {
+    it("should handle errors and rethrow them", async () => {
       // Arrange
-      (deleteVibeDatabase as Mock).mockRejectedValueOnce(new Error('Delete error'));
+      (deleteVibeDatabase as Mock).mockRejectedValueOnce(
+        new Error("Delete error"),
+      );
 
       // Act & Assert
-      await expect(deleteVibeDatabase('test-vibe-id')).rejects.toThrow('Delete error');
+      await expect(deleteVibeDatabase("test-vibe-id")).rejects.toThrow(
+        "Delete error",
+      );
     });
   });
 });

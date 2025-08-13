@@ -24,3 +24,5 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: ./actions/base
+
+      - uses: ./vibes.diy/actions/build

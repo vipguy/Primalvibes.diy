@@ -1,11 +1,13 @@
-import { vi } from 'vitest';
+import { vi } from "vitest";
 
 // Create a simple mock database that can be returned by fireproof
 const mockDb = {
-  put: vi.fn().mockResolvedValue({ id: 'test-id' }),
-  get: vi.fn().mockResolvedValue({ _id: 'test-id', title: 'Test Document' }),
+  put: vi.fn().mockResolvedValue({ id: "test-id" }),
+  get: vi.fn().mockResolvedValue({ _id: "test-id", title: "Test Document" }),
   query: vi.fn().mockResolvedValue({
-    rows: [{ id: 'session1', key: 'session1', value: { title: 'Test Session' } }],
+    rows: [
+      { id: "session1", key: "session1", value: { title: "Test Session" } },
+    ],
   }),
   delete: vi.fn().mockResolvedValue({ ok: true }),
 };
@@ -13,13 +15,13 @@ const mockDb = {
 // Mock session data for queries
 const mockSessions = [
   {
-    _id: 'session1',
-    type: 'session',
-    title: 'Test Session 1',
+    _id: "session1",
+    type: "session",
+    title: "Test Session 1",
     timestamp: Date.now() - 1000000,
     messages: [
-      { text: 'Hello', type: 'user' },
-      { text: 'Hi there', type: 'ai', code: 'console.log("Hello")' },
+      { text: "Hello", type: "user" },
+      { text: "Hi there", type: "ai", code: 'console.log("Hello")' },
     ],
   },
 ];
@@ -27,19 +29,19 @@ const mockSessions = [
 // Mock screenshots can be used in useLiveQuery with screenshot query filters
 const mockScreenshots = [
   {
-    _id: 'screenshot1',
-    type: 'screenshot',
-    session_id: 'session1',
+    _id: "screenshot1",
+    type: "screenshot",
+    session_id: "session1",
     timestamp: Date.now(),
   },
 ];
 
 // Ensure the mock uses the mockScreenshots array
 const getQueryResult = (queryType: string) => {
-  if (queryType.includes('screenshot')) {
-    return { docs: mockScreenshots, status: 'success' };
+  if (queryType.includes("screenshot")) {
+    return { docs: mockScreenshots, status: "success" };
   }
-  return { docs: mockSessions, status: 'success' };
+  return { docs: mockSessions, status: "success" };
 };
 
 // Mock the fireproof function - this is imported directly in databaseManager.ts
@@ -49,7 +51,7 @@ const fireproof = vi.fn().mockImplementation(() => mockDb);
 const useFireproof = vi.fn().mockImplementation(() => ({
   database: mockDb,
   useLiveQuery: vi.fn().mockImplementation((query) => {
-    const queryStr = typeof query === 'string' ? query : '';
+    const queryStr = typeof query === "string" ? query : "";
     return getQueryResult(queryStr);
   }),
   useDocument: vi.fn().mockReturnValue({

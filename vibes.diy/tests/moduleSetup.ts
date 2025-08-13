@@ -1,11 +1,11 @@
-import { vi } from 'vitest';
+import { vi } from "vitest";
 
 // Vitest will automatically use mocks from __mocks__ directory
 // You don't need to manually import or setup mocks here
 
 // Set up any additional global mocks needed for tests
 // Mock for react-markdown that will be used across tests
-vi.mock('react-markdown', () => {
+vi.mock("react-markdown", () => {
   // Create a mock implementation that works with @testing-library/react
   return {
     default: vi.fn(({ children }) => {

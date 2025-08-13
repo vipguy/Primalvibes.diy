@@ -1,23 +1,30 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import type React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { AuthContextType } from '../app/contexts/AuthContext';
-import { AuthContext } from '../app/contexts/AuthContext';
-import * as useSimpleChatModule from '../app/hooks/useSimpleChat';
-import UnifiedSession from '../app/routes/home';
-import type { AiChatMessage, ChatMessage, Segment, UserChatMessage } from '../app/types/chat';
-import * as segmentParser from '../app/utils/segmentParser';
-import { mockChatStateProps } from './mockData';
-import { MockThemeProvider } from './utils/MockThemeProvider';
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import type React from "react";
+import { MemoryRouter } from "react-router-dom";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { AuthContextType } from "../app/contexts/AuthContext";
+import { AuthContext } from "../app/contexts/AuthContext";
+import * as useSimpleChatModule from "../app/hooks/useSimpleChat";
+import UnifiedSession from "../app/routes/home";
+import type {
+  AiChatMessage,
+  ChatMessage,
+  Segment,
+  UserChatMessage,
+} from "../app/types/chat";
+import * as segmentParser from "../app/utils/segmentParser";
+import { mockChatStateProps } from "./mockData";
+import { MockThemeProvider } from "./utils/MockThemeProvider";
 
 // Mock the CookieConsentContext
-vi.mock('../app/contexts/CookieConsentContext', () => ({
+vi.mock("../app/contexts/CookieConsentContext", () => ({
   useCookieConsent: () => ({
     messageHasBeenSent: false,
     setMessageHasBeenSent: vi.fn(),
   }),
-  CookieConsentProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  CookieConsentProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
 }));
 
 // We need to define the mock before importing any modules that might use it
@@ -25,16 +32,19 @@ const navigateMock = vi.fn();
 
 // Mock for useLocation that we can control per test
 let locationMock = {
-  search: '',
-  pathname: '/',
-  hash: '',
+  search: "",
+  pathname: "/",
+  hash: "",
   state: null,
-  key: '',
+  key: "",
 };
 
 // Create mock implementations for react-router-dom
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
+vi.mock("react-router-dom", async () => {
+  const actual =
+    await vi.importActual<typeof import("react-router-dom")>(
+      "react-router-dom",
+    );
   return {
     ...actual,
     useNavigate: () => navigateMock,
@@ -43,7 +53,7 @@ vi.mock('react-router-dom', async () => {
 });
 
 // Mock useNavigate hook from react-router - this mock applies to all tests
-vi.mock('react-router', () => {
+vi.mock("react-router", () => {
   return {
     useParams: () => ({}),
     useNavigate: () => navigateMock,
@@ -55,7 +65,9 @@ vi.mock('react-router', () => {
 interface ChatInterfaceProps {
   chatState: {
     messages: ChatMessage[];
-    setMessages: (newMessages: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => void;
+    setMessages: (
+      newMessages: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[]),
+    ) => void;
     input: string;
     setInput: React.Dispatch<React.SetStateAction<string>>;
     isStreaming: () => boolean;
@@ -80,7 +92,7 @@ interface ResultPreviewProps {
   dependencies?: Record<string, string>;
   onShare?: () => void;
   onScreenshotCaptured?: (screenshotData: string) => void;
-  initialView?: 'code' | 'preview';
+  initialView?: "code" | "preview";
   sessionId?: string;
   isStreaming?: boolean;
 }
@@ -91,7 +103,7 @@ interface AppLayoutProps {
 }
 
 // Mock clipboard API
-Object.defineProperty(navigator, 'clipboard', {
+Object.defineProperty(navigator, "clipboard", {
   value: {
     writeText: vi.fn().mockImplementation(() => Promise.resolve()),
   },
@@ -99,24 +111,24 @@ Object.defineProperty(navigator, 'clipboard', {
 });
 
 // Mock window.location
-Object.defineProperty(window, 'location', {
+Object.defineProperty(window, "location", {
   value: {
     // Use only the properties we want to override
-    origin: 'https://example.com',
-    pathname: '/',
-    hash: '',
+    origin: "https://example.com",
+    pathname: "/",
+    hash: "",
   },
   writable: true,
 });
 
 // Mock components used in the Home component
-vi.mock('../app/components/ChatInterface', () => ({
+vi.mock("../app/components/ChatInterface", () => ({
   default: ({ onSessionCreated }: ChatInterfaceProps) => (
     <div data-testid="mock-chat-interface">
       <button
         type="button"
         data-testid="create-session-button"
-        onClick={() => onSessionCreated?.('new-session-id')}
+        onClick={() => onSessionCreated?.("new-session-id")}
       >
         Create Session
       </button>
@@ -124,16 +136,20 @@ vi.mock('../app/components/ChatInterface', () => ({
   ),
 }));
 
-vi.mock('../app/components/ResultPreview/ResultPreview', () => ({
+vi.mock("../app/components/ResultPreview/ResultPreview", () => ({
   default: ({ code }: ResultPreviewProps) => (
     <div data-testid="mock-result-preview">
-      <div data-testid="code-line-count">{code.split('\n').length} lines of code</div>
+      <div data-testid="code-line-count">
+        {code.split("\n").length} lines of code
+      </div>
       <div data-testid="code-content">{code.substring(0, 50)}...</div>
       <button
         type="button"
         data-testid="share-button"
         onClick={() =>
-          navigator.clipboard.writeText(`${window.location.origin}/shared?state=mockState`)
+          navigator.clipboard.writeText(
+            `${window.location.origin}/shared?state=mockState`,
+          )
         }
       >
         Share
@@ -142,7 +158,7 @@ vi.mock('../app/components/ResultPreview/ResultPreview', () => ({
   ),
 }));
 
-vi.mock('../app/components/AppLayout', () => ({
+vi.mock("../app/components/AppLayout", () => ({
   default: ({ chatPanel, previewPanel }: AppLayoutProps) => (
     <div data-testid="mock-app-layout">
       <div data-testid="chat-panel">{chatPanel}</div>
@@ -154,20 +170,20 @@ vi.mock('../app/components/AppLayout', () => ({
 // Using the centralized mock from the __mocks__/use-fireproof.ts file
 // This ensures consistency across all tests
 
-describe('Home Route in completed state', () => {
+describe("Home Route in completed state", () => {
   let mockCode: string;
   const authenticatedState: Partial<AuthContextType> = {
     isAuthenticated: true,
     isLoading: false,
-    token: 'mock-token',
+    token: "mock-token",
     userPayload: {
-      userId: 'test-user-id',
+      userId: "test-user-id",
       exp: 9999999999,
       tenants: [],
       ledgers: [],
       iat: 1234567890,
-      iss: 'FP_CLOUD',
-      aud: 'PUBLIC',
+      iss: "FP_CLOUD",
+      aud: "PUBLIC",
     },
     checkAuthStatus: vi.fn(),
     processToken: vi.fn(),
@@ -180,56 +196,56 @@ describe('Home Route in completed state', () => {
     mockCode = Array(210)
       .fill(0)
       .map((_, i) => `console.log("Line ${i}");`)
-      .join('\n');
+      .join("\n");
 
     // Mock segmentParser functions
-    vi.spyOn(segmentParser, 'parseContent').mockReturnValue({
+    vi.spyOn(segmentParser, "parseContent").mockReturnValue({
       segments: [
-        { type: 'markdown', content: 'Explanation of the code' } as Segment,
-        { type: 'code', content: mockCode } as Segment,
+        { type: "markdown", content: "Explanation of the code" } as Segment,
+        { type: "code", content: mockCode } as Segment,
       ],
     });
 
-    vi.spyOn(segmentParser, 'parseDependencies').mockReturnValue({
-      react: '^18.2.0',
-      'react-dom': '^18.2.0',
+    vi.spyOn(segmentParser, "parseDependencies").mockReturnValue({
+      react: "^18.2.0",
+      "react-dom": "^18.2.0",
     });
 
     // Mock useSimpleChat hook to return a chat with completed AI message containing code
-    vi.spyOn(useSimpleChatModule, 'useSimpleChat').mockReturnValue({
+    vi.spyOn(useSimpleChatModule, "useSimpleChat").mockReturnValue({
       docs: [
         {
-          type: 'user',
-          text: 'Create a React app',
+          type: "user",
+          text: "Create a React app",
         } as UserChatMessage,
         {
-          type: 'ai',
+          type: "ai",
           text: `javascript\n${mockCode}\n\n\nExplanation of the code`,
           segments: [
-            { type: 'markdown', content: 'Explanation of the code' } as Segment,
-            { type: 'code', content: mockCode } as Segment,
+            { type: "markdown", content: "Explanation of the code" } as Segment,
+            { type: "code", content: mockCode } as Segment,
           ],
           isStreaming: false,
         } as AiChatMessage,
       ],
       sendMessage: vi.fn(),
       isStreaming: false,
-      input: '',
+      input: "",
       setInput: vi.fn(),
       sessionId: null,
       selectedSegments: [
-        { type: 'markdown', content: 'Explanation of the code' } as Segment,
-        { type: 'code', content: mockCode } as Segment,
+        { type: "markdown", content: "Explanation of the code" } as Segment,
+        { type: "code", content: mockCode } as Segment,
       ],
-      selectedCode: { type: 'code', content: mockCode } as Segment,
+      selectedCode: { type: "code", content: mockCode } as Segment,
       inputRef: { current: null },
-      title: 'React App',
+      title: "React App",
       selectedResponseDoc: {
-        type: 'ai',
+        type: "ai",
         text: `javascript\n${mockCode}\n\n\nExplanation of the code`,
         segments: [
-          { type: 'markdown', content: 'Explanation of the code' } as Segment,
-          { type: 'code', content: mockCode } as Segment,
+          { type: "markdown", content: "Explanation of the code" } as Segment,
+          { type: "code", content: mockCode } as Segment,
         ],
         isStreaming: false,
       } as AiChatMessage,
@@ -238,7 +254,7 @@ describe('Home Route in completed state', () => {
     });
   });
 
-  it('displays the correct number of code lines in the preview', async () => {
+  it("displays the correct number of code lines in the preview", async () => {
     render(
       <MockThemeProvider>
         <MemoryRouter>
@@ -254,15 +270,17 @@ describe('Home Route in completed state', () => {
             <UnifiedSession />
           </AuthContext.Provider>
         </MemoryRouter>
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('code-line-count')).toHaveTextContent('210 lines of code');
+      expect(screen.getByTestId("code-line-count")).toHaveTextContent(
+        "210 lines of code",
+      );
     });
   });
 
-  it('shows share button and handles sharing', async () => {
+  it("shows share button and handles sharing", async () => {
     render(
       <MockThemeProvider>
         <MemoryRouter>
@@ -278,17 +296,17 @@ describe('Home Route in completed state', () => {
             <UnifiedSession />
           </AuthContext.Provider>
         </MemoryRouter>
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
-    const shareButton = await screen.findByTestId('share-button');
+    const shareButton = await screen.findByTestId("share-button");
     fireEvent.click(shareButton);
     await waitFor(() => {
       expect(navigator.clipboard.writeText).toHaveBeenCalled();
     });
   });
 
-  it.skip('creates a new session when create-session button is clicked', async () => {
+  it.skip("creates a new session when create-session button is clicked", async () => {
     // SKIPPED: The original test was written for a different implementation.
     // Now the ChatInterface component doesn't have session creation functionality
     // directly in it, and the session creation flow has changed.
@@ -296,11 +314,11 @@ describe('Home Route in completed state', () => {
 
     // Set mock location for this test
     locationMock = {
-      search: '',
-      pathname: '/',
-      hash: '',
+      search: "",
+      pathname: "/",
+      hash: "",
       state: null,
-      key: '',
+      key: "",
     };
 
     // Clear mock tracking
@@ -321,11 +339,13 @@ describe('Home Route in completed state', () => {
             <UnifiedSession />
           </AuthContext.Provider>
         </MemoryRouter>
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Find create session button and click it
-    const createSessionButton = await screen.findByTestId('create-session-button');
+    const createSessionButton = await screen.findByTestId(
+      "create-session-button",
+    );
     fireEvent.click(createSessionButton);
 
     // Instead of expecting immediate navigation, allow for the possibility
@@ -338,22 +358,22 @@ describe('Home Route in completed state', () => {
         const firstCall = navigateMock.mock.calls[0];
         if (firstCall) {
           const path = firstCall[0];
-          expect(typeof path).toBe('string');
-          expect(path.includes('/chat/')).toBe(true);
+          expect(typeof path).toBe("string");
+          expect(path.includes("/chat/")).toBe(true);
         }
       },
-      { timeout: 2000 }
+      { timeout: 2000 },
     );
   });
 
-  it('loads code from URL hash state when present', async () => {
+  it("loads code from URL hash state when present", async () => {
     // Set hash state for this test
     locationMock = {
-      search: '',
-      pathname: '/',
-      hash: '#state=mock-hash-state',
+      search: "",
+      pathname: "/",
+      hash: "#state=mock-hash-state",
       state: null,
-      key: '',
+      key: "",
     };
 
     render(
@@ -371,13 +391,13 @@ describe('Home Route in completed state', () => {
             <UnifiedSession />
           </AuthContext.Provider>
         </MemoryRouter>
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Verify the component renders without crashing
     await waitFor(() => {
-      expect(screen.getByTestId('mock-chat-interface')).toBeInTheDocument();
-      expect(screen.getByTestId('mock-result-preview')).toBeInTheDocument();
+      expect(screen.getByTestId("mock-chat-interface")).toBeInTheDocument();
+      expect(screen.getByTestId("mock-result-preview")).toBeInTheDocument();
     });
   });
 });

@@ -1,8 +1,8 @@
-import { render, screen } from '@testing-library/react';
-import MessageList from '../app/components/MessageList';
-import { vi, describe, test, expect, beforeEach } from 'vitest';
-import type { ChatMessageDocument } from '../app/types/chat';
-import { MockThemeProvider } from './utils/MockThemeProvider';
+import { render, screen } from "@testing-library/react";
+import MessageList from "../app/components/MessageList";
+import { vi, describe, test, expect, beforeEach } from "vitest";
+import type { ChatMessageDocument } from "../app/types/chat";
+import { MockThemeProvider } from "./utils/MockThemeProvider";
 
 // Mock scrollIntoView
 beforeEach(() => {
@@ -10,7 +10,7 @@ beforeEach(() => {
 });
 
 // Mock Message component to simplify testing
-vi.mock('../app/components/Message', () => ({
+vi.mock("../app/components/Message", () => ({
   default: ({
     message,
   }: {
@@ -29,18 +29,18 @@ vi.mock('../app/components/Message', () => ({
   WelcomeScreen: () => <div data-testid="welcome-screen">Welcome Screen</div>,
 }));
 
-describe('MessageList streaming tests', () => {
-  test('should display minimal content at stream start', () => {
+describe("MessageList streaming tests", () => {
+  test("should display minimal content at stream start", () => {
     const messages = [
       {
-        type: 'user',
-        text: 'Hello',
-        _id: 'user1',
+        type: "user",
+        text: "Hello",
+        _id: "user1",
       },
       {
-        type: 'ai',
-        text: '{',
-        _id: 'ai1',
+        type: "ai",
+        text: "{",
+        _id: "ai1",
       },
     ] as ChatMessageDocument[];
 
@@ -60,26 +60,26 @@ describe('MessageList streaming tests', () => {
             /* no-op */
           }}
         />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Test that the very basic first character of the stream is visible
-    const minimalContent = '{';
+    const minimalContent = "{";
     const visibleContent = screen.getByText(minimalContent);
     expect(visibleContent).toBeInTheDocument();
   });
 
-  test('should update UI as more content streams in', () => {
+  test("should update UI as more content streams in", () => {
     const messages = [
       {
-        type: 'user',
-        text: 'Hello',
-        _id: 'user1',
+        type: "user",
+        text: "Hello",
+        _id: "user1",
       },
       {
-        type: 'ai',
+        type: "ai",
         text: '{"dependencies": {}}\n\nThis qui',
-        _id: 'ai1',
+        _id: "ai1",
       },
     ] as ChatMessageDocument[];
 
@@ -99,7 +99,7 @@ describe('MessageList streaming tests', () => {
             /* no-op */
           }}
         />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Check that the partial content is visible
@@ -109,21 +109,21 @@ describe('MessageList streaming tests', () => {
 
   // Add more tests for specific streaming behaviors
 
-  test('should display both markdown and code when segments are present', () => {
+  test("should display both markdown and code when segments are present", () => {
     const markdownContent =
       '{"dependencies": {}}\n\nThis quick example shows how to use React hooks with TypeScript.\n\nFirst, let\'s create a simple counter component:';
-    const codeContent = 'import React, { useState, use';
+    const codeContent = "import React, { useState, use";
 
     const messages = [
       {
-        type: 'user',
-        text: 'Hello',
-        _id: 'user1',
+        type: "user",
+        text: "Hello",
+        _id: "user1",
       },
       {
-        type: 'ai',
-        text: markdownContent + '\n\n```jsx\n' + codeContent,
-        _id: 'ai1',
+        type: "ai",
+        text: markdownContent + "\n\n```jsx\n" + codeContent,
+        _id: "ai1",
       },
     ] as ChatMessageDocument[];
 
@@ -143,7 +143,7 @@ describe('MessageList streaming tests', () => {
             /* no-op */
           }}
         />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Check that both the markdown and code content are visible

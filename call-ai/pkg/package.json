@@ -12,7 +12,9 @@
     "url": "https://github.com/fireproof-storage/call-ai/issues"
   },
   "scripts": {
-    "build": "tsc"
+    "build": "core-cli tsc",
+    "pack": "core-cli build --doPack",
+    "publish": "core-cli build"
   },
   "keywords": [
     "ai",

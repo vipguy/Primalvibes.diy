@@ -1,23 +1,31 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import type { ReactNode } from 'react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { AuthContextType } from '../app/contexts/AuthContext';
-import { AuthContext } from '../app/contexts/AuthContext';
-import Settings from '../app/routes/settings';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
+import type { ReactNode } from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { AuthContextType } from "../app/contexts/AuthContext";
+import { AuthContext } from "../app/contexts/AuthContext";
+import Settings from "../app/routes/settings";
 
 // Create mock objects outside the mock function to access them in tests
 const mockMerge = vi.fn();
-const mockSave = vi.fn().mockImplementation(() => Promise.resolve({ ok: true }));
+const mockSave = vi
+  .fn()
+  .mockImplementation(() => Promise.resolve({ ok: true }));
 const mockSettings = {
-  _id: 'user_settings',
-  stylePrompt: '',
-  userPrompt: '',
+  _id: "user_settings",
+  stylePrompt: "",
+  userPrompt: "",
 };
 
 // Mock the modules
-vi.mock('../app/hooks/useSession', () => ({
+vi.mock("../app/hooks/useSession", () => ({
   useSession: () => ({
-    mainDatabase: { name: 'test-db' },
+    mainDatabase: { name: "test-db" },
   }),
 }));
 
@@ -33,14 +41,17 @@ const mockUseFireproof = vi.fn().mockReturnValue({
 });
 
 // Mock Fireproof
-vi.mock('use-fireproof', () => ({
+vi.mock("use-fireproof", () => ({
   useFireproof: () => mockUseFireproof(),
 }));
 
 // Create mock implementations for react-router-dom
 const navigateMock = vi.fn();
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
+vi.mock("react-router-dom", async () => {
+  const actual =
+    await vi.importActual<typeof import("react-router-dom")>(
+      "react-router-dom",
+    );
   return {
     ...actual,
     useNavigate: () => navigateMock,
@@ -48,7 +59,7 @@ vi.mock('react-router-dom', async () => {
 });
 
 // Mock SimpleAppLayout component
-vi.mock('../app/components/SimpleAppLayout', () => ({
+vi.mock("../app/components/SimpleAppLayout", () => ({
   default: ({
     headerLeft,
     children,
@@ -64,7 +75,7 @@ vi.mock('../app/components/SimpleAppLayout', () => ({
 }));
 
 // Mock HomeIcon component
-vi.mock('../app/components/SessionSidebar/HomeIcon', () => ({
+vi.mock("../app/components/SessionSidebar/HomeIcon", () => ({
   HomeIcon: () => <div data-testid="home-icon" />,
 }));
 
@@ -82,26 +93,33 @@ const createWrapper = (contextValue?: Partial<AuthContextType>) => {
   };
   const valueToProvide = { ...defaultContextValue, ...contextValue };
   return ({ children }: { children: ReactNode }) => (
-    <AuthContext.Provider value={valueToProvide}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={valueToProvide}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 
-describe('Settings Route', () => {
+describe("Settings Route", () => {
   const authenticatedState: Partial<AuthContextType> = {
     isAuthenticated: true,
     isLoading: false,
     userPayload: {
-      userId: 'test',
+      userId: "test",
       exp: 9999999999,
       tenants: [],
       ledgers: [],
       iat: 1234567890,
-      iss: 'FP_CLOUD',
-      aud: 'PUBLIC',
+      iss: "FP_CLOUD",
+      aud: "PUBLIC",
     },
   };
 
-  const mockDoc = { _id: 'user_settings', stylePrompt: '', userPrompt: '', model: '' };
+  const mockDoc = {
+    _id: "user_settings",
+    stylePrompt: "",
+    userPrompt: "",
+    model: "",
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -124,55 +142,63 @@ describe('Settings Route', () => {
     vi.useRealTimers();
   });
 
-  it.skip('renders the settings page with correct title and sections', async () => {
+  it.skip("renders the settings page with correct title and sections", async () => {
     const wrapper = createWrapper(authenticatedState);
     render(<Settings />, { wrapper });
     // ... assertions ...
   }, 10000);
 
-  it('allows updating style prompt via text input', async () => {
+  it("allows updating style prompt via text input", async () => {
     const wrapper = createWrapper(authenticatedState);
     render(<Settings />, { wrapper });
-    const styleInput = screen.getByPlaceholderText(/enter or select style prompt/i);
+    const styleInput = screen.getByPlaceholderText(
+      /enter or select style prompt/i,
+    );
 
     await act(async () => {
-      fireEvent.change(styleInput, { target: { value: 'new style' } });
+      fireEvent.change(styleInput, { target: { value: "new style" } });
     });
 
-    expect(mockMerge).toHaveBeenCalledWith({ stylePrompt: 'new style' });
+    expect(mockMerge).toHaveBeenCalledWith({ stylePrompt: "new style" });
   });
 
-  it('allows selecting a style prompt from suggestions', async () => {
+  it("allows selecting a style prompt from suggestions", async () => {
     const wrapper = createWrapper(authenticatedState);
     render(<Settings />, { wrapper });
-    const suggestionButton = screen.getByText('synthwave');
+    const suggestionButton = screen.getByText("synthwave");
 
     await act(async () => {
       fireEvent.click(suggestionButton);
       vi.runAllTimers(); // For the focus setTimeout
     });
 
-    expect(mockMerge).toHaveBeenCalledWith({ stylePrompt: 'synthwave (80s digital aesthetic)' });
+    expect(mockMerge).toHaveBeenCalledWith({
+      stylePrompt: "synthwave (80s digital aesthetic)",
+    });
   });
 
-  it('allows updating user prompt via textarea', async () => {
+  it("allows updating user prompt via textarea", async () => {
     const wrapper = createWrapper(authenticatedState);
     render(<Settings />, { wrapper });
-    const userPromptTextarea = screen.getByPlaceholderText(/enter custom instructions/i);
+    const userPromptTextarea = screen.getByPlaceholderText(
+      /enter custom instructions/i,
+    );
 
     await act(async () => {
-      fireEvent.change(userPromptTextarea, { target: { value: 'custom prompt' } });
+      fireEvent.change(userPromptTextarea, {
+        target: { value: "custom prompt" },
+      });
     });
 
-    expect(mockMerge).toHaveBeenCalledWith({ userPrompt: 'custom prompt' });
+    expect(mockMerge).toHaveBeenCalledWith({ userPrompt: "custom prompt" });
   });
 
-  it('calls save when the save button is clicked', async () => {
+  it("calls save when the save button is clicked", async () => {
     // Create controlled mock implementation
     mockSave.mockImplementation(() => {
       // This will redirect to home page after saving
       setTimeout(() => {
-        navigateMock('/');
+        navigateMock("/");
       }, 0);
       return Promise.resolve({ ok: true });
     });
@@ -180,14 +206,17 @@ describe('Settings Route', () => {
     const wrapper = createWrapper(authenticatedState);
     render(<Settings />, { wrapper });
 
-    const saveButton = screen.getByRole('button', { name: /save/i });
+    const saveButton = screen.getByRole("button", { name: /save/i });
     expect(saveButton).toBeDisabled(); // Initially disabled
 
     // Enable the save button
     await act(async () => {
-      fireEvent.change(screen.getByPlaceholderText(/enter or select style prompt/i), {
-        target: { value: 'enable save' },
-      });
+      fireEvent.change(
+        screen.getByPlaceholderText(/enter or select style prompt/i),
+        {
+          target: { value: "enable save" },
+        },
+      );
     });
 
     expect(saveButton).not.toBeDisabled(); // Enabled after change
@@ -203,15 +232,15 @@ describe('Settings Route', () => {
     // Check that save was called
     expect(mockSave).toHaveBeenCalled();
     // Check navigation occurred
-    expect(navigateMock).toHaveBeenCalledWith('/');
+    expect(navigateMock).toHaveBeenCalledWith("/");
   }, 10000);
 
-  it('successfully saves settings and navigates to home', async () => {
+  it("successfully saves settings and navigates to home", async () => {
     // Override save mock to simulate navigation
     mockSave.mockImplementation(() => {
       // This will redirect to home page after saving
       setTimeout(() => {
-        navigateMock('/');
+        navigateMock("/");
       }, 0);
       return Promise.resolve({ ok: true });
     });
@@ -219,13 +248,16 @@ describe('Settings Route', () => {
     const wrapper = createWrapper(authenticatedState);
     render(<Settings />, { wrapper });
 
-    const saveButton = screen.getByRole('button', { name: /save/i });
+    const saveButton = screen.getByRole("button", { name: /save/i });
 
     // Make a change to enable the save button
     await act(async () => {
-      fireEvent.change(screen.getByPlaceholderText(/enter or select style prompt/i), {
-        target: { value: 'save this' },
-      });
+      fireEvent.change(
+        screen.getByPlaceholderText(/enter or select style prompt/i),
+        {
+          target: { value: "save this" },
+        },
+      );
     });
 
     // Click the save button
@@ -238,12 +270,15 @@ describe('Settings Route', () => {
 
     // Verify save was called and we navigated home
     expect(mockSave).toHaveBeenCalled();
-    expect(navigateMock).toHaveBeenCalledWith('/');
+    expect(navigateMock).toHaveBeenCalledWith("/");
   }, 10000);
 
-  it.skip('highlights the selected style prompt suggestion', async () => {
+  it.skip("highlights the selected style prompt suggestion", async () => {
     // Need to control the useDocument mock *before* render for this specific test
-    const mockSettingsWithStyle = { ...mockDoc, stylePrompt: 'brutalist web (raw, grid-heavy)' };
+    const mockSettingsWithStyle = {
+      ...mockDoc,
+      stylePrompt: "brutalist web (raw, grid-heavy)",
+    };
     mockUseDocument.mockReturnValueOnce({
       doc: mockSettingsWithStyle,
       merge: mockMerge,
@@ -251,13 +286,13 @@ describe('Settings Route', () => {
     });
     const wrapper = createWrapper(authenticatedState);
     render(<Settings />, { wrapper });
-    const brutalistButton = await screen.findByText('brutalist web');
+    const brutalistButton = await screen.findByText("brutalist web");
     await waitFor(
       () => {
-        expect(brutalistButton).toHaveClass('bg-blue-500');
+        expect(brutalistButton).toHaveClass("bg-blue-500");
       },
-      { timeout: 10000 }
+      { timeout: 10000 },
     );
-    expect(brutalistButton).toHaveClass('text-white');
+    expect(brutalistButton).toHaveClass("text-white");
   }, 10000);
 });

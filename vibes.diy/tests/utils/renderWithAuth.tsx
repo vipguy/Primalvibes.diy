@@ -1,11 +1,14 @@
-import type { ReactElement } from 'react';
-import { render } from '@testing-library/react';
-import type { RenderOptions } from '@testing-library/react';
-import { type AuthContextType, AuthContext } from '../../app/contexts/AuthContext';
-import { vi } from 'vitest';
+import type { ReactElement } from "react";
+import { render } from "@testing-library/react";
+import type { RenderOptions } from "@testing-library/react";
+import {
+  type AuthContextType,
+  AuthContext,
+} from "../../app/contexts/AuthContext";
+import { vi } from "vitest";
 
 export const createAuthContextValue = (
-  overrides: Partial<AuthContextType> = {}
+  overrides: Partial<AuthContextType> = {},
 ): AuthContextType => ({
   token: null,
   isAuthenticated: false,
@@ -21,13 +24,15 @@ export const createAuthContextValue = (
 export const renderWithAuth = (
   ui: ReactElement,
   authOverrides: Partial<AuthContextType> = {},
-  options?: Omit<RenderOptions, 'wrapper'>
+  options?: Omit<RenderOptions, "wrapper">,
 ) => {
   const value = createAuthContextValue(authOverrides);
 
   const wrapper = ({ children }: { children: React.ReactNode }) => {
     // Lazy require inside component body to ensure module fully initialized
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+    return (
+      <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+    );
   };
   return { ...render(ui, { wrapper, ...options }), authValue: value };
 };

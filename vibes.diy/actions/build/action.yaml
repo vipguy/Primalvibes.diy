@@ -1,0 +1,11 @@
+name: "building vibes.diy "
+description: "building vibes.diy"
+# inputs:
+# your inputs here
+runs:
+  using: composite
+  steps:
+    - name: build
+      shell: bash
+      run: pnpm run build
+

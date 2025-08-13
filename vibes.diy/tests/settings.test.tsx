@@ -1,33 +1,35 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import React from 'react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AuthContext } from '../app/contexts/AuthContext';
-import type { AuthContextType } from '../app/contexts/AuthContext';
-import * as SettingsModule from '../app/routes/settings';
-import type { TokenPayload } from '../app/utils/auth';
+import { fireEvent, render, screen } from "@testing-library/react";
+import React from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { AuthContext } from "../app/contexts/AuthContext";
+import type { AuthContextType } from "../app/contexts/AuthContext";
+import * as SettingsModule from "../app/routes/settings";
+import type { TokenPayload } from "../app/utils/auth";
 
 // Extract the Settings component directly since we can't import the default export in tests
 const Settings = SettingsModule.default;
 
 // Mock components and hooks
-vi.mock('react-router-dom', () => ({
+vi.mock("react-router-dom", () => ({
   useNavigate: () => vi.fn(),
 }));
 
-vi.mock('../app/components/SimpleAppLayout', () => ({
-  default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+vi.mock("../app/components/SimpleAppLayout", () => ({
+  default: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
 }));
 
-vi.mock('../app/hooks/useSession', () => ({
+vi.mock("../app/hooks/useSession", () => ({
   useSession: () => ({
-    mainDatabase: { name: 'test-db' },
+    mainDatabase: { name: "test-db" },
   }),
 }));
 
-vi.mock('use-fireproof', () => ({
+vi.mock("use-fireproof", () => ({
   useFireproof: () => ({
     useDocument: () => ({
-      doc: { _id: 'user_settings', stylePrompt: '', userPrompt: '', model: '' },
+      doc: { _id: "user_settings", stylePrompt: "", userPrompt: "", model: "" },
       merge: vi.fn(),
       save: vi.fn(),
     }),
@@ -54,27 +56,27 @@ const localStorageMock = (() => {
     length: 0,
   };
 })();
-Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+Object.defineProperty(window, "localStorage", { value: localStorageMock });
 
 // Mock navigate from react-router
 const navigateMock = vi.fn();
-vi.mock('react-router-dom', () => ({
+vi.mock("react-router-dom", () => ({
   useNavigate: () => navigateMock,
 }));
 
 // Mock the auth utility functions
-vi.mock('../app/utils/auth', () => ({
+vi.mock("../app/utils/auth", () => ({
   initiateAuthFlow: vi.fn(),
 }));
 
-vi.mock('../app/utils/analytics', () => ({
+vi.mock("../app/utils/analytics", () => ({
   trackAuthClick: vi.fn(),
 }));
 
 // Create a wrapper component with auth context
 const renderWithAuthContext = (
   ui: React.ReactNode,
-  { isAuthenticated = true, userId = 'test-user' } = {}
+  { isAuthenticated = true, userId = "test-user" } = {},
 ) => {
   const userPayload: TokenPayload | null = isAuthenticated
     ? {
@@ -83,13 +85,13 @@ const renderWithAuthContext = (
         tenants: [],
         ledgers: [],
         iat: 1234567890,
-        iss: 'FP_CLOUD',
-        aud: 'PUBLIC',
+        iss: "FP_CLOUD",
+        aud: "PUBLIC",
       }
     : null;
 
   const authValue = {
-    token: isAuthenticated ? 'test-token' : null,
+    token: isAuthenticated ? "test-token" : null,
     isAuthenticated,
     isLoading: false,
     userPayload,
@@ -99,48 +101,50 @@ const renderWithAuthContext = (
     processToken: vi.fn(),
   } as AuthContextType;
 
-  return render(<AuthContext.Provider value={authValue}>{ui}</AuthContext.Provider>);
+  return render(
+    <AuthContext.Provider value={authValue}>{ui}</AuthContext.Provider>,
+  );
 };
 
-describe('Settings page', () => {
+describe("Settings page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Reset the localStorage mock
     localStorageMock.clear();
-    localStorageMock.setItem('auth_token', 'test-token');
+    localStorageMock.setItem("auth_token", "test-token");
 
     // Reset the navigate mock
     navigateMock.mockClear();
   });
 
-  it('should render the Settings page with a logout button when authenticated', async () => {
+  it("should render the Settings page with a logout button when authenticated", async () => {
     renderWithAuthContext(<Settings />);
 
     // Check if the logout button is rendered
-    const logoutButton = screen.getByText('Logout');
+    const logoutButton = screen.getByText("Logout");
     expect(logoutButton).toBeDefined();
   });
 
-  it('should handle logout correctly when the button is clicked', async () => {
+  it("should handle logout correctly when the button is clicked", async () => {
     renderWithAuthContext(<Settings />);
 
     // Get the logout button and click it
-    const logoutButton = screen.getByText('Logout');
+    const logoutButton = screen.getByText("Logout");
     fireEvent.click(logoutButton);
 
     // Check that localStorage.removeItem was called with 'auth_token'
-    expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_token');
+    expect(localStorageMock.removeItem).toHaveBeenCalledWith("auth_token");
 
     // For now, we won't test the navigate call since it's difficult to mock correctly
     // and is peripheral to the main logout functionality we're testing
   });
 
-  it('should not show the logout button when not authenticated', async () => {
+  it("should not show the logout button when not authenticated", async () => {
     // Render with unauthenticated context
     renderWithAuthContext(<Settings />, { isAuthenticated: false });
 
     // Logout button should not be present
-    const logoutButton = screen.queryByText('Logout');
+    const logoutButton = screen.queryByText("Logout");
     expect(logoutButton).toBeNull();
   });
 });

@@ -1,31 +1,33 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AuthContext } from '../app/contexts/AuthContext';
-import UnifiedSession from '../app/routes/home';
-import { MockThemeProvider } from './utils/MockThemeProvider';
+import { render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { AuthContext } from "../app/contexts/AuthContext";
+import UnifiedSession from "../app/routes/home";
+import { MockThemeProvider } from "./utils/MockThemeProvider";
 
 // Mock the CookieConsentContext
-vi.mock('../app/contexts/CookieConsentContext', () => ({
+vi.mock("../app/contexts/CookieConsentContext", () => ({
   useCookieConsent: () => ({
     messageHasBeenSent: false,
     setMessageHasBeenSent: vi.fn(),
   }),
-  CookieConsentProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  CookieConsentProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
 }));
 
 // Mock dependencies
-vi.mock('../app/hooks/useSimpleChat', () => ({
+vi.mock("../app/hooks/useSimpleChat", () => ({
   useSimpleChat: () => ({
     docs: [],
-    input: '',
+    input: "",
     setInput: vi.fn(),
     isStreaming: false,
     inputRef: { current: null },
     sendMessage: vi.fn(),
     selectedSegments: [],
     selectedCode: null,
-    title: '',
+    title: "",
     sessionId: null,
     selectedResponseDoc: undefined,
     codeReady: false,
@@ -34,7 +36,7 @@ vi.mock('../app/hooks/useSimpleChat', () => ({
 }));
 
 // Mock the useSession hook
-vi.mock('../app/hooks/useSession', () => ({
+vi.mock("../app/hooks/useSession", () => ({
   useSession: () => ({
     session: null,
     loading: false,
@@ -43,7 +45,7 @@ vi.mock('../app/hooks/useSession', () => ({
     updateTitle: vi.fn(),
     updateMetadata: vi.fn(),
     addScreenshot: vi.fn(),
-    createSession: vi.fn().mockResolvedValue('new-session-id'),
+    createSession: vi.fn().mockResolvedValue("new-session-id"),
     database: {
       put: vi.fn().mockResolvedValue({ ok: true }),
     },
@@ -54,27 +56,30 @@ vi.mock('../app/hooks/useSession', () => ({
 // Using centralized mock from __mocks__/use-fireproof.ts
 
 // Create mock implementations for react-router-dom
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
+vi.mock("react-router-dom", async () => {
+  const actual =
+    await vi.importActual<typeof import("react-router-dom")>(
+      "react-router-dom",
+    );
   return {
     ...actual,
     useNavigate: () => vi.fn(),
     useParams: () => ({}),
-    useLocation: () => ({ search: '', pathname: '/' }),
+    useLocation: () => ({ search: "", pathname: "/" }),
   };
 });
 
 // Mock for the utility functions
-vi.mock('../app/utils/sharing', () => ({
-  decodeStateFromUrl: () => ({ code: '', dependencies: {} }),
+vi.mock("../app/utils/sharing", () => ({
+  decodeStateFromUrl: () => ({ code: "", dependencies: {} }),
 }));
 
-vi.mock('../app/components/SessionSidebar/utils', () => ({
+vi.mock("../app/components/SessionSidebar/utils", () => ({
   encodeTitle: (title: string) => title,
 }));
 
 // Mock AppLayout component to make testing easier
-vi.mock('../app/components/AppLayout', () => {
+vi.mock("../app/components/AppLayout", () => {
   return {
     __esModule: true,
     default: ({
@@ -92,9 +97,13 @@ vi.mock('../app/components/AppLayout', () => {
         <div data-testid="app-layout">
           <div data-testid="chat-panel">{chatPanel}</div>
           <div data-testid="preview-panel">{previewPanel}</div>
-          {chatInput && <div data-testid="chat-input-container">{chatInput}</div>}
+          {chatInput && (
+            <div data-testid="chat-input-container">{chatInput}</div>
+          )}
           {suggestionsComponent && (
-            <div data-testid="suggestions-container">{suggestionsComponent}</div>
+            <div data-testid="suggestions-container">
+              {suggestionsComponent}
+            </div>
           )}
         </div>
       );
@@ -103,7 +112,7 @@ vi.mock('../app/components/AppLayout', () => {
 });
 
 // Mock our ChatInterface
-vi.mock('../app/components/ChatInterface', () => {
+vi.mock("../app/components/ChatInterface", () => {
   return {
     __esModule: true,
     default: (_props: unknown) => {
@@ -119,7 +128,7 @@ vi.mock('../app/components/ChatInterface', () => {
 });
 
 // Mock ResultPreview
-vi.mock('../app/components/ResultPreview/ResultPreview', () => {
+vi.mock("../app/components/ResultPreview/ResultPreview", () => {
   return {
     __esModule: true,
     default: (_props: unknown) => {
@@ -128,28 +137,28 @@ vi.mock('../app/components/ResultPreview/ResultPreview', () => {
   };
 });
 
-describe('Home Route', () => {
+describe("Home Route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should render the chat interface and result preview', async () => {
+  it("should render the chat interface and result preview", async () => {
     render(
       <MockThemeProvider>
         <MemoryRouter>
           <AuthContext.Provider
             value={{
-              token: 'mock-token',
+              token: "mock-token",
               isAuthenticated: true,
               isLoading: false,
               userPayload: {
-                userId: 'test',
+                userId: "test",
                 exp: 9999999999,
                 tenants: [],
                 ledgers: [],
                 iat: 1234567890,
-                iss: 'FP_CLOUD',
-                aud: 'PUBLIC',
+                iss: "FP_CLOUD",
+                aud: "PUBLIC",
               },
               needsLogin: false,
               setNeedsLogin: vi.fn(),
@@ -160,13 +169,13 @@ describe('Home Route', () => {
             <UnifiedSession />
           </AuthContext.Provider>
         </MemoryRouter>
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     await waitFor(() => {
       // Check for our components which should be visible
-      expect(screen.getByTestId('chat-interface')).toBeInTheDocument();
-      expect(screen.getByTestId('result-preview')).toBeInTheDocument();
+      expect(screen.getByTestId("chat-interface")).toBeInTheDocument();
+      expect(screen.getByTestId("result-preview")).toBeInTheDocument();
     });
   });
 });

@@ -1,23 +1,23 @@
-import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import ChatHeader from '../app/components/ChatHeaderContent';
-import { MockThemeProvider } from './utils/MockThemeProvider';
+import { vi, describe, it, expect, beforeEach } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
+import ChatHeader from "../app/components/ChatHeaderContent";
+import { MockThemeProvider } from "./utils/MockThemeProvider";
 
 // Create mock functions we can control
 const onOpenSidebar = vi.fn();
 
 // Mock useNavigate
-vi.mock('react-router', () => ({
+vi.mock("react-router", () => ({
   useNavigate: () => vi.fn(),
 }));
 
-describe('ChatHeader', () => {
+describe("ChatHeader", () => {
   beforeEach(() => {
     // Reset mocks before each test
     vi.resetAllMocks();
   });
 
-  it('renders correctly', () => {
+  it("renders correctly", () => {
     render(
       <MockThemeProvider>
         <ChatHeader
@@ -26,14 +26,14 @@ describe('ChatHeader', () => {
           isStreaming={false}
           codeReady={false}
         />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
-    expect(screen.getByLabelText('Open chat history')).toBeDefined();
-    expect(screen.getByLabelText('New Vibe')).toBeDefined();
+    expect(screen.getByLabelText("Open chat history")).toBeDefined();
+    expect(screen.getByLabelText("New Vibe")).toBeDefined();
   });
 
-  it('calls openSidebar when the sidebar button is clicked', () => {
+  it("calls openSidebar when the sidebar button is clicked", () => {
     render(
       <MockThemeProvider>
         <ChatHeader
@@ -42,16 +42,16 @@ describe('ChatHeader', () => {
           isStreaming={false}
           codeReady={false}
         />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
-    const openButton = screen.getByLabelText('Open chat history');
+    const openButton = screen.getByLabelText("Open chat history");
     fireEvent.click(openButton);
 
     expect(onOpenSidebar).toHaveBeenCalledTimes(1);
   });
 
-  it('navigates to home when the new chat button is clicked', () => {
+  it("navigates to home when the new chat button is clicked", () => {
     render(
       <MockThemeProvider>
         <ChatHeader
@@ -60,11 +60,11 @@ describe('ChatHeader', () => {
           isStreaming={false}
           codeReady={false}
         />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Just verify the new vibe button exists since we can't easily mock document.location
-    const newVibeButton = screen.getByLabelText('New Vibe');
+    const newVibeButton = screen.getByLabelText("New Vibe");
     expect(newVibeButton).toBeInTheDocument();
 
     // Note: we can't reliably test the navigation in JSDOM environment

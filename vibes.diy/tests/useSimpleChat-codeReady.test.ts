@@ -1,34 +1,34 @@
-import { cleanup, renderHook, waitFor } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { useSimpleChat } from '../app/hooks/useSimpleChat';
-import type { AiChatMessage, ChatMessage } from '../app/types/chat';
-import { parseContent, parseDependencies } from '../app/utils/segmentParser';
+import { cleanup, renderHook, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { useSimpleChat } from "../app/hooks/useSimpleChat";
+import type { AiChatMessage, ChatMessage } from "../app/types/chat";
+import { parseContent, parseDependencies } from "../app/utils/segmentParser";
 
 // Mock the prompts module
-vi.mock('../app/prompts', () => ({
-  makeBaseSystemPrompt: vi.fn().mockResolvedValue('Mocked system prompt'),
+vi.mock("../app/prompts", () => ({
+  makeBaseSystemPrompt: vi.fn().mockResolvedValue("Mocked system prompt"),
 }));
 
 // Mock the provisioning module
-vi.mock('../app/config/provisioning');
+vi.mock("../app/config/provisioning");
 
 // Import the mocked module
-import { getCredits } from '../app/config/provisioning';
-import { createOrUpdateKeyViaEdgeFunction } from '../app/services/apiKeyService';
+import { getCredits } from "../app/config/provisioning";
+import { createOrUpdateKeyViaEdgeFunction } from "../app/services/apiKeyService";
 
 // Mock the apiKeyService module
-vi.mock('../app/services/apiKeyService');
+vi.mock("../app/services/apiKeyService");
 
 // Mock the env module
-vi.mock('../app/config/env', () => ({
-  CALLAI_API_KEY: 'mock-callai-api-key-for-testing',
-  SETTINGS_DBNAME: 'test-chat-history',
+vi.mock("../app/config/env", () => ({
+  CALLAI_API_KEY: "mock-callai-api-key-for-testing",
+  SETTINGS_DBNAME: "test-chat-history",
 }));
 
 // Mock Fireproof to prevent CRDT errors
-vi.mock('use-fireproof', () => ({
+vi.mock("use-fireproof", () => ({
   useFireproof: () => ({
-    useDocument: () => [{ _id: 'mock-doc' }, vi.fn()],
+    useDocument: () => [{ _id: "mock-doc" }, vi.fn()],
     useLiveQuery: () => [[]],
     useFind: () => [[]],
     useLiveFind: () => [[]],
@@ -37,10 +37,14 @@ vi.mock('use-fireproof', () => ({
       /* no-op */
     },
     database: {
-      put: vi.fn().mockResolvedValue({ id: 'test-id' }),
-      get: vi.fn().mockResolvedValue({ _id: 'test-id', title: 'Test Document' }),
+      put: vi.fn().mockResolvedValue({ id: "test-id" }),
+      get: vi
+        .fn()
+        .mockResolvedValue({ _id: "test-id", title: "Test Document" }),
       query: vi.fn().mockResolvedValue({
-        rows: [{ id: 'session1', key: 'session1', value: { title: 'Test Session' } }],
+        rows: [
+          { id: "session1", key: "session1", value: { title: "Test Session" } },
+        ],
       }),
       delete: vi.fn().mockResolvedValue({ ok: true }),
     },
@@ -63,63 +67,63 @@ interface MockDoc {
 let mockDocs: MockDoc[] = [];
 const initialMockDocs: MockDoc[] = [
   {
-    _id: 'ai-message-1',
-    type: 'ai',
-    text: 'AI test message',
-    session_id: 'test-session-id',
+    _id: "ai-message-1",
+    type: "ai",
+    text: "AI test message",
+    session_id: "test-session-id",
     timestamp: Date.now(),
   },
   {
-    _id: 'user-message-1',
-    type: 'user',
-    text: 'User test message',
-    session_id: 'test-session-id',
+    _id: "user-message-1",
+    type: "user",
+    text: "User test message",
+    session_id: "test-session-id",
     timestamp: Date.now(),
   },
   {
-    _id: 'ai-message-0',
-    type: 'ai',
-    text: 'Older AI message',
-    session_id: 'test-session-id',
+    _id: "ai-message-0",
+    type: "ai",
+    text: "Older AI message",
+    session_id: "test-session-id",
     timestamp: Date.now() - 2000,
   },
 ];
 let currentUserMessage = {
-  text: '',
-  _id: 'user-message-draft',
-  type: 'user' as const,
-  session_id: 'test-session-id',
+  text: "",
+  _id: "user-message-draft",
+  type: "user" as const,
+  session_id: "test-session-id",
   created_at: Date.now(),
 };
 let currentAiMessage = {
-  text: '',
-  _id: 'ai-message-draft',
-  type: 'ai' as const,
-  session_id: 'test-session-id',
+  text: "",
+  _id: "ai-message-draft",
+  type: "ai" as const,
+  session_id: "test-session-id",
   created_at: Date.now(),
 };
 
 const resetMockState = () => {
   mockDocs = [...initialMockDocs]; // Reset docs to initial state
   currentUserMessage = {
-    text: '',
-    _id: 'user-message-draft',
-    type: 'user' as const,
-    session_id: 'test-session-id',
+    text: "",
+    _id: "user-message-draft",
+    type: "user" as const,
+    session_id: "test-session-id",
     created_at: Date.now(),
   };
   currentAiMessage = {
-    text: '',
-    _id: 'ai-message-draft',
-    type: 'ai' as const,
-    session_id: 'test-session-id',
+    text: "",
+    _id: "ai-message-draft",
+    type: "ai" as const,
+    session_id: "test-session-id",
     created_at: Date.now(),
   };
 };
 
 // Define the mergeUserMessage implementation separately
 const mergeUserMessageImpl = (data: Record<string, unknown>) => {
-  if (data && typeof data.text === 'string') {
+  if (data && typeof data.text === "string") {
     currentUserMessage.text = data.text;
   }
 };
@@ -128,19 +132,21 @@ const mergeUserMessageImpl = (data: Record<string, unknown>) => {
 const mockMergeUserMessage = vi.fn(mergeUserMessageImpl);
 
 // Mock the useSession hook
-vi.mock('../app/hooks/useSession', () => {
+vi.mock("../app/hooks/useSession", () => {
   return {
     useSession: () => {
       // Don't reset here, reset is done in beforeEach
       return {
         session: {
-          _id: 'test-session-id',
-          title: '',
-          type: 'session' as const,
+          _id: "test-session-id",
+          title: "",
+          type: "session" as const,
           created_at: Date.now(),
         },
         docs: mockDocs,
-        updateTitle: vi.fn().mockImplementation(async (_title) => Promise.resolve()),
+        updateTitle: vi
+          .fn()
+          .mockImplementation(async (_title) => Promise.resolve()),
         addScreenshot: vi.fn(),
         // Keep database mock simple
         sessionDatabase: {
@@ -152,17 +158,21 @@ vi.mock('../app/hooks/useSession', () => {
           get: vi.fn(async (id: string) => {
             const found = mockDocs.find((doc) => doc._id === id);
             if (found) return Promise.resolve(found);
-            return Promise.reject(new Error('Not found'));
+            return Promise.reject(new Error("Not found"));
           }),
-          query: vi.fn(async (field: string, options: Record<string, unknown>) => {
-            const key = options?.key;
-            const filtered = mockDocs.filter((doc) => {
-              return (doc as unknown as Record<string, unknown>)[field] === key;
-            });
-            return Promise.resolve({
-              rows: filtered.map((doc) => ({ id: doc._id, doc })),
-            });
-          }),
+          query: vi.fn(
+            async (field: string, options: Record<string, unknown>) => {
+              const key = options?.key;
+              const filtered = mockDocs.filter((doc) => {
+                return (
+                  (doc as unknown as Record<string, unknown>)[field] === key
+                );
+              });
+              return Promise.resolve({
+                rows: filtered.map((doc) => ({ id: doc._id, doc })),
+              });
+            },
+          ),
         },
         openSessionDatabase: vi.fn(),
         aiMessage: currentAiMessage,
@@ -170,29 +180,31 @@ vi.mock('../app/hooks/useSession', () => {
         mergeUserMessage: mockMergeUserMessage,
         submitUserMessage: vi.fn().mockImplementation(() => Promise.resolve()),
         mergeAiMessage: vi.fn().mockImplementation((data) => {
-          if (data && typeof data.text === 'string') {
+          if (data && typeof data.text === "string") {
             currentAiMessage.text = data.text;
           }
         }),
         submitAiMessage: vi.fn().mockImplementation(() => Promise.resolve()),
-        saveAiMessage: vi.fn().mockImplementation(async (existingDoc: Record<string, unknown>) => {
-          const id = existingDoc?._id || `ai-message-${Date.now()}`;
-          return Promise.resolve({ id });
-        }),
+        saveAiMessage: vi
+          .fn()
+          .mockImplementation(async (existingDoc: Record<string, unknown>) => {
+            const id = existingDoc?._id || `ai-message-${Date.now()}`;
+            return Promise.resolve({ id });
+          }),
       };
     },
   };
 });
 
 // Mock the useSessionMessages hook
-vi.mock('../app/hooks/useSessionMessages', () => {
+vi.mock("../app/hooks/useSessionMessages", () => {
   // Track messages across test runs
   const messagesStore: Record<string, ChatMessage[]> = {};
 
   return {
     useSessionMessages: () => {
       // Create session if it doesn't exist
-      const sessionKey = 'test-session-id';
+      const sessionKey = "test-session-id";
       if (!messagesStore[sessionKey]) {
         messagesStore[sessionKey] = [];
       }
@@ -204,83 +216,90 @@ vi.mock('../app/hooks/useSessionMessages', () => {
           const created_at = Date.now();
           messagesStore[sessionKey].push({
             _id: `user-${created_at}`,
-            type: 'user',
+            type: "user",
             text,
             session_id: sessionKey,
             created_at,
           });
           return created_at;
         }),
-        addAiMessage: vi.fn().mockImplementation(async (rawContent, timestamp) => {
-          const created_at = timestamp || Date.now();
-          parseContent(rawContent); // Call parseContent but don't use the result
+        addAiMessage: vi
+          .fn()
+          .mockImplementation(async (rawContent, timestamp) => {
+            const created_at = timestamp || Date.now();
+            parseContent(rawContent); // Call parseContent but don't use the result
 
-          messagesStore[sessionKey].push({
-            _id: `ai-${created_at}`,
-            type: 'ai',
-            text: rawContent,
-            session_id: sessionKey,
-            created_at,
-          });
-          return created_at;
-        }),
-        updateAiMessage: vi.fn().mockImplementation(async (rawContent, isStreaming, timestamp) => {
-          const now = timestamp || Date.now();
-
-          // Find existing message with this timestamp or create a new index for it
-          const existingIndex = messagesStore[sessionKey].findIndex(
-            (msg) => msg.type === 'ai' && msg.timestamp === now
-          );
-
-          let aiMessage: AiChatMessage;
-
-          // Special case for the markdown and code segments test
-          if (
-            rawContent.includes('function HelloWorld()') &&
-            rawContent.includes('Hello, World!')
-          ) {
-            aiMessage = {
-              type: 'ai',
+            messagesStore[sessionKey].push({
+              _id: `ai-${created_at}`,
+              type: "ai",
               text: rawContent,
-              session_id: 'test-session-id',
-              created_at: now,
-              segments: [
-                {
-                  type: 'markdown',
-                  content: "Here's a simple React component:",
-                },
-                {
-                  type: 'code',
-                  content: `function HelloWorld() {
+              session_id: sessionKey,
+              created_at,
+            });
+            return created_at;
+          }),
+        updateAiMessage: vi
+          .fn()
+          .mockImplementation(async (rawContent, isStreaming, timestamp) => {
+            const now = timestamp || Date.now();
+
+            // Find existing message with this timestamp or create a new index for it
+            const existingIndex = messagesStore[sessionKey].findIndex(
+              (msg) => msg.type === "ai" && msg.timestamp === now,
+            );
+
+            let aiMessage: AiChatMessage;
+
+            // Special case for the markdown and code segments test
+            if (
+              rawContent.includes("function HelloWorld()") &&
+              rawContent.includes("Hello, World!")
+            ) {
+              aiMessage = {
+                type: "ai",
+                text: rawContent,
+                session_id: "test-session-id",
+                created_at: now,
+                segments: [
+                  {
+                    type: "markdown",
+                    content: "Here's a simple React component:",
+                  },
+                  {
+                    type: "code",
+                    content: `function HelloWorld() {
   return <div>Hello, World!</div>;
 }
 
 export default HelloWorld;`,
-                },
-                {
-                  type: 'markdown',
-                  content: 'You can use this component in your application.',
-                },
-              ],
-              isStreaming,
-              timestamp: now,
-            };
-          }
-          // Special case for the dependencies test
-          else if (rawContent.includes('function Timer()') && rawContent.includes('useEffect')) {
-            aiMessage = {
-              type: 'ai',
-              text: rawContent,
-              session_id: 'test-session-id',
-              created_at: now,
-              segments: [
-                {
-                  type: 'markdown',
-                  content: "Here's a React component that uses useEffect:",
-                },
-                {
-                  type: 'code',
-                  content: `import React, { useEffect } from 'react';
+                  },
+                  {
+                    type: "markdown",
+                    content: "You can use this component in your application.",
+                  },
+                ],
+                isStreaming,
+                timestamp: now,
+              };
+            }
+            // Special case for the dependencies test
+            else if (
+              rawContent.includes("function Timer()") &&
+              rawContent.includes("useEffect")
+            ) {
+              aiMessage = {
+                type: "ai",
+                text: rawContent,
+                session_id: "test-session-id",
+                created_at: now,
+                segments: [
+                  {
+                    type: "markdown",
+                    content: "Here's a React component that uses useEffect:",
+                  },
+                  {
+                    type: "code",
+                    content: `import React, { useEffect } from 'react';
 
 function Timer() {
   useEffect(() => {
@@ -295,118 +314,138 @@ function Timer() {
 }
 
 export default Timer;`,
-                },
-              ],
-              isStreaming,
-              timestamp: now,
-            };
-          }
-          // Special case for the complex response test
-          else if (rawContent.includes('ImageGallery') && rawContent.includes('react-router-dom')) {
-            aiMessage = {
-              type: 'ai',
-              text: rawContent,
-              session_id: 'test-session-id',
-              created_at: now,
-              segments: [
-                { type: 'markdown', content: '# Image Gallery Component' },
-                { type: 'code', content: 'function ImageGallery() { /* ... */ }' },
-                { type: 'markdown', content: '## Usage Instructions' },
-                {
-                  type: 'code',
-                  content: 'import ImageGallery from "./components/ImageGallery";',
-                },
-                {
-                  type: 'markdown',
-                  content: 'You can customize the API endpoint and items per page.',
-                },
-              ],
-              isStreaming,
-              timestamp: now,
-            };
-          }
-          // Gallery app
-          else if (rawContent.includes('photo gallery') || rawContent.includes('Photo Gallery')) {
-            aiMessage = {
-              type: 'ai',
-              text: rawContent,
-              session_id: 'test-session-id',
-              created_at: now,
-              segments: [
-                { type: 'markdown', content: "Here's the photo gallery app:" },
-                {
-                  type: 'code',
-                  content:
-                    "import React from 'react';\nexport default function App() { /* ... */ }",
-                },
-              ],
-              isStreaming,
-              timestamp: now,
-            };
-          }
-          // Exoplanet Tracker
-          else if (
-            rawContent.includes('ExoplanetTracker') ||
-            rawContent.includes('Exoplanet Tracker')
-          ) {
-            aiMessage = {
-              type: 'ai',
-              text: rawContent,
-              session_id: 'test-session-id',
-              created_at: now,
-              segments: [
-                { type: 'markdown', content: 'I\'ll create an "Exoplanet Tracker" app' },
-                {
-                  type: 'code',
-                  content:
-                    "import React from 'react';\nexport default function ExoplanetTracker() { /* ... */ }",
-                },
-              ],
-              isStreaming,
-              timestamp: now,
-            };
-          }
-          // Lyrics Rater
-          else if (rawContent.includes('LyricsRaterApp') || rawContent.includes('Lyrics Rater')) {
-            aiMessage = {
-              type: 'ai',
-              text: rawContent,
-              session_id: 'test-session-id',
-              created_at: now,
-              segments: [
-                { type: 'markdown', content: '# Lyrics Rater App' },
-                {
-                  type: 'code',
-                  content:
-                    "import React from 'react';\nexport default function LyricsRaterApp() { /* ... */ }",
-                },
-              ],
-              isStreaming,
-              timestamp: now,
-            };
-          }
-          // Default case
-          else {
-            const { segments } = parseContent(rawContent);
-            aiMessage = {
-              type: 'ai',
-              text: rawContent,
-              session_id: 'test-session-id',
-              created_at: now,
-              segments,
-              isStreaming,
-              timestamp: now,
-            };
-          }
+                  },
+                ],
+                isStreaming,
+                timestamp: now,
+              };
+            }
+            // Special case for the complex response test
+            else if (
+              rawContent.includes("ImageGallery") &&
+              rawContent.includes("react-router-dom")
+            ) {
+              aiMessage = {
+                type: "ai",
+                text: rawContent,
+                session_id: "test-session-id",
+                created_at: now,
+                segments: [
+                  { type: "markdown", content: "# Image Gallery Component" },
+                  {
+                    type: "code",
+                    content: "function ImageGallery() { /* ... */ }",
+                  },
+                  { type: "markdown", content: "## Usage Instructions" },
+                  {
+                    type: "code",
+                    content:
+                      'import ImageGallery from "./components/ImageGallery";',
+                  },
+                  {
+                    type: "markdown",
+                    content:
+                      "You can customize the API endpoint and items per page.",
+                  },
+                ],
+                isStreaming,
+                timestamp: now,
+              };
+            }
+            // Gallery app
+            else if (
+              rawContent.includes("photo gallery") ||
+              rawContent.includes("Photo Gallery")
+            ) {
+              aiMessage = {
+                type: "ai",
+                text: rawContent,
+                session_id: "test-session-id",
+                created_at: now,
+                segments: [
+                  {
+                    type: "markdown",
+                    content: "Here's the photo gallery app:",
+                  },
+                  {
+                    type: "code",
+                    content:
+                      "import React from 'react';\nexport default function App() { /* ... */ }",
+                  },
+                ],
+                isStreaming,
+                timestamp: now,
+              };
+            }
+            // Exoplanet Tracker
+            else if (
+              rawContent.includes("ExoplanetTracker") ||
+              rawContent.includes("Exoplanet Tracker")
+            ) {
+              aiMessage = {
+                type: "ai",
+                text: rawContent,
+                session_id: "test-session-id",
+                created_at: now,
+                segments: [
+                  {
+                    type: "markdown",
+                    content: 'I\'ll create an "Exoplanet Tracker" app',
+                  },
+                  {
+                    type: "code",
+                    content:
+                      "import React from 'react';\nexport default function ExoplanetTracker() { /* ... */ }",
+                  },
+                ],
+                isStreaming,
+                timestamp: now,
+              };
+            }
+            // Lyrics Rater
+            else if (
+              rawContent.includes("LyricsRaterApp") ||
+              rawContent.includes("Lyrics Rater")
+            ) {
+              aiMessage = {
+                type: "ai",
+                text: rawContent,
+                session_id: "test-session-id",
+                created_at: now,
+                segments: [
+                  { type: "markdown", content: "# Lyrics Rater App" },
+                  {
+                    type: "code",
+                    content:
+                      "import React from 'react';\nexport default function LyricsRaterApp() { /* ... */ }",
+                  },
+                ],
+                isStreaming,
+                timestamp: now,
+              };
+            }
+            // Default case
+            else {
+              const { segments } = parseContent(rawContent);
+              aiMessage = {
+                type: "ai",
+                text: rawContent,
+                session_id: "test-session-id",
+                created_at: now,
+                segments,
+                isStreaming,
+                timestamp: now,
+              };
+            }
 
-          if (existingIndex >= 0) {
-            messagesStore[sessionKey][existingIndex] = aiMessage;
-          } else {
-            messagesStore[sessionKey].push(aiMessage);
-          }
+            if (existingIndex >= 0) {
+              messagesStore[sessionKey][existingIndex] = aiMessage;
+            } else {
+              messagesStore[sessionKey].push(aiMessage);
+            }
 
-          return now;
-        }),
+            return now;
+          }),
         // Expose the messagesStore for testing
         _getMessagesStore: () => messagesStore,
       };
@@ -414,17 +453,17 @@ export default Timer;`,
   };
 });
 
-describe('segmentParser utilities', () => {
-  it('correctly parses markdown content with no code blocks', () => {
-    const text = 'This is a simple markdown text with no code blocks.';
+describe("segmentParser utilities", () => {
+  it("correctly parses markdown content with no code blocks", () => {
+    const text = "This is a simple markdown text with no code blocks.";
     const result = parseContent(text);
 
     expect(result.segments.length).toBe(1);
-    expect(result.segments[0].type).toBe('markdown');
+    expect(result.segments[0].type).toBe("markdown");
     expect(result.segments[0].content).toBe(text);
   });
 
-  it('correctly parses content with code blocks', () => {
+  it("correctly parses content with code blocks", () => {
     const text = `
 Here's a React component:
 
@@ -440,15 +479,15 @@ You can use it in your app.
     const result = parseContent(text);
 
     expect(result.segments.length).toBe(3);
-    expect(result.segments[0].type).toBe('markdown');
+    expect(result.segments[0].type).toBe("markdown");
     expect(result.segments[0].content).toContain("Here's a React component:");
-    expect(result.segments[1].type).toBe('code');
-    expect(result.segments[1].content).toContain('function Button()');
-    expect(result.segments[2].type).toBe('markdown');
-    expect(result.segments[2].content).toContain('You can use it in your app.');
+    expect(result.segments[1].type).toBe("code");
+    expect(result.segments[1].content).toContain("function Button()");
+    expect(result.segments[2].type).toBe("markdown");
+    expect(result.segments[2].content).toContain("You can use it in your app.");
   });
 
-  it('correctly extracts dependencies from content', () => {
+  it("correctly extracts dependencies from content", () => {
     const text = `{"react": "^18.2.0", "react-dom": "^18.2.0"}}
 
 Here's how to use React.
@@ -457,44 +496,44 @@ Here's how to use React.
     const result = parseContent(text);
 
     expect(result.segments.length).toBe(1);
-    expect(result.segments[0].type).toBe('markdown');
+    expect(result.segments[0].type).toBe("markdown");
     expect(result.segments[0].content.trim()).toBe("Here's how to use React.");
   });
 
-  it('correctly parses dependencies string into object', () => {
+  it("correctly parses dependencies string into object", () => {
     const dependenciesString = '{"react": "^18.2.0", "react-dom": "^18.2.0"}}';
     const dependencies = parseDependencies(dependenciesString);
 
     expect(dependencies).toEqual({
-      react: '^18.2.0',
-      'react-dom': '^18.2.0',
+      react: "^18.2.0",
+      "react-dom": "^18.2.0",
     });
   });
 
-  it('returns empty object for invalid dependencies string', () => {
+  it("returns empty object for invalid dependencies string", () => {
     const dependencies = parseDependencies(undefined);
     expect(dependencies).toEqual({});
 
-    const emptyDependencies = parseDependencies('{}');
+    const emptyDependencies = parseDependencies("{}");
     expect(emptyDependencies).toEqual({});
   });
 });
 
 // Mock the AuthContext module
-vi.mock('../app/contexts/AuthContext', () => {
+vi.mock("../app/contexts/AuthContext", () => {
   // Create a mock AuthContext that will be used by useAuth inside the hook
   const mockAuthContext = {
     isAuthenticated: true,
     isLoading: false,
-    token: 'mock-token',
+    token: "mock-token",
     userPayload: {
-      userId: 'test-user-id',
+      userId: "test-user-id",
       exp: 9999999999,
       tenants: [],
       ledgers: [],
       iat: 1234567890,
-      iss: 'FP_CLOUD',
-      aud: 'PUBLIC',
+      iss: "FP_CLOUD",
+      aud: "PUBLIC",
     },
     checkAuthStatus: vi.fn(),
     processToken: vi.fn(),
@@ -513,17 +552,17 @@ const createWrapper = () => {
   return ({ children }: { children: React.ReactNode }) => children;
 };
 
-describe('useSimpleChat', () => {
+describe("useSimpleChat", () => {
   beforeEach(() => {
     // Mock createOrUpdateKeyViaEdgeFunction to ensure it returns the correct structure
     vi.mocked(createOrUpdateKeyViaEdgeFunction).mockImplementation(async () => {
       return {
         success: true,
         key: {
-          key: 'mock-api-key-for-testing',
-          hash: 'mock-hash',
-          name: 'Mock Session Key',
-          label: 'mock-session',
+          key: "mock-api-key-for-testing",
+          hash: "mock-hash",
+          name: "Mock Session Key",
+          label: "mock-session",
           limit: 0.01,
           disabled: false,
           usage: 0,
@@ -543,11 +582,13 @@ describe('useSimpleChat', () => {
     });
 
     // Mock window.fetch
-    vi.spyOn(window, 'fetch').mockImplementation(async () => {
+    vi.spyOn(window, "fetch").mockImplementation(async () => {
       // Mock response with a readable stream
       const stream = new ReadableStream({
         start(controller) {
-          controller.enqueue(new TextEncoder().encode('This is a test response'));
+          controller.enqueue(
+            new TextEncoder().encode("This is a test response"),
+          );
           controller.close();
         },
       });
@@ -556,7 +597,7 @@ describe('useSimpleChat', () => {
         ok: true,
         body: stream,
         status: 200,
-        statusText: 'OK',
+        statusText: "OK",
         headers: new Headers(),
       } as Response;
     });
@@ -565,14 +606,14 @@ describe('useSimpleChat', () => {
     Element.prototype.scrollIntoView = vi.fn();
 
     // Mock environment variables
-    vi.stubEnv('VITE_CALLAI_API_KEY', 'test-api-key');
+    vi.stubEnv("VITE_CALLAI_API_KEY", "test-api-key");
 
     // Mock import.meta.env.MODE for testing
-    vi.stubGlobal('import', {
+    vi.stubGlobal("import", {
       meta: {
         env: {
-          MODE: 'test',
-          VITE_CALLAI_API_KEY: 'test-api-key',
+          MODE: "test",
+          VITE_CALLAI_API_KEY: "test-api-key",
         },
       },
     });
@@ -589,23 +630,30 @@ describe('useSimpleChat', () => {
     localStorage.clear();
   });
 
-  it('initializes with expected mock messages', async () => {
+  it("initializes with expected mock messages", async () => {
     const wrapper = createWrapper();
-    const { result } = renderHook(() => useSimpleChat('test-session-id'), { wrapper });
+    const { result } = renderHook(() => useSimpleChat("test-session-id"), {
+      wrapper,
+    });
     await waitFor(() => {
       expect(result.current.docs.length).toBeGreaterThan(0);
     });
     expect(result.current.isStreaming).toBe(false);
   });
 
-  it('correctly determines when code is ready for display', async () => {
+  it("correctly determines when code is ready for display", async () => {
     const wrapper = createWrapper();
-    const { result } = renderHook(() => useSimpleChat('test-session-id'), { wrapper });
+    const { result } = renderHook(() => useSimpleChat("test-session-id"), {
+      wrapper,
+    });
     // Wait for docs to load instead of checking isLoading property
     await waitFor(() => expect(result.current.docs.length).toBeGreaterThan(0));
 
     // Test codeReady logic independently
-    function testCodeReady(isStreaming: boolean, segmentsLength: number): boolean {
+    function testCodeReady(
+      isStreaming: boolean,
+      segmentsLength: number,
+    ): boolean {
       return (!isStreaming && segmentsLength > 1) || segmentsLength > 2;
     }
 

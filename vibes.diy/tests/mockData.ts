@@ -1,5 +1,5 @@
 export const mockResultPreviewProps = {
-  displayView: 'code' as const, // Changed from activeView
+  displayView: "code" as const, // Changed from activeView
   // setActiveView: () => { /* no-op */ }, // Removed
   onPreviewLoaded: () => {
     /* no-op */
@@ -25,7 +25,7 @@ export const mockChatStateProps = {
 };
 
 export const mockSessionSidebarProps = {
-  sessionId: 'test-session-id',
+  sessionId: "test-session-id",
   isVisible: true,
   onClose: () => {
     /* no-op */
@@ -34,18 +34,18 @@ export const mockSessionSidebarProps = {
 
 export const createMockChatState = (overrides = {}) => ({
   docs: [],
-  input: '',
+  input: "",
   setInput: () => {
     /* no-op */
   },
   inputRef: { current: null },
   sendMessage: () => Promise.resolve(),
   isStreaming: false,
-  title: 'Test Session',
-  sessionId: 'test-session-id',
+  title: "Test Session",
+  sessionId: "test-session-id",
   selectedSegments: [],
   selectedCode: {
-    type: 'code',
+    type: "code",
     content: 'console.log("Hello world")',
   },
   selectedResponseDoc: undefined,

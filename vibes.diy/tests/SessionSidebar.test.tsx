@@ -1,15 +1,15 @@
-import { act, fireEvent, screen, render } from '@testing-library/react';
+import { act, fireEvent, screen, render } from "@testing-library/react";
 // Vitest will automatically use mocks from __mocks__ directory
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { resetMockAuthState, setMockAuthState } from './__mocks__/useAuth';
-import SessionSidebar from '../app/components/SessionSidebar';
-import { mockSessionSidebarProps } from './mockData';
-import { MockThemeProvider } from './utils/MockThemeProvider';
-import React from 'react';
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { resetMockAuthState, setMockAuthState } from "./__mocks__/useAuth";
+import SessionSidebar from "../app/components/SessionSidebar";
+import { mockSessionSidebarProps } from "./mockData";
+import { MockThemeProvider } from "./utils/MockThemeProvider";
+import React from "react";
 
 // Mock AuthContext to use the mocked useAuth implementation so components don’t require an AuthProvider
-vi.mock('../app/contexts/AuthContext', async () => {
-  const mockAuth = await import('./__mocks__/useAuth');
+vi.mock("../app/contexts/AuthContext", async () => {
+  const mockAuth = await import("./__mocks__/useAuth");
   return {
     useAuth: mockAuth.mockUseAuth,
     AuthProvider: ({ children }: { children: React.ReactNode }) => children,
@@ -20,53 +20,53 @@ vi.mock('../app/contexts/AuthContext', async () => {
 // (setMockAuthState / resetMockAuthState imported below)
 
 // Mock the auth utility functions
-vi.mock('../app/utils/auth', () => ({
+vi.mock("../app/utils/auth", () => ({
   initiateAuthFlow: vi.fn(),
 }));
 
-vi.mock('../app/utils/analytics', () => ({
+vi.mock("../app/utils/analytics", () => ({
   trackAuthClick: vi.fn(),
 }));
 
-import { trackAuthClick } from '../app/utils/analytics';
+import { trackAuthClick } from "../app/utils/analytics";
 // Import mocked functions
-import { initiateAuthFlow } from '../app/utils/auth';
+import { initiateAuthFlow } from "../app/utils/auth";
 
 // Mock Link component from react-router
-vi.mock('react-router', () => {
+vi.mock("react-router", () => {
   return {
     Link: vi.fn(({ to, children, onClick, ...props }) => {
       // Use React.createElement instead of JSX
       return React.createElement(
-        'a',
+        "a",
         {
-          'data-testid': 'router-link',
+          "data-testid": "router-link",
           href: to,
           onClick: onClick,
           ...props,
         },
-        children
+        children,
       );
     }),
   };
 });
 
 // Set up createObjectURL mock so we can track calls
-const createObjectURLMock = vi.fn(() => 'mocked-url');
+const createObjectURLMock = vi.fn(() => "mocked-url");
 const revokeObjectURLMock = vi.fn();
 
 // Override URL methods
-Object.defineProperty(global.URL, 'createObjectURL', {
+Object.defineProperty(global.URL, "createObjectURL", {
   value: createObjectURLMock,
   writable: true,
 });
 
-Object.defineProperty(global.URL, 'revokeObjectURL', {
+Object.defineProperty(global.URL, "revokeObjectURL", {
   value: revokeObjectURLMock,
   writable: true,
 });
 
-describe('SessionSidebar component', () => {
+describe("SessionSidebar component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     resetMockAuthState();
@@ -75,10 +75,10 @@ describe('SessionSidebar component', () => {
     vi.mocked(trackAuthClick).mockClear();
     // No window event listeners needed anymore
     // Reset DOM
-    document.body.innerHTML = '';
+    document.body.innerHTML = "";
   });
 
-  it('should correctly render SessionSidebar component with menu items when authenticated', () => {
+  it("should correctly render SessionSidebar component with menu items when authenticated", () => {
     // Mock useAuth to return authenticated state
     setMockAuthState({
       isAuthenticated: true,
@@ -91,20 +91,20 @@ describe('SessionSidebar component', () => {
     render(
       <MockThemeProvider>
         <SessionSidebar {...props} />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Check menu items - using queryAllByText since there might be multiple elements with the same text
-    expect(screen.queryAllByText('Home').length).toBeGreaterThan(0);
-    expect(screen.queryAllByText('My Vibes').length).toBeGreaterThan(0);
-    expect(screen.queryAllByText('Settings').length).toBeGreaterThan(0);
-    expect(screen.queryAllByText('About').length).toBeGreaterThan(0);
+    expect(screen.queryAllByText("Home").length).toBeGreaterThan(0);
+    expect(screen.queryAllByText("My Vibes").length).toBeGreaterThan(0);
+    expect(screen.queryAllByText("Settings").length).toBeGreaterThan(0);
+    expect(screen.queryAllByText("About").length).toBeGreaterThan(0);
 
     // Should not show Log in
-    expect(screen.queryByText('Log in')).toBeNull();
+    expect(screen.queryByText("Log in")).toBeNull();
   });
 
-  it('should show Log in button when not authenticated', async () => {
+  it("should show Log in button when not authenticated", async () => {
     // Mock useAuth to return unauthenticated state
     setMockAuthState({
       isAuthenticated: false,
@@ -120,20 +120,20 @@ describe('SessionSidebar component', () => {
     render(
       <MockThemeProvider>
         <SessionSidebar {...props} />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Check if the sidebar is rendered - it's the first div in the container
-    const sidebar = screen.getByTestId('session-sidebar');
+    const sidebar = screen.getByTestId("session-sidebar");
     expect(sidebar).toBeDefined();
 
     // Check for Login text
-    expect(screen.queryAllByText('Log in').length).toBeGreaterThan(0);
+    expect(screen.queryAllByText("Log in").length).toBeGreaterThan(0);
     // There should be no Settings text
-    expect(screen.queryAllByText('Settings').length).toBe(0);
+    expect(screen.queryAllByText("Settings").length).toBe(0);
 
     // Get the login button and click it
-    const loginButton = screen.getByText('Log in');
+    const loginButton = screen.getByText("Log in");
     await act(async () => {
       fireEvent.click(loginButton);
       await Promise.resolve();
@@ -159,22 +159,22 @@ describe('SessionSidebar component', () => {
     render(
       <MockThemeProvider>
         <SessionSidebar {...props} />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Check that the menu items are rendered
-    expect(screen.getByText('Home')).toBeInTheDocument();
-    expect(screen.getByText('My Vibes')).toBeInTheDocument();
-    expect(screen.getByText('About')).toBeInTheDocument();
+    expect(screen.getByText("Home")).toBeInTheDocument();
+    expect(screen.getByText("My Vibes")).toBeInTheDocument();
+    expect(screen.getByText("About")).toBeInTheDocument();
 
     // Now look for the 'Log in for credits' text
-    const loginCreditsBtn = screen.getByText('Log in for credits');
+    const loginCreditsBtn = screen.getByText("Log in for credits");
     fireEvent.click(loginCreditsBtn);
     expect(initiateAuthFlow).toHaveBeenCalled();
     expect(trackAuthClick).toHaveBeenCalled();
   });
 
-  it('should render navigation links with correct labels', () => {
+  it("should render navigation links with correct labels", () => {
     const props = {
       ...mockSessionSidebarProps,
     };
@@ -182,24 +182,24 @@ describe('SessionSidebar component', () => {
     render(
       <MockThemeProvider>
         <SessionSidebar {...props} />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Check if the sidebar is rendered - it's the first div in the container
-    const sidebar = screen.getByTestId('session-sidebar');
+    const sidebar = screen.getByTestId("session-sidebar");
     expect(sidebar).toBeDefined();
 
     // Check menu items - using queryAllByText since there might be multiple elements with the same text
-    expect(screen.queryAllByText('Home').length).toBeGreaterThan(0);
-    expect(screen.queryAllByText('My Vibes').length).toBeGreaterThan(0);
-    expect(screen.queryAllByText('Settings').length).toBeGreaterThan(0);
-    expect(screen.queryAllByText('About').length).toBeGreaterThan(0);
+    expect(screen.queryAllByText("Home").length).toBeGreaterThan(0);
+    expect(screen.queryAllByText("My Vibes").length).toBeGreaterThan(0);
+    expect(screen.queryAllByText("Settings").length).toBeGreaterThan(0);
+    expect(screen.queryAllByText("About").length).toBeGreaterThan(0);
 
     // We're not testing the href attributes because of issues with the jsdom environment
     // This is sufficient to verify that the navigation structure is correct
   });
 
-  it('renders sidebar correctly when visible', () => {
+  it("renders sidebar correctly when visible", () => {
     const onClose = vi.fn();
     const props = {
       ...mockSessionSidebarProps,
@@ -210,21 +210,21 @@ describe('SessionSidebar component', () => {
     render(
       <MockThemeProvider>
         <SessionSidebar {...props} />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Check that the menu items are rendered
-    expect(screen.getByText('Home')).toBeInTheDocument();
-    expect(screen.getByText('My Vibes')).toBeInTheDocument();
-    expect(screen.getByText('Settings')).toBeInTheDocument();
-    expect(screen.getByText('About')).toBeInTheDocument();
+    expect(screen.getByText("Home")).toBeInTheDocument();
+    expect(screen.getByText("My Vibes")).toBeInTheDocument();
+    expect(screen.getByText("Settings")).toBeInTheDocument();
+    expect(screen.getByText("About")).toBeInTheDocument();
 
     // The sidebar is the first div within the container that has position fixed
-    const sidebarContainer = screen.getByTestId('session-sidebar');
-    expect(sidebarContainer).not.toHaveClass('-translate-x-full');
+    const sidebarContainer = screen.getByTestId("session-sidebar");
+    expect(sidebarContainer).not.toHaveClass("-translate-x-full");
   });
 
-  it('handles close button click', () => {
+  it("handles close button click", () => {
     const onClose = vi.fn();
     const props = {
       ...mockSessionSidebarProps,
@@ -235,11 +235,11 @@ describe('SessionSidebar component', () => {
     render(
       <MockThemeProvider>
         <SessionSidebar {...props} />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Find the close button (it's a button with an SVG icon, so we use aria-label)
-    const closeButton = screen.getByLabelText('Close sidebar');
+    const closeButton = screen.getByLabelText("Close sidebar");
     expect(closeButton).toBeInTheDocument();
 
     // Click the close button
@@ -249,7 +249,7 @@ describe('SessionSidebar component', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('handles sidebar navigation links', () => {
+  it("handles sidebar navigation links", () => {
     // Mock useAuth to return authenticated state
     setMockAuthState({
       isAuthenticated: true,
@@ -263,24 +263,24 @@ describe('SessionSidebar component', () => {
     render(
       <MockThemeProvider>
         <SessionSidebar {...props} />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Check if the sidebar is rendered - it's the first div in the container
-    const sidebar = screen.getByTestId('session-sidebar');
+    const sidebar = screen.getByTestId("session-sidebar");
     expect(sidebar).toBeDefined();
 
     // Check menu items - using queryAllByText since there might be multiple elements with the same text
-    expect(screen.queryAllByText('Home').length).toBeGreaterThan(0);
-    expect(screen.queryAllByText('My Vibes').length).toBeGreaterThan(0);
-    expect(screen.queryAllByText('Settings').length).toBeGreaterThan(0);
-    expect(screen.queryAllByText('About').length).toBeGreaterThan(0);
+    expect(screen.queryAllByText("Home").length).toBeGreaterThan(0);
+    expect(screen.queryAllByText("My Vibes").length).toBeGreaterThan(0);
+    expect(screen.queryAllByText("Settings").length).toBeGreaterThan(0);
+    expect(screen.queryAllByText("About").length).toBeGreaterThan(0);
 
     // We're not testing the href attributes because of issues with the jsdom environment
     // This is sufficient to verify that the navigation structure is correct
   });
 
-  it('closes sidebar on mobile when clicking close button', () => {
+  it("closes sidebar on mobile when clicking close button", () => {
     // Mock useAuth to return authenticated state
     setMockAuthState({
       isAuthenticated: true,
@@ -297,11 +297,11 @@ describe('SessionSidebar component', () => {
     render(
       <MockThemeProvider>
         <SessionSidebar {...props} />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Find the close button (it's a button with an SVG icon, so we use aria-label)
-    const closeButton = screen.getByLabelText('Close sidebar');
+    const closeButton = screen.getByLabelText("Close sidebar");
     expect(closeButton).toBeInTheDocument();
 
     // Click the close button
@@ -311,7 +311,7 @@ describe('SessionSidebar component', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('is not visible when isVisible is false', () => {
+  it("is not visible when isVisible is false", () => {
     // Mock useAuth to return authenticated state
     setMockAuthState({
       isAuthenticated: true,
@@ -326,17 +326,17 @@ describe('SessionSidebar component', () => {
     render(
       <MockThemeProvider>
         <SessionSidebar {...props} />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Find the sidebar div
-    const sidebar = screen.getByTestId('session-sidebar');
+    const sidebar = screen.getByTestId("session-sidebar");
 
     // Verify it has the -translate-x-full class for hiding
-    expect(sidebar).toHaveClass('-translate-x-full');
+    expect(sidebar).toHaveClass("-translate-x-full");
   });
 
-  it('has navigation items rendered correctly', () => {
+  it("has navigation items rendered correctly", () => {
     // Mock useAuth to return authenticated state
     setMockAuthState({
       isAuthenticated: true,
@@ -350,25 +350,25 @@ describe('SessionSidebar component', () => {
     render(
       <MockThemeProvider>
         <SessionSidebar {...props} />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Find the navigation element
-    const nav = document.querySelector('nav');
+    const nav = document.querySelector("nav");
     expect(nav).toBeInTheDocument();
 
     // Check that it has list items
-    const listItems = nav?.querySelectorAll('li');
+    const listItems = nav?.querySelectorAll("li");
     expect(listItems?.length).toBeGreaterThan(0);
 
     // Check that each list item has a link or button
     for (const li of Array.from(listItems || [])) {
-      const linkOrButton = li.querySelector('a, button');
+      const linkOrButton = li.querySelector("a, button");
       expect(linkOrButton).toBeInTheDocument();
     }
   });
 
-  it('has navigation links that call onClose when clicked', () => {
+  it("has navigation links that call onClose when clicked", () => {
     // Mock useAuth to return authenticated state
     setMockAuthState({
       isAuthenticated: true,
@@ -385,7 +385,7 @@ describe('SessionSidebar component', () => {
     render(
       <MockThemeProvider>
         <SessionSidebar {...props} />
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Find all navigation links

@@ -1,9 +1,9 @@
-import { renderHook } from '@testing-library/react';
-import { useViewState, type ViewState } from '../app/utils/ViewState';
-import { vi, describe, test, expect, beforeEach } from 'vitest';
+import { renderHook } from "@testing-library/react";
+import { useViewState, type ViewState } from "../app/utils/ViewState";
+import { vi, describe, test, expect, beforeEach } from "vitest";
 
 // Mock react-router-dom hooks
-vi.mock('react-router-dom', () => {
+vi.mock("react-router-dom", () => {
   return {
     useNavigate: vi.fn(),
     useParams: vi.fn(),
@@ -12,19 +12,19 @@ vi.mock('react-router-dom', () => {
 });
 
 // Mock encodeTitle from utils
-vi.mock('../app/components/SessionSidebar/utils', () => {
+vi.mock("../app/components/SessionSidebar/utils", () => {
   return {
     encodeTitle: vi.fn((title) => title), // Simple mock that returns the title unchanged
   };
 });
 
 // Import mocked modules
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 
-describe('useViewState', () => {
+describe("useViewState", () => {
   const mockNavigate = vi.fn();
-  const mockSessionId = 'test-session-123';
-  const mockTitle = 'test-title';
+  const mockSessionId = "test-session-123";
+  const mockTitle = "test-title";
 
   beforeEach(() => {
     vi.resetAllMocks();
@@ -37,7 +37,7 @@ describe('useViewState', () => {
     });
   });
 
-  test('should determine correct view from path', () => {
+  test("should determine correct view from path", () => {
     // Test app path
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}/app`,
@@ -45,13 +45,13 @@ describe('useViewState', () => {
 
     const { result: appResult } = renderHook(() =>
       useViewState({
-        code: 'const test = true;',
+        code: "const test = true;",
         isStreaming: false,
         previewReady: true,
-      })
+      }),
     );
 
-    expect(appResult.current.currentView).toBe('preview');
+    expect(appResult.current.currentView).toBe("preview");
 
     // Test code path
     vi.mocked(useLocation).mockReturnValue({
@@ -60,13 +60,13 @@ describe('useViewState', () => {
 
     const { result: codeResult } = renderHook(() =>
       useViewState({
-        code: 'const test = true;',
+        code: "const test = true;",
         isStreaming: false,
         previewReady: true,
-      })
+      }),
     );
 
-    expect(codeResult.current.currentView).toBe('code');
+    expect(codeResult.current.currentView).toBe("code");
 
     // Test data path
     vi.mocked(useLocation).mockReturnValue({
@@ -75,16 +75,16 @@ describe('useViewState', () => {
 
     const { result: dataResult } = renderHook(() =>
       useViewState({
-        code: 'const test = true;',
+        code: "const test = true;",
         isStreaming: false,
         previewReady: true,
-      })
+      }),
     );
 
-    expect(dataResult.current.currentView).toBe('data');
+    expect(dataResult.current.currentView).toBe("data");
   });
 
-  test('should not redirect when explicitly on /app and preview becomes ready', () => {
+  test("should not redirect when explicitly on /app and preview becomes ready", () => {
     // Setup location with /app path
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}/app`,
@@ -96,11 +96,11 @@ describe('useViewState', () => {
         code: 'console.log("test")',
         isStreaming: false,
         previewReady: false,
-      })
+      }),
     );
 
     // Verify initial state
-    expect(result.current.currentView).toBe('preview');
+    expect(result.current.currentView).toBe("preview");
     expect(mockNavigate).not.toHaveBeenCalled();
 
     // Update with preview ready
@@ -114,7 +114,7 @@ describe('useViewState', () => {
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 
-  test('should not redirect when explicitly on /code and preview becomes ready', () => {
+  test("should not redirect when explicitly on /code and preview becomes ready", () => {
     // Setup location with /code path
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}/code`,
@@ -126,11 +126,11 @@ describe('useViewState', () => {
         code: 'console.log("test")',
         isStreaming: false,
         previewReady: false,
-      })
+      }),
     );
 
     // Verify initial state
-    expect(result.current.currentView).toBe('code');
+    expect(result.current.currentView).toBe("code");
     expect(mockNavigate).not.toHaveBeenCalled();
 
     // Update with preview ready
@@ -144,7 +144,7 @@ describe('useViewState', () => {
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 
-  test('should not redirect when explicitly on /data and preview becomes ready', () => {
+  test("should not redirect when explicitly on /data and preview becomes ready", () => {
     // Setup location with /data path
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}/data`,
@@ -156,11 +156,11 @@ describe('useViewState', () => {
         code: 'console.log("test")',
         isStreaming: false,
         previewReady: false,
-      })
+      }),
     );
 
     // Verify initial state
-    expect(result.current.currentView).toBe('data');
+    expect(result.current.currentView).toBe("data");
     expect(mockNavigate).not.toHaveBeenCalled();
 
     // Update with preview ready
@@ -174,7 +174,7 @@ describe('useViewState', () => {
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 
-  test('should auto-navigate to /app when on base path and preview becomes ready', () => {
+  test("should auto-navigate to /app when on base path and preview becomes ready", () => {
     // The key is to properly simulate ref state tracking for wasPreviewReadyRef
 
     // Setup location with base path (no view suffix)
@@ -199,7 +199,7 @@ describe('useViewState', () => {
           isStreaming: false,
           previewReady: false,
         },
-      }
+      },
     );
 
     // Unmount to clean up the first instance
@@ -219,7 +219,7 @@ describe('useViewState', () => {
           isStreaming: false,
           previewReady: false,
         },
-      }
+      },
     );
 
     // Now trigger the useEffect with a change to previewReady
@@ -232,12 +232,15 @@ describe('useViewState', () => {
     });
 
     // Should navigate to /app when on base path
-    expect(mockNavigate).toHaveBeenCalledWith(`/chat/${mockSessionId}/${mockTitle}/app`, {
-      replace: true,
-    });
+    expect(mockNavigate).toHaveBeenCalledWith(
+      `/chat/${mockSessionId}/${mockTitle}/app`,
+      {
+        replace: true,
+      },
+    );
   });
 
-  test('should only redirect once when previewReady transitions from false to true', () => {
+  test("should only redirect once when previewReady transitions from false to true", () => {
     // Setup location with base path (no view suffix)
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}`,
@@ -260,7 +263,7 @@ describe('useViewState', () => {
           isStreaming: false,
           previewReady: false,
         },
-      }
+      },
     );
 
     // Unmount to clean up
@@ -280,7 +283,7 @@ describe('useViewState', () => {
           isStreaming: false,
           previewReady: false,
         },
-      }
+      },
     );
 
     // First update - previewReady becomes true, should trigger navigation
@@ -294,9 +297,12 @@ describe('useViewState', () => {
 
     // Should navigate to /app once
     expect(mockNavigate).toHaveBeenCalledTimes(1);
-    expect(mockNavigate).toHaveBeenCalledWith(`/chat/${mockSessionId}/${mockTitle}/app`, {
-      replace: true,
-    });
+    expect(mockNavigate).toHaveBeenCalledWith(
+      `/chat/${mockSessionId}/${mockTitle}/app`,
+      {
+        replace: true,
+      },
+    );
 
     // Reset mock to check if another call happens
     mockNavigate.mockReset();

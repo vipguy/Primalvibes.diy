@@ -1,26 +1,27 @@
-import { act, renderHook, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
-import { createWrapper } from './setup';
-import { useSimpleChat } from '../../app/hooks/useSimpleChat';
-import { useSession } from '../../app/hooks/useSession';
+import { act, renderHook, waitFor } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import { createWrapper } from "./setup";
+import { useSession, useSimpleChat } from "vibes-diy";
 
-describe('useSimpleChat', () => {
-  it('prioritizes selectedResponseDoc correctly', async () => {
+describe("useSimpleChat", () => {
+  it("prioritizes selectedResponseDoc correctly", async () => {
     const wrapper = createWrapper();
-    const { result } = renderHook(() => useSimpleChat('test-session-id'), { wrapper });
-    const olderDocId = 'ai-message-0';
-    const pendingId = 'pending-ai-id';
-    const streamingText = 'Streaming message text';
+    const { result } = renderHook(() => useSimpleChat("test-session-id"), {
+      wrapper,
+    });
+    const olderDocId = "ai-message-0";
+    const pendingId = "pending-ai-id";
+    const streamingText = "Streaming message text";
 
     expect(result.current.selectedResponseDoc?._id).toBe(olderDocId);
 
     await act(async () => {
-      result.current.setSelectedResponseId('ai-message-0');
+      result.current.setSelectedResponseId("ai-message-0");
     });
-    expect(result.current.selectedResponseDoc?._id).toBe('ai-message-0');
+    expect(result.current.selectedResponseDoc?._id).toBe("ai-message-0");
 
     await act(async () => {
-      result.current.setSelectedResponseId('');
+      result.current.setSelectedResponseId("");
     });
     const mockPendingPut = vi.fn(async () => {
       return Promise.resolve({ id: pendingId });
@@ -28,7 +29,7 @@ describe('useSimpleChat', () => {
     vi.mocked(useSession)(undefined).sessionDatabase.put = mockPendingPut;
 
     act(() => {
-      result.current.setInput('trigger pending');
+      result.current.setInput("trigger pending");
     });
     await act(async () => {
       await result.current.sendMessage();
@@ -41,14 +42,14 @@ describe('useSimpleChat', () => {
     vi.mocked(useSession)(undefined).sessionDatabase.put = originalPut;
 
     await act(async () => {
-      result.current.setSelectedResponseId('');
-      result.current.setInput('trigger streaming');
-      Object.defineProperty(result.current, 'aiMessage', {
+      result.current.setSelectedResponseId("");
+      result.current.setInput("trigger streaming");
+      Object.defineProperty(result.current, "aiMessage", {
         get: () => ({
-          _id: '',
-          type: 'ai',
+          _id: "",
+          type: "ai",
           text: streamingText,
-          session_id: 'test-session-id',
+          session_id: "test-session-id",
           timestamp: Date.now(),
         }),
         configurable: true,
@@ -60,12 +61,12 @@ describe('useSimpleChat', () => {
     });
 
     await act(async () => {
-      Object.defineProperty(result.current, 'aiMessage', {
+      Object.defineProperty(result.current, "aiMessage", {
         get: () => ({
-          _id: '',
-          type: 'ai',
-          text: '',
-          session_id: 'test-session-id',
+          _id: "",
+          type: "ai",
+          text: "",
+          session_id: "test-session-id",
           timestamp: Date.now(),
         }),
         configurable: true,

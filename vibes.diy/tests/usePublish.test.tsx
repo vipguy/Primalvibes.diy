@@ -1,25 +1,29 @@
-import { act, renderHook, waitFor } from '@testing-library/react';
-import type { ReactNode } from 'react';
-import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
-import { usePublish } from '../app/components/ResultPreview/usePublish';
-import type { AuthContextType } from '../app/contexts/AuthContext';
-import { AuthContext } from '../app/contexts/AuthContext';
-import type { AiChatMessage, ChatMessageDocument, UserChatMessage } from '../app/types/chat';
-import { trackPublishClick } from '../app/utils/analytics';
-import type { TokenPayload } from '../app/utils/auth';
-import { publishApp } from '../app/utils/publishUtils';
+import { act, renderHook, waitFor } from "@testing-library/react";
+import type { ReactNode } from "react";
+import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
+import { usePublish } from "../app/components/ResultPreview/usePublish";
+import type { AuthContextType } from "../app/contexts/AuthContext";
+import { AuthContext } from "../app/contexts/AuthContext";
+import type {
+  AiChatMessage,
+  ChatMessageDocument,
+  UserChatMessage,
+} from "../app/types/chat";
+import { trackPublishClick } from "../app/utils/analytics";
+import type { TokenPayload } from "../app/utils/auth";
+import { publishApp } from "../app/utils/publishUtils";
 
 // Mock dependencies
-vi.mock('../app/utils/publishUtils', () => ({
+vi.mock("../app/utils/publishUtils", () => ({
   publishApp: vi.fn(),
 }));
 
-vi.mock('../app/utils/analytics', () => ({
+vi.mock("../app/utils/analytics", () => ({
   trackPublishClick: vi.fn(),
 }));
 
 // Mock navigation clipboard API
-Object.defineProperty(navigator, 'clipboard', {
+Object.defineProperty(navigator, "clipboard", {
   value: {
     writeText: vi.fn().mockImplementation(() => Promise.resolve()),
   },
@@ -29,17 +33,17 @@ Object.defineProperty(navigator, 'clipboard', {
 // Create wrapper with AuthProvider
 const createWrapper = () => {
   const mockUserPayload: TokenPayload = {
-    userId: 'test-user-id',
+    userId: "test-user-id",
     exp: 9999999999,
     tenants: [],
     ledgers: [],
     iat: 1234567890,
-    iss: 'FP_CLOUD',
-    aud: 'PUBLIC',
+    iss: "FP_CLOUD",
+    aud: "PUBLIC",
   };
 
   const authValue: AuthContextType = {
-    token: 'test-token',
+    token: "test-token",
     isAuthenticated: true,
     isLoading: false,
     userPayload: mockUserPayload,
@@ -54,23 +58,23 @@ const createWrapper = () => {
   );
 };
 
-describe('usePublish Hook', () => {
-  const mockSessionId = 'test-session-id';
-  const mockCode = 'const App = () => <div>Test App</div>; export default App;';
-  const mockTitle = 'Test App';
+describe("usePublish Hook", () => {
+  const mockSessionId = "test-session-id";
+  const mockCode = "const App = () => <div>Test App</div>; export default App;";
+  const mockTitle = "Test App";
   const mockMessages: ChatMessageDocument[] = [
     {
-      type: 'user',
-      text: 'Create a test app',
-      _id: 'user-1',
-      session_id: 'test-session-id',
+      type: "user",
+      text: "Create a test app",
+      _id: "user-1",
+      session_id: "test-session-id",
       created_at: Date.now(),
     } as UserChatMessage,
     {
-      type: 'ai',
-      text: 'Here is your app',
-      _id: 'ai-1',
-      session_id: 'test-session-id',
+      type: "ai",
+      text: "Here is your app",
+      _id: "ai-1",
+      session_id: "test-session-id",
       created_at: Date.now(),
     } as AiChatMessage,
   ];
@@ -79,10 +83,10 @@ describe('usePublish Hook', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     // Default implementation for publishApp
-    (publishApp as Mock).mockResolvedValue('https://test-app.vibesdiy.app');
+    (publishApp as Mock).mockResolvedValue("https://test-app.vibesdiy.app");
   });
 
-  it('initializes with correct default values', () => {
+  it("initializes with correct default values", () => {
     const { result } = renderHook(
       () =>
         usePublish({
@@ -94,19 +98,19 @@ describe('usePublish Hook', () => {
         }),
       {
         wrapper: createWrapper(),
-      }
+      },
     );
 
     expect(result.current.isPublishing).toBe(false);
     expect(result.current.urlCopied).toBe(false);
     expect(result.current.publishedAppUrl).toBeUndefined();
     expect(result.current.isShareModalOpen).toBe(false);
-    expect(typeof result.current.handlePublish).toBe('function');
-    expect(typeof result.current.toggleShareModal).toBe('function');
+    expect(typeof result.current.handlePublish).toBe("function");
+    expect(typeof result.current.toggleShareModal).toBe("function");
   });
 
-  it('initializes with provided publishedUrl', () => {
-    const initialUrl = 'https://initial-app.vibesdiy.app';
+  it("initializes with provided publishedUrl", () => {
+    const initialUrl = "https://initial-app.vibesdiy.app";
 
     const { result } = renderHook(
       () =>
@@ -120,13 +124,13 @@ describe('usePublish Hook', () => {
         }),
       {
         wrapper: createWrapper(),
-      }
+      },
     );
 
     expect(result.current.publishedAppUrl).toBe(initialUrl);
   });
 
-  it('toggles the share modal', () => {
+  it("toggles the share modal", () => {
     const { result } = renderHook(
       () =>
         usePublish({
@@ -138,7 +142,7 @@ describe('usePublish Hook', () => {
         }),
       {
         wrapper: createWrapper(),
-      }
+      },
     );
 
     // Initial state should be closed
@@ -157,8 +161,8 @@ describe('usePublish Hook', () => {
     expect(result.current.isShareModalOpen).toBe(false);
   });
 
-  it('publishes the app and updates state correctly', async () => {
-    const mockAppUrl = 'https://published-app.vibesdiy.app';
+  it("publishes the app and updates state correctly", async () => {
+    const mockAppUrl = "https://published-app.vibesdiy.app";
     (publishApp as Mock).mockResolvedValue(mockAppUrl);
 
     const { result } = renderHook(
@@ -172,7 +176,7 @@ describe('usePublish Hook', () => {
         }),
       {
         wrapper: createWrapper(),
-      }
+      },
     );
 
     // Call handlePublish
@@ -185,16 +189,18 @@ describe('usePublish Hook', () => {
       sessionId: mockSessionId,
       code: mockCode,
       title: mockTitle,
-      prompt: 'Create a test app', // First user message
+      prompt: "Create a test app", // First user message
       updatePublishedUrl: mockUpdatePublishedUrl,
-      userId: 'test-user-id',
-      token: 'test-token',
+      userId: "test-user-id",
+      token: "test-token",
     });
 
     // Verify state updates
     expect(result.current.publishedAppUrl).toBe(mockAppUrl);
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(mockAppUrl);
-    expect(trackPublishClick).toHaveBeenCalledWith({ publishedAppUrl: mockAppUrl });
+    expect(trackPublishClick).toHaveBeenCalledWith({
+      publishedAppUrl: mockAppUrl,
+    });
 
     // Verify urlCopied state is set to true initially
     expect(result.current.urlCopied).toBe(true);
@@ -204,15 +210,15 @@ describe('usePublish Hook', () => {
       () => {
         expect(result.current.urlCopied).toBe(false);
       },
-      { timeout: 4000 }
+      { timeout: 4000 },
     );
   });
 
-  it('handles failure to publish gracefully', async () => {
+  it("handles failure to publish gracefully", async () => {
     // Mock a failure in publishApp
-    (publishApp as Mock).mockRejectedValue(new Error('Failed to publish'));
+    (publishApp as Mock).mockRejectedValue(new Error("Failed to publish"));
 
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {
       /* no-op */
     });
 
@@ -227,7 +233,7 @@ describe('usePublish Hook', () => {
         }),
       {
         wrapper: createWrapper(),
-      }
+      },
     );
 
     // Call handlePublish
@@ -236,7 +242,10 @@ describe('usePublish Hook', () => {
     });
 
     // Verify error was logged
-    expect(consoleSpy).toHaveBeenCalledWith('Error in handlePublish:', expect.any(Error));
+    expect(consoleSpy).toHaveBeenCalledWith(
+      "Error in handlePublish:",
+      expect.any(Error),
+    );
 
     // Verify state resets
     expect(result.current.isPublishing).toBe(false);
@@ -245,27 +254,27 @@ describe('usePublish Hook', () => {
     consoleSpy.mockRestore();
   });
 
-  it('handles special case for first message as prompt', async () => {
+  it("handles special case for first message as prompt", async () => {
     const specialMessages: ChatMessageDocument[] = [
       {
-        type: 'user',
-        text: 'System prompt',
-        _id: '0001-user-first',
-        session_id: 'test-session-id',
+        type: "user",
+        text: "System prompt",
+        _id: "0001-user-first",
+        session_id: "test-session-id",
         created_at: Date.now(),
       } as UserChatMessage,
       {
-        type: 'user',
-        text: 'Actual user prompt',
-        _id: 'user-2',
-        session_id: 'test-session-id',
+        type: "user",
+        text: "Actual user prompt",
+        _id: "user-2",
+        session_id: "test-session-id",
         created_at: Date.now(),
       } as UserChatMessage,
       {
-        type: 'ai',
-        text: 'Response',
-        _id: 'ai-1',
-        session_id: 'test-session-id',
+        type: "ai",
+        text: "Response",
+        _id: "ai-1",
+        session_id: "test-session-id",
         created_at: Date.now(),
       } as AiChatMessage,
     ];
@@ -281,7 +290,7 @@ describe('usePublish Hook', () => {
         }),
       {
         wrapper: createWrapper(),
-      }
+      },
     );
 
     // Call handlePublish
@@ -292,12 +301,12 @@ describe('usePublish Hook', () => {
     // Verify publishApp was called with second message as prompt
     expect(publishApp).toHaveBeenCalledWith(
       expect.objectContaining({
-        prompt: 'Actual user prompt',
-      })
+        prompt: "Actual user prompt",
+      }),
     );
   });
 
-  it('does nothing when no messages to publish', async () => {
+  it("does nothing when no messages to publish", async () => {
     const { result } = renderHook(
       () =>
         usePublish({
@@ -309,7 +318,7 @@ describe('usePublish Hook', () => {
         }),
       {
         wrapper: createWrapper(),
-      }
+      },
     );
 
     // Call handlePublish

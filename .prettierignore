@@ -9,4 +9,4 @@ scripts/
 **/coverage/**
 **/.react-router/
 **/.netlify/
-**/build/
+**/build/**

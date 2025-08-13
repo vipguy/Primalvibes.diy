@@ -1,46 +1,48 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, act } from '@testing-library/react';
-import iframeTemplateRaw from '../app/components/ResultPreview/templates/iframe-template.html?raw';
-import ResultPreview from '../app/components/ResultPreview/ResultPreview';
-import { MockThemeProvider } from './utils/MockThemeProvider';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, act } from "@testing-library/react";
+import iframeTemplateRaw from "../app/components/ResultPreview/templates/iframe-template.html?raw";
+import ResultPreview from "../app/components/ResultPreview/ResultPreview";
+import { MockThemeProvider } from "./utils/MockThemeProvider";
 
-vi.mock('@remix-run/router', () => ({
+vi.mock("@remix-run/router", () => ({
   createBrowserRouter: vi.fn(),
 }));
 
 // Mock the useApiKey hook
-vi.mock('../app/hooks/useApiKey', () => ({
+vi.mock("../app/hooks/useApiKey", () => ({
   useApiKey: () => ({
-    apiKey: 'test-api-key',
-    apiKeyObject: { key: 'test-api-key', hash: 'test-hash' },
+    apiKey: "test-api-key",
+    apiKeyObject: { key: "test-api-key", hash: "test-hash" },
     isLoading: false,
     error: null,
     refreshKey: vi.fn(),
-    ensureApiKey: vi.fn().mockResolvedValue({ key: 'test-api-key', hash: 'test-hash' }),
+    ensureApiKey: vi
+      .fn()
+      .mockResolvedValue({ key: "test-api-key", hash: "test-hash" }),
   }),
 }));
 
-vi.mock('../app/contexts/AuthContext', () => ({
+vi.mock("../app/contexts/AuthContext", () => ({
   useAuth: () => ({
-    token: 'test-auth-token',
-    userPayload: { userId: 'test-user-id' },
+    token: "test-auth-token",
+    userPayload: { userId: "test-user-id" },
     isAuthenticated: true,
     login: vi.fn(),
     logout: vi.fn(),
   }),
 }));
 
-describe('Iframe Template', () => {
-  it('contains proper APP_CODE placeholder format', () => {
+describe("Iframe Template", () => {
+  it("contains proper APP_CODE placeholder format", () => {
     // Verify the template contains the correct APP_CODE placeholder pattern
-    expect(iframeTemplateRaw).toContain('{{APP_CODE}}');
+    expect(iframeTemplateRaw).toContain("{{APP_CODE}}");
 
     // Ensure there are no nested JS object syntax patterns that would cause ReferenceError
     const problematicPattern = /\{\s*\{\s*APP_CODE\s*;\s*\}\s*\}/;
     expect(problematicPattern.test(iframeTemplateRaw)).toBe(false);
   });
 
-  describe('Iframe Rendering', () => {
+  describe("Iframe Rendering", () => {
     // Sample React app code with postMessage communication
     const testAppCode = `
       function App() {
@@ -89,33 +91,35 @@ describe('Iframe Template', () => {
       messageEventHandlers = [];
 
       // Reset the URL mocks to ensure they start fresh each test
-      URL.createObjectURL = vi.fn().mockReturnValue('mock-blob-url');
+      URL.createObjectURL = vi.fn().mockReturnValue("mock-blob-url");
       URL.revokeObjectURL = vi.fn();
 
       // Make sure the URL.createObjectURL is called at least once to satisfy the test
-      URL.createObjectURL(new Blob(['test content'], { type: 'text/html' }));
+      URL.createObjectURL(new Blob(["test content"], { type: "text/html" }));
 
       // Mock localStorage to return a valid API key
       const originalGetItem = Storage.prototype.getItem;
       Storage.prototype.getItem = function (key) {
-        if (key === 'vibes-openrouter-key') {
-          return JSON.stringify({ key: 'test-api-key', hash: 'test-hash' });
+        if (key === "vibes-openrouter-key") {
+          return JSON.stringify({ key: "test-api-key", hash: "test-hash" });
         }
         return originalGetItem.call(this, key);
       };
 
       // Track all message event handlers added to window
-      vi.spyOn(window, 'addEventListener').mockImplementation((event, handler) => {
-        if (event === 'message') {
-          messageEventHandlers.push(handler as (x: MessageEvent) => void);
-        }
-        return undefined;
-      });
+      vi.spyOn(window, "addEventListener").mockImplementation(
+        (event, handler) => {
+          if (event === "message") {
+            messageEventHandlers.push(handler as (x: MessageEvent) => void);
+          }
+          return undefined;
+        },
+      );
 
       // Create a realistic iframe mock that can receive and send messages
-      vi.spyOn(document, 'querySelector').mockImplementation((selector) => {
-        if (selector === 'iframe') {
-          const iframe = document.createElement('iframe');
+      vi.spyOn(document, "querySelector").mockImplementation((selector) => {
+        if (selector === "iframe") {
+          const iframe = document.createElement("iframe");
 
           // Create a realistic iframe contentWindow that can handle postMessage
           const contentWindowMock = {
@@ -123,65 +127,67 @@ describe('Iframe Template', () => {
               write: vi.fn().mockImplementation((html: string) => {
                 // Verify the HTML content contains our code and not problematic APP_CODE
                 expect(html).toContain(testAppCode);
-                expect(html).not.toContain('{ APP_CODE; }');
-                expect(html).toContain('{{APP_CODE}}'); // Verify template has proper placeholder format
+                expect(html).not.toContain("{ APP_CODE; }");
+                expect(html).toContain("{{APP_CODE}}"); // Verify template has proper placeholder format
               }),
               close: vi.fn(),
             },
             // Create a postMessage that triggers parent's message handlers
-            postMessage: vi.fn().mockImplementation((message: unknown, _targetOrigin: string) => {
-              // Simulate the iframe sending a message to the parent
-              messageEventHandlers.forEach((handler) => {
-                // Create a partial MessageEvent and cast to unknown first to satisfy TypeScript
-                const mockEvent = {
-                  data: message,
-                  origin: window.location.origin,
-                  source: contentWindowMock,
-                  // Add missing required properties
-                  lastEventId: '',
-                  ports: [],
-                  bubbles: false,
-                  cancelable: false,
-                  composed: false,
-                  currentTarget: window,
-                  defaultPrevented: false,
-                  eventPhase: 0,
-                  isTrusted: true,
-                  returnValue: true,
-                  srcElement: null,
-                  target: window,
-                  timeStamp: Date.now(),
-                  type: 'message',
-                  composedPath: () => [],
-                  preventDefault: () => {
-                    /* no-op */
-                  },
-                  stopImmediatePropagation: () => {
-                    /* no-op */
-                  },
-                  stopPropagation: () => {
-                    /* no-op */
-                  },
-                  AT_TARGET: 0,
-                  BUBBLING_PHASE: 0,
-                  CAPTURING_PHASE: 0,
-                  NONE: 0,
-                } as unknown as MessageEvent;
+            postMessage: vi
+              .fn()
+              .mockImplementation((message: unknown, _targetOrigin: string) => {
+                // Simulate the iframe sending a message to the parent
+                messageEventHandlers.forEach((handler) => {
+                  // Create a partial MessageEvent and cast to unknown first to satisfy TypeScript
+                  const mockEvent = {
+                    data: message,
+                    origin: window.location.origin,
+                    source: contentWindowMock,
+                    // Add missing required properties
+                    lastEventId: "",
+                    ports: [],
+                    bubbles: false,
+                    cancelable: false,
+                    composed: false,
+                    currentTarget: window,
+                    defaultPrevented: false,
+                    eventPhase: 0,
+                    isTrusted: true,
+                    returnValue: true,
+                    srcElement: null,
+                    target: window,
+                    timeStamp: Date.now(),
+                    type: "message",
+                    composedPath: () => [],
+                    preventDefault: () => {
+                      /* no-op */
+                    },
+                    stopImmediatePropagation: () => {
+                      /* no-op */
+                    },
+                    stopPropagation: () => {
+                      /* no-op */
+                    },
+                    AT_TARGET: 0,
+                    BUBBLING_PHASE: 0,
+                    CAPTURING_PHASE: 0,
+                    NONE: 0,
+                  } as unknown as MessageEvent;
 
-                handler(mockEvent);
-              });
-            }),
+                  handler(mockEvent);
+                });
+              }),
           };
 
           // Set contentWindow property on iframe
-          Object.defineProperty(iframe, 'contentWindow', {
+          Object.defineProperty(iframe, "contentWindow", {
             value: contentWindowMock,
             writable: true,
           });
 
           // Add src property
-          Object.defineProperty(iframe, 'src', {
-            value: 'mock-blob-url',
+          Object.defineProperty(iframe, "src", {
+            value: "mock-blob-url",
             writable: true,
           });
 
@@ -201,7 +207,7 @@ describe('Iframe Template', () => {
       messageEventHandlers = [];
     });
 
-    it('renders a working React app in the iframe with functional messaging', async () => {
+    it("renders a working React app in the iframe with functional messaging", async () => {
       // Create mock handlers for component callbacks
       const onScreenshotCapturedMock = vi.fn();
       const onPreviewLoadedMock = vi.fn();
@@ -220,11 +226,11 @@ describe('Iframe Template', () => {
             onPreviewLoaded={onPreviewLoadedMock}
             setMobilePreviewShown={vi.fn()}
           />
-        </MockThemeProvider>
+        </MockThemeProvider>,
       );
 
       // Get the mock iframe created by our mocks
-      const iframe = document.querySelector('iframe');
+      const iframe = document.querySelector("iframe");
       expect(iframe).not.toBeNull();
 
       // Verify URL was created with a blob (createObjectURL)
@@ -233,7 +239,7 @@ describe('Iframe Template', () => {
       // Simulate iframe loading and sending the ready message
       // This triggers our mock contentWindow.postMessage which triggers parent's message handlers
       await act(async () => {
-        iframe?.contentWindow?.postMessage({ type: 'preview-ready' }, '*');
+        iframe?.contentWindow?.postMessage({ type: "preview-ready" }, "*");
       });
 
       // Verify that onPreviewLoaded was called as a result of the message
@@ -243,21 +249,23 @@ describe('Iframe Template', () => {
       await act(async () => {
         iframe?.contentWindow?.postMessage(
           {
-            type: 'screenshot',
-            data: 'data:image/png;base64,fakeScreenshotData',
+            type: "screenshot",
+            data: "data:image/png;base64,fakeScreenshotData",
           },
-          '*'
+          "*",
         );
       });
 
       // Verify screenshot handler was called with screenshot data
       expect(onScreenshotCapturedMock).toHaveBeenCalledWith(
-        'data:image/png;base64,fakeScreenshotData'
+        "data:image/png;base64,fakeScreenshotData",
       );
 
       // Verify no JS errors were generated related to APP_CODE
-      const consoleErrorSpy = vi.spyOn(console, 'error');
-      expect(consoleErrorSpy).not.toHaveBeenCalledWith(expect.stringContaining('is not defined'));
+      const consoleErrorSpy = vi.spyOn(console, "error");
+      expect(consoleErrorSpy).not.toHaveBeenCalledWith(
+        expect.stringContaining("is not defined"),
+      );
     });
   });
 });

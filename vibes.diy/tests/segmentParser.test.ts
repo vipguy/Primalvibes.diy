@@ -1,19 +1,19 @@
-import { describe, it, expect } from 'vitest';
-import { parseContent } from '../app/utils/segmentParser';
-import fs from 'fs';
-import path from 'path';
+import { describe, it, expect } from "vitest";
+import { parseContent } from "../app/utils/segmentParser";
+import fs from "fs";
+import path from "path";
 
-describe('segmentParser utilities', () => {
-  it('correctly parses markdown content with no code blocks', () => {
-    const text = 'This is a simple markdown text with no code blocks.';
+describe("segmentParser utilities", () => {
+  it("correctly parses markdown content with no code blocks", () => {
+    const text = "This is a simple markdown text with no code blocks.";
     const result = parseContent(text);
 
     expect(result.segments.length).toBe(1);
-    expect(result.segments[0].type).toBe('markdown');
+    expect(result.segments[0].type).toBe("markdown");
     expect(result.segments[0].content).toBe(text);
   });
 
-  it('correctly handles nested JSX content', () => {
+  it("correctly handles nested JSX content", () => {
     const text = `
                     >
                       {search.term}
@@ -67,11 +67,11 @@ This app creates a retr`;
 
     // We expect the parser to handle this as a single markdown segment
     expect(result.segments.length).toBe(1);
-    expect(result.segments[0].type).toBe('markdown');
+    expect(result.segments[0].type).toBe("markdown");
     expect(result.segments[0].content).toBe(text);
   });
 
-  it('correctly parses JSX/React code in code blocks', () => {
+  it("correctly parses JSX/React code in code blocks", () => {
     const text = `
 Here is a React component:
 
@@ -95,12 +95,12 @@ function SearchResults({ searches }) {
     // 2. Code block
     // 3. Empty markdown after the code
     expect(result.segments.length).toBe(2);
-    expect(result.segments[0].type).toBe('markdown');
-    expect(result.segments[1].type).toBe('code');
-    expect(result.segments[1].content).toContain('function SearchResults');
+    expect(result.segments[0].type).toBe("markdown");
+    expect(result.segments[1].type).toBe("code");
+    expect(result.segments[1].content).toContain("function SearchResults");
   });
 
-  it('correctly parses JSX/React code in the longest code block', () => {
+  it("correctly parses JSX/React code in the longest code block", () => {
     const text = `
 Here is a React component with a short code block before it:
 
@@ -134,33 +134,33 @@ Final markdown
     // 2. Code block
     // 3. Empty markdown after the code
     expect(result.segments.length).toBe(3);
-    expect(result.segments[0].type).toBe('markdown');
-    expect(result.segments[1].type).toBe('code');
-    expect(result.segments[2].type).toBe('markdown');
-    expect(result.segments[0].content).toContain('console');
-    expect(result.segments[1].content).toContain('function SearchResults');
+    expect(result.segments[0].type).toBe("markdown");
+    expect(result.segments[1].type).toBe("code");
+    expect(result.segments[2].type).toBe("markdown");
+    expect(result.segments[0].content).toContain("console");
+    expect(result.segments[1].content).toContain("function SearchResults");
   });
 
-  it('verifies segment types for all fixture files', () => {
+  it("verifies segment types for all fixture files", () => {
     // make subset files for partial parse
     const fixtureExpectations = {
-      'easy-message.txt': ['markdown', 'code', 'markdown'],
-      'easy-message2.txt': ['markdown', 'code', 'markdown'],
-      'easy-message3.txt': ['markdown', 'code', 'markdown'],
-      'easy-message4.txt': ['markdown', 'code', 'markdown'],
-      'easy-message5.txt': ['markdown', 'code', 'markdown'],
-      'hard-message.txt': ['markdown', 'code', 'markdown'],
-      'long-message.txt': ['markdown', 'code', 'markdown'],
-      'long-message2.txt': ['markdown', 'code', 'markdown'],
-      'prefix-easy.txt': ['markdown', 'code'],
+      "easy-message.txt": ["markdown", "code", "markdown"],
+      "easy-message2.txt": ["markdown", "code", "markdown"],
+      "easy-message3.txt": ["markdown", "code", "markdown"],
+      "easy-message4.txt": ["markdown", "code", "markdown"],
+      "easy-message5.txt": ["markdown", "code", "markdown"],
+      "hard-message.txt": ["markdown", "code", "markdown"],
+      "long-message.txt": ["markdown", "code", "markdown"],
+      "long-message2.txt": ["markdown", "code", "markdown"],
+      "prefix-easy.txt": ["markdown", "code"],
     };
 
     // Test each fixture file
     Object.entries(fixtureExpectations).forEach(([filename, expectedTypes]) => {
-      const fixturePath = path.join(__dirname, 'fixtures', filename);
+      const fixturePath = path.join(__dirname, "fixtures", filename);
       expect(fs.existsSync(fixturePath)).toBe(true);
 
-      const content = fs.readFileSync(fixturePath, 'utf-8');
+      const content = fs.readFileSync(fixturePath, "utf-8");
       const result = parseContent(content);
       const actualTypes = result.segments.map((segment) => segment.type);
 
@@ -168,41 +168,41 @@ Final markdown
     });
   });
 
-  it('correctly parses dependencies from easy-message5.txt fixture', () => {
+  it("correctly parses dependencies from easy-message5.txt fixture", () => {
     // Read the fixture file
-    const fixturePath = path.join(__dirname, 'fixtures', 'easy-message5.txt');
+    const fixturePath = path.join(__dirname, "fixtures", "easy-message5.txt");
     expect(fs.existsSync(fixturePath)).toBe(true);
 
-    const content = fs.readFileSync(fixturePath, 'utf-8');
+    const content = fs.readFileSync(fixturePath, "utf-8");
     const result = parseContent(content);
     expect(result.segments.length).toBe(3);
-    expect(result.segments[1].type).toBe('code');
-    expect(result.segments[1].content).toContain('react-modal');
+    expect(result.segments[1].type).toBe("code");
+    expect(result.segments[1].content).toContain("react-modal");
   });
 });
 
-it('correctly parses dependencies from hard-message2.txt fixture', () => {
-  const fixturePath = path.join(__dirname, 'fixtures', 'hard-message2.txt');
+it("correctly parses dependencies from hard-message2.txt fixture", () => {
+  const fixturePath = path.join(__dirname, "fixtures", "hard-message2.txt");
   expect(fs.existsSync(fixturePath)).toBe(true);
 
-  const content = fs.readFileSync(fixturePath, 'utf-8');
+  const content = fs.readFileSync(fixturePath, "utf-8");
   const result = parseContent(content);
   expect(result.segments.length).toBe(3);
-  expect(result.segments[1].type).toBe('code');
-  expect(result.segments[1].content).toContain('react-dropzone');
+  expect(result.segments[1].type).toBe("code");
+  expect(result.segments[1].content).toContain("react-dropzone");
 });
 
-it('correctly parses markdown and code from hard-message4.txt fixture', () => {
-  const fixturePath = path.join(__dirname, 'fixtures', 'hard-message3.txt');
+it("correctly parses markdown and code from hard-message4.txt fixture", () => {
+  const fixturePath = path.join(__dirname, "fixtures", "hard-message3.txt");
   expect(fs.existsSync(fixturePath)).toBe(true);
 
-  const content = fs.readFileSync(fixturePath, 'utf-8');
+  const content = fs.readFileSync(fixturePath, "utf-8");
   const result = parseContent(content);
 
   expect(result.segments.length).toBe(3);
-  expect(result.segments[0].type).toBe('markdown');
-  expect(result.segments[1].type).toBe('code');
-  expect(result.segments[2].type).toBe('markdown');
+  expect(result.segments[0].type).toBe("markdown");
+  expect(result.segments[1].type).toBe("code");
+  expect(result.segments[2].type).toBe("markdown");
 
   // code should match Loading questions
   expect(result.segments[1].content).toMatch(/Loading questions/);
