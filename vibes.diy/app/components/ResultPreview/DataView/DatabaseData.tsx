@@ -63,9 +63,9 @@ const DatabaseData: React.FC<{ dbName: string; sessionId: string }> = ({ dbName,
       });
 
       // Extract docs from the result based on Fireproof's API
-      const extractedDocs = result.rows
-        .filter((row) => row && ((row as any).doc || row.value))
-        .map((row) => (row as any).doc || row.value);
+      // if this is failing than the typing in fireproof-core is wrong
+      // there should be no doc MENO
+      const extractedDocs = result.rows.filter((row) => row && row.value).map((row) => row.value);
 
       setDocs(extractedDocs);
     } catch (error) {

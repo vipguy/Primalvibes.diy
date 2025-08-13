@@ -31,6 +31,7 @@ const opts = tseslint.config(
       "**/notes/**",
       "**/.cache/**",
       "**/.esm-cache/**",
+      "**/build/**",
       "**/.wrangler/**",
     ],
   },

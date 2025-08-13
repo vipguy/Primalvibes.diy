@@ -30,7 +30,6 @@ const mockReader = {
 };
 
 const mockResponse = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   json: vi.fn(),
   body: {
     getReader: vi.fn().mockReturnValue(mockReader),

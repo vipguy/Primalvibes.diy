@@ -31,7 +31,6 @@ import { callAiEnv, callAiFetch } from "./utils.js";
 export { getMeta };
 
 // Import package version for debugging
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 
 // Default fallback model when the primary model fails or is unavailable
 const FALLBACK_MODEL = "openrouter/auto";

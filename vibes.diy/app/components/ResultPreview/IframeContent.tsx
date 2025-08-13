@@ -35,11 +35,11 @@ const IframeContent: React.FC<IframeContentProps> = ({
   const lastContentRef = useRef(''); // Use ref to track last rendered code
 
   // Reference to store the current Monaco editor instance
-  const monacoEditorRef = useRef<any>(null);
+  const monacoEditorRef = useRef(null);
   // Reference to store the Monaco API instance
-  const monacoApiRef = useRef<any>(null);
+  const monacoApiRef = useRef(null);
   // Reference to store the current Shiki highlighter
-  const highlighterRef = useRef<any>(null);
+  const highlighterRef = useRef(null);
   // Reference to store disposables for cleanup
   const disposablesRef = useRef<{ dispose: () => void }[]>([]);
   // Flag to track if user has manually scrolled during streaming

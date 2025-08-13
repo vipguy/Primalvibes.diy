@@ -50,7 +50,7 @@ const mockDb = vi.hoisted(() => ({
   delete: vi.fn().mockResolvedValue({ ok: true }),
 }));
 
-const mockImgFile = vi.hoisted(() =>
+vi.hoisted(() =>
   vi.fn().mockImplementation(({ className, alt, style }) => {
     return React.createElement(
       'div',

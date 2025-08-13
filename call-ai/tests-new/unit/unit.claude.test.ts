@@ -1,5 +1,5 @@
 import { callAi } from "call-ai";
-import { describe, it, expect, beforeEach, vitest, Mock } from "vitest";
+import { describe, it, expect, beforeEach, vitest } from "vitest";
 
 // Mock global fetch
 const mock = { fetch: vitest.fn() };

@@ -90,7 +90,9 @@ export function useApiKey() {
             try {
               const stored = localStorage.getItem(storageKey);
               if (stored) return JSON.parse(stored).key as string;
-            } catch {}
+            } catch (e) {
+              /* ignore */
+            }
             return '';
           })();
 

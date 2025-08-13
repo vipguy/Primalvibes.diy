@@ -2,15 +2,7 @@
  * Streaming response handling for call-ai
  */
 
-import {
-  CallAIError,
-  CallAIOptions,
-  Message,
-  ResponseMeta,
-  SchemaAIJsonSchemaRequest,
-  SchemaAIMessageRequest,
-  SchemaStrategy,
-} from "./types.js";
+import { CallAIError, CallAIOptions, Message, ResponseMeta, SchemaAIMessageRequest, SchemaStrategy } from "./types.js";
 import { globalDebug } from "./key-management.js";
 import { responseMetadata, boxString } from "./response-metadata.js";
 import { checkForInvalidModelError } from "./error-handling.js";
@@ -156,6 +148,7 @@ async function* createStreamingGenerator(
                       let fixedJson = toolCallsAssembled;
 
                       // 1. Remove trailing commas
+                      // eslint-disable-next-line no-useless-escape
                       fixedJson = fixedJson.replace(/,\s*([\}\]])/, "$1");
 
                       // 2. Ensure proper JSON structure
@@ -342,6 +335,7 @@ async function* createStreamingGenerator(
         // Apply more robust fixes for Claude's streaming JSON issues
 
         // 1. Remove trailing commas (common in malformed JSON)
+        // eslint-disable-next-line no-useless-escape
         result = result.replace(/,\s*([\}\]])/, "$1");
 
         // 2. Ensure we have proper JSON structure

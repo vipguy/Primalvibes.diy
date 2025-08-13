@@ -4,11 +4,12 @@
  */
 
 // Import the function directly from the module
-const { imageGen } = require("../dist/api");
-const assert = require("assert");
+import { imageGen } from "call-ai";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 
 // Mock fetch for testing
-global.fetch = vi.fn(() =>
+const global = globalThis;
+const globalFetch = vi.fn(() =>
   Promise.resolve({
     ok: true,
     status: 200,
@@ -24,11 +25,12 @@ global.fetch = vi.fn(() =>
         ],
       }),
   }),
-);
+) as unknown as typeof fetch;
+global.fetch = globalFetch;
 
 describe("imageGen function", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   // Simple test to verify basic functionality

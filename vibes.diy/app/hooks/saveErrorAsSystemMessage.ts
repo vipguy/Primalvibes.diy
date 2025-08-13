@@ -1,7 +1,8 @@
+import type { Database } from 'use-fireproof';
 import type { RuntimeError, ErrorCategory } from './useRuntimeErrors';
 
 export async function saveErrorAsSystemMessage(
-  sessionDatabase: any,
+  sessionDatabase: Database,
   sessionId: string | undefined,
   error: RuntimeError,
   category: ErrorCategory

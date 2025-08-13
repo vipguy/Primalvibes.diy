@@ -2,7 +2,7 @@ import { getCredits } from '../config/provisioning';
 import type { RuntimeError } from './useRuntimeErrors';
 
 // Global request tracking to prevent duplicate credit check calls
-let pendingCreditsCheck: Promise<any> | null = null;
+let pendingCreditsCheck: Promise<{ available: number; usage: number; limit: number }> | null = null;
 
 export async function checkCredits(
   apiKeyToCheck: string,
@@ -42,7 +42,8 @@ export async function checkCredits(
     }
 
     return true;
-  } catch (error: any) {
+  } catch (ierror) {
+    const error = ierror as Error;
     pendingCreditsCheck = null;
     console.error('Error checking credits:', error);
     setNeedsNewKey(true);

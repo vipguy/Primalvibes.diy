@@ -242,7 +242,9 @@ describe('ImgGen Component', () => {
   it('should accept custom props', async () => {
     // Skip this test as the component structure makes it difficult to test className
     // The custom class might not be visible depending on the component state
-    vi.spyOn(console, 'warn').mockImplementation(() => {}); // Suppress console warnings
+    vi.spyOn(console, 'warn').mockImplementation(() => {
+      /* no-op */
+    }); // Suppress console warnings
 
     // The test is checking functionality that's proven elsewhere
     expect(true).toBe(true);

@@ -183,13 +183,11 @@ async function checkForInvalidModelError(
   let errorData;
   try {
     errorData = await responseClone.json();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     // If it's not JSON, get the text
     try {
       const text = await responseClone.text();
       errorData = { error: text };
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       errorData = { error: `Error ${response.status}: ${response.statusText}` };
     }

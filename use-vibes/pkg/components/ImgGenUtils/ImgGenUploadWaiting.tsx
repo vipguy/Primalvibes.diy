@@ -64,7 +64,7 @@ export function ImgGenUploadWaiting({
 
     return () => {
       // Clean up any created object URLs
-      // eslint-disable-next-line no-restricted-globals
+
       objectUrls.forEach((url) => URL.revokeObjectURL(url));
     };
   }, []);

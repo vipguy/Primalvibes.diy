@@ -260,7 +260,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
 
   // Effect to clear pending message once it appears in the main docs list
   useEffect(() => {
-    if (pendingAiMessage && docs.some((doc: any) => doc._id === pendingAiMessage._id)) {
+    if (pendingAiMessage && docs.some((doc) => doc._id === pendingAiMessage._id)) {
       setPendingAiMessage(null);
     }
   }, [docs, pendingAiMessage]);

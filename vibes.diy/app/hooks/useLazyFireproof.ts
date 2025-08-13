@@ -200,9 +200,9 @@ export function useLazyFireproof(
   // Custom hook that handles database transitions for LiveQuery
   function useEnhancedLiveQuery<
     T extends DocTypes,
-    K extends IndexKeyType = unknown,
+    K extends IndexKeyType = [],
     R extends DocFragment = T,
-  >(mapFnOrField: string | MapFn<T>, options?: any): LiveQueryResult<T, K, R> {
+  >(mapFnOrField: string | MapFn<T>, options?: QueryOpts<K>): LiveQueryResult<T, K, R> {
     // Use a state counter to trigger refreshes when the database transitions
     const [refreshCounter, setRefreshCounter] = useState(0);
 

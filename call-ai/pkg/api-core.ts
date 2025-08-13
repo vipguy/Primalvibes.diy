@@ -77,7 +77,6 @@ function callAi(prompt: string | Message[], options: CallAIOptions = {}) {
           if (typeof schema === "string") {
             try {
               toolDef = JSON.parse(schema);
-              // eslint-disable-next-line @typescript-eslint/no-unused-vars
             } catch (e) {
               // If it's not valid JSON, we'll use it as a plain description
               toolDef = { description: schema };

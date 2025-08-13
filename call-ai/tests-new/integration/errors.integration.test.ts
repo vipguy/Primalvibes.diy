@@ -57,7 +57,7 @@ describe("Error handling integration tests", () => {
         // Try to consume the generator
         // Cast to AsyncGenerator to ensure TypeScript recognizes it properly
         const asyncGenerator = generator as AsyncGenerator<string, string, unknown>;
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
         for await (const _ of asyncGenerator) {
           // This should throw before yielding any chunks
         }

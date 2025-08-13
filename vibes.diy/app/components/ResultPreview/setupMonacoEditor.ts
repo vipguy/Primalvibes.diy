@@ -1,5 +1,5 @@
 import { shikiToMonaco } from '@shikijs/monaco';
-import { createHighlighter } from 'shiki';
+import { createHighlighter, type ShikiInternal } from 'shiki';
 import type React from 'react';
 
 interface Options {
@@ -8,13 +8,13 @@ interface Options {
   isDarkMode: boolean;
   userScrolledRef: React.MutableRefObject<boolean>;
   disposablesRef: React.MutableRefObject<{ dispose: () => void }[]>;
-  setRefs: (editor: any, monaco: any) => void;
-  setHighlighter: (highlighter: any) => void;
+  setRefs: (editor: React.MutableRefObject<unknown>, monaco: unknown) => void;
+  setHighlighter: (highlighter: ShikiInternal<string, string>) => void;
 }
 
 export async function setupMonacoEditor(
-  editor: any,
-  monaco: any,
+  editor: React.MutableRefObject<unknown>,
+  monaco: ReturnType<typeof shikiToMonaco>,
   {
     isStreaming,
     codeReady,

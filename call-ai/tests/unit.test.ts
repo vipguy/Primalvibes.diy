@@ -5,7 +5,6 @@ import { fail } from "assert";
 
 dotenv.config();
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const global = globalThis;
 // Mock global fetch
 const globalFetch = vi.fn<typeof fetch>();

@@ -1,3 +1,4 @@
+import type { Database } from 'use-fireproof';
 import type {
   AiChatMessageDocument,
   ChatMessageDocument,
@@ -7,6 +8,7 @@ import { trackChatInputClick } from '../utils/analytics';
 import { parseContent } from '../utils/segmentParser';
 import { streamAI } from '../utils/streamHandler';
 import { generateTitle } from '../utils/titleGenerator';
+import { CallAIError } from 'call-ai';
 
 export interface SendMessageContext {
   readonly userMessage: ChatMessageDocument;
@@ -16,16 +18,16 @@ export interface SendMessageContext {
   ensureApiKey(): Promise<{ key: string } | null>;
   setNeedsLogin(v: boolean, reason: string): void;
   setNeedsNewKey(v: boolean): void;
-  addError(err: Error): void;
+  addError(err: CallAIError): void;
   checkCredits(key: string): Promise<boolean>;
   ensureSystemPrompt(): Promise<string>;
-  submitUserMessage(): Promise<any>;
-  buildMessageHistory(): any[];
+  submitUserMessage(): Promise<void>;
+  buildMessageHistory(): unknown[];
   readonly modelToUse: string;
   throttledMergeAiMessage(content: string): void;
   readonly isProcessingRef: { current: boolean };
   readonly aiMessage: AiChatMessageDocument;
-  readonly sessionDatabase: any;
+  readonly sessionDatabase: Database;
   setPendingAiMessage(doc: ChatMessageDocument | null): void;
   setSelectedResponseId(id: string): void;
   updateTitle(title: string): void;
@@ -191,7 +193,7 @@ export async function sendMessage(
         isProcessingRef.current = false;
       }
     })
-    .catch((error: any) => {
+    .catch((error) => {
       console.warn('Error in sendMessage:', error);
       isProcessingRef.current = false;
       setPendingAiMessage(null);

@@ -6,8 +6,12 @@ const llmsList = Object.values(llmsModules).map(
 // Cache for LLM text documents to prevent redundant fetches
 const llmsTextCache: Record<string, string> = {};
 
+interface UserSettings {
+  stylePrompt?: string;
+  userPrompt?: string;
+}
 // Base system prompt for the AI
-export async function makeBaseSystemPrompt(model: string, sessionDoc?: any) {
+export async function makeBaseSystemPrompt(model: string, sessionDoc?: UserSettings) {
   let concatenatedLlmsTxt = '';
 
   for (const llm of llmsList) {

@@ -33,7 +33,9 @@ export async function getCredits(apiKey: string): Promise<{
       try {
         const errorData = await response.text();
         errorDetails = errorData ? ` - ${errorData}` : '';
-      } catch (e) {}
+      } catch (e) {
+        /* ignore */
+      }
 
       throw new Error(`Failed to fetch key credits: ${response.status}${errorDetails}`);
     }
