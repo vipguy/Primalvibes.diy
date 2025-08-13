@@ -24,6 +24,7 @@
     "**/node_modules/**",
     "**/examples/**",
     "**/.react-router/**",
-    "**/.netlify/**"
+    "**/.netlify/**",
+    "**/tests-new/**"
   ]
 }
