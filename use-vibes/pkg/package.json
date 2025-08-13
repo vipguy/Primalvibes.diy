@@ -14,7 +14,7 @@
     }
   },
   "scripts": {
-    "build": "tsc",
+    "build": "core-cli tsc",
     "copy-css": "mkdir -p dist/components && cp src/components/ImgGen.css dist/components/",
     "build:watch": "tsc --watch",
     "dev:build": "tsc --watch",

@@ -1,12 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
-import { render, fireEvent, screen } from '@testing-library/react';
-import { PromptBar } from 'use-vibes';
+import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import * as matchers from '@testing-library/jest-dom/matchers';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-expect.extend(matchers as any);
+import { PromptBar } from 'use-vibes';
 
 describe('PromptBar Component', () => {
   it('should display the prompt text in view mode', () => {

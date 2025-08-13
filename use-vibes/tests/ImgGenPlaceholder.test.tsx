@@ -1,23 +1,24 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
 
-// // Mock ImageOverlay component
-// vi.mock('../src/components/ImgGenUtils/overlays/ImageOverlay', () => ({
-//   ImageOverlay: vi.fn(({ promptText, showControls }) => (
-//     <div
-//       data-testid="mock-image-overlay"
-//       data-prompt={promptText}
-//       data-show-controls={showControls}
-//       data-status="Generating..."
-//       className="imggen-overlay"
-//     >
-//       <div className="imggen-controls">
-//         {showControls === false && <div className="imggen-status-text">Generating...</div>}
-//       </div>
-//     </div>
-//   )),
-// }));
+// Mock ImageOverlay component
+vi.mock('../src/components/ImgGenUtils/overlays/ImageOverlay', () => ({
+  ImageOverlay: vi.fn(({ promptText, showControls }) => (
+    <div
+      data-testid="mock-image-overlay"
+      data-prompt={promptText}
+      data-show-controls={showControls}
+      data-status="Generating..."
+      className="imggen-overlay"
+    >
+      <div className="imggen-controls">
+        {showControls === false && <div className="imggen-status-text">Generating...</div>}
+      </div>
+    </div>
+  )),
+}));
 
 import { ImgGenDisplayPlaceholder, defaultClasses } from 'use-vibes';
 
@@ -164,7 +165,7 @@ describe('ImgGenDisplayPlaceholder Component', () => {
 
     it('starts progress animation at 0 and animates to actual value', async () => {
       vi.useFakeTimers();
-      let container: HTMLElement | undefined = undefined;
+      let container: HTMLElement | null = null;
 
       // Initial render
       await act(() => {
@@ -176,7 +177,6 @@ describe('ImgGenDisplayPlaceholder Component', () => {
       if (!container) {
         throw new Error('Failed to render component');
       }
-
       container = container as HTMLElement;
 
       // Initially should be 0%

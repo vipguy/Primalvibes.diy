@@ -1,19 +1,11 @@
 // IMPORTANT: All mock calls must be at the top since vi.mock calls are hoisted by Vitest
-import React from 'react';
-import { render, waitFor, screen } from '@testing-library/react';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
-
-// Import the component to test
-import { ImgGen, useImageGen } from 'use-vibes';
-import { DocWithId } from 'use-fireproof';
-
-import type { ImageDocument, UseImageGenOptions, UseImageGenResult } from 'use-vibes';
+import type { DocSet } from 'use-fireproof';
 
 // Create shared test data
 const createTestFile = () => new File(['test content'], 'test-image.png', { type: 'image/png' });
 
 // Mock database for tracking changes
-const dbPuts: DocWithId<Partial<ImageDocument>>[] = [];
+const dbPuts: UseImageGenOptions[] = [];
 const imageGenCallCount = { count: 0 };
 
 // Mock Fireproof and related dependencies
@@ -32,10 +24,9 @@ vi.mock('use-fireproof', () => {
         _files: { v1: createTestFile() },
       });
     }),
-    put: vi.fn().mockImplementation((doc: ImageDocument) => {
-      dbPuts.push({
-        ...doc,
-      });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    put: vi.fn().mockImplementation((doc: DocSet<any>) => {
+      dbPuts.push({ ...doc });
       return Promise.resolve({ id: doc._id, rev: 'new-rev' });
     }),
     remove: vi.fn(),
@@ -47,7 +38,6 @@ vi.mock('use-fireproof', () => {
   return {
     useFireproof: vi.fn().mockReturnValue({ database: mockDb }),
     ImgFile: vi.fn().mockImplementation((props) => {
-      // const React = require('react');
       return React.createElement('img', {
         src: 'test-image-url',
         className: 'test-class',
@@ -60,6 +50,7 @@ vi.mock('use-fireproof', () => {
 });
 
 // Import the type for proper typing in mock implementation
+import type { UseImageGenOptions, UseImageGenResult } from 'use-vibes';
 
 // Mock the image generation hook
 vi.mock('../src/hooks/image-gen/use-image-gen', () => {
@@ -68,8 +59,8 @@ vi.mock('../src/hooks/image-gen/use-image-gen', () => {
   return {
     useImageGen: vi.fn().mockImplementation((props: UseImageGenOptions): UseImageGenResult => {
       imageGenCallCount.count++;
-      const { _id } = props || {};
       const regenerate = false;
+      const { _id } = props || {};
 
       // Create a document based on the ID
       const doc = _id
@@ -110,7 +101,7 @@ vi.mock('../src/hooks/image-gen/use-image-gen', () => {
             ],
             prompts: { p1: { text: `Test prompt for doc-1`, created: Date.now() } },
             _files: { v1: createTestFile(), v2: createTestFile() },
-          });
+          } as unknown as UseImageGenOptions);
         }, 10);
       }
 
@@ -139,6 +130,13 @@ vi.mock('call-ai', () => {
 });
 
 // Import React and testing libraries
+import React from 'react';
+import { render, waitFor, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
+
+// Import the component to test
+import { ImgGen, useImageGen } from 'use-vibes';
 
 describe('ImgGen ID Switching Behavior', () => {
   beforeEach(() => {
@@ -263,7 +261,7 @@ describe('ImgGen ID Switching Behavior', () => {
     const useImageGenMock = vi.mocked(useImageGen);
 
     // First call - doc-1 initial render
-    useImageGenMock.mockImplementationOnce(() => ({
+    useImageGenMock.mockImplementationOnce((_props) => ({
       document: {
         _id: 'doc-1',
         _rev: 'test-rev',
@@ -283,7 +281,7 @@ describe('ImgGen ID Switching Behavior', () => {
     }));
 
     // Second call - doc-2 render (after rerender)
-    useImageGenMock.mockImplementationOnce(() => {
+    useImageGenMock.mockImplementationOnce((_props) => {
       // Simulate background process completing immediately after switching docs
       // Push to dbPuts directly to simulate successful background process
       dbPuts.push({
@@ -297,7 +295,7 @@ describe('ImgGen ID Switching Behavior', () => {
         ],
         prompts: { p1: { text: 'First document', created: Date.now() } },
         _files: { v1: createTestFile(), v2: createTestFile() },
-      });
+      } as unknown as UseImageGenOptions);
 
       // Return data for the new document
       return {

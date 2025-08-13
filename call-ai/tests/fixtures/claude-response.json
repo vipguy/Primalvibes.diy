@@ -17,9 +17,5 @@
       }
     }
   ],
-  "usage": {
-    "prompt_tokens": 18,
-    "completion_tokens": 162,
-    "total_tokens": 180
-  }
+  "usage": { "prompt_tokens": 18, "completion_tokens": 162, "total_tokens": 180 }
 }

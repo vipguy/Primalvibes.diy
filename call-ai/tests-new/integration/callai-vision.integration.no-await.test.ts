@@ -16,8 +16,8 @@ async function blobToBase64(blob: Blob) {
     });
   } else {
     const buffer = Buffer.from(await blob.arrayBuffer());
-    const mimeType = blob.type || 'application/octet-stream';
-    return `data:${mimeType};base64,${buffer.toString('base64')}`;
+    const mimeType = blob.type || "application/octet-stream";
+    return `data:${mimeType};base64,${buffer.toString("base64")}`;
   }
 }
 

@@ -174,6 +174,5 @@ export function entriesHeaders(headers: Headers) {
 }
 
 export function callAiFetch(options: { mock?: { fetch?: typeof fetch } }): typeof fetch {
-
   return options.mock?.fetch || globalThis.fetch;
 }

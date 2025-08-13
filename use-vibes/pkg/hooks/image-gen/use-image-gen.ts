@@ -27,6 +27,7 @@ import { createImageGenerator } from './image-generator.js';
 export function useImageGen({
   prompt,
   _id,
+  _rev,
   options = {},
   database = 'ImgGen',
   skip = false, // Skip processing flag

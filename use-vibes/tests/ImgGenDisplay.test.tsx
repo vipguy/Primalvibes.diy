@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
-import { ImgGenDisplay, PartialImageDocument } from 'use-vibes';
+import '@testing-library/jest-dom';
 
 // Use vi.hoisted to define mocks that need to be referenced in vi.mock
 const mockImgFile = vi.hoisted(() =>
@@ -19,40 +19,47 @@ const mockImgFile = vi.hoisted(() =>
   })
 );
 
-// // Mock use-fireproof module (placed before imports that use it)
-// vi.mock('use-fireproof', () => ({
-//   ImgFile: mockImgFile,
-//   // Mock File constructor for tests
-//   File: vi.fn().mockImplementation((data, name, options) => ({ name, type: options?.type })),
-// }));
+// Mock use-fireproof module (placed before imports that use it)
+vi.mock('use-fireproof', () => ({
+  ImgFile: mockImgFile,
+  // Mock File constructor for tests
+  File: vi.fn().mockImplementation((data, name, options) => ({ name, type: options?.type })),
+}));
 
-// // Mock the ImageOverlay component
-// vi.mock('../src/components/ImgGenUtils/overlays/ImageOverlay', () => ({
-//   ImageOverlay: vi.fn(() => <div data-testid="mock-image-overlay">Mocked Image Overlay</div>),
-// }));
+// Mock the ImageOverlay component
+vi.mock('../src/components/ImgGenUtils/overlays/ImageOverlay', () => ({
+  ImageOverlay: vi.fn(() => <div data-testid="mock-image-overlay">Mocked Image Overlay</div>),
+}));
 
-// // Mock the DeleteConfirmationOverlay component
-// vi.mock('../src/components/ImgGenUtils/overlays/DeleteConfirmationOverlay', () => ({
-//   DeleteConfirmationOverlay: vi.fn(() => (
-//     <div data-testid="mock-delete-confirmation">Mocked Delete Confirmation</div>
-//   )),
-// }));
+// Mock the DeleteConfirmationOverlay component
+vi.mock('../src/components/ImgGenUtils/overlays/DeleteConfirmationOverlay', () => ({
+  DeleteConfirmationOverlay: vi.fn(() => (
+    <div data-testid="mock-delete-confirmation">Mocked Delete Confirmation</div>
+  )),
+}));
 
 // Import after mocks
+import { ImgGenDisplay } from 'use-vibes';
 
 // Type simplification for testing purposes
+interface TestDoc {
+  readonly _id: string;
+  readonly _files: Record<string, File>;
+  readonly type: 'image';
+  readonly prompt?: string;
+  readonly alt?: string;
+}
+
 describe('ImgGenDisplay Component', () => {
   // Create a simple document for testing
-  function createMockDocument(prompt = 'Test prompt'): PartialImageDocument {
-    return {
-      _id: 'test-image-id',
-      _files: {
-        image: new File(['test'], 'test-image.png', { type: 'image/png' }),
-      },
-      prompt,
-      type: 'image',
-    };
-  }
+  const createMockDocument = (prompt = 'Test prompt'): TestDoc => ({
+    _id: 'test-image-id',
+    _files: {
+      image: new File(['test'], 'test-image.png', { type: 'image/png' }),
+    },
+    prompt,
+    type: 'image',
+  });
 
   it('should add title attribute with prompt text to the root element', () => {
     const mockDoc = createMockDocument('A beautiful landscape with mountains');
@@ -71,7 +78,7 @@ describe('ImgGenDisplay Component', () => {
 
   it('should use alt text as title when prompt is not available', () => {
     // Create a document without a prompt
-    const mockDoc: PartialImageDocument = {
+    const mockDoc: TestDoc = {
       _id: 'test-image-id',
       _files: {
         image: new File(['test'], 'test-image.png', { type: 'image/png' }),
@@ -93,7 +100,7 @@ describe('ImgGenDisplay Component', () => {
 
   it('should use default text as title when neither prompt nor alt is provided', () => {
     // Create a document without a prompt
-    const mockDoc: PartialImageDocument = {
+    const mockDoc: TestDoc = {
       _id: 'test-image-id',
       _files: {
         image: new File(['test'], 'test-image.png', { type: 'image/png' }),
@@ -113,7 +120,7 @@ describe('ImgGenDisplay Component', () => {
 
   it('should handle complex document structure with versioned prompts', () => {
     // Create a document with versioned prompts that matches the expected structure
-    const mockDoc: PartialImageDocument = {
+    const mockDoc = {
       _id: 'test-image-id',
       _files: {
         // Need to include the standard 'image' key for the mock to work
@@ -123,17 +130,17 @@ describe('ImgGenDisplay Component', () => {
       },
       prompt: 'Fallback prompt text',
       prompts: {
-        'prompt-0': { text: 'First version prompt', created: 1620000000000 },
-        'prompt-1': { text: 'Second version prompt', created: 1620000001000 },
+        'prompt-0': { text: 'First version prompt', timestamp: 1620000000000 },
+        'prompt-1': { text: 'Second version prompt', timestamp: 1620000001000 },
       },
       currentPromptKey: 'prompt-1',
       versions: [
-        { id: 'image-v0', promptKey: 'prompt-0', created: 1620000000000 },
-        { id: 'image-v1', promptKey: 'prompt-1', created: 1620000001000 },
+        { fileKey: 'image-v0', promptKey: 'prompt-0', timestamp: 1620000000000 },
+        { fileKey: 'image-v1', promptKey: 'prompt-1', timestamp: 1620000001000 },
       ],
       currentVersion: 1,
       type: 'image' as const,
-    };
+    } as TestDoc;
 
     const { getByTestId } = render(<ImgGenDisplay document={mockDoc} className="test-class" />);
 

@@ -41,7 +41,7 @@ describe("Image Generation Integration Tests", () => {
     const result = await imageGen(testPrompt, {
       apiKey: "VIBES_DIY",
       debug: true,
-      mock
+      mock,
     });
 
     console.log("Image editing test result:", result);
@@ -102,7 +102,7 @@ describe("Image Generation Integration Tests", () => {
       apiKey: "VIBES_DIY",
       images: mockFiles,
       debug: true,
-      mock
+      mock,
     });
 
     // Verify the structure of the response

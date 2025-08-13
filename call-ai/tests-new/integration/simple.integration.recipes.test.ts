@@ -71,7 +71,9 @@ describe("Simple callAi integration tests", () => {
   // Test basic non-structured requests with all models
   describe.each(modelEntries)("Non-structured text generation", (modelName, modelId) => {
     // Run all model tests concurrently within this describe block
-    it(`should generate recipe with ${modelName} model using schema`, async () => {
+    it(
+      `should generate recipe with ${modelName} model using schema`,
+      async () => {
         // Make API call with a recipe schema
         console.log("xxxx", modelId);
         const result = await callAi("Create a recipe for a healthy dinner.", {
@@ -252,6 +254,6 @@ describe("Simple callAi integration tests", () => {
         }
       },
       TIMEOUT,
-  );
+    );
   });
 });

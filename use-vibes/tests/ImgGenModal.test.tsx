@@ -1,32 +1,27 @@
-import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
-import { ImageDocument, ImgGenModal, base64ToFile } from 'use-vibes';
-import { fireproof } from 'use-fireproof';
+import '@testing-library/jest-dom';
+import { ImgGenModal } from 'use-vibes';
 
-// // Mock ImgFile component
-// vi.mock('use-fireproof', () => ({
-//   ImgFile: ({ alt }: { alt: string; file: unknown; className?: string }) => (
-//     <img data-testid="mock-img-file" alt={alt} />
-//   ),
-// }));
+// Mock ImgFile component
+vi.mock('use-fireproof', () => ({
+  ImgFile: ({ alt }: { alt: string; file: unknown; className?: string }) => (
+    <img data-testid="mock-img-file" alt={alt} />
+  ),
+}));
 
-// // Mock createPortal to render content directly without portal
-// vi.mock('react-dom', async () => {
-//   const actual = await vi.importActual('react-dom');
-//   return {
-//     ...(actual as Record<string, unknown>),
-//     createPortal: (children: React.ReactNode) => children,
-//   };
-// });
+// Mock createPortal to render content directly without portal
+vi.mock('react-dom', async () => {
+  const actual = await vi.importActual('react-dom');
+  return {
+    ...(actual as Record<string, unknown>),
+    createPortal: (children: React.ReactNode) => children,
+  };
+});
 
 describe('ImgGenModal Component', () => {
   const mockFile = new File(['dummy content'], 'dummy.png', { type: 'image/png' });
-  const database = fireproof('gen-modal', {
-    storeUrls: {
-      base: 'memory://gen-modal',
-    },
-  });
   const mockProps = {
     isOpen: true,
     onClose: vi.fn(),
@@ -46,41 +41,10 @@ describe('ImgGenModal Component', () => {
     versionIndex: 0,
     totalVersions: 3,
     progress: 100,
-    database,
   };
 
-  beforeAll(async () => {
-    const imgDoc: ImageDocument = {
-      _id: '', // Will be assigned by Fireproof
-      type: 'image',
-      created: Date.now(),
-      currentVersion: 0, // 0-based indexing for versions array
-      versions: [
-        {
-          id: 'v1',
-          created: Date.now(),
-          promptKey: 'p1',
-        },
-      ],
-      prompts: {
-        p1: {
-          text: 'internal creation',
-          created: Date.now(),
-        },
-      },
-      currentPromptKey: 'p1',
-      _files: {
-        v1: base64ToFile(
-          'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
-          'mock-img-file'
-        ),
-      },
-    };
-    await database.put(imgDoc);
-  });
-
   beforeEach(() => {
-    // vi.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render modal when isOpen is true', () => {

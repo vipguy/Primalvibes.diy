@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { ImgGen } from 'use-vibes';
 import React from 'react';
-import { render, act, RenderResult } from '@testing-library/react';
+import { act, render, RenderResult } from '@testing-library/react';
+import '@testing-library/jest-dom/vitest';
+import { ImgGen } from 'use-vibes';
 
 // Create a mock base64 image for testing
 const mockBase64Image =
@@ -74,42 +75,42 @@ vi.mock('call-ai', async () => {
   };
 });
 
-// vi.mock('use-fireproof', () => ({
-//   useFireproof: () => ({
-//     useDocument: () => [{ _id: 'mock-doc' }, vi.fn()],
-//     useLiveQuery: () => [[]],
-//     useFind: () => [[]],
-//     useLiveFind: () => [[]],
-//     useIndex: () => [[]],
-//     useSubscribe: () => {
-//       /* no-op */
-//     },
-//     // Create a proper database mock with proper promise handling
-//     database: {
-//       get: vi.fn().mockImplementation((id) => {
-//         return {
-//           catch: () => {
-//             // For tests that check 'Waiting for prompt', we need to fail differently
-//             if (id === 'test-image-id') {
-//               return new Error('Test ID not found - expected for empty prompt test');
-//             }
-//             return new Error('Not found');
-//           },
-//         };
-//       }),
-//       put: vi
-//         .fn()
-//         .mockImplementation((doc) => Promise.resolve({ id: doc._id, ok: true, rev: '1-123' })),
-//       query: vi.fn().mockResolvedValue({
-//         rows: [{ id: 'img1', key: 'img1', value: { _id: 'img:hash', prompt: 'Test Image' } }],
-//       }),
-//       delete: vi.fn().mockResolvedValue({ ok: true }),
-//     },
-//   }),
-//   ImgFile: mockImgFile,
-//   // Make sure to have a File constructor that matches expectations
-//   File: vi.fn().mockImplementation((data, name) => ({ name })),
-// }));
+vi.mock('use-fireproof', () => ({
+  useFireproof: () => ({
+    useDocument: () => [{ _id: 'mock-doc' }, vi.fn()],
+    useLiveQuery: () => [[]],
+    useFind: () => [[]],
+    useLiveFind: () => [[]],
+    useIndex: () => [[]],
+    useSubscribe: () => {
+      /* no-op */
+    },
+    // Create a proper database mock with proper promise handling
+    database: {
+      get: vi.fn().mockImplementation((id) => {
+        return {
+          catch: (errorHandler: (error: Error) => void) => {
+            // For tests that check 'Waiting for prompt', we need to fail differently
+            if (id === 'test-image-id') {
+              return errorHandler(new Error('Test ID not found - expected for empty prompt test'));
+            }
+            return errorHandler(new Error('Not found'));
+          },
+        };
+      }),
+      put: vi
+        .fn()
+        .mockImplementation((doc) => Promise.resolve({ id: doc._id, ok: true, rev: '1-123' })),
+      query: vi.fn().mockResolvedValue({
+        rows: [{ id: 'img1', key: 'img1', value: { _id: 'img:hash', prompt: 'Test Image' } }],
+      }),
+      delete: vi.fn().mockResolvedValue({ ok: true }),
+    },
+  }),
+  ImgFile: mockImgFile,
+  // Make sure to have a File constructor that matches expectations
+  File: vi.fn().mockImplementation((data, name) => ({ name })),
+}));
 
 describe('ImgGen Component', () => {
   beforeEach(() => {
@@ -241,9 +242,7 @@ describe('ImgGen Component', () => {
   it('should accept custom props', async () => {
     // Skip this test as the component structure makes it difficult to test className
     // The custom class might not be visible depending on the component state
-    vi.spyOn(console, 'warn').mockImplementation(() => {
-      /* no-op */
-    }); // Suppress console warnings
+    vi.spyOn(console, 'warn').mockImplementation(() => {}); // Suppress console warnings
 
     // The test is checking functionality that's proven elsewhere
     expect(true).toBe(true);
@@ -270,7 +269,7 @@ describe('ImgGen Component', () => {
       return Promise.reject(new Error('Not found for this test'));
     });
 
-    let renderResult;
+    let renderResult: RenderResult | null = null;
 
     // Wait for async rendering to complete
     await act(async () => {
@@ -286,7 +285,7 @@ describe('ImgGen Component', () => {
 
     // Check the rendered output for the waitingForPrompt message
     // The actual text could be in different formats or elements
-    const container = (renderResult as RenderResult).container as RenderResult['container'];
+    const { container } = renderResult as RenderResult;
 
     // Check if the container content includes our message (more flexible than exact text match)
     expect(container.textContent).toContain('click to upload');

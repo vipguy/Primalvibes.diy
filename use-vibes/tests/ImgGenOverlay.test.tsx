@@ -1,38 +1,40 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { ImageOverlay, ControlsBar } from 'use-vibes';
+import '@testing-library/jest-dom';
 
 // Use vi.hoisted to define mocks that need to be referenced in vi.mock
-// const mockImgFile = vi.hoisted(() =>
-//   vi.fn().mockImplementation(({ className, alt, style, ...rest }) => {
-//     return React.createElement(
-//       'div',
-//       {
-//         'data-testid': 'mock-img-file',
-//         className: `img-file ${className || ''}`,
-//         style,
-//         'aria-label': alt,
-//         ...rest,
-//         onClick:
-//           rest.onClick ||
-//           (() => {
-//             /* no-op */
-//           }),
-//       },
-//       'Image Content'
-//     );
-//   })
-// );
+const mockImgFile = vi.hoisted(() =>
+  vi.fn().mockImplementation(({ className, alt, style, ...rest }) => {
+    return React.createElement(
+      'div',
+      {
+        'data-testid': 'mock-img-file',
+        className: `img-file ${className || ''}`,
+        style,
+        'aria-label': alt,
+        ...rest,
+        onClick:
+          rest.onClick ||
+          (() => {
+            /* no-op */
+          }),
+      },
+      'Image Content'
+    );
+  })
+);
 
-// // Mock use-fireproof module (placed before imports that use it)
-// vi.mock('use-fireproof', () => ({
-//   ImgFile: mockImgFile,
-//   // Mock File constructor for tests
-//   File: vi.fn().mockImplementation((data, name, options) => ({ name, type: options?.type })),
-// }));
+// Mock use-fireproof module (placed before imports that use it)
+vi.mock('use-fireproof', () => ({
+  ImgFile: mockImgFile,
+  // Mock File constructor for tests
+  File: vi.fn().mockImplementation((data, name, options) => ({ name, type: options?.type })),
+}));
 
 // Import the components directly to test them individually
+import { ControlsBar, ImageOverlay } from 'use-vibes';
+
 describe('ImageOverlay Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();

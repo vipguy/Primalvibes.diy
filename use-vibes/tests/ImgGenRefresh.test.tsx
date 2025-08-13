@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import '@testing-library/jest-dom';
 import { addNewVersion, ImageDocument } from 'use-vibes';
+import { DocWithId } from 'use-fireproof';
+import { fail } from 'assert';
 
 // Mock for database operations
 const mockDb = {
@@ -15,22 +18,16 @@ const mockDb = {
 const mockFile = new File(['test content'], 'test-image.png', { type: 'image/png' });
 
 // Mock the call-ai module
-// vi.mock('call-ai', () => ({
-//   imageGen: vi.fn().mockImplementation(async () => ({
-//     created: Date.now(),
-//     data: [{ b64_json: 'test-base64-data' }],
-//   })),
-//   callAI: vi.fn().mockImplementation(async () => 'Mocked text response'),
-// }));
-
-// // Mock the use-image-gen module
-// vi.mock('../src/hooks/image-gen/use-image-gen', () => ({
-//   regenerateImage,
-//   generateImage,
-// }));
+vi.mock('call-ai', () => ({
+  imageGen: vi.fn().mockImplementation(async () => ({
+    created: Date.now(),
+    data: [{ b64_json: 'test-base64-data' }],
+  })),
+  callAI: vi.fn().mockImplementation(async () => 'Mocked text response'),
+}));
 
 // Mock the regenerateImage function (this is what the refresh button uses)
-const regenerateImage = vi.fn(async ({ db, _id }) => {
+const regenerateImage = vi.fn(async ({ db, _id, _prompt }) => {
   // Get the document
   const doc = await db.get(_id);
 
@@ -85,6 +82,12 @@ const generateImage = vi.fn(async ({ db, _id, prompt }) => {
     };
   }
 });
+
+// Mock the use-image-gen module
+vi.mock('../src/hooks/image-gen/use-image-gen', () => ({
+  regenerateImage,
+  generateImage,
+}));
 
 describe('Image Generation Refresh Functionality', () => {
   beforeEach(() => {
@@ -225,7 +228,7 @@ describe('Image Generation Refresh Functionality', () => {
 
     // Set up the database mocks
     mockDb.get.mockResolvedValue(mockDocument);
-    let updatedDoc: ImageDocument | null = null;
+    let updatedDoc: DocWithId<ImageDocument> | null = null;
     mockDb.put.mockImplementation((doc) => {
       updatedDoc = { ...doc, _rev: 'new-rev' };
       return Promise.resolve(updatedDoc);
@@ -238,9 +241,10 @@ describe('Image Generation Refresh Functionality', () => {
       prompt: newPrompt,
     });
     if (!updatedDoc) {
-      throw new Error('Updated doc is null');
+      fail('Updated doc is null');
+      return;
     }
-    updatedDoc = updatedDoc as ImageDocument;
+    updatedDoc = updatedDoc as DocWithId<ImageDocument>;
 
     // Verify that the document was updated correctly
     expect(updatedDoc._id).toBe(existingDocId);

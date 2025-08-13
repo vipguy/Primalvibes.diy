@@ -41,6 +41,8 @@ export interface UseImageGenOptions {
   /** Document ID for fetching existing image */
   readonly _id: string;
 
+  readonly _rev?: string;
+
   /** Fireproof database name or instance */
   readonly database: string | Database;
 
@@ -55,6 +57,17 @@ export interface UseImageGenOptions {
 
   /** Flag to skip processing when neither prompt nor _id is valid */
   readonly skip: boolean;
+
+  readonly type?: string;
+  readonly currentVersion?: number;
+  readonly versions?: {
+    readonly id: string;
+    readonly created: number;
+    readonly promptKey: string;
+  }[];
+  readonly _files?: Record<string, File>;
+
+  readonly prompts?: Record<string, PromptEntry>;
 
   /**
    * Edited prompt that should override the document prompt on regeneration

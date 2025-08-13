@@ -1,6 +1,9 @@
-import { callAi, getMeta, callAiEnv } from "call-ai";
-import { expectOrWarn } from "./test-helper.js";
-import { describe, it } from "vitest";
+import { callAi, getMeta } from "call-ai";
+import { dotenv } from "zx";
+import { describe, expect, it } from "@jest/globals";
+
+// Load environment variables from .env file if present
+dotenv.config();
 
 // Configure retry settings for flaky tests - use fewer retries with faster failures
 // jest.retryTimes(2, { logErrorsBeforeRetry: true });
@@ -9,7 +12,7 @@ import { describe, it } from "vitest";
 // jest.setTimeout(60000);
 
 // Skip tests if no API key is available
-const haveApiKey = callAiEnv.CALLAI_API_KEY;
+const haveApiKey = process.env.CALLAI_API_KEY;
 
 // Timeout for individual test
 const TIMEOUT = 30000;
@@ -28,6 +31,27 @@ const supportedModels = {
 
 // Define the model names as an array for looping
 const modelEntries = Object.entries(supportedModels);
+
+// Function to handle test expectations based on model grade
+const expectOrWarn = (
+  model: { id: string; grade: string },
+  condition: boolean,
+  message: string,
+  debugValue?: unknown, // Added optional debug value parameter
+) => {
+  if (model.grade === "A") {
+    if (!condition) {
+      // Enhanced debug logging for failures
+      console.log(`DETAILED FAILURE for ${model.id}: ${message}`);
+      if (debugValue !== undefined) {
+        console.log("Debug value:", typeof debugValue === "object" ? JSON.stringify(debugValue, null, 2) : debugValue);
+      }
+    }
+    expect(condition).toBe(true);
+  } else if (!condition) {
+    console.warn(`Warning (${model.id}): ${message}`);
+  }
+};
 
 // Create a test function that won't fail on timeouts for B and C grade models
 const gradeAwareTest = (modelId: { id: string; grade: string }) => {
@@ -81,7 +105,7 @@ describe("Claude JSON property splitting test", () => {
             const result = await callAi(
               "Provide information about France. Population should be expressed in millions (e.g., 67.5 for 67.5 million people).",
               {
-                apiKey: callAiEnv.CALLAI_API_KEY,
+                apiKey: process.env.CALLAI_API_KEY,
                 model: modelId.id,
                 stream: true, // Streaming must be enabled to trigger the property splitting issue
                 schema: {
@@ -210,9 +234,7 @@ describe("Claude JSON property splitting test", () => {
                       expectOrWarn(
                         modelId,
                         populationInMillions >= 60 && populationInMillions <= 70,
-                        `Population ${data.population} (${populationInMillions.toFixed(
-                          2,
-                        )}M) outside expected range in ${modelName} model response - possibly due to property name splitting`,
+                        `Population ${data.population} (${populationInMillions.toFixed(2)}M) outside expected range in ${modelName} model response - possibly due to property name splitting`,
                         data.population,
                       );
                     }
