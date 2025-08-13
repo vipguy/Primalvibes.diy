@@ -8,7 +8,7 @@ const { imageGen } = require("../dist/api");
 const assert = require("assert");
 
 // Mock fetch for testing
-global.fetch = jest.fn(() =>
+global.fetch = vi.fn(() =>
   Promise.resolve({
     ok: true,
     status: 200,

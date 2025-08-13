@@ -1,13 +1,13 @@
 import { callAi } from "call-ai";
 import { dotenv } from "zx";
-import { describe, expect, it, jest } from "@jest/globals";
+import { describe, expect, it, vi, } from "vitest";
 import { fail } from "assert";
 
 // Load environment variables from .env file if present
 dotenv.config();
 
 // Configure retry settings for flaky tests
-jest.retryTimes(2, { logErrorsBeforeRetry: true });
+// vi.retryTimes(2, { logErrorsBeforeRetry: true });
 
 // Skip tests if no API key is available
 const haveApiKey = process.env.CALLAI_API_KEY;
@@ -109,7 +109,7 @@ describe("Error handling integration tests", () => {
     "should handle error with debug option",
     async () => {
       // Spy on console.error
-      const consoleErrorSpy = jest.spyOn(console, "error");
+      const consoleErrorSpy = vi.spyOn(console, "error");
 
       // Attempt API call with a non-existent model and debug enabled
       try {

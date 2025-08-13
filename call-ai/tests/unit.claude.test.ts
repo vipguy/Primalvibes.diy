@@ -1,15 +1,15 @@
 /* eslint-disable no-useless-escape */
 import { callAi } from "call-ai";
-import { describe, it, expect, beforeEach, jest } from "@jest/globals";
+import { describe, it, expect, beforeEach, vi} from "vitest";
 
 // Mock global fetch
 const global = globalThis;
-const globalFetch = jest.fn<typeof fetch>();
+const globalFetch = vi.fn<typeof fetch>();
 global.fetch = globalFetch;
 
 // Simple mock for TextDecoder
-// global.TextDecoder = jest.fn().mockImplementation(() => ({
-//   decode: jest.fn((value: Uint8Array) => {
+// global.TextDecoder = vi.fn().mockImplementation(() => ({
+//   decode: vi.fn((value: Uint8Array) => {
 //     // Basic mock implementation without recursion
 //     if (value instanceof Uint8Array) {
 //       // Convert the Uint8Array to a simple string
@@ -23,7 +23,7 @@ global.fetch = globalFetch;
 
 describe("Claude Streaming JSON Property Splitting Test", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it.skip("should handle Claude property splitting in streaming responses", async () => {
@@ -48,8 +48,8 @@ describe("Claude Streaming JSON Property Splitting Test", () => {
       ok: true,
       status: 200,
       body: {
-        getReader: jest.fn().mockReturnValue({
-          read: jest
+        getReader: vi.fn().mockReturnValue({
+          read: vi
             .fn<() => Promise<{ done: boolean; value?: Uint8Array }>>()
             // First chunk: starts with {"capital"
             .mockResolvedValueOnce({
@@ -148,8 +148,8 @@ describe("Claude Streaming JSON Property Splitting Test", () => {
       ok: true,
       status: 200,
       body: {
-        getReader: jest.fn().mockReturnValue({
-          read: jest
+        getReader: vi.fn().mockReturnValue({
+          read: vi
             .fn<() => Promise<{ done: boolean; value?: Uint8Array }>>()
             // First chunk: starts with {"capital": "Par
             .mockResolvedValueOnce({
@@ -239,8 +239,8 @@ describe("Claude Streaming JSON Property Splitting Test", () => {
       ok: true,
       status: 200,
       body: {
-        getReader: jest.fn().mockReturnValue({
-          read: jest
+        getReader: vi.fn().mockReturnValue({
+          read: vi
             .fn<() => Promise<{ done: boolean; value?: Uint8Array }>>()
             // First chunk: starts with {"capital":
             .mockResolvedValueOnce({

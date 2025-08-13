@@ -2,7 +2,7 @@ import { imageGen } from "call-ai";
 import { dotenv } from "zx";
 // Import jest fetch mock
 import "jest-fetch-mock";
-import { describe, beforeEach, it, expect } from "@jest/globals";
+import { describe, beforeEach, it, expect } from "vitest";
 
 // Add type declaration for Node.js require
 // eslint-disable-next-line @typescript-eslint/no-require-imports

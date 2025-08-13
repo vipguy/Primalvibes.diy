@@ -1,42 +1,42 @@
 import { callAi, getMeta, ModelId, ResponseMeta } from "call-ai";
-import { describe, expect, it, beforeEach, jest } from "@jest/globals";
+import { describe, expect, it, beforeEach, vi, Mock } from "vitest";
 
 // Mock global fetch
-const globalFetch = jest.fn<typeof fetch>();
+const globalFetch = vi.fn<typeof fetch>();
 global.fetch = globalFetch as typeof fetch;
 
 // Mock ReadableStream
 const mockReader = {
-  read: jest.fn(),
+  read: vi.fn(),
 };
 
 // Create a mock response with headers
 const mockResponse = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  json: jest.fn<() => Promise<any>>(),
-  text: jest.fn(),
+  json: vi.fn<() => Promise<any>>(),
+  text: vi.fn(),
   body: {
-    getReader: jest.fn().mockReturnValue(mockReader),
+    getReader: vi.fn().mockReturnValue(mockReader),
   },
   ok: true,
   status: 200,
   statusText: "OK",
   headers: {
-    get: jest.fn((name) => {
+    get: vi.fn((name) => {
       if (name === "content-type") return "application/json";
       return null;
-    }) as jest.Mock,
-    forEach: jest.fn(),
+    }) as Mock,
+    forEach: vi.fn(),
   },
-  clone: jest.fn(function (this: typeof mockResponse): Response {
+  clone: vi.fn(function (this: typeof mockResponse): Response {
     return { ...this };
   }),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-} as unknown as Response & { json: jest.Mock<() => Promise<any>> };
+} as unknown as Response & { json: Mock<() => Promise<any>> };
 
 describe("getMeta", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     globalFetch.mockResolvedValue(mockResponse);
   });
 
@@ -113,7 +113,7 @@ describe("getMeta", () => {
 
     // Mock the getMeta function for this test to use our test map
     // const originalGetMeta = getMeta;
-    const mockedGetMeta = jest.fn((resp: ResponseMeta) => testMap.get(resp) as ResponseMeta);
+    const mockedGetMeta = vi.fn((resp: ResponseMeta) => testMap.get(resp) as ResponseMeta);
 
     // Check that we can get metadata from our mocked streaming response
     const meta = mockedGetMeta(generator);

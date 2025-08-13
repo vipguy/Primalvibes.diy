@@ -1,11 +1,11 @@
 import fs from "fs";
 import path from "path";
 import { callAi, Schema } from "call-ai";
-import { describe, beforeEach, it, expect, jest } from "@jest/globals";
+import { describe, beforeEach, it, expect, vi } from "vitest";
 
 // Mock fetch to use our fixture files
 const global = globalThis;
-const globalFetch = jest.fn<typeof fetch>();
+const globalFetch = vi.fn<typeof fetch>();
 global.fetch = globalFetch;
 
 describe("OpenAI Weather Streaming Tests", () => {

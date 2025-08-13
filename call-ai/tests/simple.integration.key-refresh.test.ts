@@ -1,4 +1,4 @@
-import { describe, expect, it } from "@jest/globals";
+import { describe, expect, it } from "vitest";
 import { callAi, getMeta } from "call-ai";
 // import { Message } from "../src/types";
 import { dotenv } from "zx";

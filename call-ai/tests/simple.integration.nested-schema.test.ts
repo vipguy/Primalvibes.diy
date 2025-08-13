@@ -1,4 +1,4 @@
-import { expect, it, describe, jest } from "@jest/globals";
+import { expect, it, describe, } from "vitest";
 import { callAi, getMeta, Message } from "call-ai";
 import { dotenv } from "zx";
 
@@ -6,7 +6,7 @@ import { dotenv } from "zx";
 dotenv.config();
 
 // Configure retry settings for flaky tests - use fewer retries with faster failures
-jest.retryTimes(2, { logErrorsBeforeRetry: true });
+// jest.retryTimes(2, { logErrorsBeforeRetry: true });
 
 // Increase Jest's default timeout to handle all parallel requests
 // jest.setTimeout(60000);

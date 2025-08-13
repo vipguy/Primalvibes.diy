@@ -1,4 +1,4 @@
-import { describe, it, expect } from "@jest/globals";
+import { describe, it, expect } from "vitest";
 import { fail } from "assert";
 import { callAi } from "call-ai";
 import { dotenv } from "zx";

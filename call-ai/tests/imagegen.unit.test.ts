@@ -1,10 +1,10 @@
 import { imageGen } from "call-ai";
-import { describe, it, expect, beforeEach, jest, beforeAll } from "@jest/globals";
+import { describe, it, expect, beforeEach, beforeAll, vi } from "vitest";
 import { fail } from "assert";
 
 // Mock fetch
 const global = globalThis;
-const globalFetch = jest.fn<typeof fetch>();
+const globalFetch = vi.fn<typeof fetch>();
 global.fetch = globalFetch;
 
 // Create mock objects in setup to avoid TypeScript errors
@@ -19,8 +19,8 @@ beforeAll(() => {
   mockBlobInstance = {
     size: 0,
     type: "image/png",
-    arrayBuffer: jest.fn<(typeof mockBlobInstance)["arrayBuffer"]>().mockResolvedValue(new ArrayBuffer(0)),
-    text: jest.fn<(typeof mockBlobInstance)["text"]>().mockResolvedValue("mock text"),
+    arrayBuffer: vi.fn<(typeof mockBlobInstance)["arrayBuffer"]>().mockResolvedValue(new ArrayBuffer(0)),
+    text: vi.fn<(typeof mockBlobInstance)["text"]>().mockResolvedValue("mock text"),
   };
 
   mockFileInstance = {
@@ -32,18 +32,18 @@ beforeAll(() => {
 
   // Use a simple class implementation that Jest's objectContaining can properly match
   class MockFormData {
-    append = jest.fn();
-    delete = jest.fn();
-    get = jest.fn();
-    getAll = jest.fn();
-    has = jest.fn();
-    set = jest.fn();
+    append = vi.fn();
+    delete = vi.fn();
+    get = vi.fn();
+    getAll = vi.fn();
+    has = vi.fn();
+    set = vi.fn();
   }
 
   // Mock constructors
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  global.Blob = jest.fn().mockImplementation(() => mockBlobInstance) as any;
-  global.File = jest.fn().mockImplementation((_, name, options?: FilePropertyBag) => {
+  global.Blob = vi.fn().mockImplementation(() => mockBlobInstance) as any;
+  global.File = vi.fn().mockImplementation((_, name, options?: FilePropertyBag) => {
     return { ...mockFileInstance, name, type: options?.type || "image/png" };
   });
 
@@ -64,13 +64,13 @@ const mockImageResponse = {
 
 describe("imageGen", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     globalFetch.mockResolvedValue({
       ok: true,
       status: 200,
       statusText: "OK",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      json: jest.fn<() => Promise<any>>().mockResolvedValue(mockImageResponse),
+      json: vi.fn<() => Promise<any>>().mockResolvedValue(mockImageResponse),
     } as unknown as Response);
   });
 
@@ -154,7 +154,7 @@ describe("imageGen", () => {
       ok: false,
       status: 400,
       statusText: "Bad Request",
-      text: jest.fn<() => Promise<string>>().mockResolvedValue(JSON.stringify({ error: "Invalid prompt" })),
+      text: vi.fn<() => Promise<string>>().mockResolvedValue(JSON.stringify({ error: "Invalid prompt" })),
     } as unknown as Response);
 
     const prompt = "This prompt will cause an error";
@@ -174,7 +174,7 @@ describe("imageGen", () => {
       ok: false,
       status: 400,
       statusText: "Bad Request",
-      text: jest.fn<() => Promise<string>>().mockResolvedValue(JSON.stringify({ error: "Invalid image format" })),
+      text: vi.fn<() => Promise<string>>().mockResolvedValue(JSON.stringify({ error: "Invalid image format" })),
     } as unknown as Response);
 
     const prompt = "This will trigger an error";

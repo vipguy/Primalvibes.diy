@@ -1,11 +1,11 @@
 import fs from "fs";
 import path from "path";
 import { callAi, Schema, Message } from "call-ai";
-import { describe, expect, it, beforeEach, jest } from "@jest/globals";
+import { describe, expect, it, beforeEach, vi } from "vitest";
 
 // Mock fetch to use our fixture files
 const global = globalThis;
-const globalFetch = jest.fn<typeof fetch>();
+const globalFetch = vi.fn<typeof fetch>();
 global.fetch = globalFetch;
 
 describe("GPT-4 Turbo Wire Protocol Tests", () => {

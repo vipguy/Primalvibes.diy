@@ -1,18 +1,18 @@
 import { callAi, Message, Schema } from "call-ai";
 import { dotenv } from "zx";
-import { describe, expect, it, beforeEach, jest } from "@jest/globals";
+import { describe, expect, it, beforeEach, vi, Mock, } from "vitest";
 import { fail } from "assert";
 
 dotenv.config();
 
 // Mock global fetch
 const global = globalThis;
-const globalFetch = jest.fn<typeof fetch>();
+const globalFetch = vi.fn<typeof fetch>();
 global.fetch = globalFetch;
 
 // Simple mock for TextDecoder
-// global.TextDecoder = jest.fn().mockImplementation(() => ({
-//   decode: jest.fn((value) => {
+// global.TextDecoder = vi.fn().mockImplementation(() => ({
+//   decode: vi.fn((value) => {
 //     // Basic mock implementation without recursion
 //     if (value instanceof Uint8Array) {
 //       // Convert the Uint8Array to a simple string
@@ -26,24 +26,24 @@ global.fetch = globalFetch;
 
 // Mock ReadableStream
 const mockReader = {
-  read: jest.fn<() => Promise<{ done: boolean; value?: Uint8Array }>>(),
+  read: vi.fn<() => Promise<{ done: boolean; value?: Uint8Array }>>(),
 };
 
 const mockResponse = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  json: jest.fn(),
+  json: vi.fn(),
   body: {
-    getReader: jest.fn().mockReturnValue(mockReader),
+    getReader: vi.fn().mockReturnValue(mockReader),
   },
   ok: true, // Ensure response is treated as successful
   status: 200,
   statusText: "OK",
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-} as unknown as Response & { json: jest.Mock<() => Promise<any>> };
+} as unknown as Response & { json: Mock<() => Promise<any>> };
 
 describe("callAi", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     globalFetch.mockResolvedValue(mockResponse);
   });
 
@@ -531,8 +531,8 @@ describe("callAi", () => {
       ok: true,
       status: 200,
       body: {
-        getReader: jest.fn().mockReturnValue({
-          read: jest
+        getReader: vi.fn().mockReturnValue({
+          read: vi
             .fn<() => Promise<{ done: boolean; value?: Uint8Array }>>()
             .mockResolvedValueOnce({
               done: false,

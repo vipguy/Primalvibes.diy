@@ -1,11 +1,11 @@
 import fs from "fs";
 import path from "path";
 import { callAi, Schema, Message } from "call-ai";
-import { describe, expect, it, beforeEach, jest } from "@jest/globals";
+import { describe, expect, it, beforeEach, vi } from "vitest";
 
 // Mock fetch to use our fixture files
 // Mock global fetch
-const globalFetch = jest.fn<typeof fetch>();
+const globalFetch = vi.fn<typeof fetch>();
 global.fetch = globalFetch as typeof fetch;
 
 describe("Gemini Wire Protocol Tests", () => {
@@ -30,16 +30,17 @@ describe("Gemini Wire Protocol Tests", () => {
 
   beforeEach(() => {
     // Reset mocks
-    (global.fetch as jest.Mock).mockClear();
+    globalFetch.mockClear();
 
     // Mock successful response
-    (global.fetch as jest.Mock).mockImplementation(async (_url, _options) => {
+    globalFetch
+    .mockImplementation(async (_url, _options) => {
       return {
         ok: true,
         status: 200,
         text: async () => geminiSystemResponseFixture,
         json: async () => JSON.parse(geminiSystemResponseFixture),
-      };
+      } as Response;
     });
   });
 
@@ -88,13 +89,13 @@ describe("Gemini Wire Protocol Tests", () => {
 
   it("should correctly handle Gemini response with schema", async () => {
     // Update mock to return proper response
-    (global.fetch as jest.Mock).mockImplementationOnce(async (_url, _options) => {
+    globalFetch.mockImplementationOnce(async (_url, _options) => {
       return {
         ok: true,
         status: 200,
         text: async () => geminiResponseFixture,
         json: async () => JSON.parse(geminiResponseFixture),
-      };
+      } as Response;
     });
 
     // Define the schema
@@ -223,13 +224,13 @@ describe("Gemini Wire Protocol Tests", () => {
 
   it("should handle schema when response_format schema is supported", async () => {
     // Override the mock for this specific test
-    (global.fetch as jest.Mock).mockImplementationOnce(async (_url, _options) => {
+    globalFetch.mockImplementationOnce(async (_url, _options) => {
       return {
         ok: true,
         status: 200,
         text: async () => geminiResponseFixture,
         json: async () => JSON.parse(geminiResponseFixture),
-      };
+      } as Response;
     });
 
     // Define schema

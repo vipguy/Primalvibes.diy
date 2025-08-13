@@ -1,14 +1,14 @@
 /* eslint-disable no-useless-escape */
 import { callAi } from "call-ai";
-import { describe, it, expect, beforeEach, jest } from "@jest/globals";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 
 // Mock global fetch
-const globalFetch = jest.fn<typeof fetch>();
+const globalFetch = vi.fn<typeof fetch>();
 global.fetch = globalFetch as typeof fetch;
 
 describe("Claude JSON Property Splitting Test", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should handle property name splitting across chunks", async () => {
@@ -33,11 +33,11 @@ describe("Claude JSON Property Splitting Test", () => {
       ok: true,
       status: 200,
       headers: {
-        forEach: jest.fn(),
+        forEach: vi.fn(),
       },
       body: {
-        getReader: jest.fn().mockReturnValue({
-          read: jest
+        getReader: vi.fn().mockReturnValue({
+          read: vi
             .fn<() => Promise<{ done: boolean; value?: Uint8Array }>>()
             // Streaming setup chunk
             .mockResolvedValueOnce({

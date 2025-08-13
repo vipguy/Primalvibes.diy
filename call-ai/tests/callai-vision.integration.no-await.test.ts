@@ -2,7 +2,7 @@ import { callAi, ContentItem } from "call-ai";
 import { dotenv } from "zx";
 import fs from "fs";
 import path from "path";
-import { describe, expect, it } from "@jest/globals";
+import { describe, expect, it } from "vitest";
 
 // Load environment variables from .env file if present
 dotenv.config();
