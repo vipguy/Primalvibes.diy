@@ -113,7 +113,7 @@ describe("getMeta", () => {
 
     // Mock the getMeta function for this test to use our test map
     // const originalGetMeta = getMeta;
-    const mockedGetMeta = vi.fn((resp: ResponseMeta) => testMap.get(resp) as ResponseMeta);
+    const mockedGetMeta = vi.fn((resp: AsyncGenerator<string, string, unknown>) => testMap.get(resp));
 
     // Check that we can get metadata from our mocked streaming response
     const meta = mockedGetMeta(generator);

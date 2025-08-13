@@ -4,6 +4,7 @@
   "version": "0.2.0",
   "type": "module",
   "scripts": {
+    "tsc": "core-cli tsc",
     "build": "react-router build",
     "dev": "netlify dev --offline",
     "dev:router": "react-router dev",

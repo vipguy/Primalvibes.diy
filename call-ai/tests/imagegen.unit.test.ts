@@ -48,7 +48,7 @@ beforeAll(() => {
   });
 
   // For FormData, create a new instance each time
-  global.FormData = MockFormData;
+  global.FormData = MockFormData as unknown as typeof FormData;
 });
 
 // Mock response for successful image generation
