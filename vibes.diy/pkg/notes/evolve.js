@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useFireproof } from 'use-fireproof';
-import { callAI } from 'call-ai';
+import React, { useState, useEffect, useRef } from "react";
+import { useFireproof } from "use-fireproof";
+import { callAI } from "call-ai";
 
 export default function BodyTransformer() {
-  const { database, useLiveQuery } = useFireproof('body-transformer');
+  const { database, useLiveQuery } = useFireproof("body-transformer");
   const [isRunning, setIsRunning] = useState(false);
   const [iterations, setIterations] = useState(0);
   const containerRef = useRef(null);
   const intervalRef = useRef(null);
-  const { docs } = useLiveQuery('timestamp', { descending: true, limit: 10 });
+  const { docs } = useLiveQuery("timestamp", { descending: true, limit: 10 });
 
   const saveTransformation = async (html) => {
     await database.put({
@@ -34,7 +34,7 @@ export default function BodyTransformer() {
         await saveTransformation(newHTML);
       }
     } catch (error) {
-      console.error('Error transforming body:', error);
+      console.error("Error transforming body:", error);
     }
   };
 
@@ -56,7 +56,7 @@ export default function BodyTransformer() {
 
   const addDemoData = async () => {
     const demoHTML = await callAI(
-      'Create a simple webpage about AI evolution with headings, paragraphs, and an orange synthwave aesthetic.'
+      "Create a simple webpage about AI evolution with headings, paragraphs, and an orange synthwave aesthetic.",
     );
     if (containerRef.current) {
       containerRef.current.innerHTML = demoHTML;
@@ -76,19 +76,22 @@ export default function BodyTransformer() {
     <div className="min-h-screen bg-gray-900 p-4 text-white">
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 rounded-lg border border-orange-500 bg-gray-800 p-4 shadow-lg">
-          <h1 className="mb-2 text-3xl font-bold text-orange-400">Body Transformer</h1>
+          <h1 className="mb-2 text-3xl font-bold text-orange-400">
+            Body Transformer
+          </h1>
           <p className="mb-4 text-gray-300 italic">
-            *This application uses AI to continuously evolve your webpage's HTML content. Every
-            second, it captures the current HTML, sends it to an AI model, and replaces it with a
-            more interesting version. Watch as your page gradually transforms through multiple
-            iterations, creating an ever-evolving digital experience.*
+            *This application uses AI to continuously evolve your webpage's HTML
+            content. Every second, it captures the current HTML, sends it to an
+            AI model, and replaces it with a more interesting version. Watch as
+            your page gradually transforms through multiple iterations, creating
+            an ever-evolving digital experience.*
           </p>
           <div className="mb-4 flex space-x-4">
             <button
               onClick={toggleTransformation}
-              className={`rounded-md px-4 py-2 font-bold ${isRunning ? 'bg-red-500 hover:bg-red-600' : 'bg-orange-500 hover:bg-orange-600'} transition-colors`}
+              className={`rounded-md px-4 py-2 font-bold ${isRunning ? "bg-red-500 hover:bg-red-600" : "bg-orange-500 hover:bg-orange-600"} transition-colors`}
             >
-              {isRunning ? 'Stop Transformation' : 'Start Transformation'}
+              {isRunning ? "Stop Transformation" : "Start Transformation"}
             </button>
             <button
               onClick={addDemoData}
@@ -105,19 +108,29 @@ export default function BodyTransformer() {
             <div className="min-h-[400px] rounded-lg border border-orange-500 bg-gray-800 p-4 shadow-lg">
               <div ref={containerRef} className="prose prose-invert max-w-none">
                 <h2>Welcome to the Body Transformer</h2>
-                <p>Click "Start Transformation" to begin evolving this content with AI.</p>
+                <p>
+                  Click "Start Transformation" to begin evolving this content
+                  with AI.
+                </p>
               </div>
             </div>
           </div>
 
           <div className="max-h-[600px] overflow-y-auto rounded-lg border border-orange-500 bg-gray-800 p-4 shadow-lg">
-            <h2 className="mb-4 text-xl font-bold text-orange-400">Transformation History</h2>
+            <h2 className="mb-4 text-xl font-bold text-orange-400">
+              Transformation History
+            </h2>
             {docs.length > 0 ? (
               <ul className="space-y-3">
                 {docs.map((doc) => (
-                  <li key={doc._id} className="rounded border border-gray-700 p-2">
+                  <li
+                    key={doc._id}
+                    className="rounded border border-gray-700 p-2"
+                  >
                     <div className="mb-1 flex items-center justify-between">
-                      <span className="font-medium text-orange-300">Iteration {doc.iteration}</span>
+                      <span className="font-medium text-orange-300">
+                        Iteration {doc.iteration}
+                      </span>
                       <span className="text-xs text-gray-400">
                         {new Date(doc.timestamp).toLocaleTimeString()}
                       </span>

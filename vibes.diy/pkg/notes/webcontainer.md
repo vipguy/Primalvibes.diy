@@ -175,12 +175,10 @@ export default WebContainerContent;
 Based on the project structure, here's where the implementation needs to happen:
 
 1. **Main Files to Modify**:
-
    - `app/components/ResultPreview/ResultPreview.tsx`: Replace SandpackContent with WebContainerContent
    - Create new file: `app/components/ResultPreview/WebContainerContent.tsx` (as shown above)
 
 2. **Related Files in the project structure**:
-
    - `app/components/ResultPreview/ResultPreviewTypes.ts`: May need to update types
    - `app/components/ResultPreview/ResultPreviewUtils.ts`: May need updates for WebContainer conversion
    - `app/components/ResultPreview/ResultPreviewTemplates.ts`: Update for WebContainer compatibility
@@ -235,15 +233,15 @@ module.exports = {
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: "/(.*)",
         headers: [
           {
-            key: 'Cross-Origin-Embedder-Policy',
-            value: 'require-corp',
+            key: "Cross-Origin-Embedder-Policy",
+            value: "require-corp",
           },
           {
-            key: 'Cross-Origin-Opener-Policy',
-            value: 'same-origin',
+            key: "Cross-Origin-Opener-Policy",
+            value: "same-origin",
           },
         ],
       },
@@ -361,7 +359,7 @@ Define a standard template for our projects. Using a minimal, self-contained Vit
 
 ```typescript
 // app/templates/default.ts
-import { FileSystemTree } from '@webcontainer/api';
+import { FileSystemTree } from "@webcontainer/api";
 
 export type Template = {
   files: FileSystemTree;
@@ -371,14 +369,14 @@ export type Template = {
 
 export const DEFAULT_TEMPLATE: Template = {
   files: {
-    'App.jsx': {
+    "App.jsx": {
       file: {
         contents: `export default function App() {
   return <h1>Hello WebContainer!</h1>;
 }`,
       },
     },
-    'index.jsx': {
+    "index.jsx": {
       file: {
         contents: `import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
@@ -392,7 +390,7 @@ root.render(
 );`,
       },
     },
-    'index.html': {
+    "index.html": {
       file: {
         contents: `<!DOCTYPE html>
 <html lang="en">
@@ -408,7 +406,7 @@ root.render(
 </html>`,
       },
     },
-    'package.json': {
+    "package.json": {
       file: {
         contents: `{
   "name": "webcontainer-app",
@@ -431,7 +429,7 @@ root.render(
 }`,
       },
     },
-    'vite.config.js': {
+    "vite.config.js": {
       file: {
         contents: `import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
@@ -442,8 +440,8 @@ export default defineConfig({
       },
     },
   },
-  entry: 'App.jsx',
-  visibleFiles: ['App.jsx', 'index.jsx', 'index.html'],
+  entry: "App.jsx",
+  visibleFiles: ["App.jsx", "index.jsx", "index.html"],
 };
 ```
 
@@ -697,14 +695,12 @@ app/
 ### Data Flow
 
 1. **Initialization**:
-
    - WebContainerProvider boots WebContainer
    - Default template is mounted to virtual filesystem
    - Dependencies are installed
    - Dev server is started
 
 2. **Editor Interaction**:
-
    - User edits code in Monaco editor
    - Changes are written to WebContainer filesystem
    - Vite dev server detects changes and hot-reloads

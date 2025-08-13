@@ -137,7 +137,8 @@ Based on the understanding that the current streaming message is always the most
 1. Add state for tracking streaming message:
 
    ```typescript
-   const [streamingMessage, setStreamingMessage] = useState<AiChatMessage | null>(null);
+   const [streamingMessage, setStreamingMessage] =
+     useState<AiChatMessage | null>(null);
    ```
 
 2. Update the `addAiMessage` function to handle streaming:
@@ -146,7 +147,7 @@ Based on the understanding that the current streaming message is always the most
    const addAiMessage = async (
      rawMessage: string,
      created_at?: number,
-     isStreaming: boolean = false
+     isStreaming: boolean = false,
    ) => {
      if (!sessionId) return null;
 
@@ -155,7 +156,7 @@ Based on the understanding that the current streaming message is always the most
 
        // Always create the same database document - no streaming flag in DB
        const result = await database.put({
-         type: 'ai-message',
+         type: "ai-message",
          session_id: sessionId,
          rawMessage,
          created_at: timestamp,
@@ -165,7 +166,7 @@ Based on the understanding that the current streaming message is always the most
        if (isStreaming) {
          const { segments, dependenciesString } = parseContent(rawMessage);
          setStreamingMessage({
-           type: 'ai',
+           type: "ai",
            text: rawMessage,
            segments,
            dependenciesString,
@@ -178,7 +179,7 @@ Based on the understanding that the current streaming message is always the most
 
        return timestamp;
      } catch (error) {
-       console.error('Error adding AI message:', error);
+       console.error("Error adding AI message:", error);
        return null;
      }
    };
@@ -213,18 +214,22 @@ while (true) {
   if (done) break;
 
   const chunk = decoder.decode(value, { stream: true });
-  const lines = chunk.split('\n');
+  const lines = chunk.split("\n");
   for (const line of lines) {
-    if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+    if (line.startsWith("data: ") && line !== "data: [DONE]") {
       try {
         const data = JSON.parse(line.substring(6));
         if (data.choices && data.choices[0]?.delta?.content) {
           const content = data.choices[0].delta.content;
           streamBufferRef.current += content;
-          await addAiMessage(streamBufferRef.current, aiMessageTimestampRef.current, true);
+          await addAiMessage(
+            streamBufferRef.current,
+            aiMessageTimestampRef.current,
+            true,
+          );
         }
       } catch (e) {
-        console.error('Error parsing SSE JSON:', e);
+        console.error("Error parsing SSE JSON:", e);
       }
     }
   }

@@ -43,7 +43,8 @@
         margin: 0;
         padding: 0;
         font-family:
-          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
       }
       #container {
         width: 100%;
@@ -55,12 +56,12 @@
       function captureScreenshot() {
         html2canvas(document.body).then((canvas) => {
           const dataURI = canvas.toDataURL();
-          window.parent.postMessage({ type: 'screenshot', data: dataURI }, '*');
+          window.parent.postMessage({ type: "screenshot", data: dataURI }, "*");
         });
       }
 
       function pageIsLoaded() {
-        window.parent.postMessage({ type: 'preview-ready' }, '*');
+        window.parent.postMessage({ type: "preview-ready" }, "*");
         setTimeout(captureScreenshot, 100);
       }
 
@@ -78,28 +79,28 @@
 
           return true;
         } catch (error) {
-          console.error('Failed to update component:', error);
+          console.error("Failed to update component:", error);
           return false;
         }
       }
 
       // Event listeners
-      window.addEventListener('message', function (event) {
+      window.addEventListener("message", function (event) {
         if (event.data) {
-          if (event.data.type === 'command') {
-            if (event.data.command === 'capture-screenshot') {
+          if (event.data.type === "command") {
+            if (event.data.command === "capture-screenshot") {
               captureScreenshot();
             }
-          } else if (event.data.type === 'update-component') {
+          } else if (event.data.type === "update-component") {
             // For rapid updates (optional)
             updateAppComponent(event.data.code);
-          } else if (event.data.type === 'callai-api-key' && event.data.key) {
+          } else if (event.data.type === "callai-api-key" && event.data.key) {
             window.CALLAI_API_KEY = event.data.key;
           }
         }
       });
 
-      window.addEventListener('DOMContentLoaded', function () {
+      window.addEventListener("DOMContentLoaded", function () {
         pageIsLoaded();
       });
     </script>
@@ -122,10 +123,10 @@ function updateComponent(code: string) {
   if (iframeRef.current?.contentWindow) {
     iframeRef.current.contentWindow.postMessage(
       {
-        type: 'update-component',
+        type: "update-component",
         code,
       },
-      '*'
+      "*",
     );
   }
 }

@@ -15,10 +15,10 @@ A minimal approach focusing on reducing state redundancy and complexity:
 
 ```tsx
 // ViewState.ts - Create a dedicated hook
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { encodeTitle } from '../utils';
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { encodeTitle } from "../utils";
 
-export type ViewType = 'preview' | 'code' | 'data';
+export type ViewType = "preview" | "code" | "data";
 
 export function useViewState(props: {
   sessionId?: string;
@@ -34,14 +34,14 @@ export function useViewState(props: {
   // Consolidate session and title from props or params
   const sessionId = props.sessionId || paramSessionId;
   const title = props.title || paramTitle;
-  const encodedTitle = title ? encodeTitle(title) : '';
+  const encodedTitle = title ? encodeTitle(title) : "";
 
   // Derive view from URL path
   const getViewFromPath = (): ViewType => {
-    if (location.pathname.endsWith('/app')) return 'preview';
-    if (location.pathname.endsWith('/code')) return 'code';
-    if (location.pathname.endsWith('/data')) return 'data';
-    return 'preview'; // Default
+    if (location.pathname.endsWith("/app")) return "preview";
+    if (location.pathname.endsWith("/code")) return "code";
+    if (location.pathname.endsWith("/data")) return "data";
+    return "preview"; // Default
   };
 
   const currentView = getViewFromPath();
@@ -50,20 +50,20 @@ export function useViewState(props: {
   const viewControls = {
     preview: {
       enabled: props.previewReady,
-      icon: 'app-icon',
-      label: 'App',
+      icon: "app-icon",
+      label: "App",
       loading: !props.previewReady,
     },
     code: {
       enabled: true,
-      icon: 'code-icon',
-      label: 'Code',
+      icon: "code-icon",
+      label: "Code",
       loading: props.isStreaming && !props.previewReady,
     },
     data: {
       enabled: !props.isStreaming,
-      icon: 'data-icon',
-      label: 'Data',
+      icon: "data-icon",
+      label: "Data",
       loading: false,
     },
   };
@@ -73,7 +73,7 @@ export function useViewState(props: {
     if (!viewControls[view].enabled) return;
 
     if (sessionId && encodedTitle) {
-      const suffix = view === 'preview' ? 'app' : view;
+      const suffix = view === "preview" ? "app" : view;
       navigate(`/chat/${sessionId}/${encodedTitle}/${suffix}`);
     }
   };
@@ -96,14 +96,20 @@ export function useViewState(props: {
 
 ```tsx
 // ResultPreviewHeaderContent.tsx
-const { currentView, navigateToView, viewControls, showViewControls, sessionId, encodedTitle } =
-  useViewState({
-    sessionId: propSessionId,
-    title: propTitle,
-    code,
-    isStreaming,
-    previewReady,
-  });
+const {
+  currentView,
+  navigateToView,
+  viewControls,
+  showViewControls,
+  sessionId,
+  encodedTitle,
+} = useViewState({
+  sessionId: propSessionId,
+  title: propTitle,
+  code,
+  isStreaming,
+  previewReady,
+});
 
 // Then in JSX:
 {
@@ -115,9 +121,9 @@ const { currentView, navigateToView, viewControls, showViewControls, sessionId, 
           onClick={() => navigateToView(view as ViewType)}
           disabled={!control.enabled}
           className={classNames({
-            'active-class': currentView === view,
-            'disabled-class': !control.enabled,
-            'base-class': true,
+            "active-class": currentView === view,
+            "disabled-class": !control.enabled,
+            "base-class": true,
           })}
         >
           {control.label}

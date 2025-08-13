@@ -51,7 +51,9 @@ The publish state and session state are closely related but managed separately:
 ```typescript
 // Current: Split concerns
 const session = useSession();
-const publishState = usePublish({ updateFirehoseShared: session.updateFirehoseShared });
+const publishState = usePublish({
+  updateFirehoseShared: session.updateFirehoseShared,
+});
 
 // Better: Unified publish session state
 const publishSession = usePublishSession(); // combines both
@@ -78,9 +80,9 @@ const [showUpdateSuccess, setShowUpdateSuccess] = useState(false);
 
 // Better: Explicit state machine
 const publishState = useStateMachine({
-  idle: { on: { PUBLISH: 'publishing' } },
-  publishing: { on: { SUCCESS: 'published', ERROR: 'error' } },
-  published: { on: { UPDATE: 'updating' } },
+  idle: { on: { PUBLISH: "publishing" } },
+  publishing: { on: { SUCCESS: "published", ERROR: "error" } },
+  published: { on: { UPDATE: "updating" } },
   // ...
 });
 ```

@@ -11,16 +11,16 @@ The remix route will load code from an external vibesdiy.app app, create a new s
 Create a new file at `/app/routes/remix.tsx`:
 
 ```tsx
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
-import { useSession } from '../hooks/useSession';
-import { encodeTitle } from '~/components/SessionSidebar/utils';
-import { parseContent } from '../utils/segmentParser';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
+import { useSession } from "../hooks/useSession";
+import { encodeTitle } from "~/components/SessionSidebar/utils";
+import { parseContent } from "../utils/segmentParser";
 
 export function meta() {
   return [
-    { title: 'Remix App - Vibes DIY' },
-    { name: 'description', content: 'Remix an existing app with Vibes DIY' },
+    { title: "Remix App - Vibes DIY" },
+    { name: "description", content: "Remix an existing app with Vibes DIY" },
   ];
 }
 
@@ -54,14 +54,14 @@ export default function Remix() {
         const domain = url.hostname;
 
         // Verify it's a vibesdiy.app domain
-        if (!domain.endsWith('vibesdiy.app')) {
-          setError('Invalid referrer - Only vibesdiy.app apps can be remixed');
+        if (!domain.endsWith("vibesdiy.app")) {
+          setError("Invalid referrer - Only vibesdiy.app apps can be remixed");
           setIsLoading(false);
           return;
         }
 
         // Extract app name from domain (subdomain)
-        const appName = domain.split('.')[0];
+        const appName = domain.split(".")[0];
         setAppDomain(appName);
 
         // Fetch the app code
@@ -93,10 +93,14 @@ export default function Remix() {
         await submitAiMessage();
 
         // Redirect to the new session
-        navigate(`/chat/${session._id}/${encodeTitle(sessionTitle)}/code`, { replace: true });
+        navigate(`/chat/${session._id}/${encodeTitle(sessionTitle)}/code`, {
+          replace: true,
+        });
       } catch (error) {
-        console.error('Error in remix process:', error);
-        setError(error instanceof Error ? error.message : 'Unknown error occurred');
+        console.error("Error in remix process:", error);
+        setError(
+          error instanceof Error ? error.message : "Unknown error occurred",
+        );
         setIsLoading(false);
       }
     }
@@ -111,7 +115,7 @@ export default function Remix() {
       {isLoading ? (
         <div className="text-center">
           <div className="text-light-primary text-xl font-medium dark:text-white">
-            {appDomain ? `Remixing ${appDomain}...` : 'Loading...'}
+            {appDomain ? `Remixing ${appDomain}...` : "Loading..."}
           </div>
           <div className="mt-4 h-2 w-40 overflow-hidden rounded-full bg-gray-200">
             <div className="h-full w-full animate-pulse bg-blue-600"></div>
@@ -119,10 +123,12 @@ export default function Remix() {
         </div>
       ) : error ? (
         <div className="text-light-primary max-w-md rounded-md border border-red-300 bg-red-50 p-4 text-center dark:border-red-800 dark:bg-red-900 dark:text-white">
-          <div className="text-lg font-medium text-red-700 dark:text-red-400">Error</div>
+          <div className="text-lg font-medium text-red-700 dark:text-red-400">
+            Error
+          </div>
           <div className="mt-2">{error}</div>
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate("/")}
             className="mt-4 rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
           >
             Go Home
@@ -143,7 +149,7 @@ Add the new route to `/app/routes.ts`:
 
 export default [
   // Existing routes...
-  route('remix', './routes/remix.tsx', { id: 'remix' }),
+  route("remix", "./routes/remix.tsx", { id: "remix" }),
 ] satisfies RouteConfig;
 ```
 

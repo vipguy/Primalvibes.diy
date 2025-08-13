@@ -3,14 +3,14 @@
  * API Key utility script
  * Creates a new API key and checks its credit information using Edge Functions
  */
-import { getCredits } from '../app/config/provisioning.js';
-import { createOrUpdateKeyViaEdgeFunction } from '../app/services/apiKeyService.js';
+import { getCredits } from "../app/config/provisioning.js";
+import { createOrUpdateKeyViaEdgeFunction } from "../app/services/apiKeyService.js";
 
 /**
  * Creates a new API key and returns the key data using the Edge Function
  */
 async function createApiKey() {
-  console.log('Creating new API key...');
+  console.log("Creating new API key...");
 
   try {
     // Mock user ID for testing
@@ -19,10 +19,10 @@ async function createApiKey() {
     const { key: keyData } = await createOrUpdateKeyViaEdgeFunction(
       testUserId,
       undefined,
-      'test-token'
+      "test-token",
     );
 
-    console.log('API key created successfully:');
+    console.log("API key created successfully:");
     console.log(`- Hash: ${keyData.hash}`);
     console.log(`- Name: ${keyData.name}`);
     console.log(`- Label: ${keyData.label}`);
@@ -31,7 +31,7 @@ async function createApiKey() {
 
     return keyData;
   } catch (error) {
-    console.error('Failed to create API key:', error);
+    console.error("Failed to create API key:", error);
     throw error;
   }
 }
@@ -42,22 +42,22 @@ async function createApiKey() {
  */
 async function checkCredits(apiKey: string) {
   if (!apiKey) {
-    throw new Error('No API key provided');
+    throw new Error("No API key provided");
   }
 
-  console.log('Checking credits for API key...');
+  console.log("Checking credits for API key...");
 
   try {
     const credits = await getCredits(apiKey);
 
-    console.log('Credit information:');
+    console.log("Credit information:");
     console.log(`- Available: $${credits.available}`);
     console.log(`- Usage: $${credits.usage}`);
     console.log(`- Limit: $${credits.limit}`);
 
     return credits;
   } catch (error) {
-    console.error('Failed to check credits:', error);
+    console.error("Failed to check credits:", error);
     throw error;
   }
 }
@@ -74,18 +74,18 @@ async function main() {
     // Return the key and credits for potential use in other scripts
     return { keyData, credits };
   } catch (error) {
-    console.error('Error in main process:', error);
+    console.error("Error in main process:", error);
     process.exit(1);
   }
 }
 
 // Run the main function if this script is executed directly
 if (process.argv[1] === import.meta.url) {
-  console.log('Running API key utility script...');
+  console.log("Running API key utility script...");
   main()
     .then((result) => {
-      console.log('keyData:', result?.keyData);
-      console.log('Credits:', result?.credits);
+      console.log("keyData:", result?.keyData);
+      console.log("Credits:", result?.credits);
       // Write the API key to stdout for potential capture by other scripts
       if (result?.keyData?.key) {
         console.log(`\nAPI_KEY=${result.keyData.key}`);

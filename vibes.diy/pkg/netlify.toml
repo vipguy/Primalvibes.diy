@@ -1,9 +1,11 @@
 [build]
   publish = "build/client"
+  base = "./vibes.diy/pkg"
   command = "pnpm run build"
 
 [dev]
-  command = "react-router dev --port 5174"
+  base = "./vibes.diy/pkg"
+  command = "cat package.json" # pnpm run dev:router"
   targetPort = 5174
   framework = "#custom"
   port = 8888

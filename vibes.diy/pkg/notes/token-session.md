@@ -21,14 +21,14 @@ The Vibes DIY application will use a managed key rotation approach where each de
 For anonymous users, create a session key with a 50-cent limit:
 
 ```javascript
-const response = await fetch('https://openrouter.ai/api/v1/keys/', {
-  method: 'POST',
+const response = await fetch("https://openrouter.ai/api/v1/keys/", {
+  method: "POST",
   headers: {
     Authorization: `Bearer ${PROVISIONING_API_KEY}`,
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    name: 'Anonymous Session Key',
+    name: "Anonymous Session Key",
     label: `anonymous-${deviceId}`, // Unique identifier
     limit: 0.5, // 50 cents limit
   }),
@@ -40,7 +40,7 @@ const response = await fetch('https://openrouter.ai/api/v1/keys/', {
 The `/api/v1/auth/key` endpoint provides real-time information about a key's status:
 
 ```javascript
-const response = await fetch('https://openrouter.ai/api/v1/auth/key', {
+const response = await fetch("https://openrouter.ai/api/v1/auth/key", {
   headers: {
     Authorization: `Bearer ${sessionKey}`,
   },
@@ -56,9 +56,12 @@ async function rotateApiKey(userId) {
   // 1. Query current key usage
   const currentKeyHash = getCurrentKeyHash(userId);
   if (currentKeyHash) {
-    const keyInfo = await fetch(`https://openrouter.ai/api/v1/keys/${currentKeyHash}`, {
-      headers: { Authorization: `Bearer ${PROVISIONING_API_KEY}` },
-    });
+    const keyInfo = await fetch(
+      `https://openrouter.ai/api/v1/keys/${currentKeyHash}`,
+      {
+        headers: { Authorization: `Bearer ${PROVISIONING_API_KEY}` },
+      },
+    );
     const data = await keyInfo.json();
 
     // If current key has barely been used, don't create a new one
@@ -72,11 +75,11 @@ async function rotateApiKey(userId) {
   }
 
   // 2. Create a new key
-  const response = await fetch('https://openrouter.ai/api/v1/keys/', {
-    method: 'POST',
+  const response = await fetch("https://openrouter.ai/api/v1/keys/", {
+    method: "POST",
     headers: {
       Authorization: `Bearer ${PROVISIONING_API_KEY}`,
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       name: `User Key - ${new Date().toISOString()}`,

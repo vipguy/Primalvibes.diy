@@ -14,8 +14,8 @@ The changes to `IframeContent.tsx` significantly simplified the Monaco editor se
 
    ```typescript
    // These registrations were removed
-   monacoInstance.languages.register({ id: 'jsx' });
-   monacoInstance.languages.register({ id: 'javascript' });
+   monacoInstance.languages.register({ id: "jsx" });
+   monacoInstance.languages.register({ id: "javascript" });
    ```
 
 2. **JSX Configuration Removed**:
@@ -24,8 +24,8 @@ The changes to `IframeContent.tsx` significantly simplified the Monaco editor se
    // This configuration was removed
    monacoInstance.languages.typescript.javascriptDefaults.setCompilerOptions({
      jsx: monacoInstance.languages.typescript.JsxEmit.React,
-     jsxFactory: 'React.createElement',
-     reactNamespace: 'React',
+     jsxFactory: "React.createElement",
+     reactNamespace: "React",
      allowNonTsExtensions: true,
      allowJs: true,
      target: monacoInstance.languages.typescript.ScriptTarget.Latest,
@@ -38,7 +38,7 @@ The changes to `IframeContent.tsx` significantly simplified the Monaco editor se
    // This critical setting was removed
    const model = editor.getModel();
    if (model) {
-     monacoInstance.editor.setModelLanguage(model, 'jsx');
+     monacoInstance.editor.setModelLanguage(model, "jsx");
    }
    ```
 

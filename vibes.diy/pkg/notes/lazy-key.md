@@ -7,7 +7,6 @@ The `jchris/lazy-key3` branch implements a more optimized approach to API key ha
 ## Current Analysis
 
 - `selem/auth` branch already has ~90% of the "lazy-key3" logic:
-
   - Rate-limit back-off mechanism
   - Shared `pendingKeyRequest` for deduplication
   - Hash continuity for key tracking
@@ -30,7 +29,10 @@ a. Remove the current `useEffect` that automatically calls `fetchNewKey()`.
 b. Add `ensureApiKey` as a `useCallback`:
 
 ```typescript
-const ensureApiKey = useCallback(async (): Promise<{ key: string; hash: string }> => {
+const ensureApiKey = useCallback(async (): Promise<{
+  key: string;
+  hash: string;
+}> => {
   // 1. Return cached apiKey if present
   if (apiKey?.key && !isLoading) {
     return apiKey;
@@ -50,7 +52,7 @@ const ensureApiKey = useCallback(async (): Promise<{ key: string; hash: string }
   } catch (error) {
     // Handle fallback logic
     if (storedKeyData?.key) {
-      return { key: storedKeyData.key, hash: storedKeyData.hash || 'unknown' };
+      return { key: storedKeyData.key, hash: storedKeyData.hash || "unknown" };
     }
     throw error;
   }

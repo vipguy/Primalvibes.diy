@@ -20,10 +20,10 @@ This document is a high-level orientation for contributors who want to let users
 
    ```ts
    editor.addAction({
-     id: 'explain-selection',
-     label: 'Explain Selected Code',
+     id: "explain-selection",
+     label: "Explain Selected Code",
      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyE],
-     contextMenuGroupId: 'navigation',
+     contextMenuGroupId: "navigation",
      run: () => onExplainSelection(editor),
    });
    ```
@@ -31,7 +31,8 @@ This document is a high-level orientation for contributors who want to let users
 2. Export a callback `onExplainSelection` from a new util (e.g. `app/utils/explainSelection.ts`). Within it:
 
    ```ts
-   const selection = editor.getModel()?.getValueInRange(editor.getSelection()!) || '';
+   const selection =
+     editor.getModel()?.getValueInRange(editor.getSelection()!) || "";
    if (!selection.trim()) return;
    triggerExplanation(selection);
    ```
@@ -45,13 +46,14 @@ This document is a high-level orientation for contributors who want to let users
 Our project already uses `call-ai` inside `app/hooks/useSimpleChat.ts` for regular chat completions. Re-use the same plumbing:
 
 ```ts
-import { callAI, type Message } from 'call-ai';
+import { callAI, type Message } from "call-ai";
 
 export async function explainCode(snippet: string) {
-  const sysPrompt = 'You are an expert engineer.  Explain the selected code in plain English.';
+  const sysPrompt =
+    "You are an expert engineer.  Explain the selected code in plain English.";
   const messages: Message[] = [
-    { role: 'system', content: sysPrompt },
-    { role: 'user', content: snippet },
+    { role: "system", content: sysPrompt },
+    { role: "user", content: snippet },
   ];
   return callAI({ model: CODING_MODEL, messages });
 }
@@ -72,7 +74,7 @@ For an MVP, injecting a chat message is easier and leverages existing rendering 
 
 ```ts
 chatState.addSystemMessage({
-  type: 'system',
+  type: "system",
   text: explanationText,
   timestamp: Date.now(),
 });

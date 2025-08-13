@@ -29,8 +29,8 @@ Create a utility function to manage database instances:
 
 ```typescript
 // app/utils/databaseManager.ts
-import { fireproof } from 'use-fireproof';
-import { SETTINGS_DBNAME } from '../config/env';
+import { fireproof } from "use-fireproof";
+import { SETTINGS_DBNAME } from "../config/env";
 
 // Get the main sessions database
 export const getSessionsDatabase = () => {
@@ -39,7 +39,7 @@ export const getSessionsDatabase = () => {
 
 // Get a session-specific database
 export const getSessionDatabase = (sessionId: string) => {
-  if (!sessionId) throw new Error('Session ID is required');
+  if (!sessionId) throw new Error("Session ID is required");
   return fireproof(`vibe-${sessionId}`);
 };
 ```
@@ -55,7 +55,7 @@ export function useSessionList(justFavorites = false) {
   const { database, useLiveQuery } = useFireproof(SETTINGS_DBNAME);
 
   // Query only session documents (no screenshots)
-  const { docs: sessionDocs } = useLiveQuery('type', { key: 'session' });
+  const { docs: sessionDocs } = useLiveQuery("type", { key: "session" });
 
   // For each session, query its screenshots from the session database
   const groupedSessions = useMemo(() => {
@@ -67,7 +67,7 @@ export function useSessionList(justFavorites = false) {
       const sessionDb = getSessionDatabase(session._id);
 
       // Query screenshots from session database
-      const screenshots = await sessionDb.query('type', { key: 'screenshot' });
+      const screenshots = await sessionDb.query("type", { key: "screenshot" });
 
       return {
         session,
@@ -81,7 +81,7 @@ export function useSessionList(justFavorites = false) {
         const timeA = a.session.created_at || 0;
         const timeB = b.session.created_at || 0;
         return timeB - timeA;
-      })
+      }),
     );
   }, [sessionDocs]);
 
@@ -110,8 +110,8 @@ export function useSession(sessionId: string | null) {
     save: saveSession,
   } = useDocument<SessionDocument>(
     sessionId
-      ? { _id: sessionId, type: 'session', created_at: Date.now() }
-      : { type: 'session', title: 'New Chat', created_at: Date.now() }
+      ? { _id: sessionId, type: "session", created_at: Date.now() }
+      : { type: "session", title: "New Chat", created_at: Date.now() },
   );
 
   // Functions that store data in session-specific database
@@ -121,16 +121,16 @@ export function useSession(sessionId: string | null) {
 
       // Create screenshot in session-specific database
       const screenshotDoc = {
-        type: 'screenshot',
+        type: "screenshot",
         session_id: sessionId,
         created_at: Date.now(),
-        _files: { 'screenshot.png': imageFile },
+        _files: { "screenshot.png": imageFile },
       };
 
       const result = await sessionDb.put(screenshotDoc);
       return result.id;
     },
-    [sessionId, sessionDb]
+    [sessionId, sessionDb],
   );
 
   return {
@@ -151,14 +151,14 @@ export function useSession(sessionId: string | null) {
 // app/hooks/useSessionMessages.ts
 export function useSessionMessages(sessionId: string | null) {
   // Only create the session database if we have a sessionId
-  const { useFireproof } = require('use-fireproof');
+  const { useFireproof } = require("use-fireproof");
   const { useLiveQuery } = sessionId
     ? useFireproof(`vibe-${sessionId}`)
     : { useLiveQuery: () => ({ docs: [] }) };
 
   // Query messages directly from session database
-  const { docs } = useLiveQuery('type', {
-    keys: ['user-message', 'ai-message'],
+  const { docs } = useLiveQuery("type", {
+    keys: ["user-message", "ai-message"],
     limit: 100,
   });
 
@@ -179,7 +179,7 @@ const saveUserMessage = async (text: string) => {
   const sessionDb = getSessionDatabase(sessionId);
 
   await sessionDb.put({
-    type: 'user-message',
+    type: "user-message",
     session_id: sessionId, // Still include for data portability
     created_at: Date.now(),
     text,
@@ -190,7 +190,6 @@ const saveUserMessage = async (text: string) => {
 ### 4. Migration Plan
 
 1. Create a migration utility to move existing data:
-
    - Read all data from SETTINGS_DBNAME
    - For each session, create a new session-specific database
    - Move all related data (messages, screenshots) to the new database

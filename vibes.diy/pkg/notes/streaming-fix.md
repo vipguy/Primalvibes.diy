@@ -49,10 +49,12 @@ But this parsed content isn't being reflected in the UI where "Thinking..." rema
 
    ```typescript
    // Look for how streaming updates are applied to the UI
-   updateStreamingMessage: vi.fn().mockImplementation((rawContent, timestamp) => {
-     // Is this function correctly updating the UI state?
-     // Is the timestamp matching between updates?
-   });
+   updateStreamingMessage: vi.fn().mockImplementation(
+     (rawContent, timestamp) => {
+       // Is this function correctly updating the UI state?
+       // Is the timestamp matching between updates?
+     },
+   );
    ```
 
 3. **Message Streaming vs. Completion**: There might be a disconnection between when messages are considered "streaming" versus "complete":
@@ -152,7 +154,7 @@ After testing various approaches, we've found that direct stdout writing provide
 ```typescript
 // Direct stdout logging for tests - works in both browser and Node environments
 function writeToStdout(message: string) {
-  if (typeof process !== 'undefined' && process.stdout?.write) {
+  if (typeof process !== "undefined" && process.stdout?.write) {
     process.stdout.write(`\n${message}\n`);
   } else {
     console.debug(message);
@@ -169,19 +171,19 @@ This approach bypasses Node's console buffering and ensures logs appear immediat
 
    ```typescript
    // In MessageList-very-early-streaming.test.tsx
-   vi.mock('../app/hooks/useSessionMessages', () => ({
+   vi.mock("../app/hooks/useSessionMessages", () => ({
      useSessionMessages: vi.fn().mockImplementation((sessionId) => {
-       if (sessionId === 'streaming-incremental') {
+       if (sessionId === "streaming-incremental") {
          // Simulate realistic streaming updates with minimal content
          writeToStdout('🔍 STREAM UPDATE: length=2 - content={"');
 
          return {
            messages: [
-             { type: 'user', text: 'Create a quiz app' },
+             { type: "user", text: "Create a quiz app" },
              {
-               type: 'ai',
+               type: "ai",
                text: '{"',
-               segments: [{ type: 'markdown', content: '{"' }],
+               segments: [{ type: "markdown", content: '{"' }],
                isStreaming: true,
              },
            ],
@@ -200,11 +202,13 @@ This approach bypasses Node's console buffering and ensures logs appear immediat
    // In StructuredMessage.tsx
    const hasContent =
      validSegments.length > 0 &&
-     validSegments.some((segment) => segment?.content && segment.content.trim().length > 0);
+     validSegments.some(
+       (segment) => segment?.content && segment.content.trim().length > 0,
+     );
 
    writeToStdout(
      `🔍 STRUCTURED MESSAGE: hasContent=${hasContent}, segments=${validSegments.length}, ` +
-       `contentLength=${validSegments.reduce((total, seg) => total + (seg.content?.length || 0), 0)}`
+       `contentLength=${validSegments.reduce((total, seg) => total + (seg.content?.length || 0), 0)}`,
    );
    ```
 
@@ -213,12 +217,14 @@ This approach bypasses Node's console buffering and ensures logs appear immediat
 
    ```typescript
    const messageContent = screen.queryByText(/\{\"/);
-   writeToStdout(`Is minimal content "{" visible? ${messageContent ? 'YES' : 'NO'}`);
+   writeToStdout(
+     `Is minimal content "{" visible? ${messageContent ? "YES" : "NO"}`,
+   );
 
    const messageContainer = document.querySelector('[data-testid="message-1"]');
    if (messageContainer) {
      writeToStdout(
-       `DOM content at start of stream: ${messageContainer.innerHTML.substring(0, 100)}...`
+       `DOM content at start of stream: ${messageContainer.innerHTML.substring(0, 100)}...`,
      );
    }
    ```
