@@ -42,7 +42,8 @@ export async function setup() {
 
     // Make server URL available globally
     process.env.VITE_TEST_URL = address;
-    globalThis.__VITE_SERVER_URL__ = address;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (globalThis as any).__VITE_SERVER_URL__ = address;
 
     return async () => {
       console.log("🛑 Stopping Vite dev server...");

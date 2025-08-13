@@ -74,42 +74,42 @@ vi.mock('call-ai', async () => {
   };
 });
 
-vi.mock('use-fireproof', () => ({
-  useFireproof: () => ({
-    useDocument: () => [{ _id: 'mock-doc' }, vi.fn()],
-    useLiveQuery: () => [[]],
-    useFind: () => [[]],
-    useLiveFind: () => [[]],
-    useIndex: () => [[]],
-    useSubscribe: () => {
-      /* no-op */
-    },
-    // Create a proper database mock with proper promise handling
-    database: {
-      get: vi.fn().mockImplementation((id) => {
-        return {
-          catch: () => {
-            // For tests that check 'Waiting for prompt', we need to fail differently
-            if (id === 'test-image-id') {
-              return new Error('Test ID not found - expected for empty prompt test');
-            }
-            return new Error('Not found');
-          },
-        };
-      }),
-      put: vi
-        .fn()
-        .mockImplementation((doc) => Promise.resolve({ id: doc._id, ok: true, rev: '1-123' })),
-      query: vi.fn().mockResolvedValue({
-        rows: [{ id: 'img1', key: 'img1', value: { _id: 'img:hash', prompt: 'Test Image' } }],
-      }),
-      delete: vi.fn().mockResolvedValue({ ok: true }),
-    },
-  }),
-  ImgFile: mockImgFile,
-  // Make sure to have a File constructor that matches expectations
-  File: vi.fn().mockImplementation((data, name) => ({ name })),
-}));
+// vi.mock('use-fireproof', () => ({
+//   useFireproof: () => ({
+//     useDocument: () => [{ _id: 'mock-doc' }, vi.fn()],
+//     useLiveQuery: () => [[]],
+//     useFind: () => [[]],
+//     useLiveFind: () => [[]],
+//     useIndex: () => [[]],
+//     useSubscribe: () => {
+//       /* no-op */
+//     },
+//     // Create a proper database mock with proper promise handling
+//     database: {
+//       get: vi.fn().mockImplementation((id) => {
+//         return {
+//           catch: () => {
+//             // For tests that check 'Waiting for prompt', we need to fail differently
+//             if (id === 'test-image-id') {
+//               return new Error('Test ID not found - expected for empty prompt test');
+//             }
+//             return new Error('Not found');
+//           },
+//         };
+//       }),
+//       put: vi
+//         .fn()
+//         .mockImplementation((doc) => Promise.resolve({ id: doc._id, ok: true, rev: '1-123' })),
+//       query: vi.fn().mockResolvedValue({
+//         rows: [{ id: 'img1', key: 'img1', value: { _id: 'img:hash', prompt: 'Test Image' } }],
+//       }),
+//       delete: vi.fn().mockResolvedValue({ ok: true }),
+//     },
+//   }),
+//   ImgFile: mockImgFile,
+//   // Make sure to have a File constructor that matches expectations
+//   File: vi.fn().mockImplementation((data, name) => ({ name })),
+// }));
 
 describe('ImgGen Component', () => {
   beforeEach(() => {

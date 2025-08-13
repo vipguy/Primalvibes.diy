@@ -133,9 +133,9 @@ class CallAIEnv {
       this.getEnv("OPENROUTER_API_KEY") ??
       (this.envFromWindow()?.callAi as unknown as { API_KEY: string })?.API_KEY ??
       this.getEnv("LOW_BALANCE_OPENROUTER_API_KEY");
-    if (x) {
-      console.log("[callAi] Using API key from", x, this.envs.length, new Error().stack);
-    }
+    // if (x) {
+    //   console.log("[callAi] Using API key from", x, this.envs.length, new Error().stack);
+    // }
     return x;
   }
   get CALLAI_REFRESH_ENDPOINT() {
@@ -174,5 +174,6 @@ export function entriesHeaders(headers: Headers) {
 }
 
 export function callAiFetch(options: { mock?: { fetch?: typeof fetch } }): typeof fetch {
+
   return options.mock?.fetch || globalThis.fetch;
 }

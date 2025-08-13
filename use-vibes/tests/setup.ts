@@ -9,9 +9,9 @@ import * as React from 'react';
 //}));
 
 // Setup global mock for call-ai module
-vi.mock('call-ai', async () => {
-  return await import('./mocks/call-ai.mock.js');
-});
+//vi.mock('call-ai', async () => {
+//  return await import('./mocks/call-ai.mock.js');
+//});
 
 // Mock react-dom's createPortal to render children directly in the component
 // This is crucial for testing components that use portals (like modals)

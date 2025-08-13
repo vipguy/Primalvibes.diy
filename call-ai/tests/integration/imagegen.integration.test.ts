@@ -41,6 +41,7 @@ describe("Image Generation Integration Tests", () => {
     const result = await imageGen(testPrompt, {
       apiKey: "VIBES_DIY",
       debug: true,
+      mock
     });
 
     console.log("Image editing test result:", result);
@@ -56,8 +57,8 @@ describe("Image Generation Integration Tests", () => {
     expect(imageBase64.length).toBeGreaterThan(0);
 
     // Verify the request was made correctly
-    expect(fetch).toHaveBeenCalledTimes(1);
-    expect(fetch).toHaveBeenCalledWith(
+    expect(mock.fetch).toHaveBeenCalledTimes(1);
+    expect(mock.fetch).toHaveBeenCalledWith(
       expect.stringMatching(/.*\/api\/openai-image\/generate$/),
       expect.objectContaining({
         method: "POST",
@@ -101,6 +102,7 @@ describe("Image Generation Integration Tests", () => {
       apiKey: "VIBES_DIY",
       images: mockFiles,
       debug: true,
+      mock
     });
 
     // Verify the structure of the response
@@ -111,8 +113,8 @@ describe("Image Generation Integration Tests", () => {
     expect(result.data[0].b64_json).toBeDefined();
 
     // Verify the request was made correctly
-    expect(fetch).toHaveBeenCalledTimes(1);
-    expect(fetch).toHaveBeenCalledWith(
+    expect(mock.fetch).toHaveBeenCalledTimes(1);
+    expect(mock.fetch).toHaveBeenCalledWith(
       expect.stringMatching(/.*\/api\/openai-image\/edit$/),
       expect.objectContaining({
         method: "POST",

@@ -494,7 +494,7 @@ async function callAINonStreaming(prompt: string | Message[], options: CallAIOpt
     if (!response.ok || response.status >= 400) {
       const { isInvalidModel } = await checkForInvalidModelError(response, model, options.debug);
 
-      if (isInvalidModel) {
+      if (isInvalidModel && !options.skipRetry) {
         // Retry with fallback model
         return callAINonStreaming(prompt, { ...options, model: FALLBACK_MODEL }, true);
       }

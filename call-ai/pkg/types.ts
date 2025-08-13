@@ -225,7 +225,7 @@ export interface CallAIErrorParams {
   readonly refreshError?: unknown;
   readonly errorType?: string;
 }
-export class CallAIError {
+export class CallAIError extends Error {
   readonly message: string;
   readonly status: number;
   readonly statusText?: string;
@@ -237,6 +237,7 @@ export class CallAIError {
   readonly partialContent?: string;
 
   constructor(params: CallAIErrorParams) {
+    super(params.message);
     this.message = params.message;
     this.status = params.status;
     this.statusText = params.statusText;
