@@ -102,9 +102,12 @@ describe('ImgGen Render Test', () => {
     });
 
     // Wait for effects to run
-    await waitFor(() => {
-      expect(mockImageGen.mock.calls.length).toBeGreaterThan(initialCalls);
-    }, { timeout: 1000 });
+    await waitFor(
+      () => {
+        expect(mockImageGen.mock.calls.length).toBeGreaterThan(initialCalls);
+      },
+      { timeout: 1000 }
+    );
 
     // Should only have one additional call
     const finalCalls = mockImageGen.mock.calls.length;

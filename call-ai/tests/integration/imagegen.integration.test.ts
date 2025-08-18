@@ -1,16 +1,13 @@
 import { imageGen } from "call-ai";
 import { dotenv } from "zx";
-// Import jest fetch mock
-import "jest-fetch-mock";
-import { describe, beforeEach, it, expect } from "vitest";
-
-// Add type declaration for Node.js require
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const fetchMock = require("jest-fetch-mock");
+import { HttpHeader } from "@adviser/cement";
+import { describe, beforeEach, it, expect, vi } from "vitest";
 
 // Configure fetch mock
-global.fetch = fetchMock;
-fetchMock.enableMocks();
+const global = globalThis;
+const globalFetch = vi.fn<typeof fetch>();
+global.fetch = globalFetch;
+//fetchMock.enableMocks();
 
 // Load environment variables from .env file if present
 dotenv.config();
@@ -29,15 +26,20 @@ const mockImageResponse = {
 describe("Image Generation Integration Tests", () => {
   beforeEach(() => {
     // Reset fetch mocks before each test
-    fetchMock.resetMocks();
+    globalFetch.mockClear();
   });
 
   it("should generate an image with a text prompt", async () => {
     // Set up fetch mock for image generation
-    fetchMock.mockResponseOnce(JSON.stringify(mockImageResponse), {
+
+    globalFetch.mockResolvedValueOnce({
+      ok: true,
       status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+      statusText: "OK",
+      json: vi.fn().mockResolvedValue(mockImageResponse),
+      text: vi.fn().mockResolvedValue(JSON.stringify(mockImageResponse)),
+      headers: HttpHeader.from({ "Content-Type": "application/json" }).AsHeaders(),
+    } as unknown as Response);
 
     // Generate test prompt
     const testPrompt =
@@ -62,8 +64,8 @@ describe("Image Generation Integration Tests", () => {
     expect(imageBase64.length).toBeGreaterThan(0);
 
     // Verify the request was made correctly
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock).toHaveBeenCalledWith(
+    expect(globalFetch).toHaveBeenCalledTimes(1);
+    expect(globalFetch).toHaveBeenCalledWith(
       expect.stringMatching(/.*\/api\/openai-image\/generate$/),
       expect.objectContaining({
         method: "POST",
@@ -76,8 +78,8 @@ describe("Image Generation Integration Tests", () => {
     );
 
     // Verify request body content
-    const mockCall = fetchMock.mock.calls[0];
-    const requestBody = JSON.parse(mockCall[1].body as string);
+    const mockCall = globalFetch.mock.calls[0];
+    const requestBody = JSON.parse(mockCall[1]?.body as string);
     expect(requestBody.prompt).toBe(testPrompt);
     expect(requestBody.model).toBe("gpt-image-1");
 
@@ -86,10 +88,14 @@ describe("Image Generation Integration Tests", () => {
 
   it("should handle image editing with multiple input images", async () => {
     // Set up fetch mock for image editing
-    fetchMock.mockResponseOnce(JSON.stringify(mockImageResponse), {
+    globalFetch.mockResolvedValueOnce({
+      ok: true,
       status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+      statusText: "OK",
+      json: vi.fn().mockResolvedValue(mockImageResponse),
+      text: vi.fn().mockResolvedValue(JSON.stringify(mockImageResponse)),
+      headers: HttpHeader.from({ "Content-Type": "application/json" }).AsHeaders(),
+    } as unknown as Response);
 
     const testPrompt = "Create a lovely gift basket with these four items in it";
 
@@ -115,8 +121,8 @@ describe("Image Generation Integration Tests", () => {
     expect(result.data[0].b64_json).toBeDefined();
 
     // Verify the request was made correctly
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock).toHaveBeenCalledWith(
+    expect(globalFetch).toHaveBeenCalledTimes(1);
+    expect(globalFetch).toHaveBeenCalledWith(
       expect.stringMatching(/.*\/api\/openai-image\/edit$/),
       expect.objectContaining({
         method: "POST",

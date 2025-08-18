@@ -1,5 +1,5 @@
 {
-  "name": "call-ai-test",
+  "name": "call-ai-tests-integration",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -13,7 +13,7 @@
     "url": "https://github.com/fireproof-storage/call-ai/issues"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "core-cli tsc",
     "test": "vitest --run",
     "test:integration": "vitest simple.integration",
     "test:all": "pnpm test && pnpm test:integration",
@@ -35,11 +35,9 @@
   ],
   "license": "Apache-2.0",
   "devDependencies": {
-    "@jest/globals": "^30.0.5",
+    "@fireproof/core-cli": "^0.23.1",
     "@playwright/test": "^1.54.1",
-    "@types/jest": "^30.0.0",
     "@types/node": "^24.0.15",
-    "jest": "^30.0.5",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4",
@@ -49,12 +47,10 @@
     "node": ">=20.0.0"
   },
   "dependencies": {
-    "@adviser/cement": "^0.4.20",
+    "@adviser/cement": "^0.4.25",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/user-event": "^14.6.1",
     "call-ai": "workspace:0.0.0",
-    "jest-fetch-mock": "^3.0.3",
-    "ts-jest": "^29.4.1",
     "vite": "^7.0.6"
   }
 }

@@ -78,7 +78,7 @@ vi.mock('use-fireproof', () => {
       }
       return Promise.reject(new Error('Not found'));
     }),
-    put: vi.fn().mockImplementation((doc: any) => {
+    put: vi.fn().mockImplementation((doc) => {
       return Promise.resolve({ id: doc._id, rev: 'new-rev' });
     }),
     remove: vi.fn(),
@@ -148,19 +148,22 @@ describe('ImgGen Document ID Tracking', () => {
     const { getByTestId } = render(<TestComponent />);
 
     // Wait for the initial render to complete
-    await waitFor(() => {
-      // Debug: Check if we have calls to the hook
-      console.log('mockCalls:', mockCalls);
-      console.log('mockCalls.length:', mockCalls.length);
-      
-      // Check if we have calls to the hook
-      expect(mockCalls.length).toBeGreaterThan(0);
+    await waitFor(
+      () => {
+        // Debug: Check if we have calls to the hook
+        console.log('mockCalls:', mockCalls);
+        console.log('mockCalls.length:', mockCalls.length);
 
-      // Initial call should be with prompt only
-      const initialCall = mockCalls[0];
-      expect(initialCall.prompt).toBe('Test prompt');
-      expect(initialCall._id).toBeUndefined();
-    }, { timeout: 2000 });
+        // Check if we have calls to the hook
+        expect(mockCalls.length).toBeGreaterThan(0);
+
+        // Initial call should be with prompt only
+        const initialCall = mockCalls[0];
+        expect(initialCall.prompt).toBe('Test prompt');
+        expect(initialCall._id).toBeUndefined();
+      },
+      { timeout: 2000 }
+    );
 
     // Get the initial count of calls
     const initialCallCount = mockCalls.length;

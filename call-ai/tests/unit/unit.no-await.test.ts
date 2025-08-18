@@ -47,7 +47,7 @@ describe("callAi", () => {
   });
 
   it("should handle API key requirement for non-streaming", async () => {
-    // Mock a response that will cause content extraction to fail  
+    // Mock a response that will cause content extraction to fail
     mockResponse.json.mockResolvedValueOnce({
       choices: [{ message: { content: null } }],
     } as unknown);
