@@ -3,8 +3,8 @@ import React, { useContext } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Create a controlled context for testing
-const TestContext = React.createContext<{ isStreaming: () => boolean }>({
-  isStreaming: () => false,
+const TestContext = React.createContext<{ isStreaming: boolean }>({
+  isStreaming: false,
 });
 const useTestContext = () => useContext(TestContext);
 
@@ -20,26 +20,31 @@ vi.mock("react-markdown", () => ({
 // Using the centralized mock from __mocks__/use-fireproof.ts
 
 // Now import components after mocks
-import ChatHeader from "../app/components/ChatHeaderContent";
-import MessageList from "../app/components/MessageList";
-import type { ChatMessageDocument } from "../app/types/chat";
+import ChatHeader from "~/vibes-diy/app/components/ChatHeaderContent.js";
+import MessageList from "~/vibes-diy/app/components/MessageList.js";
+import type {
+  ChatMessageDocument,
+  ViewType,
+} from "~/vibes-diy/app/types/chat.js";
+
+// type MockRenderTrackerProps = ChatHeaderContentProps & MessageListProps
+//  & {
+//     onOpenSidebar: () => void;
+//     onNewChat: () => void;
+//     isStreaming: boolean
+//     sessionId: string;
+//   }
 
 // Mock component that tracks renders
-function createRenderTracker(
-  Component: React.Component<{
-    onOpenSidebar: () => void;
-    onNewChat: () => void;
-    isStreaming: () => boolean;
-  }>,
-) {
+function createRenderTracker<P>(Component: React.ComponentType<P>) {
   let renderCount = 0;
 
   // Create a wrapped component that uses the original memoized component
   // but tracks renders of the wrapper
-  const TrackedComponent = (props: { isStreaming: () => boolean }) => {
+  const TrackedComponent = (props: P) => {
     renderCount++;
     // Use the original component directly
-    return <Component {...props} />;
+    return <Component {...(props as React.JSX.IntrinsicAttributes & P)} />;
   };
 
   // Memoize the tracker component itself to prevent re-renders from parent
@@ -64,7 +69,7 @@ function TestComponent({
   const { isStreaming } = useTestContext();
   return (
     <div data-testid="test-component">
-      {isStreaming() ? "Generating" : "Idle"}
+      {isStreaming ? "Generating" : "Idle"}
     </div>
   );
 }
@@ -84,9 +89,9 @@ describe("Component Memoization", () => {
       const onOpenSidebar = () => {
         /* no-op */
       };
-      const onNewChat = () => {
-        /* no-op */
-      };
+      // const onNewChat = () => {
+      //   /* no-op */
+      // };
       const isStreaming = () => false;
 
       function TestWrapper() {
@@ -103,8 +108,10 @@ describe("Component Memoization", () => {
             {/* Pass required props */}
             <TrackedHeader
               onOpenSidebar={onOpenSidebar}
-              onNewChat={onNewChat}
-              isStreaming={isStreaming}
+              // onNewChat={onNewChat}
+              isStreaming={isStreaming()}
+              title={""}
+              codeReady={false}
             />
           </div>
         );
@@ -126,7 +133,7 @@ describe("Component Memoization", () => {
       const renderCount = { current: 0 };
 
       const { rerender } = render(
-        <TestContext.Provider value={{ isStreaming: () => false }}>
+        <TestContext.Provider value={{ isStreaming: false }}>
           <TestComponent renderCount={renderCount} />
         </TestContext.Provider>,
       );
@@ -135,7 +142,7 @@ describe("Component Memoization", () => {
 
       // Update the context with a new value
       rerender(
-        <TestContext.Provider value={{ isStreaming: () => true }}>
+        <TestContext.Provider value={{ isStreaming: true }}>
           <TestComponent renderCount={renderCount} />
         </TestContext.Provider>,
       );
@@ -188,8 +195,17 @@ describe("Component Memoization", () => {
             </button>
             <TrackedMessageList
               messages={memoizedMessages}
-              isStreaming={isStreamingFn}
-              sessionId="test-session"
+              isStreaming={isStreamingFn()}
+              setSelectedResponseId={function (_id: string): void {
+                throw new Error("Function not implemented.");
+              }}
+              selectedResponseId={""}
+              setMobilePreviewShown={function (_shown: boolean): void {
+                throw new Error("Function not implemented.");
+              }}
+              navigateToView={function (_view: ViewType): void {
+                throw new Error("Function not implemented.");
+              }}
             />
           </div>
         );
@@ -241,7 +257,20 @@ describe("Component Memoization", () => {
             <button data-testid="add-message" onClick={addMessage}>
               Add Message
             </button>
-            <TrackedMessageList messages={messages} isStreaming={() => false} />
+            <TrackedMessageList
+              messages={messages}
+              isStreaming={false}
+              setSelectedResponseId={function (_id: string): void {
+                throw new Error("Function not implemented.");
+              }}
+              selectedResponseId={""}
+              setMobilePreviewShown={function (_shown: boolean): void {
+                throw new Error("Function not implemented.");
+              }}
+              navigateToView={function (_view: ViewType): void {
+                throw new Error("Function not implemented.");
+              }}
+            />
           </div>
         );
       }

@@ -1,8 +1,9 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, it, vi } from "vitest";
-import { createWrapper, formatAsSSE } from "./setup";
-import { useSession, useSimpleChat } from "vibes-diy";
-import type { ChatMessageDocument } from "~/types/chat";
+import { createWrapper, formatAsSSE } from "./setup.js";
+import { useSimpleChat } from "~/vibes-diy/app/hooks/useSimpleChat.js";
+import { useSession } from "~/vibes-diy/app/hooks/useSession.js";
+import type { ChatMessageDocument } from "~/vibes-diy/app/types/chat.js";
 
 describe("useSimpleChat", () => {
   it("handles pending AI message state correctly", async () => {

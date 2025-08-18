@@ -52,7 +52,7 @@ export async function streamAI(
 
   // If available, check if credits should constrain max_tokens
   try {
-    const { getCredits } = await import("../config/provisioning");
+    const { getCredits } = await import("../config/provisioning.js");
     const credits = await getCredits(apiKey);
     if (credits && credits.available) {
       // Convert available credits to tokens (rough approximation)

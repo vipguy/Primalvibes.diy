@@ -2,13 +2,13 @@
  * Utilities for publishing apps to the server
  */
 
-import { fireproof } from "use-fireproof";
-import { API_BASE_URL } from "../config/env";
+import { DocFileMeta, fireproof } from "use-fireproof";
+import { API_BASE_URL } from "../config/env.js";
 import {
   getSessionDatabaseName,
   updateUserVibespaceDoc,
-} from "./databaseManager";
-import { normalizeComponentExports } from "./normalizeComponentExports";
+} from "./databaseManager.js";
+import { normalizeComponentExports } from "./normalizeComponentExports.js";
 
 interface PublishDoc {
   remixOf?: string;
@@ -81,11 +81,27 @@ export async function publishApp({
     if (result.rows.length > 0) {
       const screenshotDoc = result.rows[0].doc;
 
+      function isDocFileMeta(
+        obj: unknown,
+      ): obj is DocFileMeta & { file: () => Promise<File> } {
+        return (
+          typeof obj === "object" &&
+          typeof (obj as DocFileMeta).file === "function"
+        );
+      }
+
       // Check if the screenshot document has a file in _files.screenshot
-      if (screenshotDoc?._files && screenshotDoc._files.screenshot) {
+      if (
+        screenshotDoc &&
+        screenshotDoc._files &&
+        screenshotDoc._files.screenshot
+      ) {
         try {
+          if (!isDocFileMeta(screenshotDoc._files.screenshot)) {
+            throw new Error("Screenshot is not a file");
+          }
           // Get the File object using the file() method - Fireproof specific API
-          const screenshotFile = await screenshotDoc._files.screenshot?.file();
+          const screenshotFile = await screenshotDoc._files.screenshot.file();
 
           // Read the file as a buffer using FileReader
           const buffer = await new Promise<string>((resolve, reject) => {

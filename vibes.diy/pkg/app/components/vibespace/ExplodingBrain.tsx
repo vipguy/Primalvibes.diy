@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 // Define the structure of vibe documents
 interface VibeDocument {

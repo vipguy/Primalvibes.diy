@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { createWrapper, formatAsSSE } from "./setup";
-import { useSimpleChat } from "vibes-diy";
+import { createWrapper, formatAsSSE } from "./setup.js";
+import { useSimpleChat } from "~/vibes-diy/app/hooks/useSimpleChat.js";
 
 describe("useSimpleChat", () => {
   it("auto-selects the new message after streaming finishes", async () => {

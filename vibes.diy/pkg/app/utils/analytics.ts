@@ -1,12 +1,14 @@
 import ReactGA from "react-ga4";
-import { GA_TRACKING_ID } from "../config/env";
+import { GA_TRACKING_ID } from "../config/env.js";
 
 /**
  * Initialize Google Analytics
  */
 export const initGA = (): void => {
   if (GA_TRACKING_ID) {
-    ReactGA.initialize(GA_TRACKING_ID);
+    (
+      ReactGA as unknown as { initialize: (trackingId: string) => void }
+    ).initialize(GA_TRACKING_ID);
   }
 };
 
@@ -16,7 +18,11 @@ export const initGA = (): void => {
  */
 export const pageview = (path: string): void => {
   if (GA_TRACKING_ID) {
-    ReactGA.send({ hitType: "pageview", page: path });
+    (
+      ReactGA as unknown as {
+        send: (params: { hitType: string; page: string }) => void;
+      }
+    ).send({ hitType: "pageview", page: path });
   }
 };
 
@@ -34,7 +40,16 @@ export const event = (
   value?: number,
 ): void => {
   if (GA_TRACKING_ID) {
-    ReactGA.event({
+    (
+      ReactGA as unknown as {
+        event: (params: {
+          category: string;
+          action: string;
+          label?: string;
+          value?: number;
+        }) => void;
+      }
+    ).event({
       category,
       action,
       label,

@@ -1,20 +1,32 @@
 import { shikiToMonaco } from "@shikijs/monaco";
-import { createHighlighter, type ShikiInternal } from "shiki";
+import {
+  BundledLanguage,
+  BundledTheme,
+  createHighlighter,
+  HighlighterGeneric,
+} from "shiki";
 import type React from "react";
+import { Monaco } from "@monaco-editor/react";
+import * as monaco from "monaco-editor";
 
 interface Options {
   isStreaming: boolean;
   codeReady: boolean;
   isDarkMode: boolean;
-  userScrolledRef: React.MutableRefObject<boolean>;
-  disposablesRef: React.MutableRefObject<{ dispose: () => void }[]>;
-  setRefs: (editor: React.MutableRefObject<unknown>, monaco: unknown) => void;
-  setHighlighter: (highlighter: ShikiInternal<string, string>) => void;
+  userScrolledRef: React.RefObject<boolean>;
+  disposablesRef: React.RefObject<{ dispose: () => void }[]>;
+  setRefs: (
+    editor: monaco.editor.IStandaloneCodeEditor,
+    monaco: Monaco,
+  ) => void;
+  setHighlighter: (
+    highlighter: HighlighterGeneric<BundledLanguage, BundledTheme>,
+  ) => void;
 }
 
 export async function setupMonacoEditor(
-  editor: React.MutableRefObject<unknown>,
-  monaco: ReturnType<typeof shikiToMonaco>,
+  editor: monaco.editor.IStandaloneCodeEditor,
+  monaco: Monaco,
   {
     isStreaming,
     codeReady,

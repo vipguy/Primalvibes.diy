@@ -1,5 +1,7 @@
 node_modules
 **/__screenshots__/
+**/build/
+**/dist/
 
 .env*
 .netlify/

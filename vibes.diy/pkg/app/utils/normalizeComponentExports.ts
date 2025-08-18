@@ -22,7 +22,7 @@ import {
   transformFunctionDeclaration,
   transformHOC,
   transformObjectLiteral,
-} from "./componentExportTransforms";
+} from "./componentExportTransforms.js";
 
 export function normalizeComponentExports(code: string): string {
   // Clean up the code by removing leading/trailing comments and whitespace

@@ -1,3 +1,5 @@
+import React from "react";
+
 const LightUpYourData = () => {
   return (
     <div className="flex h-full w-full items-center justify-center">

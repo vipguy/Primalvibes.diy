@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 interface ImgFileProps {
   file: { file: () => Promise<File>; type: string };

@@ -1,8 +1,7 @@
 // Remove jwt-decode import and related code
 // import { jwtDecode } from 'jwt-decode';
-import type React from "react";
 import type { ReactNode } from "react";
-import {
+import React, {
   createContext,
   useCallback,
   useContext,
@@ -10,7 +9,7 @@ import {
   useState,
 } from "react";
 // Import verifyToken and TokenPayload from auth utils
-import { type TokenPayload, verifyToken } from "../utils/auth";
+import { type TokenPayload, verifyToken } from "../utils/auth.js";
 
 // Remove the DecodedToken interface if it exists
 // interface DecodedToken { ... }

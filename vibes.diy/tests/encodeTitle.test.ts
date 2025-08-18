@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { encodeTitle } from "../app/components/SessionSidebar/utils";
+import { encodeTitle } from "~/vibes-diy/app/components/SessionSidebar/utils.js";
 
 describe("encodeTitle", () => {
   it("converts spaces and special characters to hyphenated encoding", () => {

@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef } from "react";
+import React, { memo, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext.js";
 import { useAuthPopup } from "../hooks/useAuthPopup.js";

@@ -1,23 +1,23 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import type React from "react";
+import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { AuthContextType } from "../app/contexts/AuthContext";
-import { AuthContext } from "../app/contexts/AuthContext";
-import * as useSimpleChatModule from "../app/hooks/useSimpleChat";
-import UnifiedSession from "../app/routes/home";
+import type { AuthContextType } from "~/vibes-diy/app/contexts/AuthContext.js";
+import { AuthContext } from "~/vibes-diy/app/contexts/AuthContext.js";
+import * as useSimpleChatModule from "~/vibes-diy/app/hooks/useSimpleChat.js";
+import UnifiedSession from "~/vibes-diy/app/routes/home.js";
 import type {
   AiChatMessage,
   ChatMessage,
   Segment,
   UserChatMessage,
-} from "../app/types/chat";
-import * as segmentParser from "../app/utils/segmentParser";
-import { mockChatStateProps } from "./mockData";
-import { MockThemeProvider } from "./utils/MockThemeProvider";
+} from "~/vibes-diy/app/types/chat.js";
+import * as segmentParser from "~/vibes-diy/app/utils/segmentParser.js";
+import { mockChatStateProps } from "./mockData.js";
+import { MockThemeProvider } from "./utils/MockThemeProvider.js";
 
 // Mock the CookieConsentContext
-vi.mock("../app/contexts/CookieConsentContext", () => ({
+vi.mock("~/vibes-diy/app/contexts/CookieConsentContext", () => ({
   useCookieConsent: () => ({
     messageHasBeenSent: false,
     setMessageHasBeenSent: vi.fn(),
@@ -122,7 +122,7 @@ Object.defineProperty(window, "location", {
 });
 
 // Mock components used in the Home component
-vi.mock("../app/components/ChatInterface", () => ({
+vi.mock("~/vibes-diy/app/components/ChatInterface", () => ({
   default: ({ onSessionCreated }: ChatInterfaceProps) => (
     <div data-testid="mock-chat-interface">
       <button
@@ -136,7 +136,7 @@ vi.mock("../app/components/ChatInterface", () => ({
   ),
 }));
 
-vi.mock("../app/components/ResultPreview/ResultPreview", () => ({
+vi.mock("~/vibes-diy/app/components/ResultPreview/ResultPreview", () => ({
   default: ({ code }: ResultPreviewProps) => (
     <div data-testid="mock-result-preview">
       <div data-testid="code-line-count">
@@ -158,7 +158,7 @@ vi.mock("../app/components/ResultPreview/ResultPreview", () => ({
   ),
 }));
 
-vi.mock("../app/components/AppLayout", () => ({
+vi.mock("~/vibes-diy/app/components/AppLayout", () => ({
   default: ({ chatPanel, previewPanel }: AppLayoutProps) => (
     <div data-testid="mock-app-layout">
       <div data-testid="chat-panel">{chatPanel}</div>

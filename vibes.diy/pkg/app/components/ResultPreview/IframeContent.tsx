@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import type { IframeFiles } from "./ResultPreviewTypes.js";
-import Editor from "@monaco-editor/react";
+import { Monaco, Editor } from "@monaco-editor/react";
+import { editor } from "monaco-editor";
 import { useApiKey } from "../../hooks/useApiKey.js";
 import { setupMonacoEditor } from "./setupMonacoEditor.js";
 import { transformImports } from "./transformImports.js";
@@ -9,6 +10,7 @@ import { normalizeComponentExports } from "../../utils/normalizeComponentExports
 
 // Import the iframe template using Vite's ?raw import option
 import iframeTemplateRaw from "./templates/iframe-template.html?raw";
+import { HighlighterGeneric, BundledLanguage, BundledTheme } from "shiki";
 
 interface IframeContentProps {
   activeView: "preview" | "code" | "data";
@@ -35,11 +37,12 @@ const IframeContent: React.FC<IframeContentProps> = ({
   const lastContentRef = useRef(""); // Use ref to track last rendered code
 
   // Reference to store the current Monaco editor instance
-  const monacoEditorRef = useRef(null);
+  const monacoEditorRef = useRef<editor.IStandaloneCodeEditor>(null);
   // Reference to store the Monaco API instance
-  const monacoApiRef = useRef(null);
+  const monacoApiRef = useRef<Monaco>(null);
   // Reference to store the current Shiki highlighter
-  const highlighterRef = useRef(null);
+  const highlighterRef =
+    useRef<HighlighterGeneric<BundledLanguage, BundledTheme>>(null);
   // Reference to store disposables for cleanup
   const disposablesRef = useRef<{ dispose: () => void }[]>([]);
   // Flag to track if user has manually scrolled during streaming

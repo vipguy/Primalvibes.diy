@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach, type Mock } from "vitest";
-import * as auth from "../app/utils/auth";
+import * as auth from "~/vibes-diy/app/utils/auth.js";
 
 // Mock the jose module
 vi.mock("jose", () => ({
@@ -52,6 +52,7 @@ describe("auth utils", () => {
       });
 
       const result = await auth.verifyToken("valid.token");
+      console.log("Result:", result);
       expect(jose.importJWK).toHaveBeenCalled();
       expect(jose.jwtVerify).toHaveBeenCalled();
       expect(result).toBeTruthy();

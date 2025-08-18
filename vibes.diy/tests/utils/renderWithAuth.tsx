@@ -1,10 +1,11 @@
 import type { ReactElement } from "react";
+import React from "react";
 import { render } from "@testing-library/react";
 import type { RenderOptions } from "@testing-library/react";
 import {
   type AuthContextType,
   AuthContext,
-} from "../../app/contexts/AuthContext";
+} from "~/vibes-diy/app/contexts/AuthContext.js";
 import { vi } from "vitest";
 
 export const createAuthContextValue = (

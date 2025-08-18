@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import LightUpYourData from "./ResultPreview/LightUpYourData";
+import React from "react";
+import LightUpYourData from "./ResultPreview/LightUpYourData.js";
 import { Toaster } from "react-hot-toast";
 
 interface AppLayoutProps {

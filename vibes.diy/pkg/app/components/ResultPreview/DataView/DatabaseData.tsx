@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import DynamicTable from "./DynamicTable";
-import { headersForDocs } from "./dynamicTableHelpers";
+import DynamicTable from "./DynamicTable.js";
+import { headersForDocs } from "./dynamicTableHelpers.js";
 // Import Fireproof for database access
 import { useFireproof, type DocBase } from "use-fireproof";
 // Import the monkey patch utility
-import { applyIndexedDBPatch } from "./indexedDBMonkeyPatch";
+import { applyIndexedDBPatch } from "./indexedDBMonkeyPatch.js";
 
 // Component for displaying database data
 const DatabaseData: React.FC<{ dbName: string; sessionId: string }> = ({

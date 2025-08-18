@@ -1,9 +1,9 @@
 import { renderHook, act } from "@testing-library/react";
-import { useSession } from "../app/hooks/useSession";
+import { useSession } from "~/vibes-diy/app/hooks/useSession";
 import { vi, describe, test, expect, beforeEach } from "vitest";
 
 // Mock the databaseManager module first
-vi.mock("../app/utils/databaseManager", () => {
+vi.mock("~/vibes-diy/app/utils/databaseManager", () => {
   const mockDb = {
     put: vi.fn().mockResolvedValue({ id: "test-session-id" }),
     get: vi.fn().mockResolvedValue({
@@ -24,7 +24,7 @@ vi.mock("../app/utils/databaseManager", () => {
 });
 
 // Mock the env module
-vi.mock("../app/config/env", () => ({
+vi.mock("~/vibes-diy/app/config/env", () => ({
   SETTINGS_DBNAME: "test-chat-history",
 }));
 

@@ -2,12 +2,12 @@
  * Authentication utilities for handling token-based auth
  */
 import { importJWK, jwtVerify } from "jose";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import {
   CLOUD_SESSION_TOKEN_PUBLIC_KEY,
   CONNECT_API_URL,
   CONNECT_URL,
-} from "../config/env";
+} from "../config/env.js";
 import { base58btc } from "multiformats/bases/base58";
 
 // Export the interface

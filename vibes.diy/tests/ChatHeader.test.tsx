@@ -1,7 +1,8 @@
 import { vi, describe, it, expect, beforeEach } from "vitest";
+import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import ChatHeader from "../app/components/ChatHeaderContent";
-import { MockThemeProvider } from "./utils/MockThemeProvider";
+import ChatHeader from "~/vibes-diy/app/components/ChatHeaderContent.js";
+import { MockThemeProvider } from "./utils/MockThemeProvider.js";
 
 // Create mock functions we can control
 const onOpenSidebar = vi.fn();

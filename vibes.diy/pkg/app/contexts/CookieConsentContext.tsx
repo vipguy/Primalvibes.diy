@@ -1,5 +1,4 @@
-import { createContext, useContext, useState } from "react";
-import type { ReactNode } from "react";
+import React, { ReactNode, createContext, useContext, useState } from "react";
 
 interface CookieConsentContextType {
   messageHasBeenSent: boolean;

@@ -1,15 +1,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, act } from "@testing-library/react";
-import iframeTemplateRaw from "../app/components/ResultPreview/templates/iframe-template.html?raw";
-import ResultPreview from "../app/components/ResultPreview/ResultPreview";
-import { MockThemeProvider } from "./utils/MockThemeProvider";
+import React from "react";
+import iframeTemplateRaw from "~/vibes-diy/app/components/ResultPreview/templates/iframe-template.html?raw";
+import ResultPreview from "~/vibes-diy/app/components/ResultPreview/ResultPreview.js";
+import { MockThemeProvider } from "./utils/MockThemeProvider.js";
 
 vi.mock("@remix-run/router", () => ({
   createBrowserRouter: vi.fn(),
 }));
 
 // Mock the useApiKey hook
-vi.mock("../app/hooks/useApiKey", () => ({
+vi.mock("~/vibes-diy/app/hooks/useApiKey", () => ({
   useApiKey: () => ({
     apiKey: "test-api-key",
     apiKeyObject: { key: "test-api-key", hash: "test-hash" },
@@ -22,7 +23,7 @@ vi.mock("../app/hooks/useApiKey", () => ({
   }),
 }));
 
-vi.mock("../app/contexts/AuthContext", () => ({
+vi.mock("~/vibes-diy/app/contexts/AuthContext", () => ({
   useAuth: () => ({
     token: "test-auth-token",
     userPayload: { userId: "test-user-id" },

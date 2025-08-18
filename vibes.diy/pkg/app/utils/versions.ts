@@ -2,7 +2,7 @@
 // Using Vite's import.meta.env to access the versions at build time
 
 // Import the package.json using Vite's feature
-import packageJson from "../../package.json";
+import packageJson from "../../package.json" with { type: "json" };
 
 // Extract the versions we need
 const fireproofVersion = packageJson.dependencies["use-fireproof"];

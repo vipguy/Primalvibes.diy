@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
 import { encodeTitle } from "../components/SessionSidebar/utils.js";
 import type { VibeDocument } from "../types/chat.js";

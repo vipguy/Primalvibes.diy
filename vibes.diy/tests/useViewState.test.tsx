@@ -1,5 +1,8 @@
 import { renderHook } from "@testing-library/react";
-import { useViewState, type ViewState } from "../app/utils/ViewState";
+import {
+  useViewState,
+  type ViewState,
+} from "~/vibes-diy/app/utils/ViewState.js";
 import { vi, describe, test, expect, beforeEach } from "vitest";
 
 // Mock react-router-dom hooks
@@ -12,7 +15,7 @@ vi.mock("react-router-dom", () => {
 });
 
 // Mock encodeTitle from utils
-vi.mock("../app/components/SessionSidebar/utils", () => {
+vi.mock("~/vibes-diy/app/components/SessionSidebar/utils.js", () => {
   return {
     encodeTitle: vi.fn((title) => title), // Simple mock that returns the title unchanged
   };
@@ -183,7 +186,7 @@ describe("useViewState", () => {
     } as ReturnType<typeof useLocation>);
 
     // We need to create a fresh instance for each test to ensure refs start clean
-    let hookResult: ViewState | null = null;
+    let hookResult: Partial<ViewState> | null = null;
 
     // Initialize with preview not ready - first render creates the refs
     const { unmount } = renderHook(
@@ -247,7 +250,7 @@ describe("useViewState", () => {
     } as ReturnType<typeof useLocation>);
 
     // We need to create a fresh instance to ensure refs are properly tracked
-    let hookResult: ViewState | null = null;
+    let hookResult: Partial<ViewState> | null = null;
 
     // Initialize with preview not ready - first render to set up refs
     const { unmount } = renderHook(

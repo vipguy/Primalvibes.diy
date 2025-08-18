@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import PublishedVibeCard from "./PublishedVibeCard";
+import React, { useMemo } from "react";
+import PublishedVibeCard from "./PublishedVibeCard.js";
 
 // Featured vibes data
 export const publishedVibes = [

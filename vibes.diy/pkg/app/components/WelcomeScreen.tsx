@@ -1,4 +1,4 @@
-import { memo } from "react";
+import React, { memo } from "react";
 
 // Welcome screen component shown when no messages are present
 const WelcomeScreen = () => {

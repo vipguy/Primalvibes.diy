@@ -1,4 +1,5 @@
-import { dark, light } from "./colorways";
+import React from "react";
+import { dark, light } from "./colorways.js";
 
 type ColorwayName = keyof typeof dark;
 

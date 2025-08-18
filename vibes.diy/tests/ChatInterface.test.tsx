@@ -1,8 +1,9 @@
 import { render } from "@testing-library/react";
 import { vi, describe, it, expect } from "vitest";
-import ChatInterface from "../app/components/ChatInterface";
-import type { ChatState } from "../app/types/chat";
-import { mockChatStateProps } from "./mockData";
+import ChatInterface from "~/vibes-diy/app/components/ChatInterface.js";
+import type { ChatState } from "~/vibes-diy/app/types/chat.js";
+import { mockChatStateProps } from "./mockData.js";
+import React from "react";
 
 /**
  * Tests for the ChatInterface component

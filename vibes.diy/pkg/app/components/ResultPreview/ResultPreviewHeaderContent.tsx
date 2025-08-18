@@ -1,13 +1,13 @@
-import { /*useEffect,*/ useRef } from "react"; // useEffect no longer needed here
+import React, { /*useEffect,*/ useRef } from "react"; // useEffect no longer needed here
 import { useParams } from "react-router";
-import { useSession } from "../../hooks/useSession";
-import type { ViewType, ViewControlsType } from "../../utils/ViewState";
+import { useSession } from "../../hooks/useSession.js";
+import type { ViewType, ViewControlsType } from "../../utils/ViewState.js";
 // import { useViewState } from '../../utils/ViewState'; // useViewState is now lifted to home.tsx
-import { BackButton } from "./BackButton";
-import { ViewControls } from "./ViewControls";
-import { ShareButton } from "./ShareButton";
-import { usePublish } from "./usePublish";
-import { ShareModal } from "./ShareModal";
+import { BackButton } from "./BackButton.js";
+import { ViewControls } from "./ViewControls.js";
+import { ShareButton } from "./ShareButton.js";
+import { usePublish } from "./usePublish.js";
+import { ShareModal } from "./ShareModal.js";
 
 interface ResultPreviewHeaderContentProps {
   // Props from useViewState (lifted to home.tsx)

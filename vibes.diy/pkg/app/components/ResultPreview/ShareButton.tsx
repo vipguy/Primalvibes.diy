@@ -1,5 +1,5 @@
-import { forwardRef } from "react";
-import { PublishIcon } from "../HeaderContent/SvgIcons";
+import React, { forwardRef } from "react";
+import { PublishIcon } from "../HeaderContent/SvgIcons.js";
 
 interface ShareButtonProps {
   onClick: () => void;

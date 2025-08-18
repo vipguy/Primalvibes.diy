@@ -144,9 +144,12 @@ class LazyDB {
         ) {
           this.ensureReal();
         }
-        return (this.inner as unknown as Record<string, unknown>)[prop](
-          ...args,
-        );
+        return (
+          this.inner as unknown as Record<
+            string,
+            (...args: unknown[]) => unknown
+          >
+        )[prop](...args);
       };
     }
 
@@ -336,7 +339,7 @@ export function useLazyFireproof(
     const result = useMemo(() => {
       return api.useChanges<T>(since, {
         ...options,
-        _refreshKey: refreshCounter,
+        // _refreshKey: refreshCounter,
       });
     }, [since, options, refreshCounter]);
 

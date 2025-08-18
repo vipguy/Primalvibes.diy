@@ -1,7 +1,7 @@
 import React from "react";
-import { StarIcon } from "./SessionSidebar/StarIcon";
-import { ImgFile } from "./SessionSidebar/ImgFile";
-import type { LocalVibe } from "../utils/vibeUtils";
+import { StarIcon } from "./SessionSidebar/StarIcon.js";
+import { ImgFile } from "./SessionSidebar/ImgFile.js";
+import type { LocalVibe } from "../utils/vibeUtils.js";
 
 interface VibeCardProps {
   vibe: LocalVibe;

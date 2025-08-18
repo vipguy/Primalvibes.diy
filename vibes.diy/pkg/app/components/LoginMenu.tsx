@@ -1,5 +1,6 @@
 import { createPortal } from "react-dom";
-import { trackAuthClick } from "../utils/analytics";
+import React from "react";
+import { trackAuthClick } from "../utils/analytics.js";
 
 interface LoginMenuProps {
   isOpen: boolean;

@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { initiateAuthFlow, pollForAuthToken } from "../utils/auth";
-import { useAuth } from "../contexts/AuthContext";
-import { trackAuthClick } from "../utils/analytics";
+import { initiateAuthFlow, pollForAuthToken } from "../utils/auth.js";
+import { useAuth } from "../contexts/AuthContext.js";
+import { trackAuthClick } from "../utils/analytics.js";
 
 export function useAuthPopup() {
   const [isPolling, setIsPolling] = useState(false);

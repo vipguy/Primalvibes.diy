@@ -1,24 +1,24 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import type { ReactNode } from "react";
+import React, { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
-import { usePublish } from "../app/components/ResultPreview/usePublish";
-import type { AuthContextType } from "../app/contexts/AuthContext";
-import { AuthContext } from "../app/contexts/AuthContext";
+import { usePublish } from "~/vibes-diy/app/components/ResultPreview/usePublish.js";
+import type { AuthContextType } from "~/vibes-diy/app/contexts/AuthContext.js";
+import { AuthContext } from "~/vibes-diy/app/contexts/AuthContext.js";
 import type {
   AiChatMessage,
   ChatMessageDocument,
   UserChatMessage,
-} from "../app/types/chat";
-import { trackPublishClick } from "../app/utils/analytics";
-import type { TokenPayload } from "../app/utils/auth";
-import { publishApp } from "../app/utils/publishUtils";
+} from "~/vibes-diy/app/types/chat.js";
+import { trackPublishClick } from "~/vibes-diy/app/utils/analytics.js";
+import type { TokenPayload } from "~/vibes-diy/app/utils/auth.js";
+import { publishApp } from "~/vibes-diy/app/utils/publishUtils.js";
 
 // Mock dependencies
-vi.mock("../app/utils/publishUtils", () => ({
+vi.mock("~/vibes-diy/app/utils/publishUtils", () => ({
   publishApp: vi.fn(),
 }));
 
-vi.mock("../app/utils/analytics", () => ({
+vi.mock("~/vibes-diy/app/utils/analytics", () => ({
   trackPublishClick: vi.fn(),
 }));
 

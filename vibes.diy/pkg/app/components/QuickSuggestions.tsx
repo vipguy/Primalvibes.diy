@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { quickSuggestions } from "../data/quick-suggestions-data";
-import FeaturedVibes from "./FeaturedVibes";
+import React, { useEffect, useState } from "react";
+import { quickSuggestions } from "../data/quick-suggestions-data.js";
+import FeaturedVibes from "./FeaturedVibes.js";
 
 interface QuickSuggestionsProps {
   onSelectSuggestion: (suggestion: string) => void;

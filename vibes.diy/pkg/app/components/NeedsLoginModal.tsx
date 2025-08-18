@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { useAuth } from "../contexts/AuthContext";
-import { trackAuthClick } from "../utils/analytics";
-import { useAuthPopup } from "../hooks/useAuthPopup";
+import { useAuth } from "../contexts/AuthContext.js";
+import { trackAuthClick } from "../utils/analytics.js";
+import { useAuthPopup } from "../hooks/useAuthPopup.js";
 
 /**
  * A modal that appears when the user needs to login to get more credits

@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { trackPublishClick } from "../../utils/analytics";
+import { trackPublishClick } from "../../utils/analytics.js";
 
 interface ShareModalProps {
   isOpen: boolean;

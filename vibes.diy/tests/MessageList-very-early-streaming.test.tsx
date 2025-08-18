@@ -1,32 +1,33 @@
+import React from "react";
 import { render, screen } from "@testing-library/react";
-import MessageList from "../app/components/MessageList";
+import MessageList from "~/vibes-diy/app/components/MessageList.js";
 import { vi, describe, test, expect, beforeEach } from "vitest";
 import type {
   UserChatMessage,
   AiChatMessage,
   ChatMessageDocument,
-} from "../app/types/chat";
-import { MockThemeProvider } from "./utils/MockThemeProvider";
+} from "~/vibes-diy/app/types/chat.js";
+import { MockThemeProvider } from "./utils/MockThemeProvider.js";
 
 beforeEach(() => {
   window.HTMLElement.prototype.scrollIntoView = vi.fn();
 });
 
 // Mock the Message component to match real implementation
-// vi.mock('../app/components/Message', () => ({
-//   default: ({ message }: any) => (
-//     <div data-testid={`message-${message._id}`}>
-//       {message.segments &&
-//         message.segments.map((segment: any, i: number) => (
-//           <div key={i} data-testid={segment.type}>
-//             {segment.content}
-//           </div>
-//         ))}
-//       {message.text && !message.segments?.length && <div>{message.text}</div>}
-//     </div>
-//   ),
-//   WelcomeScreen: () => <div data-testid="welcome-screen">Welcome Screen</div>,
-// }));
+vi.mock("~/vibes-diy/app/components/Message.js", () => ({
+  default: ({ message }: { message: AiChatMessage }) => (
+    <div data-testid={`message-${message._id}`}>
+      {message.segments &&
+        message.segments.map((segment, i: number) => (
+          <div key={i} data-testid={segment.type}>
+            {segment.content}
+          </div>
+        ))}
+      {message.text && !message.segments?.length && <div>{message.text}</div>}
+    </div>
+  ),
+  WelcomeScreen: () => <div data-testid="welcome-screen">Welcome Screen</div>,
+}));
 
 describe("MessageList Real-World Streaming Tests", () => {
   test("should display minimal content at stream start", () => {

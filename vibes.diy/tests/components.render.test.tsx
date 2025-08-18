@@ -5,18 +5,18 @@ import {
   mockUseAuth,
   resetMockAuthState,
   setMockAuthState,
-} from "./__mocks__/useAuth";
-import ChatHeader from "../app/components/ChatHeaderContent";
-import MessageList from "../app/components/MessageList";
-import SessionSidebar from "../app/components/SessionSidebar";
-import type { AuthContextType } from "../app/contexts/AuthContext";
+} from "./__mocks__/useAuth.js";
+import ChatHeader from "~/vibes-diy/app/components/ChatHeaderContent.js";
+import MessageList from "~/vibes-diy/app/components/MessageList.js";
+import SessionSidebar from "~/vibes-diy/app/components/SessionSidebar.js";
+import type { AuthContextType } from "~/vibes-diy/app/contexts/AuthContext.js";
 import type {
   AiChatMessage,
   ChatMessageDocument,
   UserChatMessage,
-} from "../app/types/chat";
-import { mockSessionSidebarProps } from "./mockData";
-import { MockThemeProvider } from "./utils/MockThemeProvider";
+} from "~/vibes-diy/app/types/chat.js";
+import { mockSessionSidebarProps } from "./mockData.js";
+import { MockThemeProvider } from "./utils/MockThemeProvider.js";
 import React from "react";
 
 // Mock dependencies
@@ -37,13 +37,13 @@ vi.mock("react-markdown", () => {
 window.HTMLElement.prototype.scrollIntoView = vi.fn();
 
 // Mock the useAuth hook for SessionSidebar
-vi.mock("../app/contexts/AuthContext", () => ({
+vi.mock("~/vibes-diy/app/contexts/AuthContext", () => ({
   useAuth: mockUseAuth,
   AuthProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
 // Mock the useSessionMessages hook for MessageList
-vi.mock("../app/hooks/useSessionMessages", () => {
+vi.mock("~/vibes-diy/app/hooks/useSessionMessages", () => {
   return {
     useSessionMessages: (sessionId: string | null) => {
       // Check the sessionId to determine what to return

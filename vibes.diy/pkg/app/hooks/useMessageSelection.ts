@@ -1,6 +1,6 @@
 import { useMemo, useCallback, useState, useEffect } from "react";
-import type { Segment, ChatMessageDocument } from "../types/chat";
-import { parseContent } from "../utils/segmentParser";
+import type { Segment, ChatMessageDocument } from "../types/chat.js";
+import { parseContent } from "../utils/segmentParser.js";
 
 /**
  * Hook for managing message selection and content processing
@@ -113,8 +113,8 @@ export function useMessageSelection({
     // Sort by document ID - this is more reliable than timestamps
     // when determining the most recent message, especially since IDs often have
     // chronological information encoded in them
-    const sortedDocsWithCode = docsWithCode.sort((a, b) =>
-      b._id.localeCompare(a._id),
+    const sortedDocsWithCode = docsWithCode.sort(
+      (a, b) => b._id?.localeCompare(a._id || "") ?? 0,
     );
 
     const latestAiDocWithCode = sortedDocsWithCode[0];

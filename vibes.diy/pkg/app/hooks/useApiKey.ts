@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from "react";
-import { useAuth } from "../contexts/AuthContext";
-import type { ApiKeyResponse } from "../services/apiKeyService";
-import { createOrUpdateKeyViaEdgeFunction } from "../services/apiKeyService";
+import { useAuth } from "../contexts/AuthContext.js";
+import type { ApiKeyResponse } from "../services/apiKeyService.js";
+import { createOrUpdateKeyViaEdgeFunction } from "../services/apiKeyService.js";
 
 /**
  * Hook for API key management that uses dynamic key provisioning

@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { StarIcon } from "../components/SessionSidebar/StarIcon.js";
 import SimpleAppLayout from "../components/SimpleAppLayout.js";

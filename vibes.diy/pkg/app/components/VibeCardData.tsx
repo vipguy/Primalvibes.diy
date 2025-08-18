@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { VibeCard } from "./VibeCard";
-import { loadVibeDocument, loadVibeScreenshot } from "../utils/vibeUtils";
-import type { LocalVibe } from "../utils/vibeUtils";
-import { useVibes } from "../hooks/useVibes";
+import { VibeCard } from "./VibeCard.js";
+import { loadVibeDocument, loadVibeScreenshot } from "../utils/vibeUtils.js";
+import type { LocalVibe } from "../utils/vibeUtils.js";
+import { useVibes } from "../hooks/useVibes.js";
 
 interface VibeCardDataProps {
   vibeId: string;

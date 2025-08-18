@@ -1,5 +1,5 @@
-import { getCredits } from "../config/provisioning";
-import type { RuntimeError } from "./useRuntimeErrors";
+import { getCredits } from "../config/provisioning.js";
+import type { RuntimeError } from "./useRuntimeErrors.js";
 
 // Global request tracking to prevent duplicate credit check calls
 let pendingCreditsCheck: Promise<{

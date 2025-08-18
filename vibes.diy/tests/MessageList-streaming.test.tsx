@@ -1,8 +1,9 @@
+import React from "react";
 import { render, screen } from "@testing-library/react";
-import MessageList from "../app/components/MessageList";
+import MessageList from "~/vibes-diy/app/components/MessageList.js";
 import { vi, describe, test, expect, beforeEach } from "vitest";
-import type { ChatMessageDocument } from "../app/types/chat";
-import { MockThemeProvider } from "./utils/MockThemeProvider";
+import type { ChatMessageDocument } from "~/vibes-diy/app/types/chat.js";
+import { MockThemeProvider } from "./utils/MockThemeProvider.js";
 
 // Mock scrollIntoView
 beforeEach(() => {
@@ -10,7 +11,7 @@ beforeEach(() => {
 });
 
 // Mock Message component to simplify testing
-vi.mock("../app/components/Message", () => ({
+vi.mock("~/vibes-diy/app/components/Message", () => ({
   default: ({
     message,
   }: {

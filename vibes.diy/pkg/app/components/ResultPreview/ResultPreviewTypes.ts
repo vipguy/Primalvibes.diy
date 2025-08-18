@@ -1,5 +1,5 @@
-import type { RuntimeError } from "../../hooks/useRuntimeErrors";
-import type { ViewType } from "../../utils/ViewState";
+import type { RuntimeError } from "../../hooks/useRuntimeErrors.js";
+import type { ViewType } from "../../utils/ViewState.js";
 
 export interface ResultPreviewProps {
   code: string;

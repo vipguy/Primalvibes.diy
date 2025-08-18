@@ -7,13 +7,13 @@ const llmsList = Object.values(llmsModules).map(
 const llmsTextCache: Record<string, string> = {};
 
 interface UserSettings {
-  stylePrompt?: string;
-  userPrompt?: string;
+  readonly stylePrompt: string;
+  readonly userPrompt: string;
 }
 // Base system prompt for the AI
 export async function makeBaseSystemPrompt(
   model: string,
-  sessionDoc?: UserSettings,
+  sessionDoc?: Partial<UserSettings>,
 ) {
   let concatenatedLlmsTxt = "";
 

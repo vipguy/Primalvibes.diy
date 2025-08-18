@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef } from "react";
-import type { ChatInterfaceProps } from "../types/chat"; // Updated import
-import MessageList from "./MessageList";
-import WelcomeScreen from "./WelcomeScreen";
+import React, { useEffect, useMemo, useRef } from "react";
+import type { ChatInterfaceProps } from "../types/chat.js"; // Updated import
+import MessageList from "./MessageList.js";
+import WelcomeScreen from "./WelcomeScreen.js";
 
 function ChatInterface({
   docs: messages,

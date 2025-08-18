@@ -3,12 +3,13 @@ import type {
   AiChatMessageDocument,
   ChatMessageDocument,
   UserChatMessageDocument,
-} from "../types/chat";
-import { trackChatInputClick } from "../utils/analytics";
-import { parseContent } from "../utils/segmentParser";
-import { streamAI } from "../utils/streamHandler";
-import { generateTitle } from "../utils/titleGenerator";
+} from "../types/chat.js";
+import { trackChatInputClick } from "../utils/analytics.js";
+import { parseContent } from "../utils/segmentParser.js";
+import { streamAI } from "../utils/streamHandler.js";
+import { generateTitle } from "../utils/titleGenerator.js";
 import { CallAIError } from "call-ai";
+import { DeepWritable } from "ts-essentials";
 
 export interface SendMessageContext {
   readonly userMessage: ChatMessageDocument;
@@ -22,7 +23,10 @@ export interface SendMessageContext {
   checkCredits(key: string): Promise<boolean>;
   ensureSystemPrompt(): Promise<string>;
   submitUserMessage(): Promise<void>;
-  buildMessageHistory(): unknown[];
+  buildMessageHistory(): {
+    role: "user" | "assistant" | "system";
+    content: string;
+  }[];
   readonly modelToUse: string;
   throttledMergeAiMessage(content: string): void;
   readonly isProcessingRef: { current: boolean };
@@ -143,7 +147,7 @@ export async function sendMessage(
     (content) => throttledMergeAiMessage(content),
     currentApiKey,
     userId,
-    setNeedsLogin,
+    // setNeedsLogin,
   )
     .then(async (finalContent) => {
       isProcessingRef.current = true;
@@ -178,10 +182,11 @@ export async function sendMessage(
         }
 
         if (aiMessage?.text !== finalContent) {
-          aiMessage.text = finalContent;
+          (aiMessage as DeepWritable<AiChatMessageDocument>).text =
+            finalContent;
         }
 
-        aiMessage.model = modelToUse;
+        (aiMessage as DeepWritable<AiChatMessageDocument>).model = modelToUse;
         const { id } = (await sessionDatabase.put(aiMessage)) as { id: string };
         setPendingAiMessage({ ...aiMessage, _id: id });
         setSelectedResponseId(id);

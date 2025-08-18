@@ -1,3 +1,4 @@
+import React from "react";
 import { cleanup } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, vi } from "vitest";
@@ -11,10 +12,10 @@ vi.mock("call-ai", () => ({
     return callCount === 1 ? "Mock Title" : "Updated Mock Title";
   }),
 }));
-import { AuthProvider } from "../../app/contexts/AuthContext";
+import { AuthProvider } from "~/vibes-diy/app/contexts/AuthContext.js";
 
 // Mock AuthContext to avoid state updates during tests
-vi.mock("../../app/contexts/AuthContext", () => {
+vi.mock("~/vibes-diy/app/contexts/AuthContext.js", () => {
   return {
     AuthProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
     useAuth: () => ({
@@ -29,8 +30,8 @@ vi.mock("../../app/contexts/AuthContext", () => {
     }),
   };
 });
-import type { AiChatMessage, ChatMessage } from "../../app/types/chat";
-import { parseContent } from "../../app/utils/segmentParser";
+import type { AiChatMessage, ChatMessage } from "~/vibes-diy/app/types/chat.js";
+import { parseContent } from "~/vibes-diy/app/utils/segmentParser.js";
 
 // Helper function to convert chunks into SSE format
 function formatAsSSE(chunks: string[]): string[] {
@@ -58,23 +59,22 @@ function formatAsSSE(chunks: string[]): string[] {
 }
 
 // Mock the prompts module
-vi.mock("../../app/prompts", () => ({
+vi.mock("~/vibes-diy/app/prompts.js", () => ({
   makeBaseSystemPrompt: vi.fn().mockResolvedValue("Mocked system prompt"),
 }));
 
 // Mock the provisioning module
-vi.mock("../../app/config/provisioning");
+vi.mock("~/vibes-diy/app/config/provisioning.js");
 
 // Import the mocked module
-import { getCredits } from "../../app/config/provisioning";
-import { createOrUpdateKeyViaEdgeFunction } from "../../app/services/apiKeyService";
-import type { DocBase } from "use-fireproof";
+import { getCredits } from "~/vibes-diy/app/config/provisioning.js";
+import { createOrUpdateKeyViaEdgeFunction } from "~/vibes-diy/app/services/apiKeyService.js";
 
 // Mock the apiKeyService module
-vi.mock("../../app/services/apiKeyService");
+vi.mock("~/vibes-diy/app/services/apiKeyService.js");
 
 // Mock the utils/streamHandler to avoid real streaming and loops
-vi.mock("../../app/utils/streamHandler", () => ({
+vi.mock("~/vibes-diy/app/utils/streamHandler.js", () => ({
   streamAI: vi.fn(
     async (
       _model: string,
@@ -92,7 +92,7 @@ vi.mock("../../app/utils/streamHandler", () => ({
 }));
 
 // Mock the env module
-vi.mock("../../app/config/env", () => ({
+vi.mock("~/vibes-diy/app/config/env.js", () => ({
   CALLAI_API_KEY: "mock-callai-api-key-for-testing",
   SETTINGS_DBNAME: "test-chat-history",
   GA_TRACKING_ID: "mock-ga-tracking-id",
@@ -194,8 +194,9 @@ const mergeUserMessageImpl = (data?: { text: string }) => {
 // Create a spy wrapping the implementation
 const mockMergeUserMessage = vi.fn(mergeUserMessageImpl);
 
+import type { DocBase } from "use-fireproof";
 // Mock the useSession hook
-vi.mock("../../app/hooks/useSession", () => {
+vi.mock("~/vibes-diy/app/hooks/useSession.js", () => {
   return {
     useSession: () => {
       // Don't reset here, reset is done in beforeEach
@@ -524,7 +525,7 @@ export default Timer;`,
 });
 
 // Mock the useSessionMessages hook
-vi.mock("../../app/hooks/useSessionMessages", () => {
+vi.mock("~/vibes-diy/app/hooks/useSessionMessages.js", () => {
   // Track messages across test runs
   const messagesStore: Record<string, ChatMessage[]> = {};
 

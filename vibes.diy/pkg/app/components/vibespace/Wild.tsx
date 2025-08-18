@@ -1,5 +1,5 @@
 import type { ReactElement, CSSProperties } from "react";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 // Define the CSS keyframes and animations
 const wildStyles = {

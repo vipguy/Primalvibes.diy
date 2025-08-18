@@ -1,13 +1,13 @@
 import type { ChangeEvent } from "react";
-import { useCallback, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useFireproof } from "use-fireproof";
-import { HomeIcon } from "../components/SessionSidebar/HomeIcon";
-import SimpleAppLayout from "../components/SimpleAppLayout";
-import { SETTINGS_DBNAME } from "../config/env";
-import { useAuth } from "../contexts/AuthContext";
-import modelsList from "../data/models.json";
-import type { UserSettings } from "../types/settings";
+import { HomeIcon } from "../components/SessionSidebar/HomeIcon.js";
+import SimpleAppLayout from "../components/SimpleAppLayout.js";
+import { SETTINGS_DBNAME } from "../config/env.js";
+import { useAuth } from "../contexts/AuthContext.js";
+import modelsList from "../data/models.json" with { type: "json" };
+import type { UserSettings } from "../types/settings.js";
 
 export function meta() {
   return [

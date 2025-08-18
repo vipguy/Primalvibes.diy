@@ -1,7 +1,8 @@
 import { render, screen } from "@testing-library/react";
+import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { mockUseAuth, resetMockAuthState } from "./__mocks__/useAuth";
-import { ErrorBoundary, Layout } from "../app/root";
+import { mockUseAuth, resetMockAuthState } from "./__mocks__/useAuth.js";
+import { ErrorBoundary, Layout } from "~/vibes-diy/app/root.js";
 
 // Mock React Router components to avoid HTML validation errors
 vi.mock("react-router", () => ({
@@ -49,7 +50,7 @@ vi.mock("react-cookie-consent", () => ({
 }));
 
 // Mock the CookieConsentContext
-vi.mock("../app/contexts/CookieConsentContext", () => ({
+vi.mock("~/vibes-diy/app/contexts/CookieConsentContext.js", () => ({
   useCookieConsent: () => ({
     messageHasBeenSent: false,
     setMessageHasBeenSent: vi.fn(),
@@ -70,7 +71,7 @@ vi.mock("use-fireproof", () => ({
 }));
 
 // Mock the useSimpleChat hook
-vi.mock("../app/hooks/useSimpleChat", () => ({
+vi.mock("~/vibes-diy/app/hooks/useSimpleChat.js", () => ({
   useSimpleChat: () => ({
     needsLogin: false,
     docs: [],
@@ -90,7 +91,7 @@ vi.mock("../app/hooks/useSimpleChat", () => ({
 }));
 
 // Mock the useAuth hook
-vi.mock("../app/contexts/AuthContext", () => ({
+vi.mock("~/vibes-diy/app/contexts/AuthContext.js", () => ({
   useAuth: mockUseAuth,
   AuthProvider: ({ children }: { children: React.ReactNode }) => children,
 }));

@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 /**
  * Central configuration file for environment variables
  * Provides fallback values for required environment variables

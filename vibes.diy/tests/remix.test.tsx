@@ -1,11 +1,12 @@
+import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { AuthContext } from "~/contexts/AuthContext";
-import type { TokenPayload } from "~/utils/auth";
-import Remix from "../app/routes/remix";
+import { AuthContext } from "~/vibes-diy/app/contexts/AuthContext.js";
+import type { TokenPayload } from "~/vibes-diy/app/utils/auth.js";
+import Remix from "~/vibes-diy/app/routes/remix.js";
 
 // Mock the Session hooks
-vi.mock("../app/hooks/useSession", () => ({
+vi.mock("~/vibes-diy/app/hooks/useSession", () => ({
   useSession: () => ({
     session: { _id: "test-session-id" },
     sessionDatabase: {
@@ -55,7 +56,7 @@ const renderWithAuthContext = (
 };
 
 // Mock the API Key hook
-vi.mock("../app/hooks/useApiKey", () => ({
+vi.mock("~/vibes-diy/app/hooks/useApiKey", () => ({
   useApiKey: () => ({
     apiKey: "test-api-key",
   }),

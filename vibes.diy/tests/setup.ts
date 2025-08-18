@@ -6,8 +6,11 @@ import React from "react";
 import "./moduleSetup";
 import type { LinkProps } from "react-router";
 
+process.env.VITE_CLOUD_SESSION_TOKEN_PUBLIC =
+  "zeWndr5LEoaySgKSo2aZniYqUk2BbKBgWfQgK1UtPLwnqt7UTicz6zMeM2VpzLBdfTNxQVKFptEY2CCUsHr3Dmatm211WrKqfWNwfDSoW3ZCgzKx35ZqzfuLUgPjudQkjRNr8g2A7HweArkPfKdUyRgJCvH4XJ4QHxLxb25pDt2pU";
+
 // Mock the makeBaseSystemPrompt function
-vi.mock("../app/prompts", () => ({
+vi.mock("~/vibes-diy/app/prompts", () => ({
   makeBaseSystemPrompt: vi.fn().mockReturnValue("mocked system prompt"),
   RESPONSE_FORMAT: {
     dependencies: {
@@ -100,6 +103,7 @@ Object.assign(navigator, {
 });
 
 // Mock TextEncoder if needed
+/*
 if (typeof TextEncoder === "undefined") {
   global.TextEncoder = class TextEncoder {
     encoding = "utf-8";
@@ -120,3 +124,4 @@ if (typeof TextEncoder === "undefined") {
     }
   };
 }
+*/

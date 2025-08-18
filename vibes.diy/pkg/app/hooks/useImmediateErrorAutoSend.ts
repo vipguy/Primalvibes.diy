@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
-import type { RuntimeError } from "./useRuntimeErrors";
-import type { UserChatMessageDocument } from "../types/chat";
+import type { RuntimeError } from "./useRuntimeErrors.js";
+import type { UserChatMessageDocument } from "../types/chat.js";
 
 interface Params {
   immediateErrors: RuntimeError[];

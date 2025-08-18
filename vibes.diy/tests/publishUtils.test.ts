@@ -7,17 +7,17 @@ import {
   vi,
   type Mock,
 } from "vitest";
-import { normalizeComponentExports } from "../app/utils/normalizeComponentExports";
-import { publishApp } from "../app/utils/publishUtils";
+import { normalizeComponentExports } from "~/vibes-diy/app/utils/normalizeComponentExports.js";
+import { publishApp } from "~/vibes-diy/app/utils/publishUtils.js";
 
 // Mock dependencies
 vi.mock("use-fireproof");
-vi.mock("../app/utils/databaseManager");
-vi.mock("../app/utils/normalizeComponentExports");
+vi.mock("~/vibes-diy/app/utils/databaseManager");
+vi.mock("~/vibes-diy/app/utils/normalizeComponentExports");
 
 // Import mocked modules
 import { fireproof } from "use-fireproof";
-import { getSessionDatabaseName } from "../app/utils/databaseManager";
+import { getSessionDatabaseName } from "~/vibes-diy/app/utils/databaseManager.js";
 
 // We need to mock the import.meta.env
 vi.stubGlobal("import", {

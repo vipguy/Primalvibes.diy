@@ -1,12 +1,13 @@
+import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { AuthContext } from "../app/contexts/AuthContext";
-import UnifiedSession from "../app/routes/home";
-import { MockThemeProvider } from "./utils/MockThemeProvider";
+import { AuthContext } from "~/vibes-diy/app/contexts/AuthContext.js";
+import UnifiedSession from "~/vibes-diy/app/routes/home.js";
+import { MockThemeProvider } from "./utils/MockThemeProvider.js";
 
 // Mock the CookieConsentContext
-vi.mock("../app/contexts/CookieConsentContext", () => ({
+vi.mock("~/vibes-diy/app/contexts/CookieConsentContext", () => ({
   useCookieConsent: () => ({
     messageHasBeenSent: false,
     setMessageHasBeenSent: vi.fn(),
@@ -17,7 +18,7 @@ vi.mock("../app/contexts/CookieConsentContext", () => ({
 }));
 
 // Mock dependencies
-vi.mock("../app/hooks/useSimpleChat", () => ({
+vi.mock("~/vibes-diy/app/hooks/useSimpleChat", () => ({
   useSimpleChat: () => ({
     docs: [],
     input: "",
@@ -36,7 +37,7 @@ vi.mock("../app/hooks/useSimpleChat", () => ({
 }));
 
 // Mock the useSession hook
-vi.mock("../app/hooks/useSession", () => ({
+vi.mock("~/vibes-diy/app/hooks/useSession", () => ({
   useSession: () => ({
     session: null,
     loading: false,
@@ -70,16 +71,16 @@ vi.mock("react-router-dom", async () => {
 });
 
 // Mock for the utility functions
-vi.mock("../app/utils/sharing", () => ({
+vi.mock("~/vibes-diy/app/utils/sharing", () => ({
   decodeStateFromUrl: () => ({ code: "", dependencies: {} }),
 }));
 
-vi.mock("../app/components/SessionSidebar/utils", () => ({
+vi.mock("~/vibes-diy/app/components/SessionSidebar/utils", () => ({
   encodeTitle: (title: string) => title,
 }));
 
 // Mock AppLayout component to make testing easier
-vi.mock("../app/components/AppLayout", () => {
+vi.mock("~/vibes-diy/app/components/AppLayout", () => {
   return {
     __esModule: true,
     default: ({
@@ -112,7 +113,7 @@ vi.mock("../app/components/AppLayout", () => {
 });
 
 // Mock our ChatInterface
-vi.mock("../app/components/ChatInterface", () => {
+vi.mock("~/vibes-diy/app/components/ChatInterface", () => {
   return {
     __esModule: true,
     default: (_props: unknown) => {
@@ -128,7 +129,7 @@ vi.mock("../app/components/ChatInterface", () => {
 });
 
 // Mock ResultPreview
-vi.mock("../app/components/ResultPreview/ResultPreview", () => {
+vi.mock("~/vibes-diy/app/components/ResultPreview/ResultPreview", () => {
   return {
     __esModule: true,
     default: (_props: unknown) => {

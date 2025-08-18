@@ -1,19 +1,19 @@
 import type { DocBase } from "use-fireproof";
-import type { RuntimeError } from "../hooks/useRuntimeErrors";
-import type { ViewType } from "../utils/ViewState"; // Import ViewType
-export type { ViewType } from "../utils/ViewState"; // Re-export ViewType
+import type { RuntimeError } from "../hooks/useRuntimeErrors.js";
+import type { ViewType } from "../utils/ViewState.js"; // Import ViewType
+export type { ViewType } from "../utils/ViewState.js"; // Re-export ViewType
 
 // ===== Vibe Document Type =====
 export interface VibeDocument {
   readonly _id: "vibe";
-  readonly title: string;
-  readonly encodedTitle: string;
-  readonly remixOf: string;
+  title: string;
+  encodedTitle: string;
+  remixOf: string;
   readonly created_at: number;
   readonly slug?: string;
   readonly favorite?: boolean;
-  readonly publishedUrl?: string;
-  readonly firehoseShared?: boolean;
+  publishedUrl?: string;
+  firehoseShared?: boolean;
 }
 
 // ===== Content Segment Types =====
@@ -86,7 +86,7 @@ export type SessionOrScreenshot = SessionDocument | ScreenshotDocument;
 // ===== UI Enhanced Types =====
 // Enhanced types with additional UI properties
 export type ChatMessage = ChatMessageDocument & {
-  readonly text: string;
+  text: string;
   readonly timestamp?: number;
 };
 

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { trackErrorEvent } from "../utils/analytics";
+import { trackErrorEvent } from "../utils/analytics.js";
 
 export interface RuntimeError {
   type: string; // 'error' or 'unhandledrejection'

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import SimpleAppLayout from "./SimpleAppLayout.js";
 import VibesDIYLogo from "./VibesDIYLogo.js";

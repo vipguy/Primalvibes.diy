@@ -1,4 +1,4 @@
-import { memo } from "react";
+import React, { memo } from "react";
 import ReactMarkdown from "react-markdown";
 import StructuredMessage from "./StructuredMessage.js";
 import type {

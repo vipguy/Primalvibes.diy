@@ -1,4 +1,4 @@
-import type { Segment } from "../types/chat";
+import type { Segment } from "../types/chat.js";
 
 /**
  * Parse content into segments of markdown and code

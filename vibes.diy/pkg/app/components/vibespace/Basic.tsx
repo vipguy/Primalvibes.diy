@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import React from "react";
 
 // Define the structure of vibe documents
 interface VibeDocument {

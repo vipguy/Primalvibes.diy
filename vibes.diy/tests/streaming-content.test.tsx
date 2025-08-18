@@ -1,8 +1,9 @@
 import { describe, test, expect } from "vitest";
+import React from "react";
 import { render, screen } from "@testing-library/react";
-import StructuredMessage from "../app/components/StructuredMessage";
-import type { Segment } from "../app/types/chat";
-import { MockThemeProvider } from "./utils/MockThemeProvider";
+import StructuredMessage from "~/vibes-diy/app/components/StructuredMessage.js";
+import type { Segment } from "~/vibes-diy/app/types/chat.js";
+import { MockThemeProvider } from "./utils/MockThemeProvider.js";
 
 describe("Streaming Content Tests", () => {
   test("renders code and markdown segments", () => {

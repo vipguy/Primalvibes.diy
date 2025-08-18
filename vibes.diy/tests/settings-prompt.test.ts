@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { makeBaseSystemPrompt } from "../app/prompts";
+import { makeBaseSystemPrompt } from "~/vibes-diy/app/prompts.js";
 
 // Mock the import.meta.glob function
-vi.mock("../app/prompts", async () => {
+vi.mock("~/vibes-diy/app/prompts", async () => {
   // Create a mock implementation that simulates the behavior of the original
   const llmsModules = {
     "./llms/module1.json": {
@@ -149,9 +149,9 @@ describe("Settings and Prompt Integration", () => {
 
   it("handles empty settings document gracefully", async () => {
     const model = "test-model";
-    const settingsDoc = { _id: "user_settings" };
+    // const settingsDoc = { _id: "user_settings" };
 
-    const prompt = await makeBaseSystemPrompt(model, settingsDoc);
+    const prompt = await makeBaseSystemPrompt(model);
 
     // Should fall back to defaults
     expect(prompt).toContain("have a DIY zine vibe");

@@ -1,26 +1,29 @@
 import { cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useSimpleChat } from "../app/hooks/useSimpleChat";
-import type { AiChatMessage, ChatMessage } from "../app/types/chat";
-import { parseContent, parseDependencies } from "../app/utils/segmentParser";
+import { useSimpleChat } from "~/vibes-diy/app/hooks/useSimpleChat.js";
+import type { AiChatMessage, ChatMessage } from "~/vibes-diy/app/types/chat.js";
+import {
+  parseContent,
+  parseDependencies,
+} from "~/vibes-diy/app/utils/segmentParser.js";
 
 // Mock the prompts module
-vi.mock("../app/prompts", () => ({
+vi.mock("~/vibes-diy/app/prompts", () => ({
   makeBaseSystemPrompt: vi.fn().mockResolvedValue("Mocked system prompt"),
 }));
 
 // Mock the provisioning module
-vi.mock("../app/config/provisioning");
+vi.mock("~/vibes-diy/app/config/provisioning");
 
 // Import the mocked module
-import { getCredits } from "../app/config/provisioning";
-import { createOrUpdateKeyViaEdgeFunction } from "../app/services/apiKeyService";
+import { getCredits } from "~/vibes-diy/app/config/provisioning.js";
+import { createOrUpdateKeyViaEdgeFunction } from "~/vibes-diy/app/services/apiKeyService.js";
 
 // Mock the apiKeyService module
-vi.mock("../app/services/apiKeyService");
+vi.mock("~/vibes-diy/app/services/apiKeyService.js");
 
 // Mock the env module
-vi.mock("../app/config/env", () => ({
+vi.mock("~/vibes-diy/app/config/env.js", () => ({
   CALLAI_API_KEY: "mock-callai-api-key-for-testing",
   SETTINGS_DBNAME: "test-chat-history",
 }));
@@ -132,7 +135,7 @@ const mergeUserMessageImpl = (data: Record<string, unknown>) => {
 const mockMergeUserMessage = vi.fn(mergeUserMessageImpl);
 
 // Mock the useSession hook
-vi.mock("../app/hooks/useSession", () => {
+vi.mock("~/vibes-diy/app/hooks/useSession", () => {
   return {
     useSession: () => {
       // Don't reset here, reset is done in beforeEach
@@ -197,7 +200,7 @@ vi.mock("../app/hooks/useSession", () => {
 });
 
 // Mock the useSessionMessages hook
-vi.mock("../app/hooks/useSessionMessages", () => {
+vi.mock("~/vibes-diy/app/hooks/useSessionMessages", () => {
   // Track messages across test runs
   const messagesStore: Record<string, ChatMessage[]> = {};
 
@@ -520,7 +523,7 @@ Here's how to use React.
 });
 
 // Mock the AuthContext module
-vi.mock("../app/contexts/AuthContext", () => {
+vi.mock("~/vibes-diy/app/contexts/AuthContext", () => {
   // Create a mock AuthContext that will be used by useAuth inside the hook
   const mockAuthContext = {
     isAuthenticated: true,

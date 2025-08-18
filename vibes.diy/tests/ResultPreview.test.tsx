@@ -1,8 +1,9 @@
 import { vi, describe, it, expect, beforeEach, afterAll } from "vitest";
 import { render, screen, act, waitFor } from "@testing-library/react";
-import ResultPreview from "../app/components/ResultPreview/ResultPreview";
-import { mockResultPreviewProps } from "./mockData";
-import { MockThemeProvider } from "./utils/MockThemeProvider";
+import ResultPreview from "~/vibes-diy/app/components/ResultPreview/ResultPreview.js";
+import { mockResultPreviewProps } from "./mockData.js";
+import { MockThemeProvider } from "./utils/MockThemeProvider.js";
+import React from "react";
 
 // Mock clipboard API
 Object.assign(navigator, {
@@ -35,19 +36,22 @@ vi.mock("@codesandbox/sandpack-react", () => ({
 }));
 
 // Mock WelcomeScreen
-vi.mock("../app/components/ResultPreview/WelcomeScreen", () => ({
+vi.mock("~/vibes-diy/app/components/ResultPreview/WelcomeScreen", () => ({
   default: () => <div data-testid="welcome-screen">Welcome Screen Content</div>,
 }));
 
 // Mock the Sandpack scroll controller
-vi.mock("../app/components/ResultPreview/SandpackScrollController", () => ({
-  default: () => null,
-}));
+vi.mock(
+  "~/vibes-diy/app/components/ResultPreview/SandpackScrollController",
+  () => ({
+    default: () => null,
+  }),
+);
 
 // Mock iframe behavior
 
 // Mock the IframeContent component to avoid iframe issues in tests
-vi.mock("../app/components/ResultPreview/IframeContent", () => ({
+vi.mock("~/vibes-diy/app/components/ResultPreview/IframeContent", () => ({
   default: ({ activeView }: { activeView: string }) => (
     <div data-testid="sandpack-provider" className="h-full">
       <div
@@ -515,7 +519,7 @@ describe("ResultPreview", () => {
     });
 
     // We need to spoof the API key that would come from config
-    vi.mock("../app/config/env", () => ({
+    vi.mock("~/vibes-diy/app/config/env", () => ({
       CALLAI_API_KEY: "test-api-key-12345",
     }));
 

@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react";
-import { useSession } from "../app/hooks/useSession";
+import { useSession } from "~/vibes-diy/app/hooks/useSession.js";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 
 // Mock the database opening function - this is what we need to track
@@ -13,7 +13,7 @@ const mockSubmitUserMessage = vi.fn().mockImplementation(() => {
 });
 
 // Mock all required dependencies
-vi.mock("../app/config/env", () => ({
+vi.mock("~/vibes-diy/app/config/env", () => ({
   SETTINGS_DBNAME: "test-chat-history",
 }));
 
@@ -27,7 +27,7 @@ vi.mock("use-fireproof", () => ({
   }),
 }));
 
-vi.mock("../app/hooks/useLazyFireproof", () => ({
+vi.mock("~/vibes-diy/app/hooks/useLazyFireproof", () => ({
   useLazyFireproof: () => ({
     useDocument: () => ({
       doc: { _id: "test-id", type: "user" },
@@ -41,7 +41,7 @@ vi.mock("../app/hooks/useLazyFireproof", () => ({
   }),
 }));
 
-vi.mock("../app/utils/databaseManager", () => ({
+vi.mock("~/vibes-diy/app/utils/databaseManager", () => ({
   getSessionDatabaseName: vi
     .fn()
     .mockImplementation((id) => `session-${id || "default"}`),
@@ -108,7 +108,7 @@ describe("useSession", () => {
     const { rerender } = renderHook(
       // We use any to avoid TypeScript complexity with hook return types
       ({ id }) => useSession(id),
-      { initialProps: { id: undefined } },
+      { initialProps: { id: undefined } as { id: string | undefined } },
     );
 
     // Reset the mock counter after initial render

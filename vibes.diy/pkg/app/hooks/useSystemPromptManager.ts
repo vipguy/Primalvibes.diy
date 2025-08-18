@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import { APP_MODE } from "../config/env";
-import { makeBaseSystemPrompt } from "../prompts";
-import type { UserSettings } from "../types/settings";
+import { APP_MODE } from "../config/env.js";
+import { makeBaseSystemPrompt } from "../prompts.js";
+import type { UserSettings } from "../types/settings.js";
 
 // Model constant used for system prompts
 const CODING_MODEL = "anthropic/claude-sonnet-4";

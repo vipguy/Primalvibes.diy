@@ -1,4 +1,4 @@
-import type { Segment } from "../types/chat";
+import type { Segment } from "../types/chat.js";
 import { callAI, type Message } from "call-ai";
 
 /**

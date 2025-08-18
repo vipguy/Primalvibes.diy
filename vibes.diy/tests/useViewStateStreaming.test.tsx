@@ -5,7 +5,7 @@ import {
   useViewState,
   type ViewState,
   type ViewStateProps,
-} from "../app/utils/ViewState";
+} from "~/vibes-diy/app/utils/ViewState.js";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 
 // Mock react-router-dom hooks

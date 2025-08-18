@@ -1,9 +1,9 @@
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { createWrapper } from "./setup";
+import { createWrapper } from "./setup.js";
 
 // --- Dynamic mocks for useApiKey ---------------------------
-import * as ApiKeyModule from "vibes-diy";
+import * as ApiKeyModule from "~/vibes-diy/app/hooks/useApiKey.js";
 
 // Track mutable auth state between renders
 let isAuthenticated = false;
@@ -19,14 +19,17 @@ const refreshKeyMock = vi.fn(async () => {
 });
 
 // Spy on useApiKey so we can inject our custom refreshKey
-vi.spyOn(ApiKeyModule, "useApiKey").mockImplementation(() => ({
-  ensureApiKey: vi.fn(),
-  refreshKey: refreshKeyMock,
-}));
+vi.spyOn(ApiKeyModule, "useApiKey").mockImplementation(
+  () =>
+    ({
+      ensureApiKey: vi.fn(),
+      refreshKey: refreshKeyMock,
+    }) as unknown as ReturnType<typeof ApiKeyModule.useApiKey>,
+);
 
 // Import the hook *after* mocks are set up
-import { useSimpleChat } from "../../app/hooks/useSimpleChat";
-import * as AuthModule from "../../app/contexts/AuthContext";
+import { useSimpleChat } from "~/vibes-diy/app/hooks/useSimpleChat.js";
+import * as AuthModule from "~/vibes-diy/app/contexts/AuthContext.js";
 
 // ---------------------------------------------------------------------------
 

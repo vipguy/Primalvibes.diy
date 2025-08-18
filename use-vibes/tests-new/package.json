@@ -13,7 +13,7 @@
     "url": "https://github.com/fireproof-storage/call-ai/issues"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "core-cli tsc",
     "test": "vitest --run",
     "test:integration": "vitest simple.integration",
     "test:all": "pnpm test && pnpm test:integration"

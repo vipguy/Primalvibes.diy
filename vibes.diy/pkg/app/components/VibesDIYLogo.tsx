@@ -1,7 +1,7 @@
 import React from "react";
-import DIYLogo from "./diyLogo-svg";
-import { dark } from "./colorways";
-import { useTheme } from "../contexts/ThemeContext";
+import DIYLogo from "./diyLogo-svg.js";
+import { dark } from "./colorways.js";
+import { useTheme } from "../contexts/ThemeContext.js";
 
 type ColorwayName = keyof typeof dark;
 

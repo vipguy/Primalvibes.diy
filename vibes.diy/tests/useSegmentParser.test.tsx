@@ -1,35 +1,39 @@
 import { describe, it, expect, vi } from "vitest";
-import { parseContent, parseDependencies } from "../app/utils/segmentParser";
-import type { ChatMessage, AiChatMessage } from "../app/types/chat";
+import {
+  parseContent,
+  parseDependencies,
+} from "~/vibes-diy/app/utils/segmentParser.js";
+import type { ChatMessage, AiChatMessage } from "~/vibes-diy/app/types/chat.js";
 
 // Mock the prompts module
-vi.mock("../app/prompts", () => ({
+vi.mock("~/vibes-diy/app/prompts", () => ({
   makeBaseSystemPrompt: vi.fn().mockResolvedValue("Mocked system prompt"),
 }));
 
 // Mock the provisioning module
-vi.mock("../app/config/provisioning");
+vi.mock("~/vibes-diy/app/config/provisioning");
 
 // Mock the env module
-vi.mock("../app/config/env", () => ({
+vi.mock("~/vibes-diy/app/config/env", () => ({
   CALLAI_API_KEY: "mock-callai-api-key-for-testing",
   SETTINGS_DBNAME: "test-chat-history",
 }));
 
 // Define shared state and reset function *outside* the mock factory
-interface MockDoc {
-  _id?: string;
-  type: string;
-  text: string;
-  session_id: string;
-  timestamp?: number;
-  created_at?: number;
-  segments?: AiChatMessage["segments"][];
-  dependenciesString?: string;
-  isStreaming?: boolean;
-  model?: string;
-  dataUrl?: string; // For screenshot docs
-}
+// interface MockDoc {
+//   _id?: string;
+//   type: string;
+//   text: string;
+//   session_id: string;
+//   timestamp?: number;
+//   created_at?: number;
+//   segments?: AiChatMessage["segments"][];
+//   dependenciesString?: string;
+//   isStreaming?: boolean;
+//   model?: string;
+//   dataUrl?: string; // For screenshot docs
+// }
+type MockDoc = ChatMessage | AiChatMessage;
 const mockDocs: MockDoc[] = [];
 
 const currentUserMessage: Partial<MockDoc> = {};
@@ -46,7 +50,7 @@ const mergeUserMessageImpl = (data: Partial<ChatMessage>) => {
 const mockMergeUserMessage = vi.fn(mergeUserMessageImpl);
 
 // Mock the useSession hook
-vi.mock("../app/hooks/useSession", () => {
+vi.mock("~/vibes-diy/app/hooks/useSession", () => {
   return {
     useSession: () => {
       // Don't reset here, reset is done in beforeEach
@@ -90,7 +94,7 @@ vi.mock("../app/hooks/useSession", () => {
           const newDoc = {
             ...currentUserMessage,
             _id: id,
-          };
+          } as MockDoc;
           mockDocs.push(newDoc);
           return Promise.resolve({ id });
         }),
@@ -105,7 +109,7 @@ vi.mock("../app/hooks/useSession", () => {
           const newDoc = {
             ...currentAiMessage,
             _id: id,
-          };
+          } as MockDoc;
           mockDocs.push(newDoc);
           return Promise.resolve({ id });
         }),
@@ -374,7 +378,7 @@ export default Timer;`,
 });
 
 // Mock the useSessionMessages hook
-vi.mock("../app/hooks/useSessionMessages", () => {
+vi.mock("~/vibes-diy/app/hooks/useSessionMessages", () => {
   // Track messages across test runs
   const messagesStore: Record<string, ChatMessage[]> = {};
 

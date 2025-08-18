@@ -1,23 +1,24 @@
+import React from "react";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // Import AuthContext only - the type is defined inline in the file
-import { AuthContext } from "../app/contexts/AuthContext";
-import { useVibes } from "../app/hooks/useVibes";
+import { AuthContext } from "~/vibes-diy/app/contexts/AuthContext.js";
+import { useVibes } from "~/vibes-diy/app/hooks/useVibes.js";
 // Import VibeDocument from the correct location
-import type { VibeDocument } from "../app/types/chat";
+import type { VibeDocument } from "~/vibes-diy/app/types/chat.js";
 // Import TokenPayload for our mock
-import type { TokenPayload } from "../app/utils/auth";
-import type { LocalVibe } from "../app/utils/vibeUtils";
+import type { TokenPayload } from "~/vibes-diy/app/utils/auth.js";
+import type { LocalVibe } from "~/vibes-diy/app/utils/vibeUtils.js";
 import {
   deleteVibeDatabase,
   listLocalVibeIds,
   listLocalVibes,
   toggleVibeFavorite,
-} from "../app/utils/vibeUtils";
+} from "~/vibes-diy/app/utils/vibeUtils.js";
 
 // Mock vibeUtils
-vi.mock("../app/utils/vibeUtils", () => ({
+vi.mock("~/vibes-diy/app/utils/vibeUtils", () => ({
   listLocalVibes: vi.fn(),
   listLocalVibeIds: vi.fn(),
   deleteVibeDatabase: vi.fn(),
@@ -26,9 +27,11 @@ vi.mock("../app/utils/vibeUtils", () => ({
 }));
 
 // Mock the AuthContext instead of the hook
-vi.mock("../app/contexts/AuthContext", async (importOriginal) => {
+vi.mock("~/vibes-diy/app/contexts/AuthContext.js", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("../app/contexts/AuthContext")>();
+    await importOriginal<
+      typeof import("~/vibes-diy/app/contexts/AuthContext.js")
+    >();
   return {
     ...actual, // Keep exports
     // No need to mock useAuth as we'll provide context value through wrapper

@@ -1,5 +1,5 @@
 import React from "react";
-import { ThemeProvider } from "./contexts/ThemeContext";
+import { ThemeProvider } from "./contexts/ThemeContext.js";
 import type { MetaFunction } from "react-router";
 import {
   Links,
@@ -11,14 +11,14 @@ import {
 } from "react-router";
 
 import { PostHogProvider } from "posthog-js/react";
-import { POSTHOG_KEY, POSTHOG_HOST, IS_DEV_MODE } from "./config/env";
-import type { Route } from "./+types/root";
+import { POSTHOG_KEY, POSTHOG_HOST, IS_DEV_MODE } from "./config/env.js";
+import type { Route } from "+types/root";
 import "./app.css";
-import ClientOnly from "./components/ClientOnly";
-import CookieBanner from "./components/CookieBanner";
-import { NeedsLoginModal } from "./components/NeedsLoginModal";
-import { AuthProvider } from "./contexts/AuthContext";
-import { CookieConsentProvider } from "./contexts/CookieConsentContext";
+import ClientOnly from "./components/ClientOnly.js";
+import CookieBanner from "./components/CookieBanner.js";
+import { NeedsLoginModal } from "./components/NeedsLoginModal.js";
+import { AuthProvider } from "./contexts/AuthContext.js";
+import { CookieConsentProvider } from "./contexts/CookieConsentContext.js";
 
 export const links: Route.LinksFunction = () => [
   { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },

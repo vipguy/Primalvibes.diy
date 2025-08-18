@@ -1,5 +1,5 @@
 import type { ChangeEvent, KeyboardEvent } from "react";
-import { useEffect, memo, useCallback } from "react";
+import React, { useEffect, memo, useCallback } from "react";
 import type { ChatState } from "../types/chat.js";
 import VibesDIYLogo from "./VibesDIYLogo.js";
 

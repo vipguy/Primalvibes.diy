@@ -7,11 +7,14 @@ import {
   afterEach,
   type Mock,
 } from "vitest";
-import { listLocalVibes, deleteVibeDatabase } from "../app/utils/vibeUtils";
-import type { LocalVibe } from "../app/utils/vibeUtils";
+import {
+  listLocalVibes,
+  deleteVibeDatabase,
+} from "~/vibes-diy/app/utils/vibeUtils.js";
+import type { LocalVibe } from "~/vibes-diy/app/utils/vibeUtils.js";
 
 // Mock vibeUtils module
-vi.mock("../app/utils/vibeUtils", () => {
+vi.mock("~/vibes-diy/app/utils/vibeUtils", () => {
   return {
     listLocalVibes: vi.fn(),
     deleteVibeDatabase: vi.fn().mockResolvedValue(undefined),

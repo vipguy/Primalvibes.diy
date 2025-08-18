@@ -1,11 +1,15 @@
+import React from "react";
 import { render, screen } from "@testing-library/react";
 import { vi, describe, test, expect } from "vitest";
-import MessageList from "../app/components/MessageList";
-import type { UserChatMessage, AiChatMessage } from "../app/types/chat";
-import { MockThemeProvider } from "./utils/MockThemeProvider";
+import MessageList from "~/vibes-diy/app/components/MessageList.js";
+import type {
+  UserChatMessage,
+  AiChatMessage,
+} from "~/vibes-diy/app/types/chat.js";
+import { MockThemeProvider } from "./utils/MockThemeProvider.js";
 
 // Mock the Message component
-vi.mock("../app/components/Message", () => ({
+vi.mock("~/vibes-diy/app/components/Message", () => ({
   default: ({ message }: { message: UserChatMessage | AiChatMessage }) => (
     <div data-testid="mock-message">{message.text}</div>
   ),

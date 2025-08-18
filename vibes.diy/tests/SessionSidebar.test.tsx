@@ -1,15 +1,15 @@
 import { act, fireEvent, screen, render } from "@testing-library/react";
 // Vitest will automatically use mocks from __mocks__ directory
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { resetMockAuthState, setMockAuthState } from "./__mocks__/useAuth";
-import SessionSidebar from "../app/components/SessionSidebar";
-import { mockSessionSidebarProps } from "./mockData";
-import { MockThemeProvider } from "./utils/MockThemeProvider";
+import { resetMockAuthState, setMockAuthState } from "./__mocks__/useAuth.js";
+import SessionSidebar from "~/vibes-diy/app/components/SessionSidebar.js";
+import { mockSessionSidebarProps } from "./mockData.js";
+import { MockThemeProvider } from "./utils/MockThemeProvider.js";
 import React from "react";
 
 // Mock AuthContext to use the mocked useAuth implementation so components don’t require an AuthProvider
-vi.mock("../app/contexts/AuthContext", async () => {
-  const mockAuth = await import("./__mocks__/useAuth");
+vi.mock("~/vibes-diy/app/contexts/AuthContext", async () => {
+  const mockAuth = await import("./__mocks__/useAuth.js");
   return {
     useAuth: mockAuth.mockUseAuth,
     AuthProvider: ({ children }: { children: React.ReactNode }) => children,
@@ -20,17 +20,17 @@ vi.mock("../app/contexts/AuthContext", async () => {
 // (setMockAuthState / resetMockAuthState imported below)
 
 // Mock the auth utility functions
-vi.mock("../app/utils/auth", () => ({
+vi.mock("~/vibes-diy/app/utils/auth", () => ({
   initiateAuthFlow: vi.fn(),
 }));
 
-vi.mock("../app/utils/analytics", () => ({
+vi.mock("~/vibes-diy/app/utils/analytics", () => ({
   trackAuthClick: vi.fn(),
 }));
 
-import { trackAuthClick } from "../app/utils/analytics";
+import { trackAuthClick } from "~/vibes-diy/app/utils/analytics.js";
 // Import mocked functions
-import { initiateAuthFlow } from "../app/utils/auth";
+import { initiateAuthFlow } from "~/vibes-diy/app/utils/auth.js";
 
 // Mock Link component from react-router
 vi.mock("react-router", () => {

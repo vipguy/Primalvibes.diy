@@ -1,5 +1,8 @@
 import { vi, describe, it, expect, beforeEach } from "vitest";
-import { makeBaseSystemPrompt, RESPONSE_FORMAT } from "../app/prompts";
+import {
+  makeBaseSystemPrompt,
+  RESPONSE_FORMAT,
+} from "~/vibes-diy/app/prompts.js";
 
 // We need to mock the module properly, not test the real implementation yet
 vi.mock("../app/prompts", () => ({

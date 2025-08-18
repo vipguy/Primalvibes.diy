@@ -1,3 +1,4 @@
+import React from "react";
 import SimpleAppLayout from "../components/SimpleAppLayout.js";
 import { HomeIcon } from "../components/SessionSidebar/HomeIcon.js";
 import VibesDIYLogo from "../components/VibesDIYLogo.js";

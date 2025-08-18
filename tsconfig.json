@@ -4,8 +4,16 @@
 
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "lib": ["DOM", "DOM.Iterable", "ES2020"],
+    "lib": ["DOM", "DOM.Iterable", "ES2023"],
 
+    "paths": {
+      "//+types/root": [
+        "./vibes.diy/pkg/.react-router/types/app/+types/root.js"
+      ],
+      "~/vibes-diy/*": ["./vibes.diy/pkg/*"]
+    },
+
+    "resolveJsonModule": true,
     "jsx": "react",
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
@@ -18,7 +26,7 @@
     "skipLibCheck": true,
     "types": ["node", "deno"]
   },
-  "include": ["call-ai", "use-vibes", "vibes.diy"],
+  "include": ["call-ai/**/*", "use-vibes/**/*", "vibes.diy/**/*"],
   "exclude": [
     "**/dist/**",
     "**/node_modules/**",

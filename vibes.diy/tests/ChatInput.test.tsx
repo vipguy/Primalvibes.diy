@@ -1,8 +1,10 @@
+import React from "react";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import ChatInput from "../app/components/ChatInput";
-import type { ChatState } from "../app/types/chat";
-import { MockThemeProvider } from "./utils/MockThemeProvider";
+import ChatInput from "~/vibes-diy/app/components/ChatInput.js";
+import type { ChatState } from "~/vibes-diy/app/types/chat.js";
+import { MockThemeProvider } from "./utils/MockThemeProvider.js";
+import type { DeepWritable } from "ts-essentials";
 
 // Create mock functions we can control
 const onSend = vi.fn();
@@ -81,7 +83,7 @@ describe("ChatInput Component", () => {
 
   it("disables send button when isStreaming is true", () => {
     // Set isStreaming to true for this test
-    mockChatState.isStreaming = true;
+    (mockChatState as DeepWritable<typeof mockChatState>).isStreaming = true;
 
     render(
       <MockThemeProvider>
@@ -129,7 +131,7 @@ describe("ChatInput Component", () => {
 
   it("does not call sendMessage or onSend when Enter is pressed while streaming", () => {
     // Set isStreaming to true for this test
-    mockChatState.isStreaming = true;
+    (mockChatState as DeepWritable<typeof mockChatState>).isStreaming = true;
 
     render(
       <MockThemeProvider>
@@ -145,7 +147,7 @@ describe("ChatInput Component", () => {
   });
 
   it("does not call sendMessage or onSend when button is clicked while streaming", () => {
-    mockChatState.isStreaming = true;
+    (mockChatState as DeepWritable<typeof mockChatState>).isStreaming = true;
 
     render(
       <MockThemeProvider>

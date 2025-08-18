@@ -4,8 +4,9 @@
   "private": "true",
   "type": "module",
   "scripts": {
+    "postinstall": "react-router typegen",
     "tsc": "core-cli tsc",
-    "build": "react-router build",
+    "build": "react-router build; core-cli tsc",
     "dev": "netlify dev",
     "dev:router": "react-router dev",
     "start": "serve -s build/client",
@@ -24,6 +25,7 @@
     "publish": "core-cli build"
   },
   "dependencies": {
+    "@adviser/cement": "^0.4.25",
     "@monaco-editor/react": "^4.7.0",
     "@react-router/node": "^7.7.1",
     "@react-router/serve": "^7.7.1",
@@ -32,6 +34,7 @@
     "call-ai": "0.10.2",
     "isbot": "^5.1.25",
     "jose": "^6.0.10",
+    "monaco-editor": "^0.52.2",
     "multiformats": "^13.3.7",
     "netlify": "^23.1.4",
     "posthog-js": "^1.240.6",
@@ -39,13 +42,13 @@
     "react-cookie-consent": "^9.0.0",
     "react-dom": "^19.1.0",
     "react-ga4": "^2.1.0",
-    "react-hot-toast": "^2.5.2",
+    "react-hot-toast": "^2.6.0",
     "react-markdown": "^10.1.0",
     "react-router": "^7.7.1",
+    "ts-essentials": "^10.1.1",
     "use-fireproof": "0.20.5"
   },
   "devDependencies": {
-    "@improvements/vite-plugin-devtools-json": "^0.0.3",
     "@react-router/dev": "^7.7.1",
     "@tailwindcss/vite": "^4.1.2",
     "@testing-library/jest-dom": "^6.6.3",
@@ -68,6 +71,7 @@
     "tsx": "^4.19.3",
     "typescript": "^5.8.2",
     "vite": "^7.1.2",
+    "vite-plugin-devtools-json": "^0.4.1",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.1.1"
   }

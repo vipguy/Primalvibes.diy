@@ -1,5 +1,6 @@
 import { type ReactNode } from "react";
-import { ThemeContext } from "../../app/contexts/ThemeContext";
+import React from "react";
+import { ThemeContext } from "~/vibes-diy/app/contexts/ThemeContext.js";
 
 interface MockThemeProviderProps {
   isDarkMode?: boolean;

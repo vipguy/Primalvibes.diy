@@ -1,4 +1,4 @@
-import { fetchVibeMetadata, generateMetaHTML } from "./utils/meta-utils.ts";
+import { fetchVibeMetadata, generateMetaHTML } from "./utils/meta-utils.js";
 
 // Import the hardcoded firehose slug
 // Note: This import path works for edge functions accessing app config

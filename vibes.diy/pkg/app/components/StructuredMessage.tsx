@@ -1,6 +1,6 @@
-import { useRef, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
-import type { Segment, ViewType } from "../types/chat";
+import type { Segment, ViewType } from "../types/chat.js";
 
 interface StructuredMessageProps {
   segments: Segment[];

@@ -1,9 +1,10 @@
+import React from "react";
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import About from "../app/routes/about";
+import About from "~/vibes-diy/app/routes/about.js";
 
 // Mock the SimpleAppLayout component
-vi.mock("../app/components/SimpleAppLayout", () => ({
+vi.mock("~/vibes-diy/app/components/SimpleAppLayout.js", () => ({
   default: ({
     headerLeft,
     children,
@@ -19,12 +20,12 @@ vi.mock("../app/components/SimpleAppLayout", () => ({
 }));
 
 // Mock HomeIcon component
-vi.mock("../app/components/SessionSidebar/HomeIcon", () => ({
+vi.mock("~/vibes-diy/app/components/SessionSidebar/HomeIcon.js", () => ({
   HomeIcon: () => <div data-testid="home-icon" />,
 }));
 
 // Mock VibesDIYLogo component
-vi.mock("~/components/VibesDIYLogo", () => ({
+vi.mock("~/vibes-diy/app/components/VibesDIYLogo.js", () => ({
   default: () => <div data-testid="vibes-diy-logo" />,
 }));
 

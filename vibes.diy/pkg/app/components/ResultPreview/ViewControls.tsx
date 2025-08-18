@@ -1,6 +1,6 @@
 import React from "react";
-import type { ViewType } from "../../utils/ViewState";
-import { CodeIcon, DataIcon, PreviewIcon } from "../HeaderContent/SvgIcons";
+import type { ViewType } from "../../utils/ViewState.js";
+import { CodeIcon, DataIcon, PreviewIcon } from "../HeaderContent/SvgIcons.js";
 
 interface ViewControlsProps {
   viewControls: Record<

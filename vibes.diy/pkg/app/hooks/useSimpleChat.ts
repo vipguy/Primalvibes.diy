@@ -1,27 +1,27 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useAuth } from "../contexts/AuthContext";
-import type { ChatMessageDocument, ChatState } from "../types/chat";
-import type { UserSettings } from "../types/settings";
+import { useAuth } from "../contexts/AuthContext.js";
+import type { ChatMessageDocument, ChatState } from "../types/chat.js";
+import type { UserSettings } from "../types/settings.js";
 
 import { useFireproof } from "use-fireproof";
-import { SETTINGS_DBNAME } from "../config/env";
-import { saveErrorAsSystemMessage } from "./saveErrorAsSystemMessage";
-import { useApiKey } from "./useApiKey";
-import { useImmediateErrorAutoSend } from "./useImmediateErrorAutoSend";
+import { SETTINGS_DBNAME } from "../config/env.js";
+import { saveErrorAsSystemMessage } from "./saveErrorAsSystemMessage.js";
+import { useApiKey } from "./useApiKey.js";
+import { useImmediateErrorAutoSend } from "./useImmediateErrorAutoSend.js";
 import {
   type ErrorCategory,
   type RuntimeError,
   useRuntimeErrors,
-} from "./useRuntimeErrors";
-import { useSession } from "./useSession";
+} from "./useRuntimeErrors.js";
+import { useSession } from "./useSession.js";
 
-import { useMessageSelection } from "./useMessageSelection";
+import { useMessageSelection } from "./useMessageSelection.js";
 // Import our custom hooks
-import { checkCredits } from "./checkCredits";
-import type { SendMessageContext } from "./sendMessage";
-import { sendMessage as sendChatMessage } from "./sendMessage";
-import { useSystemPromptManager } from "./useSystemPromptManager";
-import { useThrottledUpdates } from "./useThrottledUpdates";
+import { checkCredits } from "./checkCredits.js";
+import type { SendMessageContext } from "./sendMessage.js";
+import { sendMessage as sendChatMessage } from "./sendMessage.js";
+import { useSystemPromptManager } from "./useSystemPromptManager.js";
+import { useThrottledUpdates } from "./useThrottledUpdates.js";
 
 // Constants
 const CODING_MODEL = "anthropic/claude-sonnet-4";

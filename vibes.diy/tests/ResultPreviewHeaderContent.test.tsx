@@ -1,27 +1,27 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
-import type { ChatMessageDocument } from "../app/types/chat";
+import type { ChatMessageDocument } from "~/vibes-diy/app/types/chat.js";
 
 // Mock all imports before importing the component to test
 vi.mock("react-router", () => ({
   useParams: vi.fn(),
 }));
 
-vi.mock("../app/hooks/useSession", () => ({
+vi.mock("~/vibes-diy/app/hooks/useSession", () => ({
   useSession: vi.fn(),
 }));
 
-vi.mock("../app/utils/ViewState", () => ({
+vi.mock("~/vibes-diy/app/utils/ViewState", () => ({
   useViewState: vi.fn(),
 }));
 
-vi.mock("../app/components/ResultPreview/usePublish", () => ({
+vi.mock("~/vibes-diy/app/components/ResultPreview/usePublish", () => ({
   usePublish: vi.fn(),
 }));
 
 // Mock child components
-vi.mock("../app/components/ResultPreview/BackButton", () => ({
+vi.mock("~/vibes-diy/app/components/ResultPreview/BackButton", () => ({
   BackButton: ({ onBackClick }: { onBackClick: () => void }) => (
     <button data-testid="back-button" onClick={onBackClick}>
       Back
@@ -29,7 +29,7 @@ vi.mock("../app/components/ResultPreview/BackButton", () => ({
   ),
 }));
 
-vi.mock("../app/components/ResultPreview/ViewControls", () => ({
+vi.mock("~/vibes-diy/app/components/ResultPreview/ViewControls", () => ({
   ViewControls: ({
     viewControls,
     currentView,
@@ -60,7 +60,7 @@ vi.mock("../app/components/ResultPreview/ViewControls", () => ({
   },
 }));
 
-vi.mock("../app/components/ResultPreview/ShareButton", () => ({
+vi.mock("~/vibes-diy/app/components/ResultPreview/ShareButton", () => ({
   ShareButton: vi
     .fn()
     .mockImplementation(
@@ -91,7 +91,7 @@ vi.mock("../app/components/ResultPreview/ShareButton", () => ({
     ),
 }));
 
-vi.mock("../app/components/ResultPreview/ShareModal", () => ({
+vi.mock("~/vibes-diy/app/components/ResultPreview/ShareModal", () => ({
   ShareModal: vi.fn().mockImplementation(
     ({
       isOpen,
@@ -125,15 +125,15 @@ vi.mock("../app/components/ResultPreview/ShareModal", () => ({
 }));
 
 // Import after all mocks are set up
-import ResultPreviewHeaderContent from "../app/components/ResultPreview/ResultPreviewHeaderContent";
+import ResultPreviewHeaderContent from "~/vibes-diy/app/components/ResultPreview/ResultPreviewHeaderContent.js";
 import { useParams } from "react-router";
-import { useSession } from "../app/hooks/useSession";
+import { useSession } from "~/vibes-diy/app/hooks/useSession.js";
 import {
   useViewState,
   type ViewState,
   type ViewTypeItem,
-} from "../app/utils/ViewState";
-import { usePublish } from "../app/components/ResultPreview/usePublish";
+} from "~/vibes-diy/app/utils/ViewState.js";
+import { usePublish } from "~/vibes-diy/app/components/ResultPreview/usePublish.js";
 
 describe("ResultPreviewHeaderContent", () => {
   // Common mocks and props

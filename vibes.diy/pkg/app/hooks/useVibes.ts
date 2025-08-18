@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { useAuth } from "../contexts/AuthContext";
-import type { LocalVibe } from "../utils/vibeUtils";
+import { useAuth } from "../contexts/AuthContext.js";
+import type { LocalVibe } from "../utils/vibeUtils.js";
 import {
   deleteVibeDatabase,
   listLocalVibeIds,
   toggleVibeFavorite,
-} from "../utils/vibeUtils";
+} from "../utils/vibeUtils.js";
 
 /**
  * Custom hook for managing vibes state

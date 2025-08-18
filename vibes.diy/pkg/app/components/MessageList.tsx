@@ -1,8 +1,8 @@
-import { memo, useMemo } from "react";
-import Message from "./Message";
-import type { ChatMessageDocument, ViewType } from "../types/chat";
+import React, { memo, useMemo } from "react";
+import Message from "./Message.js";
+import type { ChatMessageDocument, ViewType } from "../types/chat.js";
 
-interface MessageListProps {
+export interface MessageListProps {
   messages: ChatMessageDocument[];
   isStreaming: boolean;
   setSelectedResponseId: (id: string) => void;
