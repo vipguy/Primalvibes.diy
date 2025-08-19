@@ -1,6 +1,8 @@
 name: "call-ai-publish"
 on:
   push:
+    paths:
+      - "call-ai/**/*"
     tags:
       - "call-ai@*"
 

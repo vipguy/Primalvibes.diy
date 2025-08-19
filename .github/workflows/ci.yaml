@@ -1,21 +1,11 @@
-name: "@fireproof/core"
+name: "common ci run"
 on:
-  #  push:
-  #    branches:
-  #      - main
-  #      - "mabels/**"
-  #      - "jchris/**"
-
-  #    paths-ignore:
-  #      - 'dashboard/**/*'
-
   pull_request_target:
     types: [opened, synchronize, reopened]
     branches: [main]
 
 jobs:
   compile_test:
-    # runs-on: blacksmith-4vcpu-ubuntu-2404
     runs-on: ubuntu-latest
     #environment:
     #  name: external-pr
@@ -24,4 +14,3 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: ./actions/base
-#      - uses: ./vibes.diy/actions/build

@@ -1,6 +1,8 @@
 name: "use-vibes-publish"
 on:
   push:
+    paths:
+      - "use-vibes/**/*"
     tags:
       - "use-vibes@*"
 

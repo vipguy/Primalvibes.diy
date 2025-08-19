@@ -1,4 +1,4 @@
-name = "vibes-diy"
+name = "vibes-diy-dev"
 main = "cf-worker/vibe-meta.ts"
 compatibility_date = "2025-02-24"
 compatibility_flags = ["nodejs_compat"]
@@ -17,4 +17,5 @@ html_handling = "force-trailing-slash"
 
 
 
-
+[env.production]
+name = "vibes-diy-prod"
