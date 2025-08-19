@@ -19,3 +19,7 @@ html_handling = "force-trailing-slash"
 
 [env.production]
 name = "vibes-diy-prod"
+
+[env.dev]
+name = "vibes-diy-dev"
+
