@@ -35,6 +35,7 @@ runs:
       run: |
         pnpm exec core-cli writeEnv --env ${{inputs.CLOUDFLARE_ENV}} --out /dev/stdout --json \
           --fromEnv CLERK_PUBLISHABLE_KEY \
-          --fromEnv CLERK_PUB_JWT_URL | \
-          pnpm exec wrangler -c ./wrangler.toml secret --env ${{inputs.CLOUDFLARE_ENV}} bulk
+          --fromEnv CLERK_PUB_JWT_URL > sec.json
+        cat sec.json
+        pnpm exec wrangler -c ./wrangler.toml secret --env ${{inputs.CLOUDFLARE_ENV}} bulk < sec.json
         pnpm run deploy --env ${{inputs.CLOUDFLARE_ENV}}
