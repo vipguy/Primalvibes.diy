@@ -148,7 +148,7 @@ export function useViewState(
       enabled: true,
       icon: "code-icon",
       label: "Code",
-      loading: !(
+      loading: !!(
         props.isStreaming &&
         !props.previewReady &&
         props.code &&
