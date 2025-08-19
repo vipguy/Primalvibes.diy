@@ -10,6 +10,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
   // Disable React Router plugin for tests or when explicitly disabled
   const disableReactRouter =
     mode === "test" || process.env.DISABLE_REACT_ROUTER === "true";
+  console.log("disableReactRouter", disableReactRouter);
 
   return {
     plugins: [
@@ -19,6 +20,9 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       tsconfigPaths(),
       cloudflare(),
     ],
+    build: {
+      outDir: "build",
+    },
     // Define global constants
     // define: {
     //   IFRAME__CALLAI_API_KEY: JSON.stringify(env.VITE_OPENROUTER_API_KEY),

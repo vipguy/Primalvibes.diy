@@ -6,3 +6,4 @@ node_modules
 .env*
 .netlify/
 .react-router/
+.wrangler/
