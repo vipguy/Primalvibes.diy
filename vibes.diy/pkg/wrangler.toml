@@ -15,11 +15,11 @@ html_handling = "force-trailing-slash"
 #not_found_handling = "single-page-application"
 #run_worker_first = true
 
-
-
 [env.production]
+vars = { ENVIRONMENT = "production" }
 name = "vibes-diy-prod"
 
 [env.dev]
+vars = { ENVIRONMENT = "dev" }
 name = "vibes-diy-dev"
 
