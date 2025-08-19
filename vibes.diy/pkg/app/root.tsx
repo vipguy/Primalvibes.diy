@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import type { MetaFunction } from "react-router";
 import {
   Links,
@@ -52,7 +52,7 @@ export const meta: MetaFunction = () => {
 
 export function Layout({ children }: { children: React.ReactNode }) {
   // Handle dark mode detection and class management (replaces ThemeContext)
-  React.useEffect(() => {
+  useEffect(() => {
     if (typeof window === "undefined") return;
 
     // Initialize dark mode based on system preference or existing class
@@ -90,8 +90,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
          *
          * Moved to a small static file to keep CSP strict (no 'unsafe-inline').
          * The script must execute before the app mounts; keep it first in <head>.
+         * <script src="/nf-ab.cookie.js"></script>
          */}
-        <script src="/nf-ab.cookie.js"></script>
         {/* FIREPROOF-UPGRADE-BRANCH: Fireproof 0.23.0 */}
         <Meta data-testid="meta" />
         <Links />
