@@ -12,7 +12,12 @@ import ResultPreviewHeaderContent from "../components/ResultPreview/ResultPrevie
 import SessionSidebar from "../components/SessionSidebar.js";
 import { useCookieConsent } from "../contexts/CookieConsentContext.js";
 import { useSimpleChat } from "../hooks/useSimpleChat.js";
-import { isMobileViewport, useViewState, ViewControlsType, ViewType } from "../utils/ViewState.js";
+import {
+  isMobileViewport,
+  useViewState,
+  ViewControlsType,
+  ViewType,
+} from "../utils/ViewState.js";
 
 export function meta() {
   return [

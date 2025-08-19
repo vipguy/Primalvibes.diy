@@ -39,8 +39,9 @@ export interface ViewStateProps {
   capturedPrompt?: string | null;
 }
 
-
-export function useViewState(props: Partial<ViewStateProps>): Partial<ViewState> {
+export function useViewState(
+  props: Partial<ViewStateProps>,
+): Partial<ViewState> {
   const { sessionId: paramSessionId, title: paramTitle } = useParams<{
     sessionId: string;
     title: string;
@@ -147,8 +148,12 @@ export function useViewState(props: Partial<ViewStateProps>): Partial<ViewState>
       enabled: true,
       icon: "code-icon",
       label: "Code",
-      loading:
-        !(props.isStreaming && !props.previewReady && props.code && props.code?.length > 0),
+      loading: !(
+        props.isStreaming &&
+        !props.previewReady &&
+        props.code &&
+        props.code?.length > 0
+      ),
     },
     data: {
       enabled: !props.isStreaming,
@@ -180,9 +185,10 @@ export function useViewState(props: Partial<ViewStateProps>): Partial<ViewState>
   };
 
   // Only show view controls when we have content or a valid session
-  const showViewControls =
-    !!((props.code && props.code.length > 0) ||
-    (sessionId && sessionId.length > 0));
+  const showViewControls = !!(
+    (props.code && props.code.length > 0) ||
+    (sessionId && sessionId.length > 0)
+  );
 
   // Determine what view should be displayed (may differ from URL-based currentView)
   // If user has explicitly navigated to a view (indicated by URL path), respect that choice
