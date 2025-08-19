@@ -1,10 +1,10 @@
 name: "@fireproof/core"
 on:
-  push:
-    branches:
-      - main
-      - "mabels/**"
-      - "jchris/**"
+  #  push:
+  #    branches:
+  #      - main
+  #      - "mabels/**"
+  #      - "jchris/**"
 
   #    paths-ignore:
   #      - 'dashboard/**/*'
