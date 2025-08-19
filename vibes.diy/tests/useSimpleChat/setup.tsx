@@ -27,7 +27,11 @@ vi.mock("~/vibes.diy/app/contexts/AuthContext", () => {
     }),
   };
 });
-import type { AiChatMessage, ChatMessage, UserChatMessage } from "~/vibes.diy/app/types/chat.js";
+import type {
+  AiChatMessage,
+  ChatMessage,
+  UserChatMessage,
+} from "~/vibes.diy/app/types/chat.js";
 import { parseContent } from "~/vibes.diy/app/utils/segmentParser.js";
 import { QueryOpts } from "use-fireproof";
 
@@ -131,7 +135,7 @@ vi.mock("use-fireproof", () => ({
 //   dataUrl?: string; // For screenshot docs
 // }
 
-type MockDoc = AiChatMessage | UserChatMessage
+type MockDoc = AiChatMessage | UserChatMessage;
 
 let mockDocs: MockDoc[] = [];
 const initialMockDocs: MockDoc[] = [
@@ -141,7 +145,7 @@ const initialMockDocs: MockDoc[] = [
     text: "AI test message",
     session_id: "test-session-id",
     timestamp: Date.now(),
-    created_at: Date.now()
+    created_at: Date.now(),
   },
   {
     _id: "user-message-1",
@@ -149,7 +153,7 @@ const initialMockDocs: MockDoc[] = [
     text: "User test message",
     session_id: "test-session-id",
     timestamp: Date.now(),
-    created_at: Date.now()
+    created_at: Date.now(),
   },
   {
     _id: "ai-message-0",
@@ -157,11 +161,11 @@ const initialMockDocs: MockDoc[] = [
     text: 'Older AI message with code:\n\n```javascript\nfunction example() {\n  return "This is a code example";\n}\n```\n\nThe above function returns a string.',
     session_id: "test-session-id",
     timestamp: Date.now() - 2000,
-    created_at: Date.now()
+    created_at: Date.now(),
   },
 ];
-let currentUserMessage: MockDoc
-let currentAiMessage: MockDoc
+let currentUserMessage: MockDoc;
+let currentAiMessage: MockDoc;
 
 const resetMockState = () => {
   mockDocs = [...initialMockDocs]; // Reset docs to initial state
