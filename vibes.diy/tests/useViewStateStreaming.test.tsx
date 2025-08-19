@@ -407,12 +407,12 @@ describe("useViewState during streaming", () => {
     // Setup: Root URL path with no session/title params yet
     vi.mocked(useLocation).mockReturnValue({
       pathname: "/",
-    } as any);
+    } as ReturnType<typeof useLocation>);
 
     // Initial phase has no sessionId or title in params (new chat)
     vi.mocked(useParams).mockReturnValue({});
 
-    let hookResult: any;
+    let hookResult: Partial<ViewState> = {};
 
     // Initialize at root, no streaming yet
     const { unmount } = renderHook(
@@ -469,7 +469,7 @@ describe("useViewState during streaming", () => {
     // Even though we don't have session/title yet, we're still in initial streaming mode
     expect(mockNavigate).not.toHaveBeenCalled();
     // The component should still show code
-    expect(hookResult.viewControls.code.loading).toBe(true); // Code icon should be spinning
+    expect(hookResult.viewControls?.code.loading).toBe(true); // Code icon should be spinning
   });
 
   test("FIXED: View stays in code view when first code lines arrive during streaming", () => {

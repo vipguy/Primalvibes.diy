@@ -27,8 +27,9 @@ vi.mock("~/vibes.diy/app/contexts/AuthContext", () => {
     }),
   };
 });
-import type { AiChatMessage, ChatMessage } from "~/vibes.diy/app/types/chat.js";
+import type { AiChatMessage, ChatMessage, UserChatMessage } from "~/vibes.diy/app/types/chat.js";
 import { parseContent } from "~/vibes.diy/app/utils/segmentParser.js";
+import { QueryOpts } from "use-fireproof";
 
 // Helper function to convert chunks into SSE format
 function formatAsSSE(chunks: string[]): string[] {
@@ -68,7 +69,7 @@ vi.mock("~/vibes.diy/app/utils/streamHandler", () => ({
     async (
       _model: string,
       _sys: string,
-      _hist: any[],
+      _hist: unknown[],
       _user: string,
       onContent: (c: string) => void,
     ) => {
@@ -116,19 +117,22 @@ vi.mock("use-fireproof", () => ({
 }));
 
 // Define shared state and reset function *outside* the mock factory
-interface MockDoc {
-  _id?: string;
-  type: string;
-  text: string;
-  session_id: string;
-  timestamp?: number;
-  created_at?: number;
-  segments?: any[];
-  dependenciesString?: string;
-  isStreaming?: boolean;
-  model?: string;
-  dataUrl?: string; // For screenshot docs
-}
+// interface MockDoc {
+//   _id?: string;
+//   type: string;
+//   text: string;
+//   session_id: string;
+//   timestamp?: number;
+//   created_at?: number;
+//   segments?: unknown[];
+//   dependenciesString?: string;
+//   isStreaming?: boolean;
+//   model?: string;
+//   dataUrl?: string; // For screenshot docs
+// }
+
+type MockDoc = AiChatMessage | UserChatMessage
+
 let mockDocs: MockDoc[] = [];
 const initialMockDocs: MockDoc[] = [
   {
@@ -137,6 +141,7 @@ const initialMockDocs: MockDoc[] = [
     text: "AI test message",
     session_id: "test-session-id",
     timestamp: Date.now(),
+    created_at: Date.now()
   },
   {
     _id: "user-message-1",
@@ -144,6 +149,7 @@ const initialMockDocs: MockDoc[] = [
     text: "User test message",
     session_id: "test-session-id",
     timestamp: Date.now(),
+    created_at: Date.now()
   },
   {
     _id: "ai-message-0",
@@ -151,10 +157,11 @@ const initialMockDocs: MockDoc[] = [
     text: 'Older AI message with code:\n\n```javascript\nfunction example() {\n  return "This is a code example";\n}\n```\n\nThe above function returns a string.',
     session_id: "test-session-id",
     timestamp: Date.now() - 2000,
+    created_at: Date.now()
   },
 ];
-let currentUserMessage: any = {};
-let currentAiMessage: any = {};
+let currentUserMessage: MockDoc
+let currentAiMessage: MockDoc
 
 const resetMockState = () => {
   mockDocs = [...initialMockDocs]; // Reset docs to initial state
@@ -175,7 +182,7 @@ const resetMockState = () => {
 };
 
 // Define the mergeUserMessage implementation separately
-const mergeUserMessageImpl = (data: any) => {
+const mergeUserMessageImpl = (data?: { text: string }) => {
   if (data && typeof data.text === "string") {
     currentUserMessage.text = data.text;
   }
@@ -199,10 +206,10 @@ vi.mock("~/vibes.diy/app/hooks/useSession", () => {
         docs: mockDocs,
         updateTitle: vi
           .fn()
-          .mockImplementation(async (title) => Promise.resolve()),
+          .mockImplementation(async (_title) => Promise.resolve()),
         addScreenshot: vi.fn(),
         sessionDatabase: {
-          put: vi.fn(async (doc: any) => {
+          put: vi.fn(async (doc) => {
             const id = doc._id || `doc-${Date.now()}`;
             return Promise.resolve({ id: id });
           }),
@@ -211,11 +218,11 @@ vi.mock("~/vibes.diy/app/hooks/useSession", () => {
             if (found) return Promise.resolve(found);
             return Promise.reject(new Error("Not found"));
           }),
-          query: vi.fn(async (field: string, options: any) => {
+          query: vi.fn(async (field: string, options: { key: string }) => {
             const key = options?.key;
             const filtered = mockDocs.filter((doc) => {
-              // @ts-ignore - we know the field exists
-              return doc[field] === key;
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              return (doc as any)[field] === key;
             });
             return Promise.resolve({
               rows: filtered.map((doc) => ({ id: doc._id, doc })),
