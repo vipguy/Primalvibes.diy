@@ -58,7 +58,7 @@ export async function publishApp({
     }
 
     // Query for the most recent screenshot document
-    const result = await sessionDb.query<string, DocFileMeta>("type", {
+    const result = await sessionDb.query<string, string, DocFileMeta>("type", {
       key: "screenshot",
       includeDocs: true,
       descending: true,

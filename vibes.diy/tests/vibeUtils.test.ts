@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach, Mock } from "vitest";
 import {
   listLocalVibes,
   deleteVibeDatabase,
@@ -61,7 +61,7 @@ describe("vibeUtils", () => {
     vi.resetAllMocks();
 
     // Set up the listLocalVibes mock to return our test data
-    (listLocalVibes as any).mockResolvedValue(mockVibes);
+    (listLocalVibes as Mock).mockResolvedValue(mockVibes);
   });
 
   afterEach(() => {
@@ -84,7 +84,7 @@ describe("vibeUtils", () => {
 
     it("should handle empty database list", async () => {
       // Arrange
-      (listLocalVibes as any).mockResolvedValueOnce([]);
+      (listLocalVibes as Mock).mockResolvedValueOnce([]);
 
       // Act
       const vibes = await listLocalVibes();
@@ -95,7 +95,7 @@ describe("vibeUtils", () => {
 
     it("should handle errors gracefully", async () => {
       // Arrange
-      (listLocalVibes as any).mockResolvedValueOnce([]);
+      (listLocalVibes as Mock).mockResolvedValueOnce([]);
 
       // Act
       const vibes = await listLocalVibes();
@@ -116,7 +116,7 @@ describe("vibeUtils", () => {
 
     it("should handle errors and rethrow them", async () => {
       // Arrange
-      (deleteVibeDatabase as any).mockRejectedValueOnce(
+      (deleteVibeDatabase as Mock).mockRejectedValueOnce(
         new Error("Delete error"),
       );
 

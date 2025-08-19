@@ -12,7 +12,7 @@ import ResultPreviewHeaderContent from "../components/ResultPreview/ResultPrevie
 import SessionSidebar from "../components/SessionSidebar.js";
 import { useCookieConsent } from "../contexts/CookieConsentContext.js";
 import { useSimpleChat } from "../hooks/useSimpleChat.js";
-import { isMobileViewport, useViewState } from "../utils/ViewState.js";
+import { isMobileViewport, useViewState, ViewControlsType, ViewType } from "../utils/ViewState.js";
 
 export function meta() {
   return [
@@ -114,7 +114,7 @@ export default function UnifiedSession() {
         chatState.setSelectedResponseId(newMessageId);
 
         // Navigate to app view to show the result
-        navigateToView("preview");
+        navigateToView?.("preview");
       } catch (error) {
         console.error("Failed to save code:", error);
         chatState.addError({
@@ -316,9 +316,9 @@ export default function UnifiedSession() {
           // Only render the header content when we have code content or a completed session
           chatState.selectedCode?.content || urlSessionId ? (
             <ResultPreviewHeaderContent
-              displayView={displayView}
-              navigateToView={navigateToView}
-              viewControls={viewControls}
+              displayView={displayView as ViewType}
+              navigateToView={navigateToView as (view: ViewType) => void}
+              viewControls={viewControls as ViewControlsType}
               showViewControls={!!showViewControls}
               setMobilePreviewShown={setMobilePreviewShown}
               setUserClickedBack={setUserClickedBack} // Keep this for BackButton logic
@@ -339,7 +339,7 @@ export default function UnifiedSession() {
           <ChatInterface
             {...chatState}
             setMobilePreviewShown={setMobilePreviewShown}
-            navigateToView={navigateToView}
+            navigateToView={navigateToView as (view: ViewType) => void}
           />
         }
         previewPanel={
@@ -351,7 +351,7 @@ export default function UnifiedSession() {
             isStreaming={chatState.isStreaming}
             codeReady={chatState.codeReady}
             onScreenshotCaptured={chatState.addScreenshot}
-            displayView={displayView}
+            displayView={displayView as ViewType}
             onPreviewLoaded={handlePreviewLoaded}
             setMobilePreviewShown={setMobilePreviewShown}
             setIsIframeFetching={setIsIframeFetching}

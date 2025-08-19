@@ -118,7 +118,7 @@ describe("ViewState Coverage Tests", () => {
 
     // Call navigateToView to navigate to data view
     act(() => {
-      result.current.navigateToView("data");
+      result.current.navigateToView?.("data");
     });
 
     // Verify navigation occurred with correct path
@@ -131,7 +131,7 @@ describe("ViewState Coverage Tests", () => {
 
     // Test preview view which should use 'app' suffix
     act(() => {
-      result.current.navigateToView("preview");
+      result.current.navigateToView?.("preview");
     });
 
     // Verify navigation with 'app' suffix
@@ -160,7 +160,7 @@ describe("ViewState Coverage Tests", () => {
 
     // Attempt to navigate to data view (which should be disabled)
     act(() => {
-      result.current.navigateToView("data");
+      result.current.navigateToView?.("data");
     });
 
     // Verify no navigation occurred since data view is disabled
