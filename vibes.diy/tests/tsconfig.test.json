@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "~/vibes.diy/*": ["../pkg/*"]
+    },
+    "outDir": "./dist"
+  },
+  "exclude": [
+    "**/dist/**",
+    "**/node_modules/**",
+    "**/examples/**",
+    "**/.react-router/**",
+    "**/.netlify/**",
+    "**/tests-new/**"
+  ]
+}
