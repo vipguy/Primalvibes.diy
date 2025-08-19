@@ -1,9 +1,9 @@
+import React from "react";
 import { vi, describe, it, expect, beforeEach, afterAll } from "vitest";
 import { render, screen, act, waitFor } from "@testing-library/react";
-import ResultPreview from "~/vibes-diy/app/components/ResultPreview/ResultPreview.js";
+import ResultPreview from "~/vibes.diy/app/components/ResultPreview/ResultPreview.js";
 import { mockResultPreviewProps } from "./mockData.js";
 import { MockThemeProvider } from "./utils/MockThemeProvider.js";
-import React from "react";
 
 // Mock clipboard API
 Object.assign(navigator, {
@@ -16,6 +16,17 @@ Object.assign(navigator, {
 const mockObjectUrl = "mock-blob-url";
 URL.createObjectURL = vi.fn().mockReturnValue(mockObjectUrl);
 URL.revokeObjectURL = vi.fn();
+
+// Mock useSession hook to prevent Fireproof initialization during tests
+vi.mock("~/vibes.diy/app/hooks/useSession", () => ({
+  useSession: vi.fn().mockReturnValue({
+    updateTitle: vi.fn().mockResolvedValue(undefined),
+    session: { title: "Test Session" },
+    updatePublishedUrl: vi.fn(),
+    updateFirehoseShared: vi.fn(),
+    addScreenshot: vi.fn(),
+  }),
+}));
 
 // Mock SandpackProvider and related components
 vi.mock("@codesandbox/sandpack-react", () => ({
@@ -36,13 +47,13 @@ vi.mock("@codesandbox/sandpack-react", () => ({
 }));
 
 // Mock WelcomeScreen
-vi.mock("~/vibes-diy/app/components/ResultPreview/WelcomeScreen", () => ({
+vi.mock("~/vibes.diy/app/components/ResultPreview/WelcomeScreen", () => ({
   default: () => <div data-testid="welcome-screen">Welcome Screen Content</div>,
 }));
 
 // Mock the Sandpack scroll controller
 vi.mock(
-  "~/vibes-diy/app/components/ResultPreview/SandpackScrollController",
+  "~/vibes.diy/app/components/ResultPreview/SandpackScrollController",
   () => ({
     default: () => null,
   }),
@@ -51,7 +62,7 @@ vi.mock(
 // Mock iframe behavior
 
 // Mock the IframeContent component to avoid iframe issues in tests
-vi.mock("~/vibes-diy/app/components/ResultPreview/IframeContent", () => ({
+vi.mock("~/vibes.diy/app/components/ResultPreview/IframeContent", () => ({
   default: ({ activeView }: { activeView: string }) => (
     <div data-testid="sandpack-provider" className="h-full">
       <div
@@ -503,57 +514,7 @@ describe("ResultPreview", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("passes API key to iframe when preview-ready message is received", async () => {
-    // Mock document.querySelector to return a mock iframe
-    const mockIframe = {
-      contentWindow: {
-        postMessage: vi.fn(),
-      },
-    };
-    const originalQuerySelector = document.querySelector;
-    document.querySelector = vi.fn().mockImplementation((selector) => {
-      if (selector === "iframe") {
-        return mockIframe;
-      }
-      return originalQuerySelector(selector);
-    });
-
-    // We need to spoof the API key that would come from config
-    vi.mock("~/vibes-diy/app/config/env", () => ({
-      CALLAI_API_KEY: "test-api-key-12345",
-    }));
-
-    const code = `function App() { return <div>API Key Test</div>; }`;
-    render(
-      <MockThemeProvider>
-        <ResultPreview
-          code={code}
-          codeReady={true}
-          {...mockResultPreviewProps}
-        />
-      </MockThemeProvider>,
-    );
-
-    // Simulate preview-ready message from iframe
-    act(() => {
-      window.dispatchEvent(
-        new MessageEvent("message", {
-          data: { type: "preview-ready" },
-        }),
-      );
-    });
-
-    // Verify that the API key was sent to the iframe
-    await waitFor(() => {
-      expect(mockIframe.contentWindow.postMessage).toHaveBeenCalledWith(
-        { type: "callai-api-key", key: expect.any(String) },
-        "*",
-      );
-    });
-
-    // Clean up mocks
-    document.querySelector = originalQuerySelector;
-  });
+  // Test removed: API key functionality has been removed as proxy handles authentication
 
   it("displays the code editor initially", () => {
     const code = `function App() { return <div>Hello World</div>; }`;
@@ -602,6 +563,7 @@ describe("ResultPreview", () => {
           setMobilePreviewShown={() => {
             /* no-op */
           }}
+          updateTitle={() => Promise.resolve()}
         />
       </MockThemeProvider>,
     );

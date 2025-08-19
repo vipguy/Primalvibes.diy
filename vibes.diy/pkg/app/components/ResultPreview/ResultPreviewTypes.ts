@@ -7,6 +7,7 @@ export interface ResultPreviewProps {
   onScreenshotCaptured?: (screenshotData: string | null) => void;
   sessionId?: string;
   title?: string;
+  updateTitle: (title: string, isManual?: boolean) => Promise<void>;
   isStreaming?: boolean;
   codeReady?: boolean;
   displayView: ViewType; // Changed from activeView
@@ -15,6 +16,9 @@ export interface ResultPreviewProps {
   setMobilePreviewShown: (shown: boolean) => void;
   setIsIframeFetching?: (fetching: boolean) => void;
   addError?: (error: RuntimeError) => void; // Single error handler for all types of errors
+  onCodeSave?: (code: string) => void;
+  onCodeChange?: (hasChanges: boolean, saveHandler: () => void) => void;
+  onSyntaxErrorChange?: (errorCount: number) => void;
 }
 
 export type IframeFiles = Record<

@@ -2,9 +2,7 @@ import React, { useEffect, useState } from "react";
 import DynamicTable from "./DynamicTable.js";
 import { headersForDocs } from "./dynamicTableHelpers.js";
 // Import Fireproof for database access
-import { useFireproof, type DocBase } from "use-fireproof";
-// Import the monkey patch utility
-import { applyIndexedDBPatch } from "./indexedDBMonkeyPatch.js";
+import { useFireproof } from "use-fireproof";
 
 // Component for displaying database data
 const DatabaseData: React.FC<{ dbName: string; sessionId: string }> = ({
@@ -15,7 +13,6 @@ const DatabaseData: React.FC<{ dbName: string; sessionId: string }> = ({
     throw new Error("No valid database name provided");
   }
 
-  const namespacedDbName = `vx-${sessionId}-${dbName}`;
   const [availableDbs, setAvailableDbs] = useState<string[]>([]);
 
   // Function to list available databases with the current session ID
@@ -44,20 +41,14 @@ const DatabaseData: React.FC<{ dbName: string; sessionId: string }> = ({
     }
   };
 
-  // Apply the IndexedDB monkey patch to ensure consistent namespacing with the iframe
   useEffect(() => {
-    // Apply the patch as soon as the component mounts
-    applyIndexedDBPatch(sessionId);
-
     // Load the initial database list
     listSessionDatabases();
   }, []);
 
-  // With the IndexedDB patch, we should now be able to use the original dbName
-  // and the patch will handle the namespacing at the IndexedDB.open level
   const { database } = useFireproof(dbName);
 
-  const [docs, setDocs] = useState<DocBase[]>([]);
+  const [docs, setDocs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   // Fetch documents function - separated so it can be called manually if needed
   const fetchDocs = async () => {
@@ -70,11 +61,9 @@ const DatabaseData: React.FC<{ dbName: string; sessionId: string }> = ({
       });
 
       // Extract docs from the result based on Fireproof's API
-      // if this is failing than the typing in fireproof-core is wrong
-      // there should be no doc MENO
       const extractedDocs = result.rows
-        .filter((row) => row && row.value)
-        .map((row) => row.value);
+        .filter((row) => row && ((row as any).doc || row.value))
+        .map((row) => (row as any).doc || row.value);
 
       setDocs(extractedDocs);
     } catch (error) {
@@ -109,9 +98,6 @@ const DatabaseData: React.FC<{ dbName: string; sessionId: string }> = ({
           <strong>Session ID:</strong> {sessionId}
         </p>
         <p>
-          <strong>Namespaced DB Name:</strong> {namespacedDbName}
-        </p>
-        <p>
           <strong>Current DB Name:</strong> {database.name}
         </p>
         <div className="mt-1">
@@ -129,14 +115,7 @@ const DatabaseData: React.FC<{ dbName: string; sessionId: string }> = ({
           </span>
           <ul className="mt-1 list-disc pl-4">
             {availableDbs.map((name, idx) => (
-              <li
-                key={idx}
-                className={
-                  name === namespacedDbName ? "font-bold text-green-600" : ""
-                }
-              >
-                {name}
-              </li>
+              <li key={idx}>{name}</li>
             ))}
           </ul>
         </div>

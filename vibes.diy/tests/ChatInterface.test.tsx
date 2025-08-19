@@ -1,9 +1,9 @@
+import React from "react";
 import { render } from "@testing-library/react";
 import { vi, describe, it, expect } from "vitest";
-import ChatInterface from "~/vibes-diy/app/components/ChatInterface.js";
-import type { ChatState } from "~/vibes-diy/app/types/chat.js";
+import ChatInterface from "~/vibes.diy/app/components/ChatInterface.js";
+import type { ChatState } from "~/vibes.diy/app/types/chat.js";
 import { mockChatStateProps } from "./mockData.js";
-import React from "react";
 
 /**
  * Tests for the ChatInterface component
@@ -21,7 +21,7 @@ vi.mock("use-fireproof", () => ({
 // Prepare mock data
 const mockChatState: ChatState & {
   setMobilePreviewShown: (shown: boolean) => void;
-  navigateToView: (view: unknown) => void;
+  navigateToView: (view: any) => void;
 } = {
   ...mockChatStateProps,
   docs: [],
@@ -30,6 +30,7 @@ const mockChatState: ChatState & {
   isStreaming: false,
   inputRef: { current: null },
   sendMessage: vi.fn(),
+  saveCodeAsAiMessage: vi.fn().mockResolvedValue("test-message-id"),
   title: "test title",
   sessionId: "test-session-id",
   selectedResponseDoc: undefined,

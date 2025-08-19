@@ -1,23 +1,15 @@
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-  type Mock,
-} from "vitest";
-import { normalizeComponentExports } from "~/vibes-diy/app/utils/normalizeComponentExports.js";
-import { publishApp } from "~/vibes-diy/app/utils/publishUtils.js";
+import { afterEach, beforeEach, describe, expect, it, Mock, vi } from "vitest";
+import { normalizeComponentExports } from "~/vibes.diy/app/utils/normalizeComponentExports.js";
+import { publishApp } from "~/vibes.diy/app/utils/publishUtils.js";
 
 // Mock dependencies
 vi.mock("use-fireproof");
-vi.mock("~/vibes-diy/app/utils/databaseManager");
-vi.mock("~/vibes-diy/app/utils/normalizeComponentExports");
+vi.mock("~/vibes.diy/app/utils/databaseManager.js");
+vi.mock("~/vibes.diy/app/utils/normalizeComponentExports.js");
 
 // Import mocked modules
 import { fireproof } from "use-fireproof";
-import { getSessionDatabaseName } from "~/vibes-diy/app/utils/databaseManager.js";
+import { getSessionDatabaseName } from "~/vibes.diy/app/utils/databaseManager.js";
 
 // We need to mock the import.meta.env
 vi.stubGlobal("import", {
@@ -54,7 +46,7 @@ class MockFileReader {
   }
 }
 
-global.FileReader = MockFileReader as typeof FileReader; // as any;
+global.FileReader = MockFileReader as typeof FileReader;
 
 // Setup mock Fireproof database and query results
 const mockVibeDoc = {

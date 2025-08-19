@@ -3,7 +3,8 @@ import { useLocation, useNavigate, useParams } from "react-router";
 import { encodeTitle } from "../components/SessionSidebar/utils.js";
 import AppLayout from "../components/AppLayout.js";
 import ChatHeaderContent from "../components/ChatHeaderContent.js";
-import ChatInput from "../components/ChatInput.js";
+import ChatInput, { ChatInputRef } from "../components/ChatInput.js";
+import models from "../data/models.json" with { type: "json" };
 import ChatInterface from "../components/ChatInterface.js";
 import QuickSuggestions from "../components/QuickSuggestions.js";
 import ResultPreview from "../components/ResultPreview/ResultPreview.js";
@@ -11,12 +12,7 @@ import ResultPreviewHeaderContent from "../components/ResultPreview/ResultPrevie
 import SessionSidebar from "../components/SessionSidebar.js";
 import { useCookieConsent } from "../contexts/CookieConsentContext.js";
 import { useSimpleChat } from "../hooks/useSimpleChat.js";
-import {
-  isMobileViewport,
-  useViewState,
-  ViewControlsType,
-  ViewType,
-} from "../utils/ViewState.js";
+import { isMobileViewport, useViewState } from "../utils/ViewState.js";
 
 export function meta() {
   return [
@@ -30,15 +26,68 @@ export default function UnifiedSession() {
   const navigate = useNavigate();
   const location = useLocation();
   const chatState = useSimpleChat(urlSessionId);
+  const hasAutoSentMessage = useRef(false);
+  const chatInputRef = useRef<ChatInputRef>(null);
 
   const { setMessageHasBeenSent } = useCookieConsent();
 
   // Track message submission events
   const [hasSubmittedMessage, setHasSubmittedMessage] = useState(false);
 
+  // Capture URL prompt on first render
+  const [capturedPrompt, setCapturedPrompt] = useState<string | null>(null);
+
+  // Capture URL prompt parameter once on mount
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const promptParam = searchParams.get("prompt");
+    if (promptParam && promptParam.trim()) {
+      setCapturedPrompt(promptParam);
+    }
+  }, []); // Empty dependency array - runs only on mount
+
+  // Handle captured prompt by setting input and focusing
+  useEffect(() => {
+    if (capturedPrompt && !hasAutoSentMessage.current) {
+      chatState.setInput(capturedPrompt);
+
+      // Focus the input element and place cursor at the end after a short delay
+      setTimeout(() => {
+        if (chatState.inputRef.current) {
+          chatState.inputRef.current.focus();
+
+          // Place cursor at the end of the text
+          const inputLength = chatState.inputRef.current.value.length;
+          chatState.inputRef.current.setSelectionRange(
+            inputLength,
+            inputLength,
+          );
+        }
+      }, 10);
+
+      hasAutoSentMessage.current = true;
+
+      // Click submit button after 2 seconds
+      setTimeout(() => {
+        if (chatInputRef.current) {
+          chatInputRef.current.clickSubmit();
+          // Clear the captured prompt to allow normal navigation behavior
+          setCapturedPrompt(null);
+        }
+      }, 1000);
+    }
+  }, [capturedPrompt, chatState.setInput]);
+
   const [previewReady, setPreviewReady] = useState(false);
   const [mobilePreviewShown, setMobilePreviewShown] = useState(false);
   const [isIframeFetching, setIsIframeFetching] = useState(false);
+
+  // State for code editing
+  const [hasCodeChanges, setHasCodeChanges] = useState(false);
+  const [codeSaveHandler, setCodeSaveHandler] = useState<(() => void) | null>(
+    null,
+  );
+  const [syntaxErrorCount, setSyntaxErrorCount] = useState(0);
 
   // Centralized view state management
   const { displayView, navigateToView, viewControls, showViewControls } =
@@ -49,7 +98,51 @@ export default function UnifiedSession() {
       isStreaming: chatState.isStreaming,
       previewReady: previewReady,
       isIframeFetching: isIframeFetching,
+      capturedPrompt: capturedPrompt,
     });
+
+  // Handle code save from the editor
+  const handleCodeSave = useCallback(
+    async (code: string) => {
+      try {
+        const newMessageId = await chatState.saveCodeAsAiMessage(
+          code,
+          chatState.docs,
+        );
+
+        // Select the newly created message
+        chatState.setSelectedResponseId(newMessageId);
+
+        // Navigate to app view to show the result
+        navigateToView("preview");
+      } catch (error) {
+        console.error("Failed to save code:", error);
+        chatState.addError({
+          type: "error",
+          message:
+            error instanceof Error ? error.message : "Failed to save code",
+          stack: error instanceof Error ? error.stack : undefined,
+          timestamp: Date.now().toString(),
+          errorType: "Other",
+        });
+      }
+    },
+    [chatState, navigateToView],
+  );
+
+  // Handle code change notifications from editor
+  const handleCodeChange = useCallback(
+    (hasChanges: boolean, saveHandler: () => void) => {
+      setHasCodeChanges(hasChanges);
+      setCodeSaveHandler(() => saveHandler);
+    },
+    [],
+  );
+
+  // Handle syntax error changes from editor
+  const handleSyntaxErrorChange = useCallback((errorCount: number) => {
+    setSyntaxErrorCount(errorCount);
+  }, []);
 
   // Add a ref to track whether streaming was active previously
   const wasStreamingRef = useRef(false);
@@ -99,9 +192,14 @@ export default function UnifiedSession() {
         suffix = "/code";
       } else if (currentPath.endsWith("/data")) {
         suffix = "/data";
+      } else if (currentPath.endsWith("/chat")) {
+        suffix = "/chat";
+      } else if (currentPath.endsWith("/settings")) {
+        suffix = "/settings";
       } else if (currentPath.includes(`/chat/${chatState.sessionId}`)) {
         // If it's the base chat URL without suffix, default to /app
-        suffix = "/app";
+        // Unless there's a captured prompt that hasn't been sent yet
+        suffix = capturedPrompt ? "" : "/app";
       }
 
       const newUrl = `/chat/${chatState.sessionId}/${encodeTitle(chatState.title)}${suffix}`;
@@ -111,35 +209,6 @@ export default function UnifiedSession() {
       }
     }
   }, [chatState.title, location.pathname, chatState.sessionId, navigate]);
-
-  // Check if there's a prompt parameter in the URL to prefill the chat input
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-
-    // Check for prompt parameter to prefill chat input
-    const promptParam = searchParams.get("prompt");
-    if (promptParam && promptParam.trim()) {
-      chatState.setInput(promptParam);
-
-      // Focus the input element and place cursor at the end after a short delay
-      // to ensure the input has been updated and DOM is ready
-      setTimeout(() => {
-        if (chatState.inputRef.current) {
-          chatState.inputRef.current.focus();
-
-          // Place cursor at the end of the text
-          const inputLength = chatState.inputRef.current.value.length;
-          chatState.inputRef.current.setSelectionRange(
-            inputLength,
-            inputLength,
-          );
-        }
-      }, 100);
-      // setTimeout(() => {
-      //   chatState.sendMessage(promptParam);
-      // }, 200);
-    }
-  }, [location.search, chatState.setInput]);
 
   // We're now passing chatState directly to ChatInput
 
@@ -205,11 +274,21 @@ export default function UnifiedSession() {
   useEffect(() => {
     const path = location?.pathname || "";
     const hasTabSuffix =
-      path.endsWith("/app") || path.endsWith("/code") || path.endsWith("/data");
+      path.endsWith("/app") ||
+      path.endsWith("/code") ||
+      path.endsWith("/data") ||
+      path.endsWith("/chat") ||
+      path.endsWith("/settings");
     const encodedAppTitle = chatState.title ? encodeTitle(chatState.title) : "";
 
     // If there's a session and title, but no specific view suffix in the URL, navigate to the 'app' (preview) view.
-    if (!hasTabSuffix && chatState.sessionId && encodedAppTitle) {
+    // Skip navigation if there's a captured prompt that hasn't been sent yet.
+    if (
+      !hasTabSuffix &&
+      chatState.sessionId &&
+      encodedAppTitle &&
+      !capturedPrompt
+    ) {
       navigate(`/chat/${chatState.sessionId}/${encodedAppTitle}/app`, {
         replace: true,
       });
@@ -237,9 +316,9 @@ export default function UnifiedSession() {
           // Only render the header content when we have code content or a completed session
           chatState.selectedCode?.content || urlSessionId ? (
             <ResultPreviewHeaderContent
-              displayView={displayView as ViewType}
-              navigateToView={navigateToView as (view: ViewType) => void}
-              viewControls={viewControls as ViewControlsType}
+              displayView={displayView}
+              navigateToView={navigateToView}
+              viewControls={viewControls}
               showViewControls={!!showViewControls}
               setMobilePreviewShown={setMobilePreviewShown}
               setUserClickedBack={setUserClickedBack} // Keep this for BackButton logic
@@ -249,6 +328,10 @@ export default function UnifiedSession() {
               sessionId={chatState.sessionId || undefined} // Handle null
               title={chatState.title || undefined} // Handle null
               previewReady={previewReady} // needed for publish button visibility logic
+              // Props for code editing
+              hasCodeChanges={hasCodeChanges}
+              onCodeSave={codeSaveHandler || undefined}
+              syntaxErrorCount={syntaxErrorCount}
             />
           ) : null
         }
@@ -256,26 +339,48 @@ export default function UnifiedSession() {
           <ChatInterface
             {...chatState}
             setMobilePreviewShown={setMobilePreviewShown}
-            navigateToView={navigateToView as (view: ViewType) => void}
+            navigateToView={navigateToView}
           />
         }
         previewPanel={
           <ResultPreview
+            title={chatState.title}
+            updateTitle={chatState.updateTitle}
             sessionId={chatState.sessionId || ""}
             code={chatState.selectedCode?.content || ""}
             isStreaming={chatState.isStreaming}
             codeReady={chatState.codeReady}
             onScreenshotCaptured={chatState.addScreenshot}
-            displayView={displayView as ViewType}
+            displayView={displayView}
             onPreviewLoaded={handlePreviewLoaded}
             setMobilePreviewShown={setMobilePreviewShown}
             setIsIframeFetching={setIsIframeFetching}
             addError={(error) => chatState.addError(error)}
+            onCodeSave={handleCodeSave}
+            onCodeChange={handleCodeChange}
+            onSyntaxErrorChange={handleSyntaxErrorChange}
           />
         }
         chatInput={
           <ChatInput
+            ref={chatInputRef}
             chatState={chatState}
+            showModelPickerInChat={chatState.showModelPickerInChat}
+            currentModel={chatState.effectiveModel}
+            onModelChange={async (modelId: string) => {
+              if (chatState.updateSelectedModel) {
+                await chatState.updateSelectedModel(modelId);
+              }
+            }}
+            models={
+              models as {
+                id: string;
+                name: string;
+                description: string;
+                featured?: boolean;
+              }[]
+            }
+            globalModel={chatState.globalModel}
             onSend={() => {
               setMessageHasBeenSent(true);
               setHasSubmittedMessage(true);
@@ -287,7 +392,7 @@ export default function UnifiedSession() {
             <QuickSuggestions onSelectSuggestion={handleSelectSuggestion} />
           ) : undefined
         }
-        mobilePreviewShown={mobilePreviewShown}
+        mobilePreviewShown={displayView === "chat" ? false : mobilePreviewShown}
       />
       <SessionSidebar
         isVisible={isSidebarVisible}

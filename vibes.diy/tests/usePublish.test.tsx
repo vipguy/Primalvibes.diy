@@ -1,24 +1,25 @@
+import React from "react";
 import { act, renderHook, waitFor } from "@testing-library/react";
-import React, { ReactNode } from "react";
-import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
-import { usePublish } from "~/vibes-diy/app/components/ResultPreview/usePublish.js";
-import type { AuthContextType } from "~/vibes-diy/app/contexts/AuthContext.js";
-import { AuthContext } from "~/vibes-diy/app/contexts/AuthContext.js";
+import type { ReactNode } from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { usePublish } from "~/vibes.diy/app/components/ResultPreview/usePublish.js";
+import type { AuthContextType } from "~/vibes.diy/app/contexts/AuthContext.js";
+import { AuthContext } from "~/vibes.diy/app/contexts/AuthContext.js";
 import type {
   AiChatMessage,
   ChatMessageDocument,
   UserChatMessage,
-} from "~/vibes-diy/app/types/chat.js";
-import { trackPublishClick } from "~/vibes-diy/app/utils/analytics.js";
-import type { TokenPayload } from "~/vibes-diy/app/utils/auth.js";
-import { publishApp } from "~/vibes-diy/app/utils/publishUtils.js";
+} from "~/vibes.diy/app/types/chat.js";
+import { trackPublishClick } from "~/vibes.diy/app/utils/analytics.js";
+import type { TokenPayload } from "~/vibes.diy/app/utils/auth.js";
+import { publishApp } from "~/vibes.diy/app/utils/publishUtils.js";
 
 // Mock dependencies
-vi.mock("~/vibes-diy/app/utils/publishUtils", () => ({
+vi.mock("~/vibes.diy/app/utils/publishUtils", () => ({
   publishApp: vi.fn(),
 }));
 
-vi.mock("~/vibes-diy/app/utils/analytics", () => ({
+vi.mock("~/vibes.diy/app/utils/analytics", () => ({
   trackPublishClick: vi.fn(),
 }));
 
@@ -47,10 +48,10 @@ const createWrapper = () => {
     isAuthenticated: true,
     isLoading: false,
     userPayload: mockUserPayload,
-    needsLogin: false,
-    setNeedsLogin: vi.fn(),
     checkAuthStatus: vi.fn().mockImplementation(() => Promise.resolve()),
     processToken: vi.fn().mockImplementation(() => Promise.resolve()),
+    needsLogin: false,
+    setNeedsLogin: vi.fn(),
   };
 
   return ({ children }: { children: ReactNode }) => (
@@ -83,7 +84,7 @@ describe("usePublish Hook", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     // Default implementation for publishApp
-    (publishApp as Mock).mockResolvedValue("https://test-app.vibesdiy.app");
+    (publishApp as any).mockResolvedValue("https://test-app.vibesdiy.app");
   });
 
   it("initializes with correct default values", () => {
@@ -163,7 +164,7 @@ describe("usePublish Hook", () => {
 
   it("publishes the app and updates state correctly", async () => {
     const mockAppUrl = "https://published-app.vibesdiy.app";
-    (publishApp as Mock).mockResolvedValue(mockAppUrl);
+    (publishApp as any).mockResolvedValue(mockAppUrl);
 
     const { result } = renderHook(
       () =>
@@ -216,7 +217,7 @@ describe("usePublish Hook", () => {
 
   it("handles failure to publish gracefully", async () => {
     // Mock a failure in publishApp
-    (publishApp as Mock).mockRejectedValue(new Error("Failed to publish"));
+    (publishApp as any).mockRejectedValue(new Error("Failed to publish"));
 
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {
       /* no-op */

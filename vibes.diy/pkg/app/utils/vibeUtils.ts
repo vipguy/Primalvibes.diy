@@ -1,4 +1,4 @@
-import { fireproof, type DocBase } from "use-fireproof";
+import { DocFileMeta, fireproof } from "use-fireproof";
 import { updateUserVibespaceDoc } from "./databaseManager.js";
 import type { VibeDocument } from "../types/chat.js";
 import { encodeTitle } from "../components/SessionSidebar/utils.js";
@@ -27,7 +27,7 @@ export interface LocalVibe {
  */
 export async function loadVibeScreenshot(
   vibeId: string,
-): Promise<{ file: () => Promise<File>; type: string } | undefined> {
+): Promise<DocFileMeta | undefined> {
   try {
     // Open the Fireproof database for this vibe
     const db = fireproof("vibe-" + vibeId);
@@ -41,13 +41,16 @@ export async function loadVibeScreenshot(
     });
 
     if (result.rows.length > 0) {
-      const screenshotDoc = result.rows[0].doc as DocBase & {
-        _files?: { screenshot?: { file: () => Promise<File>; type: string } };
-      };
+      const screenshotDoc = result.rows[0].doc; // as any;
 
       // Get the screenshot file if available
-      if (screenshotDoc._files && screenshotDoc._files.screenshot) {
-        return screenshotDoc._files.screenshot;
+      if (
+        screenshotDoc &&
+        screenshotDoc._files &&
+        screenshotDoc._files.screenshot &&
+        (screenshotDoc._files.screenshot as DocFileMeta).file
+      ) {
+        return screenshotDoc._files.screenshot as DocFileMeta;
       }
     }
 

@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import type { AuthContextType } from "~/vibes-diy/app/contexts/AuthContext.js";
+import type { AuthContextType } from "~/vibes.diy/app/contexts/AuthContext.js";
 
 // Default authenticated state
 export const defaultAuthenticatedState: AuthContextType = {
@@ -42,8 +42,6 @@ export const mockUseAuth = vi
 export const setMockAuthState = (state: Partial<AuthContextType>) => {
   mockUseAuth.mockImplementation(() => ({
     ...defaultAuthenticatedState,
-    needsLogin: false,
-    setNeedsLogin: vi.fn(),
     ...state,
   }));
 };

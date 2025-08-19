@@ -234,7 +234,9 @@ describe("Claude JSON property splitting test", () => {
                       expectOrWarn(
                         modelId,
                         populationInMillions >= 60 && populationInMillions <= 70,
-                        `Population ${data.population} (${populationInMillions.toFixed(2)}M) outside expected range in ${modelName} model response - possibly due to property name splitting`,
+                        `Population ${data.population} (${populationInMillions.toFixed(
+                          2,
+                        )}M) outside expected range in ${modelName} model response - possibly due to property name splitting`,
                         data.population,
                       );
                     }

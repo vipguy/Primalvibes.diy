@@ -1,7 +1,7 @@
-import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
-import { ViewControls } from "~/vibes-diy/app/components/ResultPreview/ViewControls.js";
+import { ViewControls } from "~/vibes.diy/app/components/ResultPreview/ViewControls.js";
 
 describe("ViewControls", () => {
   const mockViewControls = {
@@ -23,10 +23,16 @@ describe("ViewControls", () => {
       label: "Data",
       loading: false,
     },
+    settings: {
+      enabled: true,
+      icon: "export-icon",
+      label: "Settings",
+      loading: false,
+    },
   };
 
   // Mock the SVG icons
-  vi.mock("~/vibes-diy/app/components/HeaderContent/SvgIcons", () => ({
+  vi.mock("~/vibes.diy/app/components/HeaderContent/SvgIcons", () => ({
     PreviewIcon: ({
       className,
     }: {
@@ -48,6 +54,11 @@ describe("ViewControls", () => {
         Data Icon
       </span>
     ),
+    SettingsIcon: ({ className }: { className: string }) => (
+      <span data-testid="settings-icon" className={className}>
+        Settings Icon
+      </span>
+    ),
   }));
 
   it("renders all view controls", () => {
@@ -59,11 +70,13 @@ describe("ViewControls", () => {
     expect(screen.getByText("App")).toBeInTheDocument();
     expect(screen.getByText("Code")).toBeInTheDocument();
     expect(screen.getByText("Data")).toBeInTheDocument();
+    expect(screen.getByText("Settings")).toBeInTheDocument();
 
     // Check that the icons are rendered
     expect(screen.getByTestId("preview-icon")).toBeInTheDocument();
     expect(screen.getByTestId("code-icon")).toBeInTheDocument();
     expect(screen.getByTestId("data-icon")).toBeInTheDocument();
+    expect(screen.getByTestId("settings-icon")).toBeInTheDocument();
   });
 
   it("highlights the current view", () => {
@@ -73,6 +86,7 @@ describe("ViewControls", () => {
     const appButton = screen.getByText("App").closest("button");
     const codeButton = screen.getByText("Code").closest("button");
     const dataButton = screen.getByText("Data").closest("button");
+    const settingsButton = screen.getByText("Settings").closest("button");
 
     // Check that the code button has the active class
     expect(codeButton?.className).toContain("bg-light-background-00");
@@ -80,6 +94,7 @@ describe("ViewControls", () => {
     // Check that the other buttons don't have the active class
     expect(appButton?.className).not.toContain("bg-light-background-00");
     expect(dataButton?.className).not.toContain("bg-light-background-00");
+    expect(settingsButton?.className).not.toContain("bg-light-background-00");
   });
 
   it("disables buttons when enabled is false", () => {
@@ -99,6 +114,7 @@ describe("ViewControls", () => {
     const appButton = screen.getByText("App").closest("button");
     const codeButton = screen.getByText("Code").closest("button");
     const dataButton = screen.getByText("Data").closest("button");
+    const settingsButton = screen.getByText("Settings").closest("button");
 
     // Check that the data button is disabled
     expect(dataButton).toBeDisabled();
@@ -106,6 +122,7 @@ describe("ViewControls", () => {
     // Check that the other buttons are not disabled
     expect(appButton).not.toBeDisabled();
     expect(codeButton).not.toBeDisabled();
+    expect(settingsButton).not.toBeDisabled();
   });
 
   it("calls onClick handler when a button is clicked", () => {
@@ -130,6 +147,12 @@ describe("ViewControls", () => {
 
     // Check that the onClick handler was called with the correct view
     expect(mockOnClick).toHaveBeenCalledWith("data");
+
+    // Click the Settings button
+    fireEvent.click(screen.getByText("Settings"));
+
+    // Check that the onClick handler was called with the correct view
+    expect(mockOnClick).toHaveBeenCalledWith("settings");
   });
 
   it("properly navigates between views when onClick is provided", () => {
@@ -152,6 +175,11 @@ describe("ViewControls", () => {
     // Test navigation to data view
     fireEvent.click(screen.getByText("Data"));
     expect(mockNavigateToView).toHaveBeenCalledWith("data");
+    mockNavigateToView.mockClear();
+
+    // Test navigation to settings view
+    fireEvent.click(screen.getByText("Settings"));
+    expect(mockNavigateToView).toHaveBeenCalledWith("settings");
     mockNavigateToView.mockClear();
 
     // Render with a different current view

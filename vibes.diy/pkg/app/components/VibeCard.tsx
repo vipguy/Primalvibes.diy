@@ -2,10 +2,11 @@ import React from "react";
 import { StarIcon } from "./SessionSidebar/StarIcon.js";
 import { ImgFile } from "./SessionSidebar/ImgFile.js";
 import type { LocalVibe } from "../utils/vibeUtils.js";
+import { DocFileMeta } from "use-fireproof";
 
 interface VibeCardProps {
   vibe: LocalVibe;
-  screenshot?: { file: () => Promise<File>; type: string };
+  screenshot?: DocFileMeta;
   confirmDelete: string | null;
   onEditClick: (id: string, encodedTitle: string) => void;
   onToggleFavorite: (vibeId: string, e: React.MouseEvent) => Promise<void>;

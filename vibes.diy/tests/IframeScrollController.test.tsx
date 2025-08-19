@@ -1,7 +1,7 @@
+import React from "react";
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 import { render } from "@testing-library/react";
-import React from "react";
-import IframeScrollController from "~/vibes-diy/app/components/ResultPreview/IframeScrollController.js";
+import IframeScrollController from "~/vibes.diy/app/components/ResultPreview/IframeScrollController.js";
 
 // Mock ResizeObserver since it's not available in the test environment
 class MockResizeObserver {

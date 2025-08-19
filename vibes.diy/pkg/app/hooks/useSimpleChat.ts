@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../contexts/AuthContext.js";
-import type { ChatMessageDocument, ChatState } from "../types/chat.js";
+import type {
+  AiChatMessageDocument,
+  ChatMessageDocument,
+  ChatState,
+} from "../types/chat.js";
 import type { UserSettings } from "../types/settings.js";
 
 import { useFireproof } from "use-fireproof";
@@ -17,14 +21,12 @@ import { useSession } from "./useSession.js";
 
 import { useMessageSelection } from "./useMessageSelection.js";
 // Import our custom hooks
-import { checkCredits } from "./checkCredits.js";
 import type { SendMessageContext } from "./sendMessage.js";
 import { sendMessage as sendChatMessage } from "./sendMessage.js";
 import { useSystemPromptManager } from "./useSystemPromptManager.js";
 import { useThrottledUpdates } from "./useThrottledUpdates.js";
 
 // Constants
-const CODING_MODEL = "anthropic/claude-sonnet-4";
 const TITLE_MODEL = "meta-llama/llama-3.1-8b-instruct";
 
 /**
@@ -34,11 +36,7 @@ const TITLE_MODEL = "meta-llama/llama-3.1-8b-instruct";
  */
 export function useSimpleChat(sessionId: string | undefined): ChatState {
   // Get userId from auth system
-  const {
-    userPayload,
-    isAuthenticated,
-    setNeedsLogin: contextSetNeedsLogin,
-  } = useAuth();
+  const { userPayload, isAuthenticated, setNeedsLogin } = useAuth();
   const userId = userPayload?.userId;
 
   // Get API key
@@ -48,7 +46,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
   // and logged-in users will get proper credit assignment based on their ID
   // Using the useApiKey hook to get API key related functionality
   // Note: ensureApiKey is the key function we need for lazy loading
-  const { ensureApiKey, refreshKey } = useApiKey();
+  const { ensureApiKey } = useApiKey();
 
   // Get session data
   const {
@@ -63,6 +61,9 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     sessionDatabase,
     aiMessage,
     vibeDoc,
+    updateAiSelectedDependencies,
+    effectiveModel,
+    updateSelectedModel,
   } = useSession(sessionId);
 
   // Get main database directly for settings document
@@ -108,28 +109,26 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
   const [selectedResponseId, setSelectedResponseId] = useState<string>("");
   const [pendingAiMessage, setPendingAiMessage] =
     useState<ChatMessageDocument | null>(null);
-  const [needsNewKey, setNeedsNewKey] = useState<boolean>(false);
 
-  // Wrapper to retain (value, reason) signature expected by other helpers
-  const setNeedsLogin = useCallback(
-    (value: boolean, reason: string) => {
-      contextSetNeedsLogin(value);
-      console.log(`setNeedsLogin: ${value} from ${reason}`);
-    },
-    [contextSetNeedsLogin],
-  );
+  // setNeedsLogin is now obtained from AuthContext above
 
   // Derive model to use from settings or default
-  const modelToUse = useMemo(
-    () =>
-      settingsDoc?.model && settingsDoc.model.trim() !== ""
-        ? settingsDoc.model
-        : CODING_MODEL,
-    [settingsDoc?.model],
+  const modelToUse = effectiveModel;
+
+  // Create callback to store AI-selected dependencies
+  const handleAiDecisions = useCallback(
+    (decisions: { selected: string[] }) => {
+      updateAiSelectedDependencies(decisions.selected);
+    },
+    [updateAiSelectedDependencies],
   );
 
   // Use our custom hooks
-  const { ensureSystemPrompt } = useSystemPromptManager(settingsDoc);
+  const ensureSystemPrompt = useSystemPromptManager(
+    settingsDoc,
+    vibeDoc,
+    handleAiDecisions,
+  );
 
   const { throttledMergeAiMessage, isProcessingRef } =
     useThrottledUpdates(mergeAiMessage);
@@ -182,9 +181,10 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     [mergeUserMessage],
   );
 
+  // No longer needed - proxy handles authentication
   const boundCheckCredits = useCallback(
-    (key: string) => checkCredits(key, addError, setNeedsNewKey),
-    [addError, setNeedsNewKey],
+    async (_key: string) => ({ available: 999999, usage: 0, limit: 999999 }),
+    [],
   );
 
   /**
@@ -200,9 +200,6 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
         setIsStreaming,
         ensureApiKey,
         setNeedsLogin,
-        setNeedsNewKey,
-        addError,
-        checkCredits: boundCheckCredits,
         ensureSystemPrompt,
         submitUserMessage,
         buildMessageHistory,
@@ -218,6 +215,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
         userId,
         titleModel: TITLE_MODEL,
         isAuthenticated,
+        vibeDoc,
       };
       return sendChatMessage(ctx, textOverride, skipSubmit);
     },
@@ -241,44 +239,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     ],
   );
 
-  // When a login completes (isAuthenticated becomes true) and we still need a key,
-  // refresh the key and automatically retry sending the pending message.
-  useEffect(() => {
-    async function handlePostLogin() {
-      if (!needsNewKey) return;
-
-      if (!isAuthenticated) {
-        // Still not authenticated, ensure login prompt remains
-        setNeedsLogin(true, "still not authenticated");
-        return;
-      }
-
-      try {
-        await refreshKey();
-        setNeedsNewKey(false);
-        setNeedsLogin(false, "refreshKey success");
-
-        // If we have a pending user doc that hasn't been processed, retry send
-        if (pendingUserDoc?.text.trim()) {
-          // Resend the message using the pending user message text but skip resubmitting it to the DB
-          sendMessage(pendingUserDoc.text, true);
-        }
-      } catch (error) {
-        console.error("Failed to refresh API key after login:", error);
-        // If refresh fails, keep login state but notify user
-        setNeedsLogin(true, "refreshKey failure");
-      }
-    }
-
-    void handlePostLogin();
-  }, [
-    needsNewKey,
-    isAuthenticated,
-    refreshKey,
-    sendMessage,
-    pendingUserDoc,
-    setNeedsLogin,
-  ]);
+  // Login handling no longer needed - proxy handles authentication
 
   // Determine if code is ready for display
   const codeReady = useMemo(() => {
@@ -311,6 +272,66 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     setIsStreaming,
   });
 
+  // Function to save edited code as user edit + AI response
+  const saveCodeAsAiMessage = useCallback(
+    async (
+      code: string,
+      currentMessages: ChatMessageDocument[],
+    ): Promise<string> => {
+      // Use the current UI messages state AS-IS - trust the array order
+      // No sorting needed - the messages array is already in the correct order from the UI
+      const messages = currentMessages;
+
+      // SIMPLIFIED LOGIC: Just look at the last message in the array
+      const lastMessage = messages[messages.length - 1];
+      const isLastMessageFromUserEdit =
+        lastMessage?.type === "ai" &&
+        (lastMessage as AiChatMessageDocument)?.isEditedCode === true;
+
+      // UPDATE if last message is AI with isEditedCode, otherwise CREATE
+      const shouldUpdateExisting = isLastMessageFromUserEdit;
+
+      const aiResponseText = `Code changes:
+
+\`\`\`jsx
+${code}
+\`\`\``;
+
+      if (shouldUpdateExisting) {
+        const newTime = Date.now();
+        const updateDoc = {
+          ...(lastMessage as AiChatMessageDocument),
+          text: aiResponseText,
+          created_at: newTime,
+          isEditedCode: true,
+        };
+        await sessionDatabase.put(updateDoc);
+        return lastMessage._id || `updated-message-${Date.now()}`;
+      } else {
+        const now = Date.now();
+
+        const userMessageDoc = {
+          type: "user" as const,
+          session_id: session._id,
+          text: "Edited by user",
+          created_at: now,
+        };
+        await sessionDatabase.put(userMessageDoc);
+
+        const aiMessageDoc = {
+          type: "ai" as const,
+          session_id: session._id,
+          text: aiResponseText,
+          created_at: now + 1,
+          isEditedCode: true,
+        };
+        const result = await sessionDatabase.put(aiMessageDoc);
+        return result.id || `ai-message-${Date.now()}`;
+      }
+    },
+    [session._id, sessionDatabase],
+  );
+
   // Monitor advisory errors whenever they change (non-critical errors)
   useEffect(() => {
     // Advisories are handled through the system messages mechanism
@@ -320,6 +341,10 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
   return {
     sessionId: session._id,
     vibeDoc,
+    selectedModel: vibeDoc?.selectedModel,
+    effectiveModel,
+    globalModel: settingsDoc?.model,
+    showModelPickerInChat: settingsDoc?.showModelPickerInChat || false,
     addScreenshot,
     docs: messages,
     setSelectedResponseId,
@@ -331,14 +356,15 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
     isStreaming,
     codeReady,
     sendMessage,
+    saveCodeAsAiMessage,
     inputRef,
     title: vibeDoc?.title || "",
-    needsNewKey,
-    setNeedsNewKey,
+    updateTitle,
     // Error tracking
     immediateErrors,
     advisoryErrors,
     addError,
     isEmpty: docs.length === 0,
+    updateSelectedModel,
   };
 }

@@ -1,3 +1,4 @@
+import React from "react";
 export const mockResultPreviewProps = {
   displayView: "code" as const, // Changed from activeView
   // setActiveView: () => { /* no-op */ }, // Removed
@@ -7,6 +8,8 @@ export const mockResultPreviewProps = {
   setMobilePreviewShown: () => {
     /* no-op */
   },
+  sessionId: "test-session-id",
+  updateTitle: () => Promise.resolve(),
 };
 
 export const mockChatStateProps = {
@@ -18,6 +21,8 @@ export const mockChatStateProps = {
   setNeedsNewKey: () => {
     /* no-op */
   },
+  saveCodeAsAiMessage: () => Promise.resolve("test-message-id"),
+  updateTitle: () => Promise.resolve(),
   // Error tracking properties
   immediateErrors: [],
   advisoryErrors: [],
@@ -40,8 +45,10 @@ export const createMockChatState = (overrides = {}) => ({
   },
   inputRef: { current: null },
   sendMessage: () => Promise.resolve(),
+  saveCodeAsAiMessage: () => Promise.resolve("test-message-id"),
   isStreaming: false,
   title: "Test Session",
+  updateTitle: () => Promise.resolve(),
   sessionId: "test-session-id",
   selectedSegments: [],
   selectedCode: {

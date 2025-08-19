@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs } from "react-router";
-import { redirect } from "react-router";
 import React from "react";
+import { redirect } from "react-router";
 
 /**
  * Loader function that handles token processing and storage operations

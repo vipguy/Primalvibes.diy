@@ -150,6 +150,35 @@ export const DataIcon: React.FC<SvgIconProps> = ({
   );
 };
 
+export const SettingsIcon: React.FC<SvgIconProps> = ({
+  className = "h-4 w-4",
+  title,
+}) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <title>{title || "Settings icon"}</title>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+      />
+    </svg>
+  );
+};
+
 export const ShareIcon: React.FC<SvgIconProps> = ({
   className = "h-4 w-4",
   title,
@@ -252,6 +281,82 @@ export const PublishIcon: React.FC<SvgIconProps> = ({
         strokeLinejoin="round"
         strokeWidth={1.5}
         d="M12 16V2m0 0l-4 4m4-4l4 4"
+      />
+    </svg>
+  );
+};
+
+export const MinidiscIcon: React.FC<SvgIconProps> = ({
+  className = "h-4 w-4",
+  title,
+}) => {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <title>{title || "Save icon (minidisc)"}</title>
+      {/* Rounded rectangle background - 20% bigger than circle */}
+      <rect
+        x="0.8"
+        y="0.8"
+        width="22.4"
+        height="22.4"
+        rx="3"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+      />
+      {/* Minidisc outline */}
+      <circle
+        cx="12"
+        cy="12"
+        r="9.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1"
+      />
+      {/* Inner ring */}
+      <circle
+        cx="12"
+        cy="12"
+        r="3.8"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1"
+      />
+      {/* Label area */}
+      <rect
+        x="16"
+        y="9.5"
+        width="6"
+        height="5"
+        rx="1"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth=".8"
+      />
+      {/* Label lines */}
+      <line
+        x1="17"
+        y1="11"
+        x2="21"
+        y2="11"
+        stroke="currentColor"
+        strokeWidth="0.5"
+      />
+      <line
+        x1="17"
+        y1="12"
+        x2="20"
+        y2="12"
+        stroke="currentColor"
+        strokeWidth="0.5"
+      />
+      <line
+        x1="17"
+        y1="13"
+        x2="21"
+        y2="13"
+        stroke="currentColor"
+        strokeWidth="0.5"
       />
     </svg>
   );

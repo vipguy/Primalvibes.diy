@@ -1,12 +1,12 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import MessageList from "~/vibes-diy/app/components/MessageList.js";
+import MessageList from "~/vibes.diy/app/components/MessageList.js";
 import { vi, describe, test, expect, beforeEach } from "vitest";
 import type {
   UserChatMessage,
   AiChatMessage,
   ChatMessageDocument,
-} from "~/vibes-diy/app/types/chat.js";
+} from "~/vibes.diy/app/types/chat.js";
 import { MockThemeProvider } from "./utils/MockThemeProvider.js";
 
 beforeEach(() => {
@@ -14,11 +14,11 @@ beforeEach(() => {
 });
 
 // Mock the Message component to match real implementation
-vi.mock("~/vibes-diy/app/components/Message.js", () => ({
-  default: ({ message }: { message: AiChatMessage }) => (
+vi.mock("~/vibes.diy/app/components/Message", () => ({
+  default: ({ message }: any) => (
     <div data-testid={`message-${message._id}`}>
       {message.segments &&
-        message.segments.map((segment, i: number) => (
+        message.segments.map((segment: any, i: number) => (
           <div key={i} data-testid={segment.type}>
             {segment.content}
           </div>
@@ -70,7 +70,7 @@ describe("MessageList Real-World Streaming Tests", () => {
     );
 
     // Check if we see the minimal content in the DOM
-    const messageContent = screen.queryByText(/\{"/);
+    const messageContent = screen.queryByText(/\{\"/);
     expect(messageContent).toBeInTheDocument();
 
     // Log the DOM structure to see what's actually rendered
@@ -84,7 +84,7 @@ describe("MessageList Real-World Streaming Tests", () => {
     }
 
     // This is what we want - but it might fail if the app has a bug
-    expect(screen.getByText(/\{"/)).toBeInTheDocument();
+    expect(screen.getByText(/\{\"/)).toBeInTheDocument();
   });
 
   test("should update UI as more content streams in", () => {

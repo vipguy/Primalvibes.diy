@@ -1,7 +1,7 @@
+import React from "react";
 import { vi, describe, it, expect } from "vitest";
 import { render, fireEvent } from "@testing-library/react";
-import React from "react";
-import QuickSuggestions from "~/vibes-diy/app/components/QuickSuggestions.js";
+import QuickSuggestions from "~/vibes.diy/app/components/QuickSuggestions.js";
 
 describe("QuickSuggestions", () => {
   it("renders multiple suggestion buttons", () => {

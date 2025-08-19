@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseContent } from "~/vibes-diy/app/utils/segmentParser.js";
+import { parseContent } from "~/vibes.diy/app/utils/segmentParser.js";
 import fs from "fs";
 import path from "path";
 

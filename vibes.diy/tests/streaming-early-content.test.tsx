@@ -1,9 +1,9 @@
+import React from "react";
 import { render, screen, cleanup } from "@testing-library/react";
 import { vi, describe, test, expect, afterEach } from "vitest";
-import StructuredMessage from "~/vibes-diy/app/components/StructuredMessage.js";
-import type { Segment } from "~/vibes-diy/app/types/chat.js";
+import StructuredMessage from "~/vibes.diy/app/components/StructuredMessage.js";
+import type { Segment } from "~/vibes.diy/app/types/chat.js";
 import { MockThemeProvider } from "./utils/MockThemeProvider.js";
-import React from "react";
 
 // Mock the window.location for any URL operations
 vi.spyOn(window, "location", "get").mockImplementation(

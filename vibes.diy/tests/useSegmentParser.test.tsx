@@ -2,45 +2,44 @@ import { describe, it, expect, vi } from "vitest";
 import {
   parseContent,
   parseDependencies,
-} from "~/vibes-diy/app/utils/segmentParser.js";
-import type { ChatMessage, AiChatMessage } from "~/vibes-diy/app/types/chat.js";
+} from "~/vibes.diy/app/utils/segmentParser.js";
+import type { ChatMessage, AiChatMessage } from "~/vibes.diy/app/types/chat.js";
 
 // Mock the prompts module
-vi.mock("~/vibes-diy/app/prompts", () => ({
+vi.mock("~/vibes.diy/app/prompts.js", () => ({
   makeBaseSystemPrompt: vi.fn().mockResolvedValue("Mocked system prompt"),
 }));
 
 // Mock the provisioning module
-vi.mock("~/vibes-diy/app/config/provisioning");
+vi.mock("~/vibes.diy/app/config/provisioning");
 
 // Mock the env module
-vi.mock("~/vibes-diy/app/config/env", () => ({
+vi.mock("~/vibes.diy/app/config/env", () => ({
   CALLAI_API_KEY: "mock-callai-api-key-for-testing",
   SETTINGS_DBNAME: "test-chat-history",
 }));
 
 // Define shared state and reset function *outside* the mock factory
-// interface MockDoc {
-//   _id?: string;
-//   type: string;
-//   text: string;
-//   session_id: string;
-//   timestamp?: number;
-//   created_at?: number;
-//   segments?: AiChatMessage["segments"][];
-//   dependenciesString?: string;
-//   isStreaming?: boolean;
-//   model?: string;
-//   dataUrl?: string; // For screenshot docs
-// }
-type MockDoc = ChatMessage | AiChatMessage;
+interface MockDoc {
+  _id?: string;
+  type: string;
+  text: string;
+  session_id: string;
+  timestamp?: number;
+  created_at?: number;
+  segments?: any[];
+  dependenciesString?: string;
+  isStreaming?: boolean;
+  model?: string;
+  dataUrl?: string; // For screenshot docs
+}
 const mockDocs: MockDoc[] = [];
 
-const currentUserMessage: Partial<MockDoc> = {};
-const currentAiMessage: Partial<MockDoc> = {};
+const currentUserMessage: any = {};
+const currentAiMessage: any = {};
 
 // Define the mergeUserMessage implementation separately
-const mergeUserMessageImpl = (data: Partial<ChatMessage>) => {
+const mergeUserMessageImpl = (data: any) => {
   if (data && typeof data.text === "string") {
     currentUserMessage.text = data.text;
   }
@@ -50,7 +49,7 @@ const mergeUserMessageImpl = (data: Partial<ChatMessage>) => {
 const mockMergeUserMessage = vi.fn(mergeUserMessageImpl);
 
 // Mock the useSession hook
-vi.mock("~/vibes-diy/app/hooks/useSession", () => {
+vi.mock("~/vibes.diy/app/hooks/useSession", () => {
   return {
     useSession: () => {
       // Don't reset here, reset is done in beforeEach
@@ -64,10 +63,10 @@ vi.mock("~/vibes-diy/app/hooks/useSession", () => {
         docs: mockDocs,
         updateTitle: vi
           .fn()
-          .mockImplementation(async (_title) => Promise.resolve()),
+          .mockImplementation(async (title) => Promise.resolve()),
         addScreenshot: vi.fn(),
         sessionDatabase: {
-          put: vi.fn(async (doc) => {
+          put: vi.fn(async (doc: any) => {
             const id = doc._id || `doc-${Date.now()}`;
             return Promise.resolve({ id: id });
           }),
@@ -76,10 +75,11 @@ vi.mock("~/vibes-diy/app/hooks/useSession", () => {
             if (found) return Promise.resolve(found);
             return Promise.reject(new Error("Not found"));
           }),
-          query: vi.fn(async (field: string, options?: { key: string }) => {
+          query: vi.fn(async (field: string, options: any) => {
             const key = options?.key;
             const filtered = mockDocs.filter((doc) => {
-              return (doc as unknown as Record<string, string>)[field] === key;
+              // @ts-ignore - we know the field exists
+              return doc[field] === key;
             });
             return Promise.resolve({
               rows: filtered.map((doc) => ({ id: doc._id, doc })),
@@ -94,12 +94,12 @@ vi.mock("~/vibes-diy/app/hooks/useSession", () => {
           const newDoc = {
             ...currentUserMessage,
             _id: id,
-          } as MockDoc;
-          mockDocs.push(newDoc);
+          };
+          mockDocs.push(newDoc as any);
           return Promise.resolve({ id });
         }),
         aiMessage: currentAiMessage,
-        mergeAiMessage: vi.fn((data) => {
+        mergeAiMessage: vi.fn((data: any) => {
           if (data && typeof data.text === "string") {
             currentAiMessage.text = data.text;
           }
@@ -109,18 +109,18 @@ vi.mock("~/vibes-diy/app/hooks/useSession", () => {
           const newDoc = {
             ...currentAiMessage,
             _id: id,
-          } as MockDoc;
-          mockDocs.push(newDoc);
+          };
+          mockDocs.push(newDoc as any);
           return Promise.resolve({ id });
         }),
-        saveAiMessage: vi.fn().mockImplementation(async (existingDoc) => {
+        saveAiMessage: vi.fn().mockImplementation(async (existingDoc: any) => {
           const id = existingDoc?._id || `ai-message-${Date.now()}`;
           const newDoc = {
             ...currentAiMessage,
             ...existingDoc,
             _id: id,
           };
-          mockDocs.push(newDoc);
+          mockDocs.push(newDoc as any);
           return Promise.resolve({ id });
         }),
         // Mock message handling
@@ -196,7 +196,7 @@ export default HelloWorld;`,
                     '{"react": "^18.2.0", "react-dom": "^18.2.0"}}',
                   isStreaming,
                   timestamp: now,
-                };
+                } as any;
               }
               // Special case for the dependencies test
               else if (
@@ -378,7 +378,7 @@ export default Timer;`,
 });
 
 // Mock the useSessionMessages hook
-vi.mock("~/vibes-diy/app/hooks/useSessionMessages", () => {
+vi.mock("~/vibes.diy/app/hooks/useSessionMessages", () => {
   // Track messages across test runs
   const messagesStore: Record<string, ChatMessage[]> = {};
 
@@ -465,7 +465,7 @@ export default HelloWorld;`,
                     '{"react": "^18.2.0", "react-dom": "^18.2.0"}}',
                   isStreaming,
                   timestamp: now,
-                };
+                } as any;
               }
               // Special case for the dependencies test
               else if (

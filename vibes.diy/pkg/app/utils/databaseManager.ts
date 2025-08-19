@@ -18,33 +18,38 @@ export const getSessionDatabaseName = (sessionId: string) => {
  * @returns Promise resolving to the updated document
  */
 export async function updateUserVibespaceDoc(
-  userId: string | undefined,
-  slug: string | undefined,
-  data: Record<string, unknown>,
-): Promise<unknown> {
-  if (!userId || !slug) {
-    throw new Error("userId and slug are required for updating vibespace");
+  userId: string,
+  slug: string,
+  data: Record<string, any>,
+): Promise<any> {
+  try {
+    if (!userId || !slug) {
+      throw new Error("userId and slug are required for updating vibespace");
+    }
+
+    // Get the user's vibespace database
+    const userVibespaceDb = fireproof(`vu-${userId}`);
+
+    // Use a consistent document ID format
+    const docId = `app-${slug}`;
+
+    // Try to get existing document or create a new one
+    const existingDoc = await userVibespaceDb.get(docId).catch(() => ({
+      _id: docId,
+    }));
+
+    // Merge existing data with new data
+    const updatedDoc = {
+      ...existingDoc,
+      ...data,
+      lastUpdated: Date.now(),
+    };
+
+    // Update the document
+    const result = await userVibespaceDb.put(updatedDoc);
+    return result;
+  } catch (error) {
+    // Re-throw the error to be handled by the caller
+    throw error;
   }
-
-  // Get the user's vibespace database
-  const userVibespaceDb = fireproof(`vu-${userId}`);
-
-  // Use a consistent document ID format
-  const docId = `app-${slug}`;
-
-  // Try to get existing document or create a new one
-  const existingDoc = await userVibespaceDb.get(docId).catch(() => ({
-    _id: docId,
-  }));
-
-  // Merge existing data with new data
-  const updatedDoc = {
-    ...existingDoc,
-    ...data,
-    lastUpdated: Date.now(),
-  };
-
-  // Update the document
-  const result = await userVibespaceDb.put(updatedDoc);
-  return result;
 }

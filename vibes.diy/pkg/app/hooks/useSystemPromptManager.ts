@@ -1,45 +1,48 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import { APP_MODE } from "../config/env.js";
-import { makeBaseSystemPrompt } from "../prompts.js";
+import { makeBaseSystemPrompt, resolveEffectiveModel } from "../prompts.js";
 import type { UserSettings } from "../types/settings.js";
+import type { VibeDocument } from "../types/chat.js";
 
-// Model constant used for system prompts
-const CODING_MODEL = "anthropic/claude-sonnet-4";
+// Default model is resolved via resolveEffectiveModel using settings + session
 
 /**
  * Hook for managing system prompts based on settings
  * @param settingsDoc - User settings document that may contain model preferences
- * @returns Object with systemPrompt state and utility functions
+ * @param vibeDoc - Vibe document containing per-vibe settings
+ * @param onAiDecisions - Callback to store AI-selected dependencies
+ * @returns ensureSystemPrompt function that builds and returns a fresh system prompt
  */
-export function useSystemPromptManager(settingsDoc: UserSettings | undefined) {
-  const [systemPrompt, setSystemPrompt] = useState("");
+export function useSystemPromptManager(
+  settingsDoc: UserSettings | undefined,
+  vibeDoc?: VibeDocument,
+  onAiDecisions?: (decisions: { selected: string[] }) => void,
+) {
+  // Stateless builder: always constructs and returns a fresh system prompt
+  const ensureSystemPrompt = useCallback(
+    async (overrides?: {
+      userPrompt?: string;
+      history?: {
+        role: "user" | "assistant" | "system";
+        content: string;
+      }[];
+    }) => {
+      if (APP_MODE === "test") {
+        return "Test system prompt";
+      }
+      return makeBaseSystemPrompt(
+        resolveEffectiveModel(settingsDoc, vibeDoc),
+        {
+          ...(settingsDoc || {}),
+          ...(vibeDoc || {}),
+          ...(overrides || {}),
+        },
+        onAiDecisions,
+      );
+    },
+    [settingsDoc, vibeDoc, onAiDecisions],
+  );
 
-  // Reset system prompt when settings change
-  useEffect(() => {
-    if (settingsDoc && systemPrompt) {
-      // Only reset if we already have a system prompt (don't trigger on initial load)
-      const loadNewPrompt = async () => {
-        const newPrompt = await makeBaseSystemPrompt(CODING_MODEL, settingsDoc);
-        setSystemPrompt(newPrompt);
-      };
-      loadNewPrompt();
-    }
-  }, [settingsDoc, systemPrompt]);
-
-  // Function to ensure we have a system prompt
-  const ensureSystemPrompt = useCallback(async () => {
-    if (systemPrompt) return systemPrompt;
-
-    let newPrompt = "";
-    if (APP_MODE === "test") {
-      newPrompt = "Test system prompt";
-    } else {
-      newPrompt = await makeBaseSystemPrompt(CODING_MODEL, settingsDoc);
-    }
-
-    setSystemPrompt(newPrompt);
-    return newPrompt;
-  }, [systemPrompt, settingsDoc]);
-
-  return { systemPrompt, setSystemPrompt, ensureSystemPrompt };
+  // Export only the builder function
+  return ensureSystemPrompt;
 }

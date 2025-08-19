@@ -225,7 +225,9 @@ describe("Simple callAi integration tests", () => {
                     expectOrWarn(
                       modelId,
                       populationInMillions >= 60 && populationInMillions <= 70,
-                      `Population ${data.population} (${populationInMillions.toFixed(2)}M) outside expected range in ${modelName} model response`,
+                      `Population ${data.population} (${populationInMillions.toFixed(
+                        2,
+                      )}M) outside expected range in ${modelName} model response`,
                       data.population,
                     );
                   }

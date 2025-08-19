@@ -1,10 +1,10 @@
-import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
-import { ViewControls } from "~/vibes-diy/app/components/ResultPreview/ViewControls.js";
+import { ViewControls } from "~/vibes.diy/app/components/ResultPreview/ViewControls.js";
 
 // Mock the SVG icons
-vi.mock("~/vibes-diy/app/components/HeaderContent/SvgIcons", () => ({
+vi.mock("~/vibes.diy/app/components/HeaderContent/SvgIcons", () => ({
   PreviewIcon: ({
     className,
   }: {

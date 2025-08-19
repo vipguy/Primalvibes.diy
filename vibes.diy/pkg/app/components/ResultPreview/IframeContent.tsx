@@ -1,24 +1,25 @@
+import { Editor, Monaco } from "@monaco-editor/react";
 import React, { useEffect, useRef, useState } from "react";
 import type { IframeFiles } from "./ResultPreviewTypes.js";
-import { Monaco, Editor } from "@monaco-editor/react";
-import { editor } from "monaco-editor";
-import { useApiKey } from "../../hooks/useApiKey.js";
+// API key import removed - proxy handles authentication
+import { CALLAI_ENDPOINT } from "../../config/env.js";
+import { normalizeComponentExports } from "../../utils/normalizeComponentExports.js";
+import { DatabaseListView } from "./DataView/index.js";
 import { setupMonacoEditor } from "./setupMonacoEditor.js";
 import { transformImports } from "./transformImports.js";
-import { DatabaseListView } from "./DataView/index.js";
-import { normalizeComponentExports } from "../../utils/normalizeComponentExports.js";
-
-// Import the iframe template using Vite's ?raw import option
-import iframeTemplateRaw from "./templates/iframe-template.html?raw";
-import { HighlighterGeneric, BundledLanguage, BundledTheme } from "shiki";
+import { editor } from "monaco-editor";
+import { BundledLanguage, BundledTheme, HighlighterGeneric } from "shiki";
 
 interface IframeContentProps {
-  activeView: "preview" | "code" | "data";
+  activeView: "preview" | "code" | "data" | "chat" | "settings";
   filesContent: IframeFiles;
   isStreaming: boolean;
   codeReady: boolean;
   isDarkMode: boolean;
   sessionId?: string;
+  onCodeSave?: (code: string) => void;
+  onCodeChange?: (hasChanges: boolean, saveHandler: () => void) => void;
+  onSyntaxErrorChange?: (errorCount: number) => void;
 }
 
 const IframeContent: React.FC<IframeContentProps> = ({
@@ -28,9 +29,11 @@ const IframeContent: React.FC<IframeContentProps> = ({
   codeReady,
   isDarkMode,
   sessionId,
+  onCodeSave,
+  onCodeChange,
+  onSyntaxErrorChange,
 }) => {
-  const { ensureApiKey } = useApiKey();
-  const [apiKey, setApiKey] = useState("");
+  // API key no longer needed - proxy handles authentication
   const iframeRef = useRef<HTMLIFrameElement>(null);
   // Theme state is now received from parent via props
   const contentLoadedRef = useRef(false);
@@ -50,6 +53,69 @@ const IframeContent: React.FC<IframeContentProps> = ({
 
   // Extract the current app code string
   const appCode = filesContent["/App.jsx"]?.code || "";
+
+  // State for edited code
+  const [editedCode, setEditedCode] = useState(appCode);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  // Update edited code when app code changes
+  useEffect(() => {
+    setEditedCode(appCode);
+    setHasUnsavedChanges(false);
+  }, [appCode]);
+
+  // Handle code changes in the editor
+  const handleCodeChange = (value: string | undefined) => {
+    const newCode = value || "";
+
+    // Also check the editor's current value to be extra sure
+    const editorCurrentValue = monacoEditorRef.current?.getValue() || newCode;
+    const actualValue =
+      editorCurrentValue.length >= newCode.length
+        ? editorCurrentValue
+        : newCode;
+
+    setEditedCode(actualValue);
+    const hasChanges = actualValue !== appCode;
+    setHasUnsavedChanges(hasChanges);
+
+    // Notify parent about changes
+    if (onCodeChange) {
+      onCodeChange(hasChanges, () => handleSave());
+    }
+
+    // Note: Syntax error checking is handled by onDidChangeMarkers listener
+    // Don't check errors here as markers are updated asynchronously
+  };
+
+  // Handle save button click
+  const handleSave = async () => {
+    // Format the code before saving
+    try {
+      await monacoEditorRef.current
+        ?.getAction("editor.action.formatDocument")
+        ?.run();
+    } catch (error) {
+      console.warn("Could not format document:", error);
+    }
+
+    // Get the current value directly from Monaco editor to ensure we capture all keystrokes
+    const currentValue = monacoEditorRef.current?.getValue() || editedCode;
+
+    // Update our state with the actual current value
+    if (currentValue !== editedCode) {
+      setEditedCode(currentValue);
+    }
+
+    if (onCodeSave && (hasUnsavedChanges || currentValue !== appCode)) {
+      onCodeSave(currentValue);
+      setHasUnsavedChanges(false);
+      // Notify parent that changes are saved
+      if (onCodeChange) {
+        onCodeChange(false, () => handleSave());
+      }
+    }
+  };
 
   // Theme detection is now handled in the parent component
 
@@ -82,19 +148,11 @@ const IframeContent: React.FC<IframeContentProps> = ({
 
   // This effect is now managed at the ResultPreview component level
 
-  // Get API key on component mount
-  useEffect(() => {
-    const getApiKey = async () => {
-      const keyData = await ensureApiKey();
-      setApiKey(keyData.key);
-    };
+  // API key management removed - proxy handles authentication
 
-    getApiKey();
-  }, [ensureApiKey]);
-
-  // Update iframe when code is ready and API key is available
+  // Update iframe when code is ready
   useEffect(() => {
-    if (codeReady && apiKey && iframeRef.current) {
+    if (codeReady && iframeRef.current) {
       // Skip if content hasn't changed
       if (contentLoadedRef.current && appCode === lastContentRef.current) {
         return;
@@ -106,20 +164,32 @@ const IframeContent: React.FC<IframeContentProps> = ({
       // Use the extracted function to normalize component export patterns
       const normalizedCode = normalizeComponentExports(appCode);
 
-      // Create a session ID variable for the iframe template
+      // Create a session ID variable for the iframe
       const sessionIdValue = sessionId || "default-session";
 
       const transformedCode = transformImports(normalizedCode);
 
-      // Use the template and replace placeholders
-      const htmlContent = iframeTemplateRaw
-        .replace("{{API_KEY}}", apiKey)
-        .replace("{{APP_CODE}}", transformedCode)
-        .replace("{{SESSION_ID}}", sessionIdValue);
+      // Use vibesbox.dev subdomain for origin isolation
+      const iframeUrl = `https://${sessionIdValue}.vibesbox.dev/`;
+      iframeRef.current.src = iframeUrl;
 
-      const blob = new Blob([htmlContent], { type: "text/html" });
-      const url = URL.createObjectURL(blob);
-      iframeRef.current.src = url;
+      // Send code via postMessage after iframe loads
+      const handleIframeLoad = () => {
+        if (iframeRef.current?.contentWindow) {
+          iframeRef.current.contentWindow.postMessage(
+            {
+              type: "execute-code",
+              code: transformedCode,
+              apiKey: "sk-vibes-proxy-managed",
+              sessionId: sessionIdValue,
+              endpoint: CALLAI_ENDPOINT,
+            },
+            "*",
+          );
+        }
+      };
+
+      iframeRef.current.addEventListener("load", handleIframeLoad);
 
       // Setup message listener for preview ready signal
       const handleMessage = (event: MessageEvent) => {
@@ -131,11 +201,13 @@ const IframeContent: React.FC<IframeContentProps> = ({
       window.addEventListener("message", handleMessage);
 
       return () => {
-        URL.revokeObjectURL(url);
+        if (iframeRef.current) {
+          iframeRef.current.removeEventListener("load", handleIframeLoad);
+        }
         window.removeEventListener("message", handleMessage);
       };
     }
-  }, [appCode, apiKey, codeReady]);
+  }, [appCode, codeReady]);
 
   // Determine which view to show based on URL path - gives more stable behavior on refresh
   const getViewFromPath = () => {
@@ -143,6 +215,8 @@ const IframeContent: React.FC<IframeContentProps> = ({
     if (path.endsWith("/code")) return "code";
     if (path.endsWith("/data")) return "data";
     if (path.endsWith("/app")) return "preview";
+    if (path.endsWith("/chat")) return "preview"; // Show preview for chat view
+    if (path.endsWith("/settings")) return "settings";
     return activeView; // Fall back to state if path doesn't have a suffix
   };
 
@@ -166,9 +240,7 @@ const IframeContent: React.FC<IframeContentProps> = ({
           ref={iframeRef}
           className="h-full w-full border-0"
           title="Preview"
-          sandbox="allow-downloads allow-forms allow-modals allow-pointer-lock allow-popups-to-escape-sandbox allow-popups allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
           allow="accelerometer *; bluetooth *; camera *; encrypted-media *; display-capture *; geolocation *; gyroscope *; microphone *; midi *; clipboard-read *; clipboard-write *; web-share *; serial *; xr-spatial-tracking *"
-          scrolling="auto"
           allowFullScreen={true}
         />
       </div>
@@ -189,9 +261,10 @@ const IframeContent: React.FC<IframeContentProps> = ({
           path="file.jsx"
           defaultLanguage="jsx"
           theme={isDarkMode ? "github-dark" : "github-light"}
-          value={filesContent["/App.jsx"]?.code || ""}
+          value={editedCode}
+          onChange={handleCodeChange}
           options={{
-            readOnly: true,
+            readOnly: false,
             minimap: { enabled: false },
             scrollBeyondLastLine: false,
             automaticLayout: true,
@@ -199,6 +272,8 @@ const IframeContent: React.FC<IframeContentProps> = ({
             lineNumbers: "on",
             wordWrap: "on",
             padding: { top: 16 },
+            formatOnType: true,
+            formatOnPaste: true,
           }}
           onMount={async (editor, monaco) => {
             await setupMonacoEditor(editor, monaco, {
@@ -215,6 +290,70 @@ const IframeContent: React.FC<IframeContentProps> = ({
                 highlighterRef.current = h;
               },
             });
+
+            // Set up syntax error monitoring
+            const model = editor.getModel();
+            if (model) {
+              // Holds the timeout id for pending syntax-error checks so we can cancel
+              // any previously scheduled run before queuing a new one. This acts as a
+              // lightweight, manual debounce without bringing in lodash or a similar
+              // utility.
+              let syntaxErrorCheckTimeoutId: ReturnType<
+                typeof setTimeout
+              > | null = null;
+
+              const scheduleSyntaxCheck = (delay: number) => {
+                if (syntaxErrorCheckTimeoutId !== null) {
+                  clearTimeout(syntaxErrorCheckTimeoutId);
+                }
+                syntaxErrorCheckTimeoutId = setTimeout(
+                  checkSyntaxErrors,
+                  delay,
+                );
+              };
+
+              const checkSyntaxErrors = () => {
+                // Get ALL markers for our model from all sources
+                const allMarkers = monaco.editor.getModelMarkers({
+                  resource: model.uri,
+                });
+
+                // Filter for error markers from any language service
+                const errorMarkers = allMarkers.filter(
+                  (marker) => marker.severity === monaco.MarkerSeverity.Error,
+                );
+
+                const errorCount = errorMarkers.length;
+
+                if (onSyntaxErrorChange) {
+                  onSyntaxErrorChange(errorCount);
+                }
+              };
+
+              // Initial check after a short delay to allow language service to initialize
+              scheduleSyntaxCheck(100);
+
+              // Listen for marker changes - check every time markers change
+              const disposable = monaco.editor.onDidChangeMarkers((uris) => {
+                // Check if our model's URI is in the changed URIs
+                if (
+                  uris.some((uri) => uri.toString() === model.uri.toString())
+                ) {
+                  // Add a small delay to ensure markers are updated
+                  scheduleSyntaxCheck(50);
+                }
+              });
+
+              // Also listen for model content changes as a backup
+              const contentDisposable = editor.onDidChangeModelContent(() => {
+                // Queue a syntax check, cancelling any pending one, to avoid stacking
+                // up checks during rapid typing.
+                scheduleSyntaxCheck(500);
+              });
+
+              disposablesRef.current.push(disposable);
+              disposablesRef.current.push(contentDisposable);
+            }
           }}
         />
       </div>
@@ -228,7 +367,8 @@ const IframeContent: React.FC<IframeContentProps> = ({
           top: 0,
           left: 0,
           padding: "0px",
-          overflow: "auto",
+          overflowY: "scroll",
+          overflowX: "hidden",
         }}
       >
         <div className="data-container">
@@ -238,6 +378,11 @@ const IframeContent: React.FC<IframeContentProps> = ({
           />
         </div>
       </div>
+      {/**
+       * Settings view is rendered by the parent ResultPreview component, not inside
+       * the iframe. We intentionally do not render a placeholder slot here to avoid
+       * any chance of intercepting pointer events or impacting layout.
+       */}
     </div>
   );
 };

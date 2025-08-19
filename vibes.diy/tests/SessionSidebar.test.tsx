@@ -1,14 +1,14 @@
+import React from "react";
 import { act, fireEvent, screen, render } from "@testing-library/react";
 // Vitest will automatically use mocks from __mocks__ directory
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { resetMockAuthState, setMockAuthState } from "./__mocks__/useAuth.js";
-import SessionSidebar from "~/vibes-diy/app/components/SessionSidebar.js";
+import SessionSidebar from "~/vibes.diy/app/components/SessionSidebar.js";
 import { mockSessionSidebarProps } from "./mockData.js";
 import { MockThemeProvider } from "./utils/MockThemeProvider.js";
-import React from "react";
 
 // Mock AuthContext to use the mocked useAuth implementation so components don’t require an AuthProvider
-vi.mock("~/vibes-diy/app/contexts/AuthContext", async () => {
+vi.mock("~/vibes.diy/app/contexts/AuthContext", async () => {
   const mockAuth = await import("./__mocks__/useAuth.js");
   return {
     useAuth: mockAuth.mockUseAuth,
@@ -20,17 +20,17 @@ vi.mock("~/vibes-diy/app/contexts/AuthContext", async () => {
 // (setMockAuthState / resetMockAuthState imported below)
 
 // Mock the auth utility functions
-vi.mock("~/vibes-diy/app/utils/auth", () => ({
+vi.mock("~/vibes.diy/app/utils/auth", () => ({
   initiateAuthFlow: vi.fn(),
 }));
 
-vi.mock("~/vibes-diy/app/utils/analytics", () => ({
+vi.mock("~/vibes.diy/app/utils/analytics", () => ({
   trackAuthClick: vi.fn(),
 }));
 
-import { trackAuthClick } from "~/vibes-diy/app/utils/analytics.js";
+import { trackAuthClick } from "~/vibes.diy/app/utils/analytics.js";
 // Import mocked functions
-import { initiateAuthFlow } from "~/vibes-diy/app/utils/auth.js";
+import { initiateAuthFlow } from "~/vibes.diy/app/utils/auth.js";
 
 // Mock Link component from react-router
 vi.mock("react-router", () => {
@@ -144,35 +144,7 @@ describe("SessionSidebar component", () => {
     expect(trackAuthClick).toHaveBeenCalledTimes(1);
   });
 
-  it('should show "Log in for credits" when needsLogin is true', () => {
-    // Mock useAuth to return authenticated state
-    setMockAuthState({
-      isAuthenticated: false,
-      isLoading: false,
-      needsLogin: true,
-    });
-
-    const props = {
-      ...mockSessionSidebarProps,
-    };
-
-    render(
-      <MockThemeProvider>
-        <SessionSidebar {...props} />
-      </MockThemeProvider>,
-    );
-
-    // Check that the menu items are rendered
-    expect(screen.getByText("Home")).toBeInTheDocument();
-    expect(screen.getByText("My Vibes")).toBeInTheDocument();
-    expect(screen.getByText("About")).toBeInTheDocument();
-
-    // Now look for the 'Log in for credits' text
-    const loginCreditsBtn = screen.getByText("Log in for credits");
-    fireEvent.click(loginCreditsBtn);
-    expect(initiateAuthFlow).toHaveBeenCalled();
-    expect(trackAuthClick).toHaveBeenCalled();
-  });
+  // Test removed - needsLogin functionality no longer exists
 
   it("should render navigation links with correct labels", () => {
     const props = {

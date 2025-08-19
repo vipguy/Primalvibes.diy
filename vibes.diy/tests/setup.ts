@@ -3,15 +3,39 @@ import "@testing-library/jest-dom";
 import React from "react";
 
 // Import our module setup which configures the use-fireproof mock
-import "./moduleSetup";
-import type { LinkProps } from "react-router";
+import "./moduleSetup.js";
+import { LinkProps } from "react-router";
 
-process.env.VITE_CLOUD_SESSION_TOKEN_PUBLIC =
-  "zeWndr5LEoaySgKSo2aZniYqUk2BbKBgWfQgK1UtPLwnqt7UTicz6zMeM2VpzLBdfTNxQVKFptEY2CCUsHr3Dmatm211WrKqfWNwfDSoW3ZCgzKx35ZqzfuLUgPjudQkjRNr8g2A7HweArkPfKdUyRgJCvH4XJ4QHxLxb25pDt2pU";
-
-// Mock the makeBaseSystemPrompt function
-vi.mock("~/vibes-diy/app/prompts", () => ({
+// Mock the prompts module to avoid network/file IO during tests
+vi.mock("~/vibes.diy/app/prompts.js", () => ({
   makeBaseSystemPrompt: vi.fn().mockReturnValue("mocked system prompt"),
+  // Minimal stubs used by hooks that depend on prompts (reflect relaxed policy + normalization)
+  normalizeModelId: vi
+    .fn()
+    .mockImplementation((id: unknown) =>
+      typeof id === "string" && id.trim() ? id.trim() : undefined,
+    ),
+  isPermittedModelId: vi
+    .fn()
+    .mockImplementation((id: unknown) => typeof id === "string" && !!id.trim()),
+  resolveEffectiveModel: vi
+    .fn()
+    .mockImplementation(
+      (
+        settingsDoc?: { model?: string },
+        vibeDoc?: { selectedModel?: string },
+      ) => {
+        const session =
+          typeof vibeDoc?.selectedModel === "string"
+            ? vibeDoc.selectedModel.trim()
+            : "";
+        const global =
+          typeof settingsDoc?.model === "string"
+            ? settingsDoc.model.trim()
+            : "";
+        return session || global || "anthropic/claude-sonnet-4";
+      },
+    ),
   RESPONSE_FORMAT: {
     dependencies: {
       format: '{dependencies: { "package-name": "version" }}',
@@ -95,6 +119,16 @@ Object.defineProperty(window, "matchMedia", {
   })),
 });
 
+// Mock ResizeObserver for tests
+global.ResizeObserver = class ResizeObserver {
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+  // constructor(callback: ResizeObserverCallback) {
+  //   // Mock constructor
+  // }
+};
+
 // Mock clipboard API
 Object.assign(navigator, {
   clipboard: {
@@ -102,26 +136,66 @@ Object.assign(navigator, {
   },
 });
 
-// Mock TextEncoder if needed
-/*
-if (typeof TextEncoder === "undefined") {
-  global.TextEncoder = class TextEncoder {
-    encoding = "utf-8";
-    encode(text: string): Uint8Array {
-      const encoded = new Uint8Array(text.length);
-      for (let i = 0; i < text.length; i++) {
-        encoded[i] = text.charCodeAt(i);
-      }
-      return encoded;
+// Mock HTMLCanvasElement for tests that use canvas
+Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
+  value: vi.fn().mockImplementation((contextType: string) => {
+    if (contextType === "2d") {
+      return {
+        fillStyle: "",
+        fillRect: vi.fn(),
+        clearRect: vi.fn(),
+        strokeStyle: "",
+        lineWidth: 1,
+        beginPath: vi.fn(),
+        moveTo: vi.fn(),
+        lineTo: vi.fn(),
+        stroke: vi.fn(),
+        arc: vi.fn(),
+        fill: vi.fn(),
+        save: vi.fn(),
+        restore: vi.fn(),
+        translate: vi.fn(),
+        rotate: vi.fn(),
+        scale: vi.fn(),
+        drawImage: vi.fn(),
+        createImageData: vi
+          .fn()
+          .mockImplementation((width: number, height: number) => ({
+            data: new Uint8ClampedArray(width * height * 4),
+            width,
+            height,
+          })),
+        getImageData: vi.fn(),
+        putImageData: vi.fn(),
+        canvas: {
+          width: 300,
+          height: 150,
+        },
+      };
     }
-    encodeInto(
-      text: string,
-      dest: Uint8Array,
-    ): { read: number; written: number } {
-      const encoded = this.encode(text);
-      dest.set(encoded);
-      return { read: text.length, written: encoded.length };
-    }
-  };
-}
-*/
+    return null;
+  }),
+});
+
+// // Mock TextEncoder if needed
+// if (typeof TextEncoder === "undefined") {
+//   // @ts-ignore - We're mocking TextEncoder for the test environment
+//   global.TextEncoder = class TextEncoder {
+//     encoding = "utf-8";
+//     encode(text: string): Uint8Array {
+//       const encoded = new Uint8Array(text.length);
+//       for (let i = 0; i < text.length; i++) {
+//         encoded[i] = text.charCodeAt(i);
+//       }
+//       return encoded;
+//     }
+//     encodeInto(
+//       text: string,
+//       dest: Uint8Array,
+//     ): { read: number; written: number } {
+//       const encoded = this.encode(text);
+//       dest.set(encoded);
+//       return { read: text.length, written: encoded.length };
+//     }
+//   };
+// }

@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useRef, useMemo } from "react";
 import type {
   AiChatMessageDocument,
   UserChatMessageDocument,
@@ -6,47 +6,14 @@ import type {
   ChatMessageDocument,
 } from "../types/chat.js";
 import { getSessionDatabaseName } from "../utils/databaseManager.js";
-import { useLazyFireproof } from "./useLazyFireproof.js";
+import { useFireproof } from "use-fireproof";
 import { encodeTitle } from "../components/SessionSidebar/utils.js";
-import type { Database, DocResponse, DocWithId } from "use-fireproof";
+import { CATALOG_DEPENDENCY_NAMES, llmsCatalog } from "../llms/catalog.js";
+import { resolveEffectiveModel, normalizeModelId } from "../prompts.js";
+import { SETTINGS_DBNAME } from "../config/env.js";
+import type { UserSettings } from "../types/settings.js";
 
-interface SessionView {
-  _id: string;
-  title: string;
-  publishedUrl?: string;
-  firehoseShared?: boolean;
-}
-
-interface UseSession {
-  // // Session information
-  session: SessionView;
-  docs: ChatMessageDocument[];
-
-  // // Databases
-  sessionDatabase: Database;
-  openSessionDatabase: () => void;
-
-  // // Session management functions
-  updateTitle: (title: string) => Promise<void>;
-  updatePublishedUrl: (publishedUrl: string) => Promise<void>;
-  updateFirehoseShared: (firehoseShared: boolean) => Promise<void>;
-  addScreenshot: (screenshotData: string | null) => Promise<void>;
-  // // Message management
-  userMessage: UserChatMessageDocument;
-  submitUserMessage: () => Promise<void>;
-  mergeUserMessage: (newDoc: Partial<UserChatMessageDocument>) => void;
-  // saveUserMessage: (newDoc: UserChatMessageDocument) => Promise<void>;
-  aiMessage: AiChatMessageDocument;
-  submitAiMessage: (e?: Event) => Promise<void>;
-  mergeAiMessage: (newDoc: Partial<AiChatMessageDocument>) => void;
-  saveAiMessage: (
-    existingDoc?: DocWithId<AiChatMessageDocument> | undefined,
-  ) => Promise<DocResponse>;
-  // // Vibe document management
-  vibeDoc: VibeDocument;
-}
-
-export function useSession(routedSessionId?: string): UseSession {
+export function useSession(routedSessionId?: string) {
   const [generatedSessionId] = useState(
     () =>
       `${Date.now().toString(36).padStart(9, "f")}${Math.random().toString(36).slice(2, 11).padEnd(9, "0")}`,
@@ -71,15 +38,7 @@ export function useSession(routedSessionId?: string): UseSession {
     database: sessionDatabase,
     useDocument: useSessionDocument,
     useLiveQuery: useSessionLiveQuery,
-    open: openSessionDatabase,
-  } = useLazyFireproof(sessionDbName, !!routedSessionId);
-
-  // Explicitly open the database when a sessionId is provided
-  useEffect(() => {
-    if (routedSessionId) {
-      openSessionDatabase();
-    }
-  }, [routedSessionId, openSessionDatabase]);
+  } = useFireproof(sessionDbName);
 
   // User message is stored in the session-specific database
   const {
@@ -121,40 +80,152 @@ export function useSession(routedSessionId?: string): UseSession {
     docs: ChatMessageDocument[];
   };
 
+  // Stabilize merge function and vibe document with refs to avoid recreating callbacks
+  const mergeRef = useRef(mergeVibeDoc);
+  useEffect(() => {
+    mergeRef.current = mergeVibeDoc;
+  }, [mergeVibeDoc]);
+
+  const vibeRef = useRef(vibeDoc);
+  useEffect(() => {
+    vibeRef.current = vibeDoc;
+  }, [vibeDoc]);
+
   // Update session title using the vibe document
   const updateTitle = useCallback(
-    async (title: string) => {
+    async (title: string, isManual = false) => {
+      const base = vibeRef.current;
       const encodedTitle = encodeTitle(title);
+      const updatedDoc = {
+        ...base,
+        title,
+        encodedTitle,
+        titleSetManually: isManual,
+      } as VibeDocument;
 
-      vibeDoc.title = title;
-      vibeDoc.encodedTitle = encodedTitle;
-
-      await sessionDatabase.put(vibeDoc);
-      mergeVibeDoc(vibeDoc);
+      // Merge first for immediate UI update, then persist
+      mergeRef.current(updatedDoc);
+      await sessionDatabase.put(updatedDoc);
     },
-    [sessionDatabase, vibeDoc],
+    [sessionDatabase],
   );
 
   // Update published URL using the vibe document
   const updatePublishedUrl = useCallback(
     async (publishedUrl: string) => {
-      vibeDoc.publishedUrl = publishedUrl;
-
-      await sessionDatabase.put(vibeDoc);
-      mergeVibeDoc(vibeDoc);
+      const base = vibeRef.current;
+      const updatedDoc = { ...base, publishedUrl } as VibeDocument;
+      mergeRef.current(updatedDoc);
+      await sessionDatabase.put(updatedDoc);
     },
-    [sessionDatabase, vibeDoc, mergeVibeDoc],
+    [sessionDatabase],
   );
 
   // Update firehose shared state using the vibe document
   const updateFirehoseShared = useCallback(
     async (firehoseShared: boolean) => {
-      vibeDoc.firehoseShared = firehoseShared;
-
-      await sessionDatabase.put(vibeDoc);
-      mergeVibeDoc(vibeDoc);
+      const base = vibeRef.current;
+      const updatedDoc = { ...base, firehoseShared } as VibeDocument;
+      mergeRef.current(updatedDoc);
+      await sessionDatabase.put(updatedDoc);
     },
-    [sessionDatabase, vibeDoc, mergeVibeDoc],
+    [sessionDatabase],
+  );
+
+  // Update per‑vibe dependency selection using the vibe document
+  const updateDependencies = useCallback(
+    async (deps: string[], userOverride = true) => {
+      const input = Array.isArray(deps)
+        ? deps.filter((n): n is string => typeof n === "string")
+        : [];
+      // Validate and de‑dupe by catalog names
+      const deduped = Array.from(
+        new Set(input.filter((n) => CATALOG_DEPENDENCY_NAMES.has(n))),
+      );
+      // Canonicalize order by catalog order
+      const order = new Map(llmsCatalog.map((l, i) => [l.name, i] as const));
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const validDeps = deduped.sort((a, b) => order.get(a)! - order.get(b)!);
+
+      const base = vibeRef.current;
+      const updatedDoc = {
+        ...base,
+        dependencies: validDeps,
+        dependenciesUserOverride: !!userOverride,
+      } as VibeDocument;
+      mergeRef.current(updatedDoc);
+      await sessionDatabase.put(updatedDoc);
+    },
+    [sessionDatabase],
+  );
+
+  // Update per‑vibe instructional text override setting
+  const updateInstructionalTextOverride = useCallback(
+    async (override?: boolean) => {
+      const base = vibeRef.current;
+      const updatedDoc = {
+        ...base,
+        instructionalTextOverride: override,
+      } as VibeDocument;
+      mergeRef.current(updatedDoc);
+      await sessionDatabase.put(updatedDoc);
+    },
+    [sessionDatabase],
+  );
+
+  // Update per‑vibe demo data override setting
+  const updateDemoDataOverride = useCallback(
+    async (override?: boolean) => {
+      const base = vibeRef.current;
+      const updatedDoc = {
+        ...base,
+        demoDataOverride: override,
+      } as VibeDocument;
+      mergeRef.current(updatedDoc);
+      await sessionDatabase.put(updatedDoc);
+    },
+    [sessionDatabase],
+  );
+
+  // Update AI-selected dependencies (internal use for displaying in UI)
+  const updateAiSelectedDependencies = useCallback(
+    async (aiSelectedDependencies: string[]) => {
+      const base = vibeRef.current;
+      const updatedDoc = {
+        ...base,
+        aiSelectedDependencies,
+      } as VibeDocument;
+      mergeRef.current(updatedDoc);
+      await sessionDatabase.put(updatedDoc);
+    },
+    [sessionDatabase],
+  );
+  // --- Model selection management ---
+  const updateSelectedModel = useCallback(
+    async (modelId: string) => {
+      // Accept relaxed policy: any non-empty string; persist normalized (trimmed)
+      const normalized = normalizeModelId(modelId);
+      if (!normalized) return; // no-op on empty/whitespace
+      const base = vibeRef.current;
+      const updatedDoc = {
+        ...base,
+        selectedModel: normalized,
+      } as VibeDocument;
+      mergeRef.current(updatedDoc);
+      await sessionDatabase.put(updatedDoc);
+    },
+    [sessionDatabase],
+  );
+
+  // Access global settings to compute effective model fallback
+  const { useDocument: useSettingsDocument } = useFireproof(SETTINGS_DBNAME);
+  const { doc: settingsDoc } = useSettingsDocument<UserSettings>({
+    _id: "user_settings",
+  });
+
+  const effectiveModel = useMemo(
+    () => resolveEffectiveModel(settingsDoc, vibeDoc),
+    [settingsDoc?.model, vibeDoc?.selectedModel],
   );
 
   // Add a screenshot to the session (in session-specific database)
@@ -189,6 +260,13 @@ export function useSession(routedSessionId?: string): UseSession {
     return submitUserMessage();
   }, [submitUserMessage]);
 
+  interface SessionView {
+    _id: string;
+    title: string;
+    publishedUrl?: string;
+    firehoseShared?: boolean;
+  }
+
   const session: SessionView = {
     _id: sessionId,
     title: vibeDoc.title,
@@ -203,7 +281,6 @@ export function useSession(routedSessionId?: string): UseSession {
 
     // Databases
     sessionDatabase,
-    openSessionDatabase,
 
     // Session management functions
     updateTitle,
@@ -220,5 +297,12 @@ export function useSession(routedSessionId?: string): UseSession {
     saveAiMessage,
     // Vibe document management
     vibeDoc,
+    selectedModel: vibeDoc?.selectedModel,
+    effectiveModel,
+    updateDependencies,
+    updateInstructionalTextOverride,
+    updateDemoDataOverride,
+    updateAiSelectedDependencies,
+    updateSelectedModel,
   };
 }

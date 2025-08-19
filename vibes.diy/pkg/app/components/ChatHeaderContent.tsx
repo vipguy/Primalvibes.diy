@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 import { MenuIcon, EditIcon } from "./ChatHeaderIcons.js";
 
-export interface ChatHeaderContentProps {
+interface ChatHeaderContentProps {
   onOpenSidebar: () => void;
   title: string;
   isStreaming: boolean;

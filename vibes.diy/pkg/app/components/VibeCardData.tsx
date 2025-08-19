@@ -4,6 +4,7 @@ import { VibeCard } from "./VibeCard.js";
 import { loadVibeDocument, loadVibeScreenshot } from "../utils/vibeUtils.js";
 import type { LocalVibe } from "../utils/vibeUtils.js";
 import { useVibes } from "../hooks/useVibes.js";
+import { DocFileMeta } from "use-fireproof";
 
 interface VibeCardDataProps {
   vibeId: string;
@@ -11,9 +12,9 @@ interface VibeCardDataProps {
 
 export function VibeCardData({ vibeId }: VibeCardDataProps) {
   const [vibe, setVibe] = useState<LocalVibe | null>(null);
-  const [screenshot, setScreenshot] = useState<
-    { file: () => Promise<File>; type: string } | undefined
-  >(undefined);
+  const [screenshot, setScreenshot] = useState<DocFileMeta | undefined>(
+    undefined,
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -127,7 +128,7 @@ export function VibeCardData({ vibeId }: VibeCardDataProps) {
     const loadScreenshotData = async () => {
       try {
         const screenshotData = await loadVibeScreenshot(vibeId);
-        if (isMounted) {
+        if (isMounted && screenshotData) {
           setScreenshot(screenshotData);
         }
       } catch (error) {

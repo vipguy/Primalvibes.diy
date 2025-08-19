@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { normalizeComponentExports } from "~/vibes-diy/app/utils/normalizeComponentExports.js";
+import { normalizeComponentExports } from "~/vibes.diy/app/utils/normalizeComponentExports.js";
 
 describe("normalizeComponentExports edge cases", () => {
   // Test for the case in app1.jsx where a component named 'App' is already declared
@@ -75,18 +75,18 @@ export default App;
   // Test directly against the actual app1.jsx fixture
   it("should normalize the actual app1.jsx fixture correctly", async () => {
     // Import the actual fixture
-    const fs = await import("fs");
-    const path = await import("path");
+    // const fs = await import("fs");
+    // const path = await import("path");
 
-    let fixturePath = path.resolve("./fixtures/app1.jsx");
-    console.log("Fixture path:", fixturePath);
-    if (!fixturePath.endsWith("vibes.diy/tests/fixtures/app1.jsx")) {
-      fixturePath = path.resolve("./vibes.diy/tests/fixtures/app1.jsx");
-    }
+    // let fixturePath = path.resolve("./fixtures/app1.jsx");
+    // if (!fixturePath) {
+    //   fixturePath = path.resolve("./vibes.diy/tests/fixtures/app1.jsx");
+    // }
+    // const fixtureContent = fs.readFileSync(fixturePath, "utf-8");
 
-    const fixtureContent = fs.readFileSync(fixturePath, "utf-8");
+    const fixtureContent = await import("./fixtures/app1.jsx?raw");
 
-    const normalized = normalizeComponentExports(fixtureContent);
+    const normalized = normalizeComponentExports(fixtureContent.default);
 
     // Should not result in duplicate App declarations
     expect(normalized).not.toMatch(/const\s+App\s+=\s+App/);

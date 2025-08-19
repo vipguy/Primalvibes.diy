@@ -78,7 +78,7 @@ export function useRuntimeErrors({
       // Track error event with processed info
       try {
         // Only send minimal stack for privacy and size
-        const details: Record<string, unknown> = {};
+        const details: Record<string, any> = {};
         if (error.stack) {
           details.stack = error.stack.slice(0, 300);
         }

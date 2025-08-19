@@ -13,4 +13,7 @@ export interface UserSettings {
 
   /** AI model to use for code generation */
   model?: string;
+
+  /** Whether to show the per‑chat model picker in the chat UI */
+  showModelPickerInChat?: boolean; // default false
 }

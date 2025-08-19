@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, it, vi } from "vitest";
 import { createWrapper } from "./setup.js";
-import { useSimpleChat } from "~/vibes-diy/app/hooks/useSimpleChat.js";
+import { useSimpleChat } from "~/vibes.diy/app/hooks/useSimpleChat.js";
 
 describe("useSimpleChat", () => {
   it("extracts dependencies from response", async () => {

@@ -1,8 +1,8 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import MessageList from "~/vibes-diy/app/components/MessageList.js";
+import MessageList from "~/vibes.diy/app/components/MessageList.js";
 import { vi, describe, test, expect, beforeEach } from "vitest";
-import type { ChatMessageDocument } from "~/vibes-diy/app/types/chat.js";
+import type { ChatMessageDocument } from "~/vibes.diy/app/types/chat.js";
 import { MockThemeProvider } from "./utils/MockThemeProvider.js";
 
 // Mock scrollIntoView
@@ -11,15 +11,11 @@ beforeEach(() => {
 });
 
 // Mock Message component to simplify testing
-vi.mock("~/vibes-diy/app/components/Message", () => ({
-  default: ({
-    message,
-  }: {
-    message: { text?: string; segments: { type: string; content: string }[] };
-  }) => (
+vi.mock("~/vibes.diy/app/components/Message", () => ({
+  default: ({ message }: any) => (
     <div data-testid="mock-message">
       {message.segments &&
-        message.segments.map((segment, i: number) => (
+        message.segments.map((segment: any, i: number) => (
           <div key={i} data-testid={segment.type}>
             {segment.content}
           </div>

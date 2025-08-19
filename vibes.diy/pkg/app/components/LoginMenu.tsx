@@ -9,7 +9,12 @@ interface LoginMenuProps {
   buttonRef: React.RefObject<HTMLButtonElement | null>;
 }
 
-export function LoginMenu({ isOpen, onLogin, onClose }: LoginMenuProps) {
+export function LoginMenu({
+  isOpen,
+  onLogin,
+  onClose,
+  buttonRef,
+}: LoginMenuProps) {
   if (!isOpen) return null;
 
   // Center the menu on screen rather than positioning it relative to the button

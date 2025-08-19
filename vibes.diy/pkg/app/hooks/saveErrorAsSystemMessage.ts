@@ -1,4 +1,4 @@
-import type { Database } from "use-fireproof";
+import { Database } from "use-fireproof";
 import type { RuntimeError, ErrorCategory } from "./useRuntimeErrors.js";
 
 export async function saveErrorAsSystemMessage(

@@ -1,10 +1,9 @@
 import React from "react";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import ChatInput from "~/vibes-diy/app/components/ChatInput.js";
-import type { ChatState } from "~/vibes-diy/app/types/chat.js";
+import ChatInput from "~/vibes.diy/app/components/ChatInput.js";
+import type { ChatState } from "~/vibes.diy/app/types/chat.js";
 import { MockThemeProvider } from "./utils/MockThemeProvider.js";
-import type { DeepWritable } from "ts-essentials";
 
 // Create mock functions we can control
 const onSend = vi.fn();
@@ -31,13 +30,13 @@ describe("ChatInput Component", () => {
       docs: [],
       setInput: setInput,
       sendMessage: sendMessage,
+      saveCodeAsAiMessage: vi.fn().mockResolvedValue("test-message-id"),
       codeReady: false,
       title: "",
+      updateTitle: vi.fn().mockResolvedValue(undefined),
       addScreenshot: vi.fn().mockResolvedValue(undefined),
       setSelectedResponseId: vi.fn(),
       selectedSegments: [],
-      needsNewKey: false,
-      setNeedsNewKey: vi.fn(),
       immediateErrors: [],
       advisoryErrors: [],
       addError: vi.fn(),
@@ -83,7 +82,7 @@ describe("ChatInput Component", () => {
 
   it("disables send button when isStreaming is true", () => {
     // Set isStreaming to true for this test
-    (mockChatState as DeepWritable<typeof mockChatState>).isStreaming = true;
+    mockChatState.isStreaming = true;
 
     render(
       <MockThemeProvider>
@@ -131,7 +130,7 @@ describe("ChatInput Component", () => {
 
   it("does not call sendMessage or onSend when Enter is pressed while streaming", () => {
     // Set isStreaming to true for this test
-    (mockChatState as DeepWritable<typeof mockChatState>).isStreaming = true;
+    mockChatState.isStreaming = true;
 
     render(
       <MockThemeProvider>
@@ -147,7 +146,7 @@ describe("ChatInput Component", () => {
   });
 
   it("does not call sendMessage or onSend when button is clicked while streaming", () => {
-    (mockChatState as DeepWritable<typeof mockChatState>).isStreaming = true;
+    mockChatState.isStreaming = true;
 
     render(
       <MockThemeProvider>
@@ -161,5 +160,69 @@ describe("ChatInput Component", () => {
 
     expect(sendMessage).not.toHaveBeenCalled();
     expect(onSend).not.toHaveBeenCalled();
+  });
+
+  it("does not render the model picker when models are missing or empty", () => {
+    const { rerender } = render(
+      <MockThemeProvider>
+        <ChatInput chatState={mockChatState} onSend={onSend} />
+      </MockThemeProvider>,
+    );
+    expect(screen.queryByRole("button", { name: /ai model/i })).toBeNull();
+
+    const emptyModels: {
+      id: string;
+      name: string;
+      description: string;
+    }[] = [];
+    rerender(
+      <MockThemeProvider>
+        <ChatInput
+          chatState={mockChatState}
+          onSend={onSend}
+          models={emptyModels}
+          onModelChange={vi.fn()}
+          showModelPickerInChat
+        />
+      </MockThemeProvider>,
+    );
+    expect(screen.queryByRole("button", { name: /ai model/i })).toBeNull();
+  });
+
+  it("renders the model picker only when showModelPickerInChat is true", () => {
+    const models = [
+      { id: "a", name: "A", description: "A" },
+      { id: "b", name: "B", description: "B" },
+    ];
+
+    // Flag false → no picker
+    const { rerender } = render(
+      <MockThemeProvider>
+        <ChatInput
+          chatState={mockChatState}
+          onSend={onSend}
+          models={models}
+          onModelChange={vi.fn()}
+          showModelPickerInChat={false}
+        />
+      </MockThemeProvider>,
+    );
+    expect(screen.queryByRole("button", { name: /ai model/i })).toBeNull();
+
+    // Flag true → picker renders
+    rerender(
+      <MockThemeProvider>
+        <ChatInput
+          chatState={mockChatState}
+          onSend={onSend}
+          models={models}
+          onModelChange={vi.fn()}
+          showModelPickerInChat
+        />
+      </MockThemeProvider>,
+    );
+    expect(
+      screen.getByRole("button", { name: /ai model/i }),
+    ).toBeInTheDocument();
   });
 });

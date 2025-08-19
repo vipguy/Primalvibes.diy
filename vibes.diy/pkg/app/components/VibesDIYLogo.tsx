@@ -1,7 +1,6 @@
 import React from "react";
 import DIYLogo from "./diyLogo-svg.js";
 import { dark } from "./colorways.js";
-import { useTheme } from "../contexts/ThemeContext.js";
 
 type ColorwayName = keyof typeof dark;
 
@@ -33,9 +32,6 @@ const VibesDIYLogo: React.FC<VibesDIYLogoProps> = ({
   colorway,
   ...props
 }) => {
-  // Use theme context instead of maintaining local state
-  const { isDarkMode } = useTheme();
-
   const aspectRatio = 372 / 123; // Matches SVG viewBox dimensions
 
   return (
@@ -64,10 +60,7 @@ const VibesDIYLogo: React.FC<VibesDIYLogoProps> = ({
           minHeight: 0,
         }}
       >
-        <DIYLogo
-          isDarkMode={isDarkMode}
-          colorway={colorway || randomColorway()}
-        />
+        <DIYLogo colorway={colorway || randomColorway()} />
       </div>
     </div>
   );

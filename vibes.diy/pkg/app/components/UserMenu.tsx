@@ -1,11 +1,11 @@
+import React, { RefObject } from "react";
 import { createPortal } from "react-dom";
-import React from "react";
 
 interface UserMenuProps {
   isOpen: boolean;
   onLogout: () => void;
   onClose: () => void;
-  buttonRef: React.RefObject<HTMLButtonElement | null>;
+  buttonRef: RefObject<HTMLButtonElement | null>;
 }
 
 export function UserMenu({

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import routes from "~/vibes-diy/app/routes.js";
+import routes from "~/vibes.diy/app/routes.js";
 
 describe("Routes", () => {
   it("defines the correct routes", () => {

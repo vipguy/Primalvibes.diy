@@ -1,5 +1,4 @@
 import React from "react";
-import { ThemeProvider } from "./contexts/ThemeContext.js";
 import type { MetaFunction } from "react-router";
 import {
   Links,
@@ -12,11 +11,10 @@ import {
 
 import { PostHogProvider } from "posthog-js/react";
 import { POSTHOG_KEY, POSTHOG_HOST, IS_DEV_MODE } from "./config/env.js";
-import type { Route } from "+types/root";
+import type { Route } from "./+types/root";
 import "./app.css";
 import ClientOnly from "./components/ClientOnly.js";
 import CookieBanner from "./components/CookieBanner.js";
-import { NeedsLoginModal } from "./components/NeedsLoginModal.js";
 import { AuthProvider } from "./contexts/AuthContext.js";
 import { CookieConsentProvider } from "./contexts/CookieConsentContext.js";
 
@@ -53,40 +51,75 @@ export const meta: MetaFunction = () => {
 };
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  // Handle dark mode detection and class management (replaces ThemeContext)
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // Initialize dark mode based on system preference or existing class
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const updateDarkMode = (isDarkMode: boolean) => {
+      if (isDarkMode) {
+        document.documentElement.classList.add("dark");
+        document.documentElement.dataset.theme = "dark";
+      } else {
+        document.documentElement.classList.remove("dark");
+        document.documentElement.dataset.theme = "light";
+      }
+    };
+
+    // Set initial state based on system preference
+    const initialIsDarkMode = mediaQuery.matches;
+    updateDarkMode(initialIsDarkMode);
+
+    // Listen for system preference changes
+    const handleChange = (e: MediaQueryListEvent) => {
+      updateDarkMode(e.matches);
+    };
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
   return (
-    <ThemeProvider>
-      <html lang="en">
-        <head>
-          <meta charSet="utf-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <Meta data-testid="meta" />
-          <Links />
-        </head>
-        <body>
-          <AuthProvider>
-            <PostHogProvider
-              apiKey={POSTHOG_KEY}
-              options={{
-                api_host: POSTHOG_HOST,
-                opt_out_capturing_by_default: true,
-              }}
-            >
-              <CookieConsentProvider>
-                {children}
-                <ClientOnly>
-                  <CookieBanner />
-                  <NeedsLoginModal />
-                </ClientOnly>
-              </CookieConsentProvider>
-              <ScrollRestoration data-testid="scroll-restoration" />
-              <Scripts data-testid="scripts" />
-            </PostHogProvider>
-          </AuthProvider>
-          <ScrollRestoration data-testid="scroll-restoration" />
-          <Scripts data-testid="scripts" />
-        </body>
-      </html>
-    </ThemeProvider>
+    <html lang="en">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {/**
+         * Netlify Split Testing opt-in/out via query params (pre-mount)
+         *
+         * Moved to a small static file to keep CSP strict (no 'unsafe-inline').
+         * The script must execute before the app mounts; keep it first in <head>.
+         */}
+        <script src="/nf-ab.cookie.js"></script>
+        {/* FIREPROOF-UPGRADE-BRANCH: Fireproof 0.23.0 */}
+        <Meta data-testid="meta" />
+        <Links />
+      </head>
+      <body>
+        <script>
+          console.log("🔥 FIREPROOF UPGRADE BRANCH iframe: v0.23.0 🔥");
+        </script>
+        <AuthProvider>
+          <PostHogProvider
+            apiKey={POSTHOG_KEY}
+            options={{
+              api_host: POSTHOG_HOST,
+              opt_out_capturing_by_default: true,
+            }}
+          >
+            <CookieConsentProvider>
+              {children}
+              <ClientOnly>
+                <CookieBanner />
+              </ClientOnly>
+            </CookieConsentProvider>
+            <ScrollRestoration data-testid="scroll-restoration" />
+            <Scripts data-testid="scripts" />
+          </PostHogProvider>
+        </AuthProvider>
+      </body>
+    </html>
   );
 }
 

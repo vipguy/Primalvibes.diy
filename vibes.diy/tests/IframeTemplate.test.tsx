@@ -1,8 +1,8 @@
+import React from "react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, act } from "@testing-library/react";
-import React from "react";
-import iframeTemplateRaw from "~/vibes-diy/app/components/ResultPreview/templates/iframe-template.html?raw";
-import ResultPreview from "~/vibes-diy/app/components/ResultPreview/ResultPreview.js";
+import iframeTemplateRaw from "~/vibes.diy/app/components/ResultPreview/templates/iframe-template.html?raw";
+import ResultPreview from "~/vibes.diy/app/components/ResultPreview/ResultPreview.js";
 import { MockThemeProvider } from "./utils/MockThemeProvider.js";
 
 vi.mock("@remix-run/router", () => ({
@@ -10,7 +10,7 @@ vi.mock("@remix-run/router", () => ({
 }));
 
 // Mock the useApiKey hook
-vi.mock("~/vibes-diy/app/hooks/useApiKey", () => ({
+vi.mock("~/vibes.diy/app/hooks/useApiKey", () => ({
   useApiKey: () => ({
     apiKey: "test-api-key",
     apiKeyObject: { key: "test-api-key", hash: "test-hash" },
@@ -23,13 +23,24 @@ vi.mock("~/vibes-diy/app/hooks/useApiKey", () => ({
   }),
 }));
 
-vi.mock("~/vibes-diy/app/contexts/AuthContext", () => ({
+vi.mock("~/vibes.diy/app/contexts/AuthContext", () => ({
   useAuth: () => ({
     token: "test-auth-token",
     userPayload: { userId: "test-user-id" },
     isAuthenticated: true,
     login: vi.fn(),
     logout: vi.fn(),
+  }),
+}));
+
+// Mock useSession hook to prevent Fireproof initialization during tests
+vi.mock("~/vibes.diy/app/hooks/useSession", () => ({
+  useSession: vi.fn().mockReturnValue({
+    updateTitle: vi.fn().mockResolvedValue(undefined),
+    session: { title: "Test Session" },
+    updatePublishedUrl: vi.fn(),
+    updateFirehoseShared: vi.fn(),
+    addScreenshot: vi.fn(),
   }),
 }));
 
@@ -81,9 +92,9 @@ describe("Iframe Template", () => {
     // Make sure revokeObjectURL exists to avoid cleanup errors
     const originalRevokeObjectURL =
       URL.revokeObjectURL ||
-      (() => {
+      function () {
         /* no-op */
-      });
+      };
     const originalGetItem = Storage.prototype.getItem;
     let messageEventHandlers: ((event: MessageEvent) => void)[] = [];
 
@@ -111,9 +122,9 @@ describe("Iframe Template", () => {
       vi.spyOn(window, "addEventListener").mockImplementation(
         (event, handler) => {
           if (event === "message") {
-            messageEventHandlers.push(handler as (x: MessageEvent) => void);
+            messageEventHandlers.push(handler as any);
           }
-          return undefined;
+          return undefined as any;
         },
       );
 
@@ -136,7 +147,7 @@ describe("Iframe Template", () => {
             // Create a postMessage that triggers parent's message handlers
             postMessage: vi
               .fn()
-              .mockImplementation((message: unknown, _targetOrigin: string) => {
+              .mockImplementation((message: any, targetOrigin: string) => {
                 // Simulate the iframe sending a message to the parent
                 messageEventHandlers.forEach((handler) => {
                   // Create a partial MessageEvent and cast to unknown first to satisfy TypeScript
@@ -226,6 +237,7 @@ describe("Iframe Template", () => {
             displayView="preview"
             onPreviewLoaded={onPreviewLoadedMock}
             setMobilePreviewShown={vi.fn()}
+            updateTitle={vi.fn().mockResolvedValue(undefined)}
           />
         </MockThemeProvider>,
       );

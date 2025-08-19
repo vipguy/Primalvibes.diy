@@ -13,6 +13,12 @@ export default [
   route("chat/:sessionId/:title/data", "./routes/home.tsx", {
     id: "chat-data",
   }),
+  route("chat/:sessionId/:title/chat", "./routes/home.tsx", {
+    id: "chat-chat",
+  }),
+  route("chat/:sessionId/:title/settings", "./routes/home.tsx", {
+    id: "chat-app-settings",
+  }),
   route("vibes/mine", "./routes/mine.tsx", { id: "my-vibes" }),
 
   route("settings", "./routes/settings.tsx", { id: "settings" }),

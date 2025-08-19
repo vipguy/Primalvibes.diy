@@ -8,6 +8,7 @@ import { SETTINGS_DBNAME } from "../config/env.js";
 import { useAuth } from "../contexts/AuthContext.js";
 import modelsList from "../data/models.json" with { type: "json" };
 import type { UserSettings } from "../types/settings.js";
+// Dependency chooser moved to per‑vibe App Settings view
 
 export function meta() {
   return [
@@ -35,6 +36,8 @@ export default function Settings() {
 
   // State to track unsaved changes
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   const stylePromptSuggestions = [
     { name: "synthwave", description: "80s digital aesthetic" },
@@ -119,10 +122,17 @@ Secretly name this theme “Viridian Pulse”, capturing Sterling’s original p
   );
 
   const handleSubmit = useCallback(async () => {
-    await saveSettings(settings);
-    setHasUnsavedChanges(false); // Reset after save
-    // navigate to /
-    navigate("/");
+    setSaveError(null);
+    setSaveSuccess(false);
+    try {
+      await saveSettings({ ...settings });
+      setHasUnsavedChanges(false);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2000);
+      navigate("/");
+    } catch (err) {
+      setSaveError((err as Error).message || "Failed to save settings");
+    }
   }, [saveSettings, settings, navigate]);
 
   const handleLogout = useCallback(() => {
@@ -133,6 +143,14 @@ Secretly name this theme “Viridian Pulse”, capturing Sterling’s original p
       navigate("/");
     });
   }, [navigate, checkAuthStatus]);
+
+  const handleShowModelPickerInChatChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      mergeSettings({ showModelPickerInChat: e.target.checked });
+      setHasUnsavedChanges(true); // Track change
+    },
+    [mergeSettings],
+  );
 
   return (
     <SimpleAppLayout
@@ -163,10 +181,22 @@ Secretly name this theme “Viridian Pulse”, capturing Sterling’s original p
               Save
             </button>
           </div>
+          {saveSuccess && (
+            <div className="mb-4 rounded border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800 dark:border-green-900/40 dark:bg-green-900/20 dark:text-green-300">
+              Settings saved.
+            </div>
+          )}
+          {saveError && (
+            <div className="mb-4 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-300">
+              {saveError}
+            </div>
+          )}
           <p className="text-accent-01 dark:text-dark-secondary mb-4">
             Configure your application settings to customize the AI experience.
           </p>
           <div className="space-y-6">
+            {/* Libraries chooser moved to per‑vibe App Settings */}
+
             <div className="border-light-decorative-01 dark:border-dark-decorative-01 rounded border p-4">
               <div className="flex items-start justify-between">
                 <h3 className="mb-2 text-lg font-medium">AI Model</h3>
@@ -215,6 +245,19 @@ Secretly name this theme “Viridian Pulse”, capturing Sterling’s original p
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Model picker visibility */}
+              <div className="mt-4">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={settings.showModelPickerInChat || false}
+                    onChange={handleShowModelPickerInChatChange}
+                    className="mr-2 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm">Show model picker in chat</span>
+                </label>
               </div>
             </div>
 

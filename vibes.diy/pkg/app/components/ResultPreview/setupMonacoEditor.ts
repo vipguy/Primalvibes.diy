@@ -1,32 +1,20 @@
 import { shikiToMonaco } from "@shikijs/monaco";
-import {
-  BundledLanguage,
-  BundledTheme,
-  createHighlighter,
-  HighlighterGeneric,
-} from "shiki";
+import { createHighlighter } from "shiki";
 import type React from "react";
-import { Monaco } from "@monaco-editor/react";
-import * as monaco from "monaco-editor";
 
 interface Options {
   isStreaming: boolean;
   codeReady: boolean;
   isDarkMode: boolean;
-  userScrolledRef: React.RefObject<boolean>;
-  disposablesRef: React.RefObject<{ dispose: () => void }[]>;
-  setRefs: (
-    editor: monaco.editor.IStandaloneCodeEditor,
-    monaco: Monaco,
-  ) => void;
-  setHighlighter: (
-    highlighter: HighlighterGeneric<BundledLanguage, BundledTheme>,
-  ) => void;
+  userScrolledRef: React.MutableRefObject<boolean>;
+  disposablesRef: React.MutableRefObject<{ dispose: () => void }[]>;
+  setRefs: (editor: any, monaco: any) => void;
+  setHighlighter: (highlighter: any) => void;
 }
 
 export async function setupMonacoEditor(
-  editor: monaco.editor.IStandaloneCodeEditor,
-  monaco: Monaco,
+  editor: any,
+  monaco: any,
   {
     isStreaming,
     codeReady,
@@ -46,6 +34,16 @@ export async function setupMonacoEditor(
     allowNonTsExtensions: true,
     allowJs: true,
     target: monaco.languages.typescript.ScriptTarget.Latest,
+    module: monaco.languages.typescript.ModuleKind.ESNext,
+    moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+    esModuleInterop: true,
+    skipLibCheck: true,
+  });
+
+  // Enable syntax error detection for JavaScript/JSX
+  monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+    noSemanticValidation: false, // Enable semantic validation
+    noSyntaxValidation: false, // Enable syntax error detection
   });
 
   editor.updateOptions({
@@ -85,7 +83,7 @@ export async function setupMonacoEditor(
     monaco.editor.setTheme(currentTheme);
     const model = editor.getModel();
     if (model) {
-      monaco.editor.setModelLanguage(model, "jsx");
+      monaco.editor.setModelLanguage(model, "javascript");
     }
   } catch (error) {
     console.warn("Shiki highlighter setup failed:", error);

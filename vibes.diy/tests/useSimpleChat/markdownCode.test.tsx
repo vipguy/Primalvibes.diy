@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { createWrapper } from "./setup.js";
-import { useSimpleChat } from "~/vibes-diy/app/hooks/useSimpleChat.js";
+import { useSimpleChat } from "~/vibes.diy/app/hooks/useSimpleChat.js";
 
 // Reuse helper from setup
 

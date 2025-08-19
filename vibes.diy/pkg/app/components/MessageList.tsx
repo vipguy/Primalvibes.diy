@@ -2,7 +2,7 @@ import React, { memo, useMemo } from "react";
 import Message from "./Message.js";
 import type { ChatMessageDocument, ViewType } from "../types/chat.js";
 
-export interface MessageListProps {
+interface MessageListProps {
   messages: ChatMessageDocument[];
   isStreaming: boolean;
   setSelectedResponseId: (id: string) => void;

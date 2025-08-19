@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
 import React from "react";
+import type { ReactNode } from "react";
 import LightUpYourData from "./ResultPreview/LightUpYourData.js";
 import { Toaster } from "react-hot-toast";
 

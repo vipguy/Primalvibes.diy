@@ -1,5 +1,5 @@
-import React from "react";
 import { BackArrowIcon } from "../HeaderContent/SvgIcons.js";
+import React from "react";
 
 interface BackButtonProps {
   onBackClick: () => void;

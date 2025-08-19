@@ -3,10 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router";
 import { GA_TRACKING_ID } from "../config/env.js";
 import { useCookieConsent } from "../contexts/CookieConsentContext.js";
-import { useTheme } from "../contexts/ThemeContext.js";
 import { initGA, pageview } from "../utils/analytics.js";
-import { CookieConsent, getCookieConsentValue } from "react-cookie-consent";
-// import type { CookieConsentProps } from 'react-cookie-consent/dist/CookieConsent.props';
 
 // We'll use any type for dynamic imports to avoid TypeScript errors with the cookie consent component
 
@@ -14,15 +11,15 @@ export default function CookieBanner() {
   const location = useLocation();
   const [hasConsent, setHasConsent] = useState(false);
   const { messageHasBeenSent } = useCookieConsent();
-  const { isDarkMode } = useTheme();
+  // Use CSS-based dark mode detection like the rest of the UI
+  const isDarkMode =
+    typeof document !== "undefined"
+      ? document.documentElement.classList.contains("dark")
+      : true; // Default to dark mode for SSR
 
   // Dynamic import for client-side only
-  const [XCookieConsent, setXCookieConsent] = useState<
-    typeof CookieConsent | null
-  >(null);
-  // const [getCookieConsentValue, setGetCookieConsentValue] = useState<
-  //   ((name?: string) => string | undefined) | null
-  // >(null);
+  const [CookieConsent, setCookieConsent] = useState<any>(null);
+  const [getCookieConsentValue, setGetCookieConsentValue] = useState<any>(null);
 
   const posthog = usePostHog();
 
@@ -31,10 +28,9 @@ export default function CookieBanner() {
   // Load the cookie consent library on client side only
   useEffect(() => {
     import("react-cookie-consent").then((module) => {
-      setXCookieConsent(module.default as unknown as typeof CookieConsent);
+      setCookieConsent(() => module.default);
+      setGetCookieConsentValue(() => module.getCookieConsentValue);
     });
-    // setGetCookieConsentValue(() => getCookieConsentValue);
-    // });
   }, []);
 
   // Check for existing cookie consent
@@ -69,15 +65,15 @@ export default function CookieBanner() {
 
       // Define window.dataLayer with proper TypeScript type
       interface WindowWithDataLayer extends Window {
-        dataLayer: unknown[];
-        gtag: (...args: unknown[]) => void;
+        dataLayer: any[];
+        gtag: (...args: any[]) => void;
       }
 
       const windowWithDataLayer = window as unknown as WindowWithDataLayer;
       windowWithDataLayer.dataLayer = windowWithDataLayer.dataLayer || [];
 
-      function gtag(...args: unknown[]) {
-        windowWithDataLayer.dataLayer.push(args);
+      function gtag(...args: any[]) {
+        windowWithDataLayer.dataLayer.push(arguments);
       }
 
       windowWithDataLayer.gtag = gtag;
@@ -102,12 +98,10 @@ export default function CookieBanner() {
   // 1. CookieConsent is not loaded
   // 2. No message has been sent yet
   // 3. Google Analytics ID is not set (making analytics optional)
-  if (!XCookieConsent || !messageHasBeenSent || !GA_TRACKING_ID) return null;
-
-  // const X: CookieConsentType = CookieConsent as unknown as CookieConsentType;
+  if (!CookieConsent || !messageHasBeenSent || !GA_TRACKING_ID) return null;
 
   return (
-    <XCookieConsent
+    <CookieConsent
       location="bottom"
       buttonText="Accept"
       declineButtonText="Decline"
@@ -144,6 +138,6 @@ export default function CookieBanner() {
     >
       This website uses cookies to enhance the user experience and analyze site
       traffic.
-    </XCookieConsent>
+    </CookieConsent>
   );
 }

@@ -1,44 +1,44 @@
-import type { Database } from "use-fireproof";
+import { Database } from "use-fireproof";
 import type {
   AiChatMessageDocument,
   ChatMessageDocument,
   UserChatMessageDocument,
+  VibeDocument,
 } from "../types/chat.js";
 import { trackChatInputClick } from "../utils/analytics.js";
 import { parseContent } from "../utils/segmentParser.js";
 import { streamAI } from "../utils/streamHandler.js";
 import { generateTitle } from "../utils/titleGenerator.js";
-import { CallAIError } from "call-ai";
-import { DeepWritable } from "ts-essentials";
 
 export interface SendMessageContext {
-  readonly userMessage: ChatMessageDocument;
-  mergeUserMessage(msg: Partial<UserChatMessageDocument>): void;
-  setPendingUserDoc(doc: ChatMessageDocument): void;
-  setIsStreaming(v: boolean): void;
-  ensureApiKey(): Promise<{ key: string } | null>;
-  setNeedsLogin(v: boolean, reason: string): void;
-  setNeedsNewKey(v: boolean): void;
-  addError(err: CallAIError): void;
-  checkCredits(key: string): Promise<boolean>;
-  ensureSystemPrompt(): Promise<string>;
-  submitUserMessage(): Promise<void>;
-  buildMessageHistory(): {
+  userMessage: ChatMessageDocument;
+  mergeUserMessage: (msg: Partial<UserChatMessageDocument>) => void;
+  setPendingUserDoc: (doc: ChatMessageDocument) => void;
+  setIsStreaming: (v: boolean) => void;
+  ensureApiKey: () => Promise<{ key: string } | null>;
+  setNeedsLogin: (v: boolean, reason: string) => void;
+  ensureSystemPrompt: (overrides?: {
+    userPrompt?: string;
+    history?: { role: "user" | "assistant" | "system"; content: string }[];
+  }) => Promise<string>;
+  submitUserMessage: () => Promise<void>;
+  buildMessageHistory: () => {
     role: "user" | "assistant" | "system";
     content: string;
   }[];
-  readonly modelToUse: string;
-  throttledMergeAiMessage(content: string): void;
-  readonly isProcessingRef: { current: boolean };
-  readonly aiMessage: AiChatMessageDocument;
-  readonly sessionDatabase: Database;
-  setPendingAiMessage(doc: ChatMessageDocument | null): void;
-  setSelectedResponseId(id: string): void;
-  updateTitle(title: string): void;
-  setInput(text: string): void;
-  readonly userId: string | undefined;
-  readonly titleModel: string;
-  readonly isAuthenticated: boolean;
+  modelToUse: string;
+  throttledMergeAiMessage: (content: string) => void;
+  isProcessingRef: { current: boolean };
+  aiMessage: AiChatMessageDocument;
+  sessionDatabase: Database;
+  setPendingAiMessage: (doc: ChatMessageDocument | null) => void;
+  setSelectedResponseId: (id: string) => void;
+  updateTitle: (title: string, isManual?: boolean) => Promise<void>;
+  setInput: (text: string) => void;
+  userId: string | undefined;
+  titleModel: string;
+  isAuthenticated: boolean;
+  vibeDoc: VibeDocument;
 }
 
 export async function sendMessage(
@@ -53,9 +53,6 @@ export async function sendMessage(
     setIsStreaming,
     ensureApiKey,
     setNeedsLogin,
-    setNeedsNewKey,
-    addError,
-    checkCredits,
     ensureSystemPrompt,
     submitUserMessage,
     buildMessageHistory,
@@ -71,6 +68,7 @@ export async function sendMessage(
     userId,
     titleModel,
     isAuthenticated,
+    vibeDoc,
   } = ctx;
 
   const promptText =
@@ -105,39 +103,28 @@ export async function sendMessage(
 
   setIsStreaming(true);
 
-  let currentApiKey: string;
+  // Get API key - will return dummy key for proxy-managed auth
+  let currentApiKey = "";
   try {
     const keyObject = await ensureApiKey();
-    if (!keyObject?.key) {
-      throw new Error("API key not found after ensureApiKey call.");
-    }
-    currentApiKey = keyObject.key;
+    // Always use the key from ensureApiKey (will be dummy key 'sk-vibes-proxy-managed')
+    currentApiKey = keyObject?.key || "";
   } catch (err) {
-    console.warn("sendMessage: Failed to ensure API key:", err);
-    setNeedsLogin(true, "sendMessage failed to ensure API key");
-    setNeedsNewKey(true);
-    addError({
-      type: "error",
-      message:
-        "API key is required. Please log in or ensure your key is valid.",
-      errorType: "Other",
-      source: "sendMessage",
-      timestamp: new Date().toISOString(),
-    });
-    setIsStreaming(false);
-    return;
+    console.warn("Error getting API key:", err);
+    // This should not happen with the new useApiKey implementation
+    currentApiKey = "sk-vibes-proxy-managed";
   }
 
-  const hasSufficientCredits = await checkCredits(currentApiKey);
-  if (!hasSufficientCredits) {
-    setIsStreaming(false);
-    return;
-  }
+  // Credit checking no longer needed - proxy handles it
 
-  const currentSystemPrompt = await ensureSystemPrompt();
-
-  // Now proceed with AI processing for authenticated users
+  // Build the history that will be used for the code-writing prompt
   const messageHistory = buildMessageHistory();
+
+  // Compose system prompt with schema-based module selection using prompt + history
+  const currentSystemPrompt = await ensureSystemPrompt({
+    userPrompt: promptText,
+    history: messageHistory,
+  });
 
   return streamAI(
     modelToUse,
@@ -158,7 +145,6 @@ export async function sendMessage(
             const parsedContent = JSON.parse(finalContent);
 
             if (parsedContent.error) {
-              setNeedsNewKey(true);
               setInput(promptText);
               finalContent = `Error: ${JSON.stringify(parsedContent.error)}`;
             } else {
@@ -173,36 +159,49 @@ export async function sendMessage(
           }
         }
 
-        if (
-          !finalContent ||
-          (typeof finalContent === "string" && finalContent.trim().length === 0)
+        if (!finalContent) {
+          console.warn("No response from AI");
+          finalContent = "Error: No response from AI service.";
+        } else if (
+          typeof finalContent === "string" &&
+          finalContent.trim().length === 0
         ) {
-          setNeedsLogin(true, "empty response");
-          return;
+          console.warn(
+            "Empty response from AI, this might indicate an API issue",
+          );
+          // Save an error message instead of returning early
+          finalContent =
+            "Error: Empty response from AI service. This might be due to missing API key or proxy issues.";
         }
 
         if (aiMessage?.text !== finalContent) {
-          (aiMessage as DeepWritable<AiChatMessageDocument>).text =
-            finalContent;
+          aiMessage.text = finalContent;
         }
 
-        (aiMessage as DeepWritable<AiChatMessageDocument>).model = modelToUse;
+        aiMessage.model = modelToUse;
         const { id } = (await sessionDatabase.put(aiMessage)) as { id: string };
         setPendingAiMessage({ ...aiMessage, _id: id });
         setSelectedResponseId(id);
 
-        const { segments } = parseContent(aiMessage?.text || "");
-        try {
-          const title = await generateTitle(
-            segments,
-            titleModel,
-            currentApiKey,
-          );
-          if (title) {
-            updateTitle(title);
+        // Skip title generation if the response is an error or title was set manually
+        const isErrorResponse =
+          typeof finalContent === "string" && finalContent.startsWith("Error:");
+        const titleSetManually = vibeDoc?.titleSetManually === true;
+
+        if (!isErrorResponse && !titleSetManually) {
+          const { segments } = parseContent(aiMessage?.text || "");
+          try {
+            const title = await generateTitle(
+              segments,
+              titleModel,
+              currentApiKey,
+            );
+            if (title) {
+              await updateTitle(title, false); // Mark as AI-generated
+            }
+          } catch (titleError) {
+            console.warn("Failed to generate title:", titleError);
           }
-        } catch (titleError) {
-          console.warn("Failed to generate title:", titleError);
         }
       } finally {
         isProcessingRef.current = false;
@@ -216,10 +215,6 @@ export async function sendMessage(
     })
     .finally(() => {
       setIsStreaming(false);
-      if (currentApiKey) {
-        checkCredits(currentApiKey).catch((err) => {
-          console.warn("Failed to check credits in finally block:", err);
-        });
-      }
+      // Credit checking no longer needed
     });
 }

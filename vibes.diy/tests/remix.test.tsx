@@ -1,14 +1,35 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { AuthContext } from "~/vibes-diy/app/contexts/AuthContext.js";
-import type { TokenPayload } from "~/vibes-diy/app/utils/auth.js";
-import Remix from "~/vibes-diy/app/routes/remix.js";
+import { AuthContext } from "~/vibes.diy/app/contexts/AuthContext.js";
+import type { TokenPayload } from "~/vibes.diy/app/utils/auth.js";
+import Remix from "~/vibes.diy/app/routes/remix.js";
+
+// Mock useLazyFireproof first
+vi.mock("~/vibes.diy/app/hooks/useLazyFireproof", () => ({
+  useLazyFireproof: () => ({
+    useDocument: () => ({
+      doc: { _id: "test-id", type: "user" },
+      merge: vi.fn(),
+      submit: vi.fn().mockResolvedValue({ ok: true }),
+      save: vi.fn(),
+    }),
+    useLiveQuery: () => ({ docs: [] }),
+    database: { get: vi.fn(), put: vi.fn() },
+    open: vi.fn(),
+  }),
+}));
 
 // Mock the Session hooks
-vi.mock("~/vibes-diy/app/hooks/useSession", () => ({
+vi.mock("~/vibes.diy/app/hooks/useSession", () => ({
   useSession: () => ({
-    session: { _id: "test-session-id" },
+    session: {
+      _id: "test-session-id",
+      title: "Test Session",
+      publishedUrl: "",
+      firehoseShared: false,
+    },
+    docs: [],
     sessionDatabase: {
       get: vi.fn().mockImplementation((id) => {
         if (id === "vibe") {
@@ -18,7 +39,39 @@ vi.mock("~/vibes-diy/app/hooks/useSession", () => ({
       }),
       put: vi.fn().mockResolvedValue({ ok: true }),
     },
-    updateTitle: vi.fn().mockResolvedValue(true),
+    openSessionDatabase: vi.fn().mockResolvedValue({}),
+    updateTitle: vi.fn().mockResolvedValue(undefined),
+    updatePublishedUrl: vi.fn(),
+    updateFirehoseShared: vi.fn(),
+    addScreenshot: vi.fn(),
+    userMessage: {
+      _id: "user-msg",
+      type: "user",
+      session_id: "test-session-id",
+      text: "",
+      created_at: Date.now(),
+    },
+    aiMessage: {
+      _id: "ai-msg",
+      type: "ai",
+      session_id: "test-session-id",
+      text: "",
+      created_at: Date.now(),
+    },
+    vibeDoc: {
+      _id: "vibe",
+      title: "",
+      encodedTitle: "",
+      created_at: Date.now(),
+      remixOf: "",
+    },
+    mergeUserMessage: vi.fn(),
+    saveUserMessage: vi.fn(),
+    submitUserMessage: vi.fn(),
+    mergeAiMessage: vi.fn(),
+    saveAiMessage: vi.fn(),
+    submitAiMessage: vi.fn(),
+    mergeVibeDoc: vi.fn(),
   }),
 }));
 
@@ -44,10 +97,10 @@ const renderWithAuthContext = (
     isAuthenticated,
     isLoading: false,
     userPayload,
-    needsLogin: false,
-    setNeedsLogin: vi.fn(),
     checkAuthStatus: vi.fn(() => Promise.resolve()),
     processToken: vi.fn(),
+    needsLogin: false,
+    setNeedsLogin: vi.fn(),
   };
 
   return render(
@@ -56,7 +109,7 @@ const renderWithAuthContext = (
 };
 
 // Mock the API Key hook
-vi.mock("~/vibes-diy/app/hooks/useApiKey", () => ({
+vi.mock("~/vibes.diy/app/hooks/useApiKey", () => ({
   useApiKey: () => ({
     apiKey: "test-api-key",
   }),
@@ -77,13 +130,20 @@ vi.mock("react-router", () => ({
 }));
 
 // Mock fetch
-global.fetch = vi.fn().mockImplementation((_url) => {
+global.fetch = vi.fn().mockImplementation(() => {
   return Promise.resolve({
     ok: true,
+    status: 200,
+    statusText: "OK",
+    headers: new Headers(),
     text: () =>
       Promise.resolve(
         "export default function App() { return <div>Test App</div>; }",
       ),
+    json: () => Promise.resolve({}),
+    blob: () => Promise.resolve(new Blob()),
+    arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+    formData: () => Promise.resolve(new FormData()),
   });
 });
 
@@ -92,10 +152,28 @@ vi.mock("~/components/SessionSidebar/utils", () => ({
   encodeTitle: (title: string) => title,
 }));
 
+// Mock database manager
+vi.mock("~/vibes.diy/app/utils/databaseManager", () => ({
+  getSessionDatabaseName: vi
+    .fn()
+    .mockImplementation((id) => `session-${id || "default"}`),
+}));
+
 describe("Remix Route", () => {
   beforeEach(() => {
     // Reset mocks before each test
     navigateMock.mockReset();
+
+    // Mock localStorage
+    Object.defineProperty(window, "localStorage", {
+      value: {
+        getItem: vi.fn().mockReturnValue("test-auth-token"),
+        setItem: vi.fn(),
+        removeItem: vi.fn(),
+        clear: vi.fn(),
+      },
+      writable: true,
+    });
   });
 
   it("should process vibe slug and navigate with prompt parameter", async () => {
@@ -115,7 +193,7 @@ describe("Remix Route", () => {
       // Check that the URL contains the expected parts
       const callArg = navigateMock.mock.calls[0][0];
       expect(callArg).toContain("/chat/");
-      expect(callArg).toContain("/app?prompt=Make");
+      expect(callArg).toContain("/chat?prompt=Make");
     });
   });
 
@@ -129,7 +207,7 @@ describe("Remix Route", () => {
     await waitFor(() => {
       expect(navigateMock).toHaveBeenCalled();
       expect(navigateMock).toHaveBeenCalledWith(
-        expect.stringMatching(/\/chat\/.*\/.*\/app$/),
+        expect.stringMatching(/\/chat\/.*\/.*\/chat$/),
       );
       expect(navigateMock).not.toHaveBeenCalledWith(
         expect.stringMatching(/\?prompt=/),

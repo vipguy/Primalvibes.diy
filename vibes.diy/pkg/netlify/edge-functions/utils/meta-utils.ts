@@ -11,8 +11,9 @@ export interface VibeMetadata {
 
 export async function fetchVibeMetadata(
   vibeSlug: string,
+  searchParams?: string,
 ): Promise<VibeMetadata> {
-  const sourceUrl = `https://${vibeSlug}.vibesdiy.app/`;
+  const sourceUrl = `https://${vibeSlug}.vibesdiy.app/${searchParams || ""}`;
   const sourceResponse = await fetch(sourceUrl, {
     headers: {
       "User-Agent": "Mozilla/5.0 (compatible; VibesDIY-Bot/1.0)",
@@ -44,7 +45,10 @@ export async function fetchVibeMetadata(
   };
 }
 
-export function generateMetaHTML(metadata: VibeMetadata): string {
+export function generateMetaHTML(
+  metadata: VibeMetadata,
+  searchParams?: string,
+): string {
   const { title, description, vibeSlug, canonicalUrl } = metadata;
 
   return `<!DOCTYPE html>
@@ -80,7 +84,7 @@ export function generateMetaHTML(metadata: VibeMetadata): string {
 </head>
 <body>
   <iframe
-    src="https://${vibeSlug}.vibesdiy.app/"
+    src="https://${vibeSlug}.vibesdiy.app/${searchParams || ""}"
     title="${escapeHtml(title)}"
     allow="accelerometer; autoplay; camera; clipboard-read; clipboard-write; encrypted-media; fullscreen; gamepad; geolocation; gyroscope; hid; microphone; midi; payment; picture-in-picture; publickey-credentials-get; screen-wake-lock; serial; usb; web-share; xr-spatial-tracking"
     sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation allow-orientation-lock allow-pointer-lock allow-downloads allow-top-navigation"

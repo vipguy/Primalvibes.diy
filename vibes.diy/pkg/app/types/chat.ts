@@ -1,49 +1,85 @@
-import type { DocBase } from "use-fireproof";
+import type { DocTypes } from "use-fireproof";
 import type { RuntimeError } from "../hooks/useRuntimeErrors.js";
 import type { ViewType } from "../utils/ViewState.js"; // Import ViewType
 export type { ViewType } from "../utils/ViewState.js"; // Re-export ViewType
 
 // ===== Vibe Document Type =====
 export interface VibeDocument {
-  readonly _id: "vibe";
+  _id: "vibe";
   title: string;
   encodedTitle: string;
   remixOf: string;
-  readonly created_at: number;
-  readonly slug?: string;
-  readonly favorite?: boolean;
+  created_at: number;
+  slug?: string;
+  favorite?: boolean;
   publishedUrl?: string;
   firehoseShared?: boolean;
+  titleSetManually?: boolean;
+  /**
+   * Optional per‑chat model override. When set to a valid model id
+   * from app/data/models.json it will be used for subsequent LLM calls
+   * in this session. When absent or invalid, fall back to user settings
+   * (global) model and finally the default.
+   */
+  selectedModel?: string;
+  /**
+   * Per‑vibe selected dependency modules (by catalog name).
+   * These control which helper libraries and docs are injected into prompts.
+   */
+  dependencies?: string[];
+  /**
+   * When true, treat `dependencies` as a user override and bypass any
+   * automatic/catalog-based module selection.
+   */
+  dependenciesUserOverride?: boolean;
+  /**
+   * AI-selected dependencies from last prompt analysis.
+   * These are displayed in the UI when user hasn't made an override.
+   */
+  aiSelectedDependencies?: string[];
+  /**
+   * When true, enable instructional text in prompts regardless of LLM decision.
+   * When false, disable instructional text regardless of LLM decision.
+   * When undefined, use LLM decision.
+   */
+  instructionalTextOverride?: boolean;
+  /**
+   * When true, enable demo data in prompts regardless of LLM decision.
+   * When false, disable demo data regardless of LLM decision.
+   * When undefined, use LLM decision.
+   */
+  demoDataOverride?: boolean;
 }
 
 // ===== Content Segment Types =====
 export interface Segment {
-  readonly type: "markdown" | "code";
-  readonly content: string;
+  type: "markdown" | "code";
+  content: string;
 }
 
 // ===== Document Types =====
 
 export interface BaseChatMessageDocument {
-  readonly _id?: string;
-  readonly session_id: string;
-  readonly text: string;
-  readonly created_at: number;
+  _id?: string;
+  session_id: string;
+  text: string;
+  created_at: number;
 }
 
 export type UserChatMessageDocument = BaseChatMessageDocument & {
-  readonly type: "user";
+  type: "user";
 };
 
 export type AiChatMessageDocument = BaseChatMessageDocument & {
-  readonly type: "ai";
-  readonly model?: string; // The model used to generate this message
+  type: "ai";
+  model?: string; // The model used to generate this message
+  isEditedCode?: boolean; // Flag to indicate this message contains edited code
 };
 
 export type SystemChatMessageDocument = BaseChatMessageDocument & {
-  readonly type: "system";
-  readonly errorType?: string; // Type of error if this is an error message
-  readonly errorCategory?: "immediate" | "advisory"; // Category of error
+  type: "system";
+  errorType?: string; // Type of error if this is an error message
+  errorCategory?: "immediate" | "advisory"; // Category of error
 };
 
 export type ChatMessageDocument =
@@ -52,29 +88,36 @@ export type ChatMessageDocument =
   | SystemChatMessageDocument;
 
 /**
+ * Base document interface with common properties
+ */
+export interface DocBase {
+  _id: string;
+}
+
+/**
  * Document type for screenshot entries
  */
-export interface ScreenshotDocument extends Omit<DocBase, "_files"> {
-  readonly type: "screenshot";
-  readonly session_id: string;
-  readonly _files?: {
-    readonly screenshot: { readonly file: () => Promise<File>; type: string };
+export interface ScreenshotDocument extends DocBase {
+  type: "screenshot";
+  session_id: string;
+  _files?: {
+    screenshot: { file: () => Promise<File>; type: string };
   };
 }
 
 // Note: We already have a SessionDocument interface, so merged the properties
-export interface SessionDocument extends Partial<DocBase> {
-  readonly _id?: string;
-  readonly type: "session"; // Document type for Fireproof queries
-  readonly title?: string;
-  readonly created_at: number;
-  readonly favorite?: boolean; // Added favorite property for starring sessions
-  readonly publishedUrl?: string; // URL where the app is published
-  readonly messages?: {
-    readonly text: string;
-    readonly type: "user" | "ai" | "system";
-    readonly code?: string;
-    readonly dependencies?: Record<string, string>;
+export interface SessionDocument extends DocTypes {
+  _id?: string;
+  type: "session"; // Document type for Fireproof queries
+  title?: string;
+  created_at: number;
+  favorite?: boolean; // Added favorite property for starring sessions
+  publishedUrl?: string; // URL where the app is published
+  messages?: {
+    text: string;
+    type: "user" | "ai" | "system";
+    code?: string;
+    dependencies?: Record<string, string>;
   }[];
 }
 
@@ -87,69 +130,77 @@ export type SessionOrScreenshot = SessionDocument | ScreenshotDocument;
 // Enhanced types with additional UI properties
 export type ChatMessage = ChatMessageDocument & {
   text: string;
-  readonly timestamp?: number;
+  timestamp?: number;
 };
 
 // User chat message type used in the UI
 export type UserChatMessage = ChatMessage & {
-  readonly type: "user";
+  type: "user";
 };
 
 // Enhanced AiChatMessage type with segments for structured display
 export type AiChatMessage = ChatMessage & {
-  readonly type: "ai" | "user";
-  readonly segments?: Segment[];
-  readonly isStreaming?: boolean;
-  readonly dependenciesString?: string;
+  type: "ai";
+  segments?: Segment[];
+  isStreaming?: boolean;
 };
 
 // System message type for errors and important system notifications
 export type SystemChatMessage = ChatMessage & {
-  readonly type: "system";
-  readonly errorType?: string;
-  readonly errorCategory?: "immediate" | "advisory";
+  type: "system";
+  errorType?: string;
+  errorCategory?: "immediate" | "advisory";
 };
 
 // ===== Component Props =====
 export interface ChatState {
-  readonly isEmpty: boolean;
-  readonly docs: ChatMessageDocument[];
-  readonly input: string;
-  setInput(input: string): void;
-  readonly isStreaming: boolean;
-  readonly codeReady: boolean;
-  readonly inputRef: React.RefObject<HTMLTextAreaElement | null>;
-  sendMessage(text?: string): Promise<void>;
-  readonly title: string;
-  addScreenshot(screenshot: string | null): Promise<void>;
-  readonly sessionId?: string | null;
-  setSelectedResponseId(id: string): void;
-  readonly selectedResponseDoc?: ChatMessageDocument;
-  readonly selectedSegments?: Segment[];
-  readonly selectedCode?: Segment;
-  readonly needsNewKey?: boolean;
-  setNeedsNewKey(value: boolean): void;
+  isEmpty: boolean;
+  docs: ChatMessageDocument[];
+  input: string;
+  setInput: (input: string) => void;
+  isStreaming: boolean;
+  codeReady: boolean;
+  inputRef: React.RefObject<HTMLTextAreaElement | null>;
+  sendMessage: (text?: string) => Promise<void>;
+  saveCodeAsAiMessage: (
+    code: string,
+    currentMessages: ChatMessageDocument[],
+  ) => Promise<string>;
+  title: string;
+  updateTitle: (title: string, isManual?: boolean) => Promise<void>;
+  addScreenshot: (screenshot: string | null) => Promise<void>;
+  sessionId?: string | null;
+  setSelectedResponseId: (id: string) => void;
+  selectedResponseDoc?: ChatMessageDocument;
+  selectedSegments?: Segment[];
+  selectedCode?: Segment;
+  // Per‑chat model selection
+  selectedModel?: string;
+  updateSelectedModel?: (modelId: string) => Promise<void>;
+  effectiveModel?: string;
+  globalModel?: string;
+  showModelPickerInChat?: boolean;
 
   // Error tracking
-  readonly immediateErrors: RuntimeError[];
-  readonly advisoryErrors: RuntimeError[];
-  addError(error: RuntimeError): void;
-  readonly vibeDoc?: VibeDocument;
+  immediateErrors: RuntimeError[];
+  advisoryErrors: RuntimeError[];
+  addError: (error: RuntimeError) => void;
+  vibeDoc?: VibeDocument;
 }
 
 export interface ChatInterfaceProps extends ChatState {
   // chatState is now extended
   // sessionId is part of ChatState
-  onSessionCreated?(newSessionId: string): void;
-  navigateToView(view: ViewType): void;
-  setMobilePreviewShown(shown: boolean): void;
+  onSessionCreated?: (newSessionId: string) => void;
+  navigateToView: (view: ViewType) => void;
+  setMobilePreviewShown: (shown: boolean) => void;
 }
 
 /**
  * Props for the SessionSidebar component
  */
 export interface SessionSidebarProps {
-  readonly isVisible: boolean;
-  onClose(): void;
-  readonly sessionId: string;
+  isVisible: boolean;
+  onClose: () => void;
+  sessionId: string;
 }

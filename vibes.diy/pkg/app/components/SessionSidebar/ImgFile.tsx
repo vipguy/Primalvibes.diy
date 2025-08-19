@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { DocFileMeta } from "use-fireproof";
 
 interface ImgFileProps {
-  file: { file: () => Promise<File>; type: string };
+  file: DocFileMeta;
   alt: string;
   className?: string;
   withBlurredBg?: boolean;
@@ -23,7 +24,7 @@ export function ImgFile({
   const [imgDataUrl, setImgDataUrl] = useState("");
 
   useEffect(() => {
-    if (file.type && /image/.test(file.type)) {
+    if (file && file.type && /image/.test(file.type) && file.file) {
       file.file().then((file: File) => {
         const src = URL.createObjectURL(file);
         setImgDataUrl(src);

@@ -46,7 +46,11 @@ export default function Remix() {
 
         // Fetch the app code
         const appUrl = `https://${appName}.vibesdiy.app/App.jsx`;
-        const response = await fetch(appUrl);
+        const response = await fetch(appUrl, {
+          headers: {
+            "X-VIBES-Token": localStorage.getItem("auth_token") || "",
+          },
+        });
 
         if (!response.ok) {
           throw new Error(`Error fetching app code: ${response.status}`);
@@ -106,7 +110,7 @@ export default function Remix() {
         await updateTitle(finalTitle);
 
         // Build the target URL, including the prompt parameter if it exists
-        let targetUrl = `/chat/${session._id}/${encodeTitle(finalTitle)}/app`;
+        let targetUrl = `/chat/${session._id}/${encodeTitle(finalTitle)}/chat`;
 
         // Forward the prompt parameter to the chat route if it exists
         if (promptParameter && promptParameter.trim()) {

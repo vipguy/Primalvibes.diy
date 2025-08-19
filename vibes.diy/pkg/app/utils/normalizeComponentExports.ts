@@ -6,7 +6,7 @@
  * Handles:
  * - export default function ComponentName() {}
  * - export default class ComponentName {}
- * - export default (props) => { };
+ * - export default (props) => {  };
  * - export default memo(Component);
  * - export default forwardRef(...);
  * - function ComponentName() {} export default ComponentName;

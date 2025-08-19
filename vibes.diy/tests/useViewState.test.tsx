@@ -1,8 +1,5 @@
 import { renderHook } from "@testing-library/react";
-import {
-  useViewState,
-  type ViewState,
-} from "~/vibes-diy/app/utils/ViewState.js";
+import { useViewState } from "~/vibes.diy/app/utils/ViewState.js";
 import { vi, describe, test, expect, beforeEach } from "vitest";
 
 // Mock react-router-dom hooks
@@ -15,7 +12,7 @@ vi.mock("react-router-dom", () => {
 });
 
 // Mock encodeTitle from utils
-vi.mock("~/vibes-diy/app/components/SessionSidebar/utils.js", () => {
+vi.mock("~/vibes.diy/app/components/SessionSidebar/utils", () => {
   return {
     encodeTitle: vi.fn((title) => title), // Simple mock that returns the title unchanged
   };
@@ -44,7 +41,7 @@ describe("useViewState", () => {
     // Test app path
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}/app`,
-    } as ReturnType<typeof useLocation>);
+    } as any);
 
     const { result: appResult } = renderHook(() =>
       useViewState({
@@ -59,7 +56,7 @@ describe("useViewState", () => {
     // Test code path
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}/code`,
-    } as ReturnType<typeof useLocation>);
+    } as any);
 
     const { result: codeResult } = renderHook(() =>
       useViewState({
@@ -74,7 +71,7 @@ describe("useViewState", () => {
     // Test data path
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}/data`,
-    } as ReturnType<typeof useLocation>);
+    } as any);
 
     const { result: dataResult } = renderHook(() =>
       useViewState({
@@ -91,7 +88,7 @@ describe("useViewState", () => {
     // Setup location with /app path
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}/app`,
-    } as ReturnType<typeof useLocation>);
+    } as any);
 
     // Initialize with preview not ready
     const { result, rerender } = renderHook(() =>
@@ -121,7 +118,7 @@ describe("useViewState", () => {
     // Setup location with /code path
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}/code`,
-    } as ReturnType<typeof useLocation>);
+    } as any);
 
     // Initialize with preview not ready
     const { result, rerender } = renderHook(() =>
@@ -151,7 +148,7 @@ describe("useViewState", () => {
     // Setup location with /data path
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}/data`,
-    } as ReturnType<typeof useLocation>);
+    } as any);
 
     // Initialize with preview not ready
     const { result, rerender } = renderHook(() =>
@@ -183,10 +180,10 @@ describe("useViewState", () => {
     // Setup location with base path (no view suffix)
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}`,
-    } as ReturnType<typeof useLocation>);
+    } as any);
 
     // We need to create a fresh instance for each test to ensure refs start clean
-    let hookResult: Partial<ViewState> | null = null;
+    let hookResult: any;
 
     // Initialize with preview not ready - first render creates the refs
     const { unmount } = renderHook(
@@ -247,10 +244,10 @@ describe("useViewState", () => {
     // Setup location with base path (no view suffix)
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}`,
-    } as ReturnType<typeof useLocation>);
+    } as any);
 
     // We need to create a fresh instance to ensure refs are properly tracked
-    let hookResult: Partial<ViewState> | null = null;
+    let hookResult: any;
 
     // Initialize with preview not ready - first render to set up refs
     const { unmount } = renderHook(
@@ -321,5 +318,21 @@ describe("useViewState", () => {
 
     // Should not navigate again since wasPreviewReadyRef is now true
     expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  test("should determine settings view from path", () => {
+    vi.mocked(useLocation).mockReturnValue({
+      pathname: `/chat/${mockSessionId}/${mockTitle}/settings`,
+    } as any);
+
+    const { result } = renderHook(() =>
+      useViewState({
+        code: "const test = true;",
+        isStreaming: false,
+        previewReady: true,
+      }),
+    );
+
+    expect(result.current.currentView).toBe("settings");
   });
 });

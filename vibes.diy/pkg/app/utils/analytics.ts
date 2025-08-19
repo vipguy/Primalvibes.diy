@@ -1,30 +1,24 @@
-import ReactGA from "react-ga4";
+import ReactGA from "react-ga";
 import { GA_TRACKING_ID } from "../config/env.js";
 
 /**
  * Initialize Google Analytics
  */
-export const initGA = (): void => {
+export function initGA() {
   if (GA_TRACKING_ID) {
-    (
-      ReactGA as unknown as { initialize: (trackingId: string) => void }
-    ).initialize(GA_TRACKING_ID);
+    ReactGA.initialize(GA_TRACKING_ID);
   }
-};
+}
 
 /**
  * Track page view
  * @param path - The page path
  */
-export const pageview = (path: string): void => {
+export function pageview(path: string): void {
   if (GA_TRACKING_ID) {
-    (
-      ReactGA as unknown as {
-        send: (params: { hitType: string; page: string }) => void;
-      }
-    ).send({ hitType: "pageview", page: path });
+    ReactGA.send({ hitType: "pageview", page: path });
   }
-};
+}
 
 /**
  * Track custom event
@@ -40,16 +34,7 @@ export const event = (
   value?: number,
 ): void => {
   if (GA_TRACKING_ID) {
-    (
-      ReactGA as unknown as {
-        event: (params: {
-          category: string;
-          action: string;
-          label?: string;
-          value?: number;
-        }) => void;
-      }
-    ).event({
+    ReactGA.event({
       category,
       action,
       label,
@@ -58,9 +43,6 @@ export const event = (
   }
 };
 
-type WindowWithGtag = typeof window & {
-  gtag: (...args: unknown[]) => void;
-};
 /**
  * Track a Google Ads conversion event
  * @param eventName - Name of the event
@@ -78,12 +60,12 @@ export const trackEvent = (
     'script[src*="googletagmanager.com/gtag/js"]',
   );
 
+  const gtag = (window as { gtag?: (...args: unknown[]) => void }).gtag;
   // Check if the gtag function is defined
-  const hasGTagFunction = typeof (window as WindowWithGtag).gtag === "function";
+  const hasGTagFunction = typeof gtag === "function";
 
   // Only fire the event if both conditions are met (which implies consent was given)
   if (hasGTagScript && hasGTagFunction) {
-    const gtag = (window as WindowWithGtag).gtag;
     gtag("event", eventName, eventParams);
   }
 };

@@ -3,22 +3,13 @@
  */
 
 import { DocFileMeta, fireproof } from "use-fireproof";
-import { API_BASE_URL } from "../config/env.js";
+import { APP_HOST_BASE_URL, API_BASE_URL } from "../config/env.js";
 import {
   getSessionDatabaseName,
   updateUserVibespaceDoc,
 } from "./databaseManager.js";
 import { normalizeComponentExports } from "./normalizeComponentExports.js";
-
-interface PublishDoc {
-  remixOf?: string;
-  favorite: boolean;
-  _files?: {
-    screenshot?: {
-      file: () => Promise<File>;
-    };
-  };
-}
+import { VibeDocument } from "../types/chat.js";
 
 /**
  * Publish an app to the server
@@ -58,7 +49,7 @@ export async function publishApp({
     // Try to get the vibe document which might contain remixOf information
     let remixOf = null;
     try {
-      const vibeDoc = await sessionDb.get<PublishDoc>("vibe");
+      const vibeDoc = (await sessionDb.get("vibe")) as VibeDocument;
       if (vibeDoc && vibeDoc.remixOf) {
         remixOf = vibeDoc.remixOf;
       }
@@ -67,7 +58,7 @@ export async function publishApp({
     }
 
     // Query for the most recent screenshot document
-    const result = await sessionDb.query("type", {
+    const result = await sessionDb.query<string, DocFileMeta>("type", {
       key: "screenshot",
       includeDocs: true,
       descending: true,
@@ -79,27 +70,22 @@ export async function publishApp({
 
     // Check if we have a screenshot document
     if (result.rows.length > 0) {
-      const screenshotDoc = result.rows[0].doc;
+      const screenshotDoc = result.rows[0].doc; // Cast to any to handle Fireproof types
 
-      function isDocFileMeta(
-        obj: unknown,
-      ): obj is DocFileMeta & { file: () => Promise<File> } {
-        return (
-          typeof obj === "object" &&
-          typeof (obj as DocFileMeta).file === "function"
+      function isDocFileMeta(obj: unknown): obj is {
+        _files: { screenshot: DocFileMeta & { file: () => Promise<File> } };
+      } {
+        const o = obj as { _files: { screenshot: DocFileMeta } };
+        return !!(
+          o &&
+          o._files &&
+          o._files.screenshot &&
+          o._files.screenshot.file
         );
       }
-
       // Check if the screenshot document has a file in _files.screenshot
-      if (
-        screenshotDoc &&
-        screenshotDoc._files &&
-        screenshotDoc._files.screenshot
-      ) {
+      if (isDocFileMeta(screenshotDoc)) {
         try {
-          if (!isDocFileMeta(screenshotDoc._files.screenshot)) {
-            throw new Error("Screenshot is not a file");
-          }
           // Get the File object using the file() method - Fireproof specific API
           const screenshotFile = await screenshotDoc._files.screenshot.file();
 
@@ -128,6 +114,7 @@ export async function publishApp({
     // Prepare headers with optional Authorization
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
+      "X-VIBES-Token": localStorage.getItem("auth_token") || "",
     };
 
     // Add Authorization header if token is provided
@@ -160,7 +147,7 @@ export async function publishApp({
       // Construct the app URL from the response data
       const appUrl =
         data.appUrl ||
-        `https://${data.app.slug}.${new URL(API_BASE_URL).hostname}`;
+        `https://${data.app.slug}.${new URL(APP_HOST_BASE_URL).hostname}`;
 
       // Get the user's vibespace database to check for existing data
       const userVibespaceDb = fireproof(`vu-${userId}`);
@@ -168,7 +155,7 @@ export async function publishApp({
 
       // Try to get the existing document to preserve metadata like favorite status
       const existingDoc = await userVibespaceDb
-        .get<PublishDoc>(docId)
+        .get<{ favorite?: boolean; remixOf?: string }>(docId)
         .catch(() => null);
 
       // Use the shared utility function to update the user's vibespace

@@ -1,5 +1,4 @@
-import type { ReactElement } from "react";
-import React, { useState, useEffect, useRef } from "react";
+import React, { ReactElement, useState, useEffect, useRef } from "react";
 
 // Cyberpunk color palette and neon effects
 const NEONS = [

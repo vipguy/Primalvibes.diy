@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { ShareModal } from "~/vibes-diy/app/components/ResultPreview/ShareModal.js";
+import { ShareModal } from "~/vibes.diy/app/components/ResultPreview/ShareModal.js";
 
 // Mock react-dom's createPortal to render children directly
 vi.mock("react-dom", () => ({
@@ -9,7 +9,7 @@ vi.mock("react-dom", () => ({
 }));
 
 // Mock the analytics tracking function (not used in current tests)
-vi.mock("~/vibes-diy/app/utils/analytics", () => ({
+vi.mock("~/vibes.diy/app/utils/analytics", () => ({
   trackPublishClick: vi.fn(),
 }));
 
@@ -108,7 +108,9 @@ describe("ShareModal", () => {
 
     // Should have the community message
     expect(
-      screen.getByText(/publish your app for anyone to share and remix/i),
+      screen.getByText(
+        /Publishing allows anyone with the link to share and remix/i,
+      ),
     ).toBeInTheDocument();
     expect(screen.getByText(/our community/i)).toBeInTheDocument();
   });

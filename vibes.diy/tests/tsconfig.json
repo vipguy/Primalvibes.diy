@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "paths": {
-      "~/vibes-diy/*": ["../pkg/*"]
+      "~/vibes.diy/*": ["../pkg/*"]
     },
     "outDir": "./dist"
   }

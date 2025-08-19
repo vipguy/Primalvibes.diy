@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
-import VibespaceComponent from "~/vibes-diy/app/components/VibespaceComponent.js";
+import VibespaceComponent from "~/vibes.diy/app/components/VibespaceComponent.js";
 
 // Mock the Fireproof hook
 vi.mock("use-fireproof", () => ({
@@ -12,25 +12,25 @@ vi.mock("use-fireproof", () => ({
 }));
 
 // Mock the vibespace theme components
-vi.mock("~/vibes-diy/app/components/vibespace/Basic", () => ({
+vi.mock("~/vibes.diy/app/components/vibespace/Basic", () => ({
   default: ({ userId }: { userId: string }) => (
     <div data-testid="basic-theme">Basic theme for {userId}</div>
   ),
 }));
 
-vi.mock("~/vibes-diy/app/components/vibespace/Wild", () => ({
+vi.mock("~/vibes.diy/app/components/vibespace/Wild", () => ({
   default: ({ userId }: { userId: string }) => (
     <div data-testid="wild-theme">Wild theme for {userId}</div>
   ),
 }));
 
-vi.mock("~/vibes-diy/app/components/vibespace/ExplodingBrain", () => ({
+vi.mock("~/vibes.diy/app/components/vibespace/ExplodingBrain", () => ({
   default: ({ userId }: { userId: string }) => (
     <div data-testid="brain-theme">Brain theme for {userId}</div>
   ),
 }));
 
-vi.mock("~/vibes-diy/app/components/vibespace/Cyberpunk", () => ({
+vi.mock("~/vibes.diy/app/components/vibespace/Cyberpunk", () => ({
   default: ({ userId }: { userId: string }) => (
     <div data-testid="cyberpunk-theme">Cyberpunk theme for {userId}</div>
   ),
@@ -61,7 +61,7 @@ Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
 });
 
 // Mock VibesDIYLogo
-vi.mock("~/vibes-diy/app/components/VibesDIYLogo", () => ({
+vi.mock("~/vibes.diy/app/components/VibesDIYLogo", () => ({
   default: ({ height }: { height: number }) => (
     <div data-testid="vibes-logo" style={{ height: `${height}px` }}>
       Vibes DIY Logo
@@ -70,7 +70,7 @@ vi.mock("~/vibes-diy/app/components/VibesDIYLogo", () => ({
 }));
 
 // Mock SimpleAppLayout
-vi.mock("~/vibes-diy/app/components/SimpleAppLayout", () => ({
+vi.mock("~/vibes.diy/app/components/SimpleAppLayout", () => ({
   default: ({
     children,
     headerLeft,

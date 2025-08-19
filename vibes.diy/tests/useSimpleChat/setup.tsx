@@ -12,10 +12,9 @@ vi.mock("call-ai", () => ({
     return callCount === 1 ? "Mock Title" : "Updated Mock Title";
   }),
 }));
-import { AuthProvider } from "~/vibes-diy/app/contexts/AuthContext.js";
 
 // Mock AuthContext to avoid state updates during tests
-vi.mock("~/vibes-diy/app/contexts/AuthContext.js", () => {
+vi.mock("~/vibes.diy/app/contexts/AuthContext", () => {
   return {
     AuthProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
     useAuth: () => ({
@@ -23,15 +22,13 @@ vi.mock("~/vibes-diy/app/contexts/AuthContext.js", () => {
       isAuthenticated: true,
       isLoading: false,
       userPayload: { userId: "test-user-id", exp: 0, tenants: [], ledgers: [] },
-      needsLogin: false,
-      setNeedsLogin: vi.fn(),
       checkAuthStatus: vi.fn(),
       processToken: vi.fn(),
     }),
   };
 });
-import type { AiChatMessage, ChatMessage } from "~/vibes-diy/app/types/chat.js";
-import { parseContent } from "~/vibes-diy/app/utils/segmentParser.js";
+import type { AiChatMessage, ChatMessage } from "~/vibes.diy/app/types/chat.js";
+import { parseContent } from "~/vibes.diy/app/utils/segmentParser.js";
 
 // Helper function to convert chunks into SSE format
 function formatAsSSE(chunks: string[]): string[] {
@@ -59,27 +56,19 @@ function formatAsSSE(chunks: string[]): string[] {
 }
 
 // Mock the prompts module
-vi.mock("~/vibes-diy/app/prompts.js", () => ({
+vi.mock("~/vibes.diy/app/prompts.js", () => ({
   makeBaseSystemPrompt: vi.fn().mockResolvedValue("Mocked system prompt"),
 }));
 
-// Mock the provisioning module
-vi.mock("~/vibes-diy/app/config/provisioning.js");
-
-// Import the mocked module
-import { getCredits } from "~/vibes-diy/app/config/provisioning.js";
-import { createOrUpdateKeyViaEdgeFunction } from "~/vibes-diy/app/services/apiKeyService.js";
-
-// Mock the apiKeyService module
-vi.mock("~/vibes-diy/app/services/apiKeyService.js");
+// Credit checking mocks no longer needed
 
 // Mock the utils/streamHandler to avoid real streaming and loops
-vi.mock("~/vibes-diy/app/utils/streamHandler.js", () => ({
+vi.mock("~/vibes.diy/app/utils/streamHandler", () => ({
   streamAI: vi.fn(
     async (
       _model: string,
       _sys: string,
-      _hist: unknown[],
+      _hist: any[],
       _user: string,
       onContent: (c: string) => void,
     ) => {
@@ -92,8 +81,9 @@ vi.mock("~/vibes-diy/app/utils/streamHandler.js", () => ({
 }));
 
 // Mock the env module
-vi.mock("~/vibes-diy/app/config/env.js", () => ({
+vi.mock("~/vibes.diy/app/config/env", () => ({
   CALLAI_API_KEY: "mock-callai-api-key-for-testing",
+  CALLAI_ENDPOINT: "https://mock-callai-endpoint.com",
   SETTINGS_DBNAME: "test-chat-history",
   GA_TRACKING_ID: "mock-ga-tracking-id",
   APP_MODE: "test", // Added mock APP_MODE
@@ -133,7 +123,7 @@ interface MockDoc {
   session_id: string;
   timestamp?: number;
   created_at?: number;
-  segments?: unknown[];
+  segments?: any[];
   dependenciesString?: string;
   isStreaming?: boolean;
   model?: string;
@@ -163,8 +153,8 @@ const initialMockDocs: MockDoc[] = [
     timestamp: Date.now() - 2000,
   },
 ];
-let currentUserMessage: AiChatMessage;
-let currentAiMessage: AiChatMessage;
+let currentUserMessage: any = {};
+let currentAiMessage: any = {};
 
 const resetMockState = () => {
   mockDocs = [...initialMockDocs]; // Reset docs to initial state
@@ -185,7 +175,7 @@ const resetMockState = () => {
 };
 
 // Define the mergeUserMessage implementation separately
-const mergeUserMessageImpl = (data?: { text: string }) => {
+const mergeUserMessageImpl = (data: any) => {
   if (data && typeof data.text === "string") {
     currentUserMessage.text = data.text;
   }
@@ -194,9 +184,8 @@ const mergeUserMessageImpl = (data?: { text: string }) => {
 // Create a spy wrapping the implementation
 const mockMergeUserMessage = vi.fn(mergeUserMessageImpl);
 
-import type { DocBase } from "use-fireproof";
 // Mock the useSession hook
-vi.mock("~/vibes-diy/app/hooks/useSession.js", () => {
+vi.mock("~/vibes.diy/app/hooks/useSession", () => {
   return {
     useSession: () => {
       // Don't reset here, reset is done in beforeEach
@@ -210,10 +199,10 @@ vi.mock("~/vibes-diy/app/hooks/useSession.js", () => {
         docs: mockDocs,
         updateTitle: vi
           .fn()
-          .mockImplementation(async (_title) => Promise.resolve()),
+          .mockImplementation(async (title) => Promise.resolve()),
         addScreenshot: vi.fn(),
         sessionDatabase: {
-          put: vi.fn(async (doc: DocBase) => {
+          put: vi.fn(async (doc: any) => {
             const id = doc._id || `doc-${Date.now()}`;
             return Promise.resolve({ id: id });
           }),
@@ -222,11 +211,11 @@ vi.mock("~/vibes-diy/app/hooks/useSession.js", () => {
             if (found) return Promise.resolve(found);
             return Promise.reject(new Error("Not found"));
           }),
-          query: vi.fn(async (field: string, options?: { key: string }) => {
+          query: vi.fn(async (field: string, options: any) => {
             const key = options?.key;
             const filtered = mockDocs.filter((doc) => {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              return (doc as any)[field] === key;
+              // @ts-ignore - we know the field exists
+              return doc[field] === key;
             });
             return Promise.resolve({
               rows: filtered.map((doc) => ({ id: doc._id, doc })),
@@ -242,11 +231,11 @@ vi.mock("~/vibes-diy/app/hooks/useSession.js", () => {
             ...currentUserMessage,
             _id: id,
           };
-          mockDocs.push(newDoc);
+          mockDocs.push(newDoc as any);
           return Promise.resolve({ id });
         }),
         aiMessage: currentAiMessage,
-        mergeAiMessage: vi.fn((data) => {
+        mergeAiMessage: vi.fn((data: any) => {
           if (data && typeof data.text === "string") {
             currentAiMessage.text = data.text;
           }
@@ -257,17 +246,17 @@ vi.mock("~/vibes-diy/app/hooks/useSession.js", () => {
             ...currentAiMessage,
             _id: id,
           };
-          mockDocs.push(newDoc);
+          mockDocs.push(newDoc as any);
           return Promise.resolve({ id });
         }),
-        saveAiMessage: vi.fn().mockImplementation(async (existingDoc) => {
+        saveAiMessage: vi.fn().mockImplementation(async (existingDoc: any) => {
           const id = existingDoc?._id || `ai-message-${Date.now()}`;
           const newDoc = {
             ...currentAiMessage,
             ...existingDoc,
             _id: id,
           };
-          mockDocs.push(newDoc);
+          mockDocs.push(newDoc as any);
           return Promise.resolve({ id });
         }),
         // Mock message handling
@@ -343,7 +332,7 @@ export default HelloWorld;`,
                     '{"react": "^18.2.0", "react-dom": "^18.2.0"}}',
                   isStreaming,
                   timestamp: now,
-                };
+                } as any;
               }
               // Special case for the dependencies test
               else if (
@@ -525,7 +514,7 @@ export default Timer;`,
 });
 
 // Mock the useSessionMessages hook
-vi.mock("~/vibes-diy/app/hooks/useSessionMessages.js", () => {
+vi.mock("~/vibes.diy/app/hooks/useSessionMessages", () => {
   // Track messages across test runs
   const messagesStore: Record<string, ChatMessage[]> = {};
 
@@ -612,7 +601,7 @@ export default HelloWorld;`,
                     '{"react": "^18.2.0", "react-dom": "^18.2.0"}}',
                   isStreaming,
                   timestamp: now,
-                };
+                } as any;
               }
               // Special case for the dependencies test
               else if (
@@ -797,39 +786,13 @@ export default Timer;`,
 
 // Wrapper definition
 const createWrapper = () => {
-  return ({ children }: { children: ReactNode }) => (
-    <AuthProvider>{children}</AuthProvider>
-  );
+  return ({ children }: { children: ReactNode }) => <>{children}</>;
 };
 
 const testJwt =
   "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0=.eyJ1c2VySWQiOiJ0ZXN0LXVzZXItaWQiLCJleHAiOjI1MzQwMjMwMDc5OX0=.";
 beforeEach(() => {
-  vi.mocked(createOrUpdateKeyViaEdgeFunction).mockImplementation(async () => {
-    return {
-      success: true,
-      key: {
-        key: "mock-api-key-for-testing",
-        hash: "mock-hash",
-        name: "Mock Session Key",
-        label: "mock-session",
-        limit: 0.01,
-        disabled: false,
-        usage: 0,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-    };
-  });
-
-  vi.mocked(getCredits).mockImplementation(async () => {
-    // Provide ample credits to avoid triggering needsNewKey in tests
-    return {
-      available: 100,
-      usage: 0,
-      limit: 100,
-    };
-  });
+  // Credit checking mocks no longer needed
 
   vi.spyOn(window, "fetch").mockImplementation(async () => {
     const stream = new ReadableStream({

@@ -1,13 +1,14 @@
 import React, { /*useEffect,*/ useRef } from "react"; // useEffect no longer needed here
 import { useParams } from "react-router";
 import { useSession } from "../../hooks/useSession.js";
-import type { ViewType, ViewControlsType } from "../../utils/ViewState.js";
+import type { ViewControlsType, ViewType } from "../../utils/ViewState.js";
 // import { useViewState } from '../../utils/ViewState'; // useViewState is now lifted to home.tsx
 import { BackButton } from "./BackButton.js";
-import { ViewControls } from "./ViewControls.js";
+import { SaveButton } from "./SaveButton.js";
 import { ShareButton } from "./ShareButton.js";
-import { usePublish } from "./usePublish.js";
 import { ShareModal } from "./ShareModal.js";
+import { usePublish } from "./usePublish.js";
+import { ViewControls } from "./ViewControls.js";
 
 interface ResultPreviewHeaderContentProps {
   // Props from useViewState (lifted to home.tsx)
@@ -24,6 +25,11 @@ interface ResultPreviewHeaderContentProps {
   isStreaming: boolean; // for BackButton logic
   sessionId?: string; // for useSession, usePublish
   title?: string; // for useSession, usePublish
+
+  // Props for code editing
+  hasCodeChanges?: boolean;
+  onCodeSave?: () => void;
+  syntaxErrorCount?: number;
 }
 
 const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
@@ -38,6 +44,9 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
   isStreaming,
   sessionId: propSessionId,
   title: propTitle,
+  hasCodeChanges,
+  onCodeSave,
+  syntaxErrorCount,
 }) => {
   const { sessionId: urlSessionId, view: urlView } = useParams();
   const publishButtonRef = useRef<HTMLButtonElement>(null);
@@ -103,11 +112,21 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
           />
         )}
       </div>
-      {/* Right side - Publish button */}
+      {/* Right side - Save and Publish buttons */}
       <div className="flex w-1/4 items-center justify-end">
-        <div className="flex items-center">
-          {showViewControls && previewReady && (
-            <div className="mr-2">
+        <div className="flex items-center gap-2">
+          {/* Save button - show when in code view and has changes */}
+          {displayView === "code" && hasCodeChanges && onCodeSave && (
+            <SaveButton
+              onClick={onCodeSave}
+              hasChanges={hasCodeChanges}
+              syntaxErrorCount={syntaxErrorCount}
+            />
+          )}
+
+          {showViewControls &&
+            (previewReady ||
+              (displayView === "settings" && publishedAppUrl)) && (
               <ShareButton
                 ref={publishButtonRef}
                 onClick={toggleShareModal}
@@ -115,8 +134,7 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
                 urlCopied={urlCopied}
                 hasPublishedUrl={!!publishedAppUrl}
               />
-            </div>
-          )}
+            )}
         </div>
       </div>
       {/* Share Modal */}

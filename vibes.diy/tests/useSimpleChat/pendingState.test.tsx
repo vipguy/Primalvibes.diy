@@ -1,9 +1,8 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, it, vi } from "vitest";
 import { createWrapper, formatAsSSE } from "./setup.js";
-import { useSimpleChat } from "~/vibes-diy/app/hooks/useSimpleChat.js";
-import { useSession } from "~/vibes-diy/app/hooks/useSession.js";
-import type { ChatMessageDocument } from "~/vibes-diy/app/types/chat.js";
+import { useSimpleChat } from "~/vibes.diy/app/hooks/useSimpleChat.js";
+import { useSession } from "~/vibes.diy/app/hooks/useSession.js";
 
 describe("useSimpleChat", () => {
   it("handles pending AI message state correctly", async () => {
@@ -39,10 +38,7 @@ describe("useSimpleChat", () => {
     const mockPut = vi.fn(async () => {
       return Promise.resolve({ id: generatedId });
     });
-    vi.mocked(useSession)(undefined).sessionDatabase.put =
-      mockPut as unknown as ReturnType<
-        typeof useSession
-      >["sessionDatabase"]["put"];
+    (vi.mocked(useSession)(undefined) as any).sessionDatabase.put = mockPut;
 
     act(() => {
       result.current.setInput("Trigger stream");
@@ -53,14 +49,20 @@ describe("useSimpleChat", () => {
 
     act(() => {
       const sessionHookResult = vi.mocked(useSession)(undefined);
-      const mockDocs = sessionHookResult.docs;
+      const mockDocs = (sessionHookResult as any).docs as {
+        _id: string;
+        type: string;
+        text: string;
+        session_id: string;
+        timestamp: number;
+      }[];
       const docToAdd = {
         _id: generatedId,
         type: "ai",
         text: mockResponseText,
         session_id: "test-session-id",
-        created_at: Date.now(),
-      } as ChatMessageDocument;
+        timestamp: Date.now(),
+      };
       mockDocs.push(docToAdd);
       result.current.setInput("");
     });

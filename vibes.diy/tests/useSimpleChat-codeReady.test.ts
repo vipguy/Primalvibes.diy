@@ -1,29 +1,22 @@
+import React from "react";
 import { cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useSimpleChat } from "~/vibes-diy/app/hooks/useSimpleChat.js";
-import type { AiChatMessage, ChatMessage } from "~/vibes-diy/app/types/chat.js";
+import { useSimpleChat } from "~/vibes.diy/app/hooks/useSimpleChat.js";
+import type { AiChatMessage, ChatMessage } from "~/vibes.diy/app/types/chat.js";
 import {
   parseContent,
   parseDependencies,
-} from "~/vibes-diy/app/utils/segmentParser.js";
+} from "~/vibes.diy/app/utils/segmentParser.js";
 
 // Mock the prompts module
-vi.mock("~/vibes-diy/app/prompts", () => ({
+vi.mock("~/vibes.diy/app/prompts.js", () => ({
   makeBaseSystemPrompt: vi.fn().mockResolvedValue("Mocked system prompt"),
 }));
 
-// Mock the provisioning module
-vi.mock("~/vibes-diy/app/config/provisioning");
-
-// Import the mocked module
-import { getCredits } from "~/vibes-diy/app/config/provisioning.js";
-import { createOrUpdateKeyViaEdgeFunction } from "~/vibes-diy/app/services/apiKeyService.js";
-
-// Mock the apiKeyService module
-vi.mock("~/vibes-diy/app/services/apiKeyService.js");
+// Credit checking mocks no longer needed
 
 // Mock the env module
-vi.mock("~/vibes-diy/app/config/env.js", () => ({
+vi.mock("~/vibes.diy/app/config/env", () => ({
   CALLAI_API_KEY: "mock-callai-api-key-for-testing",
   SETTINGS_DBNAME: "test-chat-history",
 }));
@@ -135,7 +128,7 @@ const mergeUserMessageImpl = (data: Record<string, unknown>) => {
 const mockMergeUserMessage = vi.fn(mergeUserMessageImpl);
 
 // Mock the useSession hook
-vi.mock("~/vibes-diy/app/hooks/useSession", () => {
+vi.mock("~/vibes.diy/app/hooks/useSession", () => {
   return {
     useSession: () => {
       // Don't reset here, reset is done in beforeEach
@@ -149,7 +142,7 @@ vi.mock("~/vibes-diy/app/hooks/useSession", () => {
         docs: mockDocs,
         updateTitle: vi
           .fn()
-          .mockImplementation(async (_title) => Promise.resolve()),
+          .mockImplementation(async (title) => Promise.resolve()),
         addScreenshot: vi.fn(),
         // Keep database mock simple
         sessionDatabase: {
@@ -167,9 +160,8 @@ vi.mock("~/vibes-diy/app/hooks/useSession", () => {
             async (field: string, options: Record<string, unknown>) => {
               const key = options?.key;
               const filtered = mockDocs.filter((doc) => {
-                return (
-                  (doc as unknown as Record<string, unknown>)[field] === key
-                );
+                // @ts-ignore - we know the field exists
+                return doc[field] === key;
               });
               return Promise.resolve({
                 rows: filtered.map((doc) => ({ id: doc._id, doc })),
@@ -200,7 +192,7 @@ vi.mock("~/vibes-diy/app/hooks/useSession", () => {
 });
 
 // Mock the useSessionMessages hook
-vi.mock("~/vibes-diy/app/hooks/useSessionMessages", () => {
+vi.mock("~/vibes.diy/app/hooks/useSessionMessages", () => {
   // Track messages across test runs
   const messagesStore: Record<string, ChatMessage[]> = {};
 
@@ -523,7 +515,7 @@ Here's how to use React.
 });
 
 // Mock the AuthContext module
-vi.mock("~/vibes-diy/app/contexts/AuthContext", () => {
+vi.mock("~/vibes.diy/app/contexts/AuthContext", () => {
   // Create a mock AuthContext that will be used by useAuth inside the hook
   const mockAuthContext = {
     isAuthenticated: true,
@@ -557,32 +549,7 @@ const createWrapper = () => {
 
 describe("useSimpleChat", () => {
   beforeEach(() => {
-    // Mock createOrUpdateKeyViaEdgeFunction to ensure it returns the correct structure
-    vi.mocked(createOrUpdateKeyViaEdgeFunction).mockImplementation(async () => {
-      return {
-        success: true,
-        key: {
-          key: "mock-api-key-for-testing",
-          hash: "mock-hash",
-          name: "Mock Session Key",
-          label: "mock-session",
-          limit: 0.01,
-          disabled: false,
-          usage: 0,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-      };
-    });
-
-    // Mock the getCredits function
-    vi.mocked(getCredits).mockImplementation(async () => {
-      return {
-        available: 0.005,
-        usage: 0.005,
-        limit: 0.01,
-      };
-    });
+    // Credit checking mocks no longer needed
 
     // Mock window.fetch
     vi.spyOn(window, "fetch").mockImplementation(async () => {

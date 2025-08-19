@@ -1,3 +1,4 @@
+import React from "react";
 import {
   act,
   fireEvent,
@@ -5,11 +6,11 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import React, { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { AuthContextType } from "~/vibes-diy/app/contexts/AuthContext.js";
-import { AuthContext } from "~/vibes-diy/app/contexts/AuthContext.js";
-import Settings from "~/vibes-diy/app/routes/settings.js";
+import type { AuthContextType } from "~/vibes.diy/app/contexts/AuthContext.js";
+import { AuthContext } from "~/vibes.diy/app/contexts/AuthContext.js";
+import Settings from "~/vibes.diy/app/routes/settings.js";
 
 // Create mock objects outside the mock function to access them in tests
 const mockMerge = vi.fn();
@@ -23,7 +24,7 @@ const mockSettings = {
 };
 
 // Mock the modules
-vi.mock("~/vibes-diy/app/hooks/useSession", () => ({
+vi.mock("~/vibes.diy/app/hooks/useSession", () => ({
   useSession: () => ({
     mainDatabase: { name: "test-db" },
   }),
@@ -59,7 +60,7 @@ vi.mock("react-router-dom", async () => {
 });
 
 // Mock SimpleAppLayout component
-vi.mock("~/vibes-diy/app/components/SimpleAppLayout", () => ({
+vi.mock("~/vibes.diy/app/components/SimpleAppLayout", () => ({
   default: ({
     headerLeft,
     children,
@@ -75,7 +76,7 @@ vi.mock("~/vibes-diy/app/components/SimpleAppLayout", () => ({
 }));
 
 // Mock HomeIcon component
-vi.mock("~/vibes-diy/app/components/SessionSidebar/HomeIcon", () => ({
+vi.mock("~/vibes.diy/app/components/SessionSidebar/HomeIcon", () => ({
   HomeIcon: () => <div data-testid="home-icon" />,
 }));
 
@@ -86,10 +87,10 @@ const createWrapper = (contextValue?: Partial<AuthContextType>) => {
     isAuthenticated: false,
     isLoading: false,
     userPayload: null,
-    needsLogin: false,
-    setNeedsLogin: vi.fn(),
     checkAuthStatus: vi.fn(),
     processToken: vi.fn(),
+    needsLogin: false,
+    setNeedsLogin: vi.fn(),
   };
   const valueToProvide = { ...defaultContextValue, ...contextValue };
   return ({ children }: { children: ReactNode }) => (

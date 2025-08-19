@@ -1,7 +1,7 @@
-import { vi, describe, it, expect, beforeEach } from "vitest";
 import React from "react";
+import { vi, describe, it, expect, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import ChatHeader from "~/vibes-diy/app/components/ChatHeaderContent.js";
+import ChatHeader from "~/vibes.diy/app/components/ChatHeaderContent.js";
 import { MockThemeProvider } from "./utils/MockThemeProvider.js";
 
 // Create mock functions we can control

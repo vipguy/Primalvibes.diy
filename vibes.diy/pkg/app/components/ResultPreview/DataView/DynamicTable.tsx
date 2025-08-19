@@ -1,13 +1,12 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 
 export default function DynamicTable({
-  // hrefFn,
+  hrefFn,
   dbName,
   headers,
   rows,
   th = "_id",
-  // link = ['_id'],
+  link = ["_id"],
   onRowClick = () => {
     /* no-op */
   },
