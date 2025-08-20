@@ -9,7 +9,7 @@ vars = { ENVIRONMENT = "test" }
 #enabled = true
 
 [assets]
-directory = "build/client"
+directory = "build"
 binding = "ASSETS"
 html_handling = "force-trailing-slash"
 #not_found_handling = "single-page-application"

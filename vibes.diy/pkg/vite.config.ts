@@ -16,9 +16,9 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
     plugins: [
       tailwindcss(),
       // Only include React Router plugin when not disabled
-      ...(!disableReactRouter ? [reactRouter()] : []),
       tsconfigPaths(),
       cloudflare(),
+      ...(!disableReactRouter ? [reactRouter()] : []),
     ],
     build: {
       outDir: "build",
