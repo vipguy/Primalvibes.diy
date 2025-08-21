@@ -88,7 +88,9 @@ export async function setupMonacoEditor(
     });
     setHighlighter(highlighter);
     await shikiToMonaco(highlighter, monaco);
-    const currentTheme = isDarkMode ? "github-dark" : "github-light";
+    const currentTheme = isDarkMode
+      ? "github-dark-default"
+      : "github-light-default";
     monaco.editor.setTheme(currentTheme);
     const model = editor.getModel();
     if (model) {

@@ -132,7 +132,9 @@ const IframeContent: React.FC<IframeContentProps> = ({
   useEffect(() => {
     if (monacoApiRef.current) {
       // Update the Shiki theme in Monaco when dark mode changes from parent
-      const currentTheme = isDarkMode ? "github-dark" : "github-light";
+      const currentTheme = isDarkMode
+        ? "github-dark-default"
+        : "github-light-default";
       // Use monaco editor namespace to set theme
       monacoApiRef.current.editor.setTheme(currentTheme);
     }
@@ -260,7 +262,7 @@ const IframeContent: React.FC<IframeContentProps> = ({
           width="100%"
           path="file.jsx"
           defaultLanguage="jsx"
-          theme={isDarkMode ? "github-dark" : "github-light"}
+          theme={isDarkMode ? "github-dark-default" : "github-light-default"}
           value={editedCode}
           onChange={handleCodeChange}
           options={{
