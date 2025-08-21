@@ -21,6 +21,7 @@
     "test": "vitest --run",
     "format": "prettier --write  --log-level silent .",
     "dev": "cd vibes.diy/pkg && pnpm run dev",
+    "dev:router": "cd vibes.diy/pkg && pnpm run dev:router",
     "pack": "echo skip pack",
     "publish": "echo skip publish"
   },

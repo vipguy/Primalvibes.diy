@@ -2,7 +2,7 @@ name: "deploy vibes.diy"
 on:
   push:
     paths:
-      - "vibes-diy/**/*"
+      - "vibes.diy/**/*"
 
   #    tags:
   #      - "vibes-diy@*"

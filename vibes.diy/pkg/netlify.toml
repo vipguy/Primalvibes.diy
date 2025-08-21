@@ -5,7 +5,7 @@
 
 [dev]
   base = "./vibes.diy/pkg"
-  command = "cat package.json" # pnpm run dev:router"
+  command = "pnpm run dev:router --port 5174"
   targetPort = 5174
   framework = "#custom"
   port = 8888
