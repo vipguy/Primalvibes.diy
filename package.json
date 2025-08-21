@@ -20,6 +20,7 @@
     "lint": "eslint .",
     "test": "vitest --run",
     "format": "prettier --write  --log-level silent .",
+    "dev": "cd vibes.diy/pkg && pnpm run dev",
     "pack": "echo skip pack",
     "publish": "echo skip publish"
   },

@@ -20,6 +20,15 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Manual approval step
+      uses: trstringer/manual-approval@v1
+      with:
+        secret: ${{ github.TOKEN }}
+        approvers: user1,org-team1
+        minimum-approvals: 1
+        issue-title: "Deploying ${{ github.event.inputs.version }} to prod"
+        issue-body: "Please approve or deny the deployment."
+
     - name: Build vibes.diy
       working-directory: vibes.diy/pkg
       shell: bash

@@ -7,7 +7,7 @@
     "postinstall": "react-router typegen",
     "tsc": "core-cli tsc",
     "build": "react-router build",
-    "dev": "netlify dev",
+    "dev": "react-router dev",
     "dev:router": "react-router dev",
     "deploy": "wrangler deploy -c wrangler.toml",
     "start": "serve -s build/client",

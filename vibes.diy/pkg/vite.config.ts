@@ -30,6 +30,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
     // Server configuration for local development
     server: {
       host: "0.0.0.0", // Listen on all local IPs
+      port: 8888,
       allowedHosts: ["devserver-main--fireproof-ai-builder.netlify.app"], // Specific ngrok hostname
       cors: true, // Enable CORS for all origins
       hmr: true, // Use default HMR settings for local development

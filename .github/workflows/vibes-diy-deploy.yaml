@@ -4,8 +4,14 @@ on:
     paths:
       - "vibes-diy/**/*"
 
-    tags:
-      - "vibes-diy@*"
+  #    tags:
+  #      - "vibes-diy@*"
+
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to deploy"
+        required: true
 
 jobs:
   compile_test:
