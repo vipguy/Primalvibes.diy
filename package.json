@@ -19,7 +19,7 @@
     "build": "core-cli tsc",
     "lint": "eslint .",
     "test": "vitest --run",
-    "format": "prettier .",
+    "format": "prettier --write  --log-level silent .",
     "pack": "echo skip pack",
     "publish": "echo skip publish"
   },
