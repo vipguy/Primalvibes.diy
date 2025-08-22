@@ -1,6 +1,6 @@
 {
   "name": "use-vibes",
-  "version": "0.5.8",
+  "version": "0.5.9",
   "type": "module",
   "description": "Transform any DOM element into an AI-powered micro-app",
   "exports": {
@@ -44,7 +44,7 @@
   ],
   "license": "Apache-2.0",
   "dependencies": {
-    "call-ai": "workspace:0.0.0",
+    "call-ai": "^0.10.1",
     "use-fireproof": "0.23.5",
     "uuid": "^11.1.0"
   },
