@@ -117,6 +117,9 @@ class CallAIEnv {
       // ugly as hell but useful
       return callAiEnv.CALLAI_REFRESH_ENDPOINT ?? "https://vibecode.garden";
     },
+    get CALLAI_CHAT_URL() {
+      return callAiEnv.CALLAI_CHAT_URL ?? "https://vibes-diy-api.com";
+    },
   };
 
   get CALLAI_IMG_URL() {

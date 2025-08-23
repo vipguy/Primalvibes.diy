@@ -376,7 +376,7 @@ function prepareRequestParams(
   const model = schemaStrategy.model;
 
   // Get custom chat API origin if set
-  const customChatOrigin = options.chatUrl || callAiEnv.CALLAI_CHAT_URL || null;
+  const customChatOrigin = options.chatUrl || callAiEnv.def.CALLAI_CHAT_URL || null;
   // (typeof window !== "undefined" ? (window as any).CALLAI_CHAT_URL : null) ||
   // (typeof process !== "undefined" && process.env
   //   ? process.env.CALLAI_CHAT_URL
