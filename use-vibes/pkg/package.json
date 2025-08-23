@@ -26,7 +26,7 @@
     "clean": "rimraf dist",
     "typecheck": "tsc --noEmit",
     "check": "pnpm lint && pnpm format && pnpm typecheck && pnpm test",
-    "pack": "core-cli build --doPack",
+    "pack": "core-cli build --doPack && node fix-ranges-tarball.js",
     "publish": "core-cli build"
   },
   "keywords": [
