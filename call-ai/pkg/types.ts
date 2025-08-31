@@ -2,6 +2,8 @@
  * Type definitions for call-ai
  */
 
+import { callAi } from "./api.js";
+
 export type Falsy = false | null | undefined | 0 | "";
 
 export interface OriginalError {
@@ -367,6 +369,7 @@ export interface CallAIOptions {
 
 export interface Mocks {
   readonly fetch?: typeof fetch;
+  readonly callAI?: typeof callAi;
 }
 
 export interface AIResponse {

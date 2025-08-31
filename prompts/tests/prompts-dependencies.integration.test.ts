@@ -4,7 +4,7 @@ import * as mod from "@vibes.diy/prompts";
 // Ensure real implementation
 // (vi as any).doUnmock?.("~/vibes.diy/app/prompts");
 //vi.unmock("~/vibes.diy/app/prompts.js");
-vi.resetModules();
+// vi.resetModules();
 
 // let makeBaseSystemPrompt: typeof mod.makeBaseSystemPrompt;
 // let preloadLlmsText: () => Promise<void>;
@@ -18,6 +18,15 @@ beforeAll(async () => {
 const opts = {
   fallBackUrl: new URL("https://example.com/fallback"),
   callAiEndpoint: "https://example.com/call-ai",
+  mock: {
+    callAI: vi
+      .fn()
+      .mockResolvedValue(
+        JSON.stringify({
+          choices: [{ message: { content: "Mocked response" } }],
+        }),
+      ),
+  },
 };
 
 describe("makeBaseSystemPrompt dependency selection", () => {

@@ -1,4 +1,9 @@
-import { callAI, type Message, type CallAIOptions } from "call-ai";
+import {
+  callAI as realCallAI,
+  type Message,
+  type CallAIOptions,
+  Mocks,
+} from "call-ai";
 
 // Import all LLM text files statically
 // import { getTxtDocs } from "./llms/txt-docs.js";
@@ -16,8 +21,7 @@ import { callAI, type Message, type CallAIOptions } from "call-ai";
 // } from "./llms/catalog.js";
 // import models from "./data/models.json" with { type: "json" };
 import type { HistoryMessage, UserSettings } from "./settings.js";
-import type { VibeDocument } from "./chat.js";
-import { Lazy } from "@adviser/cement";
+import { CoerceURI, Lazy, runtimeFn, URI } from "@adviser/cement";
 import {
   getJsonDocs,
   getLlmCatalog,
@@ -59,8 +63,8 @@ export function isPermittedModelId(id: unknown): id is string {
 
 // Resolve the effective model id given optional session and global settings
 export async function resolveEffectiveModel(
-  settingsDoc?: UserSettings,
-  vibeDoc?: VibeDocument,
+  settingsDoc?: { model?: string },
+  vibeDoc?: { selectedModel?: string },
 ): Promise<string> {
   const sessionChoice = normalizeModelIdInternal(vibeDoc?.selectedModel);
   if (sessionChoice) return sessionChoice;
@@ -99,7 +103,7 @@ function escapeRegExp(str: string): string {
 }
 
 // Precompile import-detection regexes once per module entry
-const llmImportRegexes = Lazy((fallBackUrl: URL) => {
+const llmImportRegexes = Lazy((fallBackUrl: CoerceURI) => {
   return getJsonDocs(fallBackUrl).then((docs) =>
     Object.values(docs)
       .map((d) => d.obj)
@@ -130,7 +134,7 @@ const llmImportRegexes = Lazy((fallBackUrl: URL) => {
 // Detect modules already referenced in history imports
 async function detectModulesInHistory(
   history: HistoryMessage[],
-  opts: LlmSelectionWithFallbackUrl,
+  opts: LlmSelectionOptions,
 ): Promise<Set<string>> {
   const detected = new Set<string>();
   if (!Array.isArray(history)) return detected;
@@ -154,18 +158,43 @@ export interface LlmSelectionDecisions {
   demoData: boolean; // whether to instruct adding Demo Data button/flow
 }
 
+const warnOnce = Lazy(() => console.warn("auth_token is not support on node"));
+function defaultGetAuthToken(
+  fn?: () => Promise<string>,
+): () => Promise<string> {
+  if (typeof fn === "function") {
+    return () => fn();
+  }
+  const rn = runtimeFn();
+  if (rn.isBrowser) {
+    return () => Promise.resolve(localStorage.getItem("auth_token") || "");
+  }
+  return () => {
+    warnOnce();
+    return Promise.resolve("Unsupported.JWT-Token");
+  };
+}
+
 export interface LlmSelectionOptions {
   readonly appMode?: "test" | "production";
-  readonly callAiEndpoint: string;
-  readonly fallBackUrl?: URL;
+  readonly callAiEndpoint?: CoerceURI;
+  readonly fallBackUrl?: CoerceURI;
+
+  readonly getAuthToken?: () => Promise<string>;
+  readonly mock?: Mocks;
 }
 
 export type LlmSelectionWithFallbackUrl = Omit<
-  LlmSelectionOptions,
-  "fallBackUrl"
+  Omit<LlmSelectionOptions, "fallBackUrl">,
+  "callAiEndpoint"
 > & {
-  readonly fallBackUrl: URL;
+  readonly fallBackUrl: CoerceURI;
+  readonly callAiEndpoint?: CoerceURI;
 };
+
+async function sleepReject<T>(ms: number) {
+  return new Promise<T>((_, rj) => setTimeout(rj, ms));
+}
 
 // Ask LLM which modules and options to include based on catalog + user prompt + history
 export async function selectLlmsAndOptions(
@@ -176,21 +205,27 @@ export async function selectLlmsAndOptions(
 ): Promise<LlmSelectionDecisions> {
   const opts: LlmSelectionWithFallbackUrl = {
     appMode: "production",
-    fallBackUrl: new URL("https://esm.sh/use-vibes/prompt-catalog/llms"),
     ...iopts,
+    callAiEndpoint: iopts.callAiEndpoint
+      ? URI.from(iopts.callAiEndpoint).toString()
+      : undefined,
+    fallBackUrl: URI.from(
+      iopts.fallBackUrl ?? "https://esm.sh/use-vibes/prompt-catalog/llms",
+    ).toString(),
+    getAuthToken: defaultGetAuthToken(iopts.getAuthToken),
   };
   const llmsCatalog = await getLlmCatalog(opts.fallBackUrl);
   // In test mode, avoid network and return all modules to keep deterministic coverage
-  if (
-    opts.appMode === "test" &&
-    !/localhost|127\.0\.0\.1/i.test(String(opts.callAiEndpoint))
-  ) {
-    return {
-      selected: llmsCatalog.map((l) => l.name),
-      instructionalText: true,
-      demoData: true,
-    };
-  }
+  // if (
+  //   opts.appMode === "test" &&
+  //   !/localhost|127\.0\.0\.1/i.test(String(opts.callAiEndpoint))
+  // ) {
+  //   return {
+  //     selected: llmsCatalog.map((l) => l.name),
+  //     instructionalText: false,
+  //     demoData: false,
+  //   };
+  // }
   const catalog = llmsCatalog.map((l) => ({
     name: l.name,
     description: l.description || "",
@@ -211,7 +246,9 @@ export async function selectLlmsAndOptions(
   ];
 
   const options: CallAIOptions = {
-    chatUrl: opts.callAiEndpoint,
+    chatUrl: opts.callAiEndpoint
+      ? URI.from(opts.callAiEndpoint).toString()
+      : undefined,
     apiKey: "sk-vibes-proxy-managed",
     model,
     schema: {
@@ -226,25 +263,19 @@ export async function selectLlmsAndOptions(
     headers: {
       "HTTP-Referer": "https://vibes.diy",
       "X-Title": "Vibes DIY",
-      "X-VIBES-Token": localStorage.getItem("auth_token") || "",
+      "X-VIBES-Token": await opts.getAuthToken?.(),
     },
+    mock: opts.mock,
   };
 
   try {
     // Add a soft timeout to prevent hanging if the model service is unreachable
     const withTimeout = <T>(p: Promise<T>, ms = 4000): Promise<T> =>
-      new Promise<T>((resolve, reject) => {
-        const t = setTimeout(() => reject(new Error("callAI timeout")), ms);
-        p.then((v) => {
-          clearTimeout(t);
-          resolve(v);
-        }).catch((e) => {
-          clearTimeout(t);
-          reject(e);
-        });
-      });
+      Promise.race([sleepReject<T>(ms), p]);
 
-    const raw = (await withTimeout(callAI(messages, options))) as string;
+    const raw = (await withTimeout(
+      callCallAI(options)(messages, options),
+    )) as string;
     const parsed = JSON.parse(raw) ?? {};
     const selected = Array.isArray(parsed?.selected)
       ? parsed.selected.filter((v: unknown) => typeof v === "string")
@@ -260,6 +291,10 @@ export async function selectLlmsAndOptions(
     console.warn("Module/options selection call failed:", err);
     return { selected: [], instructionalText: true, demoData: true };
   }
+}
+
+function callCallAI(option: CallAIOptions) {
+  return option.mock?.callAI || realCallAI;
 }
 
 // Public: preload all llms text files (triggered on form focus)
@@ -311,7 +346,7 @@ export function generateImportStatements(llms: LlmCatalogEntry[]) {
 // Base system prompt for the AI
 export async function makeBaseSystemPrompt(
   model: string,
-  sessionDoc: Partial<UserSettings> & LlmSelectionWithFallbackUrl,
+  sessionDoc: Partial<UserSettings> & LlmSelectionOptions,
   onAiDecisions?: (decisions: { selected: string[] }) => void,
 ) {
   // Inputs for module selection
@@ -356,10 +391,10 @@ export async function makeBaseSystemPrompt(
   }
 
   // Apply per-vibe overrides for instructional text and demo data
-  if (sessionDoc?.instructionalTextOverride) {
+  if (typeof sessionDoc?.instructionalTextOverride === "boolean") {
     includeInstructional = sessionDoc.instructionalTextOverride;
   }
-  if (sessionDoc?.demoDataOverride) {
+  if (typeof sessionDoc?.demoDataOverride === "boolean") {
     includeDemoData = sessionDoc.demoDataOverride;
   }
 

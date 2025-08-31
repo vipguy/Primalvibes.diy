@@ -2,7 +2,7 @@ import { vi, describe, it, expect, beforeEach } from "vitest";
 import { makeBaseSystemPrompt, RESPONSE_FORMAT } from "@vibes.diy/prompts";
 
 // We need to mock the module properly, not test the real implementation yet
-vi.mock("~/vibes.diy/app/prompts.js", () => ({
+vi.mock("@vibes.diy/prompts", () => ({
   makeBaseSystemPrompt: vi.fn().mockResolvedValue("mocked system prompt"),
   RESPONSE_FORMAT: {
     dependencies: {
@@ -22,6 +22,9 @@ describe("Prompts Utility", () => {
   const opts = {
     fallBackUrl: new URL("https://example.com/fallback"),
     callAiEndpoint: "https://example.com/call-ai",
+    mock: {
+      fetch: () => Promise.resolve(new Response("xxx")),
+    },
   };
   beforeEach(() => {
     vi.clearAllMocks();
@@ -82,6 +85,6 @@ describe("Prompts Utility", () => {
     const model = "gpt-4";
     await makeBaseSystemPrompt(model, opts);
 
-    expect(makeBaseSystemPrompt).toHaveBeenCalledWith(model);
+    expect(makeBaseSystemPrompt).toHaveBeenCalledWith(model, { ...opts });
   });
 });

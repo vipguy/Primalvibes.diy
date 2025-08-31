@@ -1,10 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { makeBaseSystemPrompt } from "../../pkg/prompts.js";
-import { UserSettings } from "../../pkg/settings.js";
-import { VibesDiyEnv } from "~/vibes.diy/app/config/env.js";
+import { makeBaseSystemPrompt, UserSettings } from "@vibes.diy/prompts";
 
 // Mock the import.meta.glob function
-vi.mock("~/vibes.diy/app/prompts.js", async () => {
+vi.mock("@vibes.diy/prompts", async () => {
   // Create a mock implementation that simulates the behavior of the original
   const llmsModules = {
     "./llms/module1.json": {
@@ -94,8 +92,8 @@ describe("Settings and Prompt Integration", () => {
   it("generates a base system prompt with default values when no settings provided", async () => {
     const model = "test-model";
     const prompt = await makeBaseSystemPrompt(model, {
-      fallBackUrl: VibesDiyEnv.PROMPT_FALL_BACKURL(),
-      callAiEndpoint: VibesDiyEnv.CALLAI_ENDPOINT(),
+      fallBackUrl: new URL("https://example.com/fallback"),
+      callAiEndpoint: "https://example.com/call-ai",
     });
 
     // Check that the prompt includes the default style
@@ -110,8 +108,8 @@ describe("Settings and Prompt Integration", () => {
     const settingsDoc = {
       _id: "user_settings",
       stylePrompt: "synthwave (80s digital aesthetic)",
-      fallBackUrl: VibesDiyEnv.PROMPT_FALL_BACKURL(),
-      callAiEndpoint: VibesDiyEnv.CALLAI_ENDPOINT(),
+      fallBackUrl: new URL("https://example.com/fallback"),
+      callAiEndpoint: "https://example.com/call-ai",
     };
 
     const prompt = await makeBaseSystemPrompt(model, settingsDoc);
@@ -128,8 +126,8 @@ describe("Settings and Prompt Integration", () => {
     const settingsDoc = {
       _id: "user_settings",
       userPrompt: userPromptText,
-      fallBackUrl: VibesDiyEnv.PROMPT_FALL_BACKURL(),
-      callAiEndpoint: VibesDiyEnv.CALLAI_ENDPOINT(),
+      fallBackUrl: new URL("https://example.com/fallback"),
+      callAiEndpoint: "https://example.com/call-ai",
     };
 
     const prompt = await makeBaseSystemPrompt(model, settingsDoc);
@@ -146,8 +144,8 @@ describe("Settings and Prompt Integration", () => {
       _id: "user_settings",
       stylePrompt: stylePromptText,
       userPrompt: userPromptText,
-      fallBackUrl: VibesDiyEnv.PROMPT_FALL_BACKURL(),
-      callAiEndpoint: VibesDiyEnv.CALLAI_ENDPOINT(),
+      fallBackUrl: new URL("https://example.com/fallback"),
+      callAiEndpoint: "https://example.com/call-ai",
     };
 
     const prompt = await makeBaseSystemPrompt(model, settingsDoc);
@@ -162,8 +160,8 @@ describe("Settings and Prompt Integration", () => {
     const model = "test-model";
     const settingsDoc = {
       _id: "user_settings",
-      fallBackUrl: VibesDiyEnv.PROMPT_FALL_BACKURL(),
-      callAiEndpoint: VibesDiyEnv.CALLAI_ENDPOINT(),
+      fallBackUrl: new URL("https://example.com/fallback"),
+      callAiEndpoint: "https://example.com/call-ai",
     };
 
     const prompt = await makeBaseSystemPrompt(model, settingsDoc);
@@ -175,8 +173,8 @@ describe("Settings and Prompt Integration", () => {
   it("includes LLM documentation in the prompt", async () => {
     const model = "test-model";
     const prompt = await makeBaseSystemPrompt(model, {
-      fallBackUrl: VibesDiyEnv.PROMPT_FALL_BACKURL(),
-      callAiEndpoint: VibesDiyEnv.CALLAI_ENDPOINT(),
+      fallBackUrl: new URL("https://example.com/fallback"),
+      callAiEndpoint: "https://example.com/call-ai",
     });
 
     // Check that the LLM documentation is included
