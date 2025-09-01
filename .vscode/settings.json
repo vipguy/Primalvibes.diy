@@ -1,22 +1,139 @@
 {
   "workbench.colorCustomizations": {
-    "activityBar.activeBackground": "#51a0d0",
-    "activityBar.background": "#51a0d0",
-    "activityBar.foreground": "#15202b",
-    "activityBar.inactiveForeground": "#15202b99",
-    "activityBarBadge.background": "#f1cde4",
-    "activityBarBadge.foreground": "#15202b",
-    "commandCenter.border": "#e7e7e799",
-    "sash.hoverBorder": "#51a0d0",
-    "statusBar.background": "#3388bb",
-    "statusBar.foreground": "#e7e7e7",
-    "statusBarItem.hoverBackground": "#51a0d0",
-    "statusBarItem.remoteBackground": "#3388bb",
-    "statusBarItem.remoteForeground": "#e7e7e7",
-    "titleBar.activeBackground": "#3388bb",
-    "titleBar.activeForeground": "#e7e7e7",
-    "titleBar.inactiveBackground": "#3388bb99",
-    "titleBar.inactiveForeground": "#e7e7e799"
+    // ----- Activity Bar (far left vertical icons) -----
+    "activityBar.activeBackground": "#cc0000",
+    "activityBar.background": "#000000",
+    "activityBar.foreground": "#ffffff",
+    "activityBar.inactiveForeground": "#ffffff99",
+    "activityBarBadge.background": "#cc0000",
+    "activityBarBadge.foreground": "#ffffff",
+
+    // ----- Explorer (file tree) -----
+    "sideBar.background": "#000000",
+    "sideBar.foreground": "#ffffff",
+    "sideBar.border": "#cc0000",
+    "sideBarSectionHeader.background": "#000000",
+    "sideBarSectionHeader.foreground": "#cc0000",
+    "sideBarSectionHeader.border": "#cc0000",
+
+    // File tree items
+    "list.activeSelectionBackground": "#cc0000",
+    "list.activeSelectionForeground": "#ffffff",
+    "list.inactiveSelectionBackground": "#cc000055",
+    "list.inactiveSelectionForeground": "#ffffff",
+    "list.hoverBackground": "#cc000022",
+    "list.hoverForeground": "#ffffff",
+    "list.highlightForeground": "#ff6666",
+    "list.focusBackground": "#cc0000",
+    "list.focusForeground": "#ffffff",
+
+    // ----- Tabs Bar -----
+    "editorGroupHeader.tabsBackground": "#000000",
+    "editorGroupHeader.tabsBorder": "#cc0000",
+    "tab.activeBackground": "#000000",
+    "tab.activeForeground": "#ffffff",
+    "tab.activeBorderTop": "#cc0000",
+    "tab.inactiveBackground": "#111111",
+    "tab.inactiveForeground": "#aaaaaa",
+    "tab.hoverBackground": "#1a1a1a",
+    "tab.hoverForeground": "#ffffff",
+    "tab.unfocusedActiveForeground": "#ffffff99",
+    "tab.unfocusedInactiveForeground": "#888888",
+
+    // ----- Editor Area -----
+    "editor.background": "#000000",
+    "editor.foreground": "#ffffff",
+    "editorCursor.foreground": "#cc0000",
+    "editorLineNumber.foreground": "#888888",
+    "editorLineNumber.activeForeground": "#cc0000",
+    "editor.selectionBackground": "#cc000055",
+    "editor.selectionHighlightBackground": "#cc000033",
+    "editor.wordHighlightBackground": "#cc000033",
+    "editor.findMatchBackground": "#cc000055",
+    "editor.findMatchHighlightBackground": "#cc000033",
+    "editorIndentGuide.background1": "#333333",
+    "editorIndentGuide.activeBackground1": "#cc0000",
+    "editorRuler.foreground": "#cc0000",
+
+    // ----- Panels (Problems, Output, Debug Console, Terminal tabs) -----
+    "panel.background": "#000000",
+    "panel.border": "#cc0000",
+    "panelTitle.activeForeground": "#ffffff",
+    "panelTitle.activeBorder": "#cc0000",
+    "panelTitle.inactiveForeground": "#888888",
+
+    // ----- Terminal -----
+    "terminal.background": "#000000",
+    "terminal.foreground": "#ffffff",
+    "terminalCursor.foreground": "#cc0000",
+    "terminal.ansiBlack": "#000000",
+    "terminal.ansiRed": "#cc0000",
+    "terminal.ansiGreen": "#00ff00",
+    "terminal.ansiYellow": "#ffff00",
+    "terminal.ansiBlue": "#3399ff",
+    "terminal.ansiMagenta": "#ff00ff",
+    "terminal.ansiCyan": "#00ffff",
+    "terminal.ansiWhite": "#ffffff",
+    "terminal.ansiBrightRed": "#ff3333",
+
+    // ----- Status Bar -----
+    "statusBar.background": "#000000",
+    "statusBar.foreground": "#ffffff",
+    "statusBar.border": "#cc0000",
+    "statusBarItem.hoverBackground": "#cc0000",
+    "statusBarItem.remoteBackground": "#000000",
+    "statusBarItem.remoteForeground": "#ffffff",
+
+    // ----- Title Bar -----
+    "titleBar.activeBackground": "#000000",
+    "titleBar.activeForeground": "#ffffff",
+    "titleBar.inactiveBackground": "#00000099",
+    "titleBar.inactiveForeground": "#ffffff99",
+    "titleBar.border": "#cc0000",
+
+    // ----- Dropdowns, Menus, Inputs -----
+    "dropdown.background": "#000000",
+    "dropdown.foreground": "#ffffff",
+    "dropdown.border": "#cc0000",
+    "input.background": "#111111",
+    "input.foreground": "#ffffff",
+    "input.border": "#cc0000",
+    "input.placeholderForeground": "#888888",
+    "inputOption.activeBackground": "#cc000055",
+    "inputOption.activeBorder": "#cc0000",
+
+    // Quick pick (command palette, etc.)
+    "quickInput.background": "#000000",
+    "quickInput.foreground": "#ffffff",
+    "quickInputTitle.background": "#cc000022",
+
+    // ----- Notifications -----
+    "notifications.background": "#000000",
+    "notifications.foreground": "#ffffff",
+    "notificationCenterHeader.background": "#111111",
+    "notificationCenterHeader.foreground": "#ffffff",
+    "notifications.border": "#cc0000",
+
+    // ----- Scrollbars -----
+    "scrollbarSlider.background": "#cc000055",
+    "scrollbarSlider.hoverBackground": "#cc000088",
+    "scrollbarSlider.activeBackground": "#cc0000",
+
+    // ----- Debug -----
+    "debugToolBar.background": "#000000",
+    "debugToolBar.border": "#cc0000",
+    // Input boxes in extensions (like config textboxes)
+    // ----- Peek view (find references, etc.) -----
+    "peekView.border": "#cc0000",
+    "peekViewEditor.background": "#111111",
+    "peekViewEditor.matchHighlightBackground": "#cc000055",
+    "peekViewResult.background": "#000000",
+    "peekViewResult.matchHighlightBackground": "#cc000033",
+    "peekViewTitle.background": "#111111",
+    "peekViewTitleDescription.foreground": "#aaaaaa",
+    "peekViewTitleLabel.foreground": "#ffffff"
   },
-  "peacock.color": "#38b"
+
+  // Peacock workspace color indicator
+  "peacock.color": "#cc0000"
 }
