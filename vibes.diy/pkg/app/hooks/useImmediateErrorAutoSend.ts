@@ -47,7 +47,7 @@ export function useImmediateErrorAutoSend({
       debouncedSendRef.current = setTimeout(() => {
         sentErrorsRef.current.add(fingerprint);
         mergeUserMessage({
-          text: "Please help me fix the errors shown above. Simplify the code if necessary.",
+          text: "Please help me fix the errors shown above.",
         });
         setDidSendErrors(true);
         debouncedSendRef.current = null;
