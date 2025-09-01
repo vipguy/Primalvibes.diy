@@ -55,5 +55,10 @@
     "typescript-eslint": "^8.38.0",
     "vitest": "^3.2.4",
     "wrangler": "^4.31.0"
+  },
+  "dependencies": {
+    "@testing-library/react": "^16.3.0",
+    "react": "^19.1.1",
+    "use-vibes": "^0.12.0"
   }
 }
