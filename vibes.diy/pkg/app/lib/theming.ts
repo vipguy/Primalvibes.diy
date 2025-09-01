@@ -1,62 +1,62 @@
-// Theme system
+// theme.ts
 
-export type Theme = "neobrutalism" | "rainbow" | "cyberpunk" | "minimal";
+// Only one theme: Neumorphic Dark
+export type Theme = "neumorphic-dark";
 
+// Theme definition
 export const themes = {
-  neobrutalism: {
+  "neumorphic-dark": {
     button: {
-      border: "border-2 border-black",
-      shadow: "shadow-[4px_4px_0px_0px_black]",
-      radius: "rounded-[5px]",
+      border: "border border-transparent",
+      shadow:
+        "shadow-[inset_-4px_-4px_8px_rgba(255,255,255,0.05),_inset_4px_4px_8px_rgba(0,0,0,0.7)]",
+      radius: "rounded-xl",
       active:
-        "active:translate-x-[4px] active:translate-y-[4px] active:shadow-none",
-      normal: "bg-blue-500 text-white hover:bg-blue-600",
-      error: "bg-red-500 text-white hover:bg-red-600",
+        "active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.7),_inset_-4px_-4px_8px_rgba(255,255,255,0.05)]",
+      normal: "bg-[#1e1e1e] text-gray-100 hover:bg-[#2a2a2a]",
+      error: "bg-[#2a1e1e] text-red-400 hover:bg-[#3a2a2a]",
     },
-  },
-  rainbow: {
-    button: {
-      border: "border-2 border-black",
-      shadow: "shadow-lg",
-      radius: "rounded-lg",
-      active: "active:scale-95",
-      normal: "bg-gradient-to-r from-purple-500 to-pink-500 text-white",
-      error: "bg-gradient-to-r from-red-500 to-orange-500 text-white",
+    card: {
+      base: "bg-[#1c1c1c] text-gray-200 rounded-2xl p-4",
+      shadow:
+        "shadow-[inset_-6px_-6px_12px_rgba(255,255,255,0.04),_inset_6px_6px_12px_rgba(0,0,0,0.8)]",
     },
-  },
-  // Placeholder
-  cyberpunk: {
-    button: {
-      border: "border border-cyan-400",
-      shadow: "shadow-[0_0_10px_rgba(34,211,238,0.5)]",
-      radius: "rounded-none",
-      active: "active:brightness-110",
-      normal: "bg-black text-cyan-400 hover:bg-cyan-900",
-      error: "bg-black text-red-400 hover:bg-red-900",
-    },
-  },
-  minimal: {
-    button: {
-      border: "border border-gray-300",
-      shadow: "shadow-sm",
-      radius: "rounded-md",
-      active: "active:bg-gray-100",
-      normal: "bg-white text-gray-900 hover:bg-gray-50",
-      error: "bg-red-50 text-red-700 hover:bg-red-100",
+    input: {
+      base: "bg-[#1e1e1e] text-gray-100 rounded-lg px-3 py-2",
+      shadow:
+        "shadow-[inset_-2px_-2px_4px_rgba(255,255,255,0.05),_inset_2px_2px_4px_rgba(0,0,0,0.6)]",
+      focus: "focus:ring-2 focus:ring-cyan-500",
     },
   },
 };
 
-// Helper function to get theme classes
+// Helper for buttons
 export function getButtonClasses(
-  theme: Theme = "neobrutalism",
+  theme: Theme = "neumorphic-dark",
   variant: "normal" | "error" = "normal",
 ) {
-  const themeConfig = themes[theme].button;
+  const themeConfig = themes["neumorphic-dark"].button;
   return {
     base: `inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${themeConfig.border} ${themeConfig.radius}`,
     shadow: themeConfig.shadow,
     active: themeConfig.active,
     variant: variant === "error" ? themeConfig.error : themeConfig.normal,
   };
+}
+
+// Helper for cards / panels
+export function getCardClasses() {
+  const themeConfig = themes["neumorphic-dark"].card;
+  return `${themeConfig.base} ${themeConfig.shadow}`;
+}
+
+// Helper for inputs
+export function getInputClasses() {
+  const themeConfig = themes["neumorphic-dark"].input;
+  return `${themeConfig.base} ${themeConfig.shadow} ${themeConfig.focus}`;
+}
+
+// Helper for icons
+export function getIconClasses() {
+  return "w-5 h-5";
 }
