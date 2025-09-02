@@ -208,33 +208,3 @@ export function parseContent(text: string): {
 
   return { segments };
 }
-
-/**
- * Extract dependencies as a Record from the dependencies string
- */
-export function parseDependencies(
-  dependenciesString?: string,
-): Record<string, string> {
-  if (!dependenciesString) return {};
-
-  const dependencies: Record<string, string> = {};
-  const matches = dependenciesString.match(/"([^"]+)"\s*:\s*"([^"]+)"/g);
-
-  if (matches) {
-    matches.forEach((match) => {
-      const keyMatch = match.match(/"([^"]+)"\s*:/);
-      const valueMatch = match.match(/:\s*"([^"]+)"/);
-
-      if (keyMatch?.[1] && valueMatch?.[1]) {
-        const key = keyMatch[1].trim();
-        const value = valueMatch[1].trim();
-
-        if (key && value) {
-          dependencies[key] = value;
-        }
-      }
-    });
-  }
-
-  return dependencies;
-}

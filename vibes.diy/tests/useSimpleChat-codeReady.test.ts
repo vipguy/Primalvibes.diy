@@ -3,10 +3,7 @@ import { cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useSimpleChat } from "~/vibes.diy/app/hooks/useSimpleChat.js";
 import type { AiChatMessage, ChatMessage } from "@vibes.diy/prompts";
-import {
-  parseContent,
-  parseDependencies,
-} from "~/vibes.diy/app/utils/segmentParser.js";
+import { parseContent } from "~/vibes.diy/app/utils/segmentParser.js";
 
 // Mock the prompts module
 vi.mock("~/vibes.diy/app/prompts.js", () => ({
@@ -492,24 +489,6 @@ Here's how to use React.
     expect(result.segments.length).toBe(1);
     expect(result.segments[0].type).toBe("markdown");
     expect(result.segments[0].content.trim()).toBe("Here's how to use React.");
-  });
-
-  it("correctly parses dependencies string into object", () => {
-    const dependenciesString = '{"react": "^18.2.0", "react-dom": "^18.2.0"}}';
-    const dependencies = parseDependencies(dependenciesString);
-
-    expect(dependencies).toEqual({
-      react: "^18.2.0",
-      "react-dom": "^18.2.0",
-    });
-  });
-
-  it("returns empty object for invalid dependencies string", () => {
-    const dependencies = parseDependencies(undefined);
-    expect(dependencies).toEqual({});
-
-    const emptyDependencies = parseDependencies("{}");
-    expect(emptyDependencies).toEqual({});
   });
 });
 

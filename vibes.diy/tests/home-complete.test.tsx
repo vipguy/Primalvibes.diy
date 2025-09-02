@@ -206,11 +206,6 @@ describe("Home Route in completed state", () => {
       ],
     });
 
-    vi.spyOn(segmentParser, "parseDependencies").mockReturnValue({
-      react: "^18.2.0",
-      "react-dom": "^18.2.0",
-    });
-
     // Mock useSimpleChat hook to return a chat with completed AI message containing code
     vi.spyOn(useSimpleChatModule, "useSimpleChat").mockReturnValue({
       docs: [

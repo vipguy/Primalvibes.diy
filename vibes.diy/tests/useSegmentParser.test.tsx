@@ -1,8 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import {
-  parseContent,
-  parseDependencies,
-} from "~/vibes.diy/app/utils/segmentParser.js";
+import { parseContent } from "~/vibes.diy/app/utils/segmentParser.js";
 import type { ChatMessage, AiChatMessage } from "@vibes.diy/prompts";
 
 // Mock the prompts module
@@ -679,23 +676,5 @@ Here's how to use React.
     expect(result.segments.length).toBe(1);
     expect(result.segments[0].type).toBe("markdown");
     expect(result.segments[0].content.trim()).toBe("Here's how to use React.");
-  });
-
-  it("correctly parses dependencies string into object", () => {
-    const dependenciesString = '{"react": "^18.2.0", "react-dom": "^18.2.0"}}';
-    const dependencies = parseDependencies(dependenciesString);
-
-    expect(dependencies).toEqual({
-      react: "^18.2.0",
-      "react-dom": "^18.2.0",
-    });
-  });
-
-  it("returns empty object for invalid dependencies string", () => {
-    const dependencies = parseDependencies(undefined);
-    expect(dependencies).toEqual({});
-
-    const emptyDependencies = parseDependencies("{}");
-    expect(emptyDependencies).toEqual({});
   });
 });
