@@ -1,34 +1,61 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
-import '@testing-library/jest-dom';
 
 // Use vi.hoisted to define mocks that need to be referenced in vi.mock
-const mockImgFile = vi.hoisted(() =>
-  vi.fn().mockImplementation(({ className, alt, style }) => {
-    return React.createElement(
-      'div',
-      {
-        'data-testid': 'mock-img-file',
-        className: `img-file ${className || ''}`,
-        style,
-        'aria-label': alt,
-      },
-      'Image Content'
-    );
-  })
-);
 
 // Mock use-fireproof module (placed before imports that use it)
-vi.mock('use-fireproof', () => ({
-  ImgFile: mockImgFile,
-  // Mock File constructor for tests
-  File: vi.fn().mockImplementation((data, name, options) => ({ name, type: options?.type })),
-}));
+vi.mock('use-fireproof', async (importOriginal) => {
+  const actual = (await importOriginal()) as Record<string, unknown>;
+  console.log('>>>>>>', actual.ImgFile);
+  return {
+    ...actual,
+    File: vi.fn().mockImplementation((data, name, options) => {
+      // console.log('>>>>> File', { data, name, options });
+      return { name, type: options?.type };
+    }),
+    ImgFile: vi.fn().mockImplementation(({ className, alt, style }) => {
+      // console.log('>>>>> ImgFile', { className, alt, style });
+      return React.createElement(
+        'div',
+        {
+          'data-testid': 'mock-img-file',
+          className: `img-file ${className || ''}`,
+          style,
+          'aria-label': alt,
+        },
+        'Image Content'
+      );
+    }),
 
+    // ImageOverlay: vi.fn(() => <div data-testid="mock-image-overlay">Mocked Image Overlay</div>),
+    // DeleteConfirmationOverlay: vi.fn(() => (
+    //   <div data-testid="mock-delete-confirmation">Mocked Delete Confirmation</div>
+    // )),
+    // ImgGenDisplay: vi.fn().mockImplementation((opts) => {
+
+    //   console.log(">>>>>", opts, actual().then(i => console.log("xxxxx", "ImgGenDisplay" in i)))
+    // }),
+
+    // return React.createElement(
+    //   'div',
+    //   {
+    //     className: `imggen-root ${className || ''}`,
+    //     title: document.prompt || alt || 'Generated image',
+    //     'data-testid': 'mock-imggen-root',
+    //   },
+    //   'ImgGenDisplay Content'
+    // );
+    // }),
+    // Mock File constructor for tests
+  };
+});
+
+import { ImgGenDisplay } from '@vibes.diy/use-vibes-base';
+
+/*
 // Mock components from use-vibes-base
-vi.mock('@vibes.diy/use-vibes-base', async () => {
-  const actual = await vi.importActual('@vibes.diy/use-vibes-base');
+vi.mock(import('@vibes.diy/use-vibes-base'), async (actual) => {
   return {
     ...actual,
     ImageOverlay: vi.fn(() => <div data-testid="mock-image-overlay">Mocked Image Overlay</div>),
@@ -37,9 +64,9 @@ vi.mock('@vibes.diy/use-vibes-base', async () => {
     )),
   };
 });
+*/
 
 // Import after mocks
-import { ImgGenDisplay } from '@vibes.diy/use-vibes-base';
 
 // Type simplification for testing purposes
 interface TestDoc {
@@ -52,13 +79,20 @@ interface TestDoc {
 
 describe('ImgGenDisplay Component', () => {
   // Create a simple document for testing
-  const createMockDocument = (prompt = 'Test prompt'): TestDoc => ({
-    _id: 'test-image-id',
-    _files: {
-      image: new File(['test'], 'test-image.png', { type: 'image/png' }),
-    },
-    prompt,
-    type: 'image',
+  function createMockDocument(prompt = 'Test prompt'): TestDoc {
+    return {
+      _id: 'test-image-id',
+      _files: {
+        image: new File(['test'], 'test-image.png', { type: 'image/png' }),
+      },
+      prompt,
+      type: 'image',
+    };
+  }
+
+  beforeEach(() => {
+    // Clear all instances and calls to the mock functions before each test
+    vi.clearAllMocks();
   });
 
   it('should add title attribute with prompt text to the root element', () => {
@@ -142,18 +176,18 @@ describe('ImgGenDisplay Component', () => {
       type: 'image' as const,
     } as TestDoc;
 
-    const { getByTestId } = render(<ImgGenDisplay document={mockDoc} className="test-class" />);
+    const res = render(<ImgGenDisplay document={mockDoc} className="test-class" />);
 
     // Our mock ImgFile renders with 'mock-img-file' test ID
-    const imageElement = getByTestId('mock-img-file');
-    expect(imageElement).toBeInTheDocument();
+    // const imageElement = res.q
+    expect(res.getAllByTestId('mock-img-file')).toBeDefined();
 
-    // Since we can't directly test the root element (which may be wrapped by the mock),
-    // we'll verify our mocks were called correctly with the right data
-    // The implementation ensures title attribute is set from the extracted prompt
-    expect(mockImgFile).toHaveBeenCalled();
+    // // Since we can't directly test the root element (which may be wrapped by the mock),
+    // // we'll verify our mocks were called correctly with the right data
+    // // The implementation ensures title attribute is set from the extracted prompt
+    // expect(mockImgFile).toHaveBeenCalled();
 
-    // Reset mock count between tests
-    mockImgFile.mockClear();
+    // // Reset mock count between tests
+    // mockImgFile.mockClear();
   });
 });

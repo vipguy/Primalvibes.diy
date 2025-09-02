@@ -24,7 +24,7 @@ vi.mock('call-ai', () => {
 });
 
 // Mock Fireproof
-vi.mock('use-fireproof', () => {
+vi.mock('use-vibes', (actual) => {
   const mockDb = {
     get: vi.fn().mockImplementation(async (id) => {
       // Return a basic document structure for any ID to avoid "Not found" errors
@@ -44,11 +44,10 @@ vi.mock('use-fireproof', () => {
     del: vi.fn().mockResolvedValue({ ok: true }),
     query: vi.fn().mockResolvedValue({ rows: [] }),
     remove: vi.fn().mockResolvedValue({ ok: true }),
-    getAttachment: vi.fn(),
-    putAttachment: vi.fn(),
   };
 
   return {
+    ...actual,
     useFireproof: () => ({ database: mockDb }),
     ImgFile: ({ alt }: { alt?: string }) => <div data-testid="mock-img">{alt}</div>,
   };

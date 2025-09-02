@@ -22,7 +22,7 @@ export { callAI, callAI as callAi };
 export type * as CallAI from 'call-ai';
 
 // Export ImgGen component - the primary export
-export { default as ImgGen } from './components/ImgGen.js';
+export { ImgGen } from './components/ImgGen.js';
 export type { ImgGenProps } from './components/ImgGen.js';
 
 // Export all components for testing and advanced usage
@@ -49,7 +49,9 @@ export { MODULE_STATE } from './hooks/image-gen/utils.js';
 export { addNewVersion } from './hooks/image-gen/utils.js';
 
 // Export types for testing and advanced usage
-export { type ImageDocument } from './hooks/image-gen/types.js';
+export type { ImageDocument } from './hooks/image-gen/types.js';
+export type { ImgGenDisplayProps } from './components/ImgGenUtils/types.js';
+export type { ImgGenModalProps } from './components/ImgGenUtils/ImgGenModal.js';
 export {
   type UseImageGenOptions,
   type UseImageGenResult,

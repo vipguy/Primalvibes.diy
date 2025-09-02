@@ -2,6 +2,7 @@ import React from "react";
 import { cleanup } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, vi } from "vitest";
+import { VibesDiyEnv } from "~/vibes.diy/app/config/env.js";
 
 // IMPORTANT: Mock call-ai BEFORE any modules that might import it
 let callCount = 0;
@@ -85,13 +86,15 @@ vi.mock("~/vibes.diy/app/utils/streamHandler", () => ({
 }));
 
 // Mock the env module
-vi.mock("~/vibes.diy/app/config/env", () => ({
+
+VibesDiyEnv.env().sets({
   CALLAI_API_KEY: "mock-callai-api-key-for-testing",
   CALLAI_ENDPOINT: "https://mock-callai-endpoint.com",
   SETTINGS_DBNAME: "test-chat-history",
   GA_TRACKING_ID: "mock-ga-tracking-id",
   APP_MODE: "test", // Added mock APP_MODE
-}));
+  // callAiEnv.set("CALLAI_API_KEY", "test-api-key");
+});
 
 // Mock Fireproof to prevent CRDT errors
 vi.mock("use-fireproof", () => ({
@@ -823,16 +826,8 @@ beforeEach(() => {
 
   Element.prototype.scrollIntoView = vi.fn();
 
-  vi.stubEnv("VITE_CALLAI_API_KEY", "test-api-key");
-
-  vi.stubGlobal("import", {
-    meta: {
-      env: {
-        MODE: "test",
-        VITE_CALLAI_API_KEY: "test-api-key",
-      },
-    },
-  });
+  // VibesDiyEnv.set("CALLAI_API_KEY", "test-api-key");
+  // vi.stubEnv("VITE_CALLAI_API_KEY", "test-api-key");
 
   resetMockState();
 

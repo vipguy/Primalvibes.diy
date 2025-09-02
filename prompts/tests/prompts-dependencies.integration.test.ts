@@ -19,13 +19,11 @@ const opts = {
   fallBackUrl: new URL("https://example.com/fallback"),
   callAiEndpoint: "https://example.com/call-ai",
   mock: {
-    callAI: vi
-      .fn()
-      .mockResolvedValue(
-        JSON.stringify({
-          choices: [{ message: { content: "Mocked response" } }],
-        }),
-      ),
+    callAI: vi.fn().mockResolvedValue(
+      JSON.stringify({
+        choices: [{ message: { content: "Mocked response" } }],
+      }),
+    ),
   },
 };
 

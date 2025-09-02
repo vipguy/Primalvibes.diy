@@ -126,7 +126,10 @@ export async function sendMessage(
     history: messageHistory,
   });
 
-  const modelToUse = await resolveEffectiveModel({model: ctx.modelToUse[0]}, vibeDoc);
+  const modelToUse = await resolveEffectiveModel(
+    { model: ctx.modelToUse[0] },
+    vibeDoc,
+  );
 
   return streamAI(
     modelToUse,

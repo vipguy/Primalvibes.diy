@@ -10,12 +10,7 @@ import {
 } from "react-router";
 
 import { PostHogProvider } from "posthog-js/react";
-import {
-  POSTHOG_KEY,
-  POSTHOG_HOST,
-  IS_DEV_MODE,
-  APP_BASENAME,
-} from "./config/env.js";
+import { VibesDiyEnv } from "./config/env.js";
 import type { Route } from "./+types/root";
 import "./app.css";
 import ClientOnly from "./components/ClientOnly.js";
@@ -24,8 +19,12 @@ import { AuthProvider } from "./contexts/AuthContext.js";
 import { CookieConsentProvider } from "./contexts/CookieConsentContext.js";
 
 export const links: Route.LinksFunction = () => [
-  { rel: "icon", type: "image/svg+xml", href: `${APP_BASENAME}favicon.svg` },
-  { rel: "alternate icon", href: `${APP_BASENAME}favicon.ico` },
+  {
+    rel: "icon",
+    type: "image/svg+xml",
+    href: `${VibesDiyEnv.APP_BASENAME()}favicon.svg`,
+  },
+  { rel: "alternate icon", href: `${VibesDiyEnv.APP_BASENAME}favicon.ico` },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
     rel: "preconnect",
@@ -107,9 +106,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </script>
         <AuthProvider>
           <PostHogProvider
-            apiKey={POSTHOG_KEY}
+            apiKey={VibesDiyEnv.POSTHOG_KEY()}
             options={{
-              api_host: POSTHOG_HOST,
+              api_host: VibesDiyEnv.POSTHOG_HOST(),
               opt_out_capturing_by_default: true,
             }}
           >
@@ -143,7 +142,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
       error.status === 404
         ? "The requested page could not be found."
         : error.statusText || details;
-  } else if (IS_DEV_MODE && error && error instanceof Error) {
+  } else if (VibesDiyEnv.IS_DEV_MODE() && error && error instanceof Error) {
     details = error.message;
     stack = error.stack;
   }

@@ -18,7 +18,8 @@
   "dependencies": {
     "@adviser/cement": "^0.4.26",
     "call-ai": "workspace:*",
-    "use-fireproof": "^0.23.11",
+    "react-dom": "^19.1.1",
+    "use-fireproof": "^0.23.13",
     "uuid": "^11.1.0"
   },
   "peerDependencies": {

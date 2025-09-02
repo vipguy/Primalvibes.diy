@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import React from 'react';
 import { act, render, screen, RenderResult } from '@testing-library/react';
-import '@testing-library/jest-dom/vitest';
 import { ImgGen } from '@vibes.diy/use-vibes-base';
 
 // Create a mock base64 image for testing
@@ -75,7 +74,7 @@ vi.mock('call-ai', async () => {
   };
 });
 
-vi.mock('use-fireproof', () => ({
+vi.mock('@vibes-diy/use-vibes-base', () => ({
   useFireproof: () => ({
     useDocument: () => [{ _id: 'mock-doc' }, vi.fn()],
     useLiveQuery: () => [[]],
