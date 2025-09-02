@@ -56,15 +56,16 @@ const AppSettingsView: React.FC<AppSettingsViewProps> = ({
 
   // Per‑vibe libraries selection state
   useEffect(() => {
-    getLlmCatalogNames(VibesDiyEnv.PROMPT_FALL_BACKURL()).then((names) =>
-      setCatalogNames(names),
-    );
-    getLlmCatalog(VibesDiyEnv.PROMPT_FALL_BACKURL()).then((catalog) =>
-      setLlmsCatalog(catalog),
-    );
+    getLlmCatalogNames(VibesDiyEnv.PROMPT_FALL_BACKURL()).then((names) => {
+      setCatalogNames(names);
+    });
+    getLlmCatalog(VibesDiyEnv.PROMPT_FALL_BACKURL()).then((catalog) => {
+      setLlmsCatalog(catalog);
+    });
   }, []);
 
   const initialDeps = useMemo(() => {
+    console.log("initialDeps-memo");
     const useManual = !!dependenciesUserOverride;
     let input: string[];
 
@@ -85,9 +86,11 @@ const AppSettingsView: React.FC<AppSettingsViewProps> = ({
     selectedDependencies,
     aiSelectedDependencies,
     dependenciesUserOverride,
+    llmsCatalog,
     catalogNames,
   ]);
-  const [deps, setDeps] = useState<string[]>(initialDeps);
+
+  const [deps, setDeps] = useState<string[]>([]);
   const [hasUnsavedDeps, setHasUnsavedDeps] = useState(false);
   const [saveDepsOk, setSaveDepsOk] = useState(false);
   const [saveDepsErr, setSaveDepsErr] = useState<string | null>(null);
@@ -135,15 +138,19 @@ const AppSettingsView: React.FC<AppSettingsViewProps> = ({
   );
 
   // Libraries handlers
-  const toggleDependency = useCallback((name: string, checked: boolean) => {
-    setDeps((prev) => {
-      const set = new Set(prev);
-      if (checked) set.add(name);
-      else set.delete(name);
-      return Array.from(set);
-    });
-    setHasUnsavedDeps(true);
-  }, []);
+  const toggleDependency = useCallback(
+    (name: string, checked: boolean) => {
+      setDeps((prev) => {
+        const set = new Set(prev);
+        if (checked) set.add(name);
+        else set.delete(name);
+        console.log("Toggling dependency", prev, set);
+        return Array.from(set);
+      });
+      setHasUnsavedDeps(true);
+    },
+    [llmsCatalog, catalogNames, deps],
+  );
 
   const handleSaveDeps = useCallback(async () => {
     setSaveDepsErr(null);
@@ -177,6 +184,8 @@ const AppSettingsView: React.FC<AppSettingsViewProps> = ({
     },
     [onUpdateDemoDataOverride],
   );
+
+  console.log("xxxxxx", hasUnsavedDeps, deps);
 
   return (
     <div

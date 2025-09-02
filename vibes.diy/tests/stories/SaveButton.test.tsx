@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { SaveButton } from "~/vibes.diy/app/components/ResultPreview/SaveButton.js";
 
@@ -7,6 +7,7 @@ describe("SaveButton", () => {
   const mockOnClick = vi.fn();
 
   beforeEach(() => {
+    globalThis.document.body.innerHTML = "";
     mockOnClick.mockClear();
   });
 
@@ -19,16 +20,18 @@ describe("SaveButton", () => {
     });
 
     it("should render when hasChanges is true", () => {
-      render(<SaveButton onClick={mockOnClick} hasChanges={true} />);
+      const res = render(
+        <SaveButton onClick={mockOnClick} hasChanges={true} />,
+      );
 
       // Should render both desktop and mobile versions
-      expect(screen.getAllByRole("button", { name: /save/i })).toHaveLength(2);
+      expect(res.getAllByRole("button", { name: /save/i })).toHaveLength(2);
     });
   });
 
   describe("Save state (no errors)", () => {
     it('should show "Save" text on desktop version', () => {
-      render(
+      const res = render(
         <SaveButton
           onClick={mockOnClick}
           hasChanges={true}
@@ -36,11 +39,11 @@ describe("SaveButton", () => {
         />,
       );
 
-      expect(screen.getByText("Save")).toBeInTheDocument();
+      expect(res.getByText("Save")).toBeInTheDocument();
     });
 
     it("should have blue styling when no errors", () => {
-      render(
+      const res = render(
         <SaveButton
           onClick={mockOnClick}
           hasChanges={true}
@@ -48,14 +51,14 @@ describe("SaveButton", () => {
         />,
       );
 
-      const button = screen.getByText("Save").closest("button");
+      const button = res.getByText("Save").closest("button");
       expect(button).toHaveClass("bg-blue-500", "hover:bg-blue-600");
       expect(button).not.toHaveClass("cursor-not-allowed", "opacity-75");
       expect(button).not.toBeDisabled();
     });
 
     it("should call onClick when clicked and no errors", () => {
-      render(
+      const res = render(
         <SaveButton
           onClick={mockOnClick}
           hasChanges={true}
@@ -63,7 +66,7 @@ describe("SaveButton", () => {
         />,
       );
 
-      const button = screen.getByText("Save");
+      const button = res.getByText("Save");
       fireEvent.click(button);
 
       expect(mockOnClick).toHaveBeenCalledTimes(1);
@@ -72,7 +75,7 @@ describe("SaveButton", () => {
 
   describe("Error state", () => {
     it("should show singular error message for 1 error", () => {
-      render(
+      const res = render(
         <SaveButton
           onClick={mockOnClick}
           hasChanges={true}
@@ -80,11 +83,11 @@ describe("SaveButton", () => {
         />,
       );
 
-      expect(screen.getByText("1 Error")).toBeInTheDocument();
+      expect(res.getByText("1 Error")).toBeInTheDocument();
     });
 
     it("should show plural error message for multiple errors", () => {
-      render(
+      const res = render(
         <SaveButton
           onClick={mockOnClick}
           hasChanges={true}
@@ -92,11 +95,11 @@ describe("SaveButton", () => {
         />,
       );
 
-      expect(screen.getByText("3 Errors")).toBeInTheDocument();
+      expect(res.getByText("3 Errors")).toBeInTheDocument();
     });
 
     it("should have red styling when errors exist", () => {
-      render(
+      const res = render(
         <SaveButton
           onClick={mockOnClick}
           hasChanges={true}
@@ -104,14 +107,14 @@ describe("SaveButton", () => {
         />,
       );
 
-      const button = screen.getByText("1 Error").closest("button");
+      const button = res.getByText("1 Error").closest("button");
       expect(button).toHaveClass("bg-red-500", "hover:bg-red-600");
       expect(button).toHaveClass("cursor-not-allowed", "opacity-75");
       expect(button).toBeDisabled();
     });
 
     it("should not call onClick when clicked and has errors", () => {
-      render(
+      const res = render(
         <SaveButton
           onClick={mockOnClick}
           hasChanges={true}
@@ -119,7 +122,7 @@ describe("SaveButton", () => {
         />,
       );
 
-      const button = screen.getByText("1 Error");
+      const button = res.getByText("1 Error");
       fireEvent.click(button);
 
       // Button is disabled, so click shouldn't trigger the handler
@@ -129,7 +132,7 @@ describe("SaveButton", () => {
 
   describe("Responsive behavior", () => {
     it("should render both desktop and mobile versions", () => {
-      render(
+      const res = render(
         <SaveButton
           onClick={mockOnClick}
           hasChanges={true}
@@ -138,16 +141,16 @@ describe("SaveButton", () => {
       );
 
       // Desktop version (hidden on mobile)
-      const desktopButton = screen.getByText("Save").closest("button");
+      const desktopButton = res.getByText("Save").closest("button");
       expect(desktopButton).toHaveClass("hidden", "sm:flex");
 
       // Mobile version (hidden on desktop) - find by title attribute
-      const mobileButton = screen.getByTitle("Save changes");
+      const mobileButton = res.getByTitle("Save changes");
       expect(mobileButton).toHaveClass("sm:hidden");
     });
 
     it("should show error count in mobile tooltip when has errors", () => {
-      render(
+      const res = render(
         <SaveButton
           onClick={mockOnClick}
           hasChanges={true}
@@ -155,13 +158,13 @@ describe("SaveButton", () => {
         />,
       );
 
-      const mobileButton = screen.getByTitle("2 syntax errors");
+      const mobileButton = res.getByTitle("2 syntax errors");
       expect(mobileButton).toBeInTheDocument();
       expect(mobileButton).toHaveClass("sm:hidden");
     });
 
     it("should show singular error in mobile tooltip for 1 error", () => {
-      render(
+      const res = render(
         <SaveButton
           onClick={mockOnClick}
           hasChanges={true}
@@ -169,7 +172,7 @@ describe("SaveButton", () => {
         />,
       );
 
-      const mobileButton = screen.getByTitle("1 syntax error");
+      const mobileButton = res.getByTitle("1 syntax error");
       expect(mobileButton).toBeInTheDocument();
     });
   });
@@ -196,15 +199,17 @@ describe("SaveButton", () => {
 
   describe("Props validation", () => {
     it("should handle undefined syntaxErrorCount", () => {
-      render(<SaveButton onClick={mockOnClick} hasChanges={true} />);
+      const res = render(
+        <SaveButton onClick={mockOnClick} hasChanges={true} />,
+      );
 
-      expect(screen.getByText("Save")).toBeInTheDocument();
-      const button = screen.getByText("Save").closest("button");
+      expect(res.getByText("Save")).toBeInTheDocument();
+      const button = res.getByText("Save").closest("button");
       expect(button).not.toBeDisabled();
     });
 
     it("should handle zero syntaxErrorCount explicitly", () => {
-      render(
+      const res = render(
         <SaveButton
           onClick={mockOnClick}
           hasChanges={true}
@@ -212,8 +217,8 @@ describe("SaveButton", () => {
         />,
       );
 
-      expect(screen.getByText("Save")).toBeInTheDocument();
-      const button = screen.getByText("Save").closest("button");
+      expect(res.getByText("Save")).toBeInTheDocument();
+      const button = res.getByText("Save").closest("button");
       expect(button).not.toBeDisabled();
     });
   });

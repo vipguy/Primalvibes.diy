@@ -16,7 +16,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@adviser/cement": "^0.4.26",
+    "@adviser/cement": "^0.4.30",
     "call-ai": "workspace:*",
     "react-dom": "^19.1.1",
     "use-fireproof": "^0.23.13",

@@ -1,13 +1,13 @@
 import { vi, afterAll } from "vitest";
-import "@testing-library/jest-dom";
+//import "@testing-library/jest-dom";
 import React from "react";
 
 // Import our module setup which configures the use-fireproof mock
-import "./moduleSetup.js";
 import { LinkProps } from "react-router";
+import { VibesDiyEnv } from "~/vibes.diy/app/config/env.js";
 
 // Mock the prompts module to avoid network/file IO during tests
-vi.mock("~/vibes.diy/app/prompts.js", () => ({
+vi.mock("@vibes.diy/prompts.js", () => ({
   makeBaseSystemPrompt: vi.fn().mockReturnValue("mocked system prompt"),
   // Minimal stubs used by hooks that depend on prompts (reflect relaxed policy + normalization)
   normalizeModelId: vi
@@ -51,6 +51,7 @@ vi.mock("~/vibes.diy/app/prompts.js", () => ({
 }));
 
 // Note: Mock for use-fireproof is in tests/__mocks__/use-fireproof.ts
+VibesDiyEnv.env().set("DEV", "true");
 
 // Mock React Router modules globally
 vi.mock("@react-router/dev/vite", () => ({
@@ -120,7 +121,7 @@ Object.defineProperty(window, "matchMedia", {
 });
 
 // Mock ResizeObserver for tests
-global.ResizeObserver = class ResizeObserver {
+globalThis.ResizeObserver = class ResizeObserver {
   observe = vi.fn();
   unobserve = vi.fn();
   disconnect = vi.fn();
@@ -130,7 +131,7 @@ global.ResizeObserver = class ResizeObserver {
 };
 
 // Mock clipboard API
-Object.assign(navigator, {
+vi.stubGlobal("navigator", {
   clipboard: {
     writeText: vi.fn().mockImplementation(() => Promise.resolve()),
   },
@@ -199,3 +200,5 @@ Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
 //     }
 //   };
 // }
+//
+//

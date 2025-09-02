@@ -111,15 +111,21 @@ Object.defineProperty(navigator, "clipboard", {
 });
 
 // Mock window.location
-Object.defineProperty(window, "location", {
-  value: {
-    // Use only the properties we want to override
-    origin: "https://example.com",
-    pathname: "/",
-    hash: "",
-  },
-  writable: true,
-});
+// vi.stubGlobal('location', {
+//   origin: 'https://example.com',
+//   pathname: '/',
+//   hash: '',
+// });
+
+// Object.defineProperty(window, "location", {
+//   value: {
+//     // Use only the properties we want to override
+//     origin: "https://example.com",
+//     pathname: "/",
+//     hash: "",
+//   },
+//   writable: true,
+// });
 
 // Mock components used in the Home component
 vi.mock("~/vibes.diy/app/components/ChatInterface", () => ({
@@ -190,6 +196,7 @@ describe("Home Route in completed state", () => {
   };
 
   beforeEach(() => {
+    globalThis.document.body.innerHTML = "";
     // Clear all mocks before each test
     vi.clearAllMocks();
 
@@ -205,6 +212,11 @@ describe("Home Route in completed state", () => {
         { type: "code", content: mockCode } as Segment,
       ],
     });
+
+    // vi.spyOn(segmentParser, "parseDependencies").mockReturnValue({
+    //   react: "^18.2.0",
+    //   "react-dom": "^18.2.0",
+    // });
 
     // Mock useSimpleChat hook to return a chat with completed AI message containing code
     vi.spyOn(useSimpleChatModule, "useSimpleChat").mockReturnValue({

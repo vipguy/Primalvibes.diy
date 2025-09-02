@@ -9,7 +9,8 @@ import { handleApiError, checkForInvalidModelError } from "./error-handling.js";
 import { createBackwardCompatStreamingProxy } from "./api-core.js";
 import { extractContent, extractClaudeResponse, PACKAGE_VERSION } from "./non-streaming.js";
 import { createStreamingGenerator } from "./streaming.js";
-import { callAiEnv, callAiFetch } from "./utils.js";
+import { callAiFetch } from "./utils.js";
+import { callAiEnv } from "./env.js";
 
 // Key management is now imported from ./key-management
 

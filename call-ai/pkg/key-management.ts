@@ -3,7 +3,8 @@
  */
 
 import { CallAIErrorParams, Falsy, Mocks } from "./types.js";
-import { callAiEnv, callAiFetch, entriesHeaders } from "./utils.js";
+import { callAiFetch, entriesHeaders } from "./utils.js";
+import { callAiEnv } from "./env.js";
 
 export interface KeyMetadata {
   key: string;

@@ -20,9 +20,14 @@ vi.mock("~/vibes.diy/app/contexts/AuthContext", async () => {
 // (setMockAuthState / resetMockAuthState imported below)
 
 // Mock the auth utility functions
-vi.mock("~/vibes.diy/app/utils/auth", () => ({
-  initiateAuthFlow: vi.fn(),
-}));
+vi.mock("~/vibes.diy/app/utils/auth.js", async (original) => {
+  const actual =
+    (await original()) as typeof import("~/vibes.diy/app/utils/auth.js");
+  return {
+    ...actual,
+    initiateAuthFlow: vi.fn(),
+  };
+});
 
 vi.mock("~/vibes.diy/app/utils/analytics", () => ({
   trackAuthClick: vi.fn(),
@@ -56,12 +61,12 @@ const createObjectURLMock = vi.fn(() => "mocked-url");
 const revokeObjectURLMock = vi.fn();
 
 // Override URL methods
-Object.defineProperty(global.URL, "createObjectURL", {
+Object.defineProperty(globalThis.URL, "createObjectURL", {
   value: createObjectURLMock,
   writable: true,
 });
 
-Object.defineProperty(global.URL, "revokeObjectURL", {
+Object.defineProperty(globalThis.URL, "revokeObjectURL", {
   value: revokeObjectURLMock,
   writable: true,
 });

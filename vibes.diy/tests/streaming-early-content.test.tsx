@@ -1,21 +1,25 @@
 import React from "react";
 import { render, screen, cleanup } from "@testing-library/react";
-import { vi, describe, test, expect, afterEach } from "vitest";
+import { describe, test, expect, afterEach, beforeEach } from "vitest";
 import StructuredMessage from "~/vibes.diy/app/components/StructuredMessage.js";
 import type { Segment } from "@vibes.diy/prompts";
 import { MockThemeProvider } from "./utils/MockThemeProvider.js";
 
 // Mock the window.location for any URL operations
-vi.spyOn(window, "location", "get").mockImplementation(
-  () =>
-    ({
-      origin: "http://localhost:3000",
-    }) as unknown as Location,
-);
+// vi.spyOn(window, "location", "get").mockImplementation(
+//   () =>
+//     ({
+//       origin: "http://localhost:3000",
+//     }) as unknown as Location,
+// );
 
 // Run cleanup after each test
 afterEach(() => {
   cleanup();
+});
+
+beforeEach(() => {
+  globalThis.document.body.innerHTML = "";
 });
 
 describe("Early Streaming Content Display", () => {

@@ -32,7 +32,7 @@ const mockFetch = vi.fn().mockImplementation(async () => ({
     appUrl: "https://test-app-slug.vibesdiy.app",
   }),
 }));
-global.fetch = mockFetch;
+// global.fetch = mockFetch;
 
 // Setup mock FileReader for screenshot processing
 class MockFileReader {
@@ -46,7 +46,8 @@ class MockFileReader {
   }
 }
 
-global.FileReader = MockFileReader as typeof FileReader;
+vi.stubGlobal("FileReader", MockFileReader);
+// global.FileReader = MockFileReader as typeof FileReader;
 
 // Setup mock Fireproof database and query results
 const mockVibeDoc = {
@@ -109,7 +110,7 @@ describe("publishApp", () => {
         appUrl: "https://test-app-slug.vibesdiy.app",
       }),
     }));
-    global.fetch = mockFetch;
+    // global.fetch = mockFetch;
   });
 
   afterEach(() => {
@@ -135,6 +136,7 @@ describe("publishApp", () => {
       prompt: testPrompt,
       updatePublishedUrl,
       token: "test-jwt-token",
+      fetch: mockFetch,
     });
 
     // Assert: Check that fetch was called and included remixOf in the payload
@@ -168,6 +170,7 @@ describe("publishApp", () => {
       userId: "test-user-id",
       prompt: "Create an original app",
       token: null,
+      fetch: mockFetch,
     });
 
     // Assert: Check that fetch was called with null remixOf
@@ -193,6 +196,7 @@ describe("publishApp", () => {
       userId: "test-user-id",
       prompt: "Create an app with screenshot",
       token: "test-token",
+      fetch: mockFetch,
     });
 
     // Assert: Check that the screenshot was included
@@ -219,6 +223,7 @@ describe("publishApp", () => {
       userId: "test-user-id",
       prompt: "Create an app with authentication",
       token: testToken,
+      fetch: mockFetch,
     });
 
     // Assert: Check that the Authorization header was included
@@ -245,6 +250,7 @@ describe("publishApp", () => {
       userId: "test-user-id",
       prompt: "Create an app without authentication",
       token: null,
+      fetch: mockFetch,
     });
 
     // Assert: Check that no Authorization header was included

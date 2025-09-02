@@ -130,22 +130,25 @@ vi.mock("react-router", () => ({
 }));
 
 // Mock fetch
-global.fetch = vi.fn().mockImplementation(() => {
-  return Promise.resolve({
-    ok: true,
-    status: 200,
-    statusText: "OK",
-    headers: new Headers(),
-    text: () =>
-      Promise.resolve(
-        "export default function App() { return <div>Test App</div>; }",
-      ),
-    json: () => Promise.resolve({}),
-    blob: () => Promise.resolve(new Blob()),
-    arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
-    formData: () => Promise.resolve(new FormData()),
-  });
-});
+vi.stubGlobal(
+  "fetch",
+  vi.fn().mockImplementation(() => {
+    return Promise.resolve({
+      ok: true,
+      status: 200,
+      statusText: "OK",
+      headers: new Headers(),
+      text: () =>
+        Promise.resolve(
+          "export default function App() { return <div>Test App</div>; }",
+        ),
+      json: () => Promise.resolve({}),
+      blob: () => Promise.resolve(new Blob()),
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+      formData: () => Promise.resolve(new FormData()),
+    });
+  }),
+);
 
 // Mock the utils
 vi.mock("~/components/SessionSidebar/utils", () => ({

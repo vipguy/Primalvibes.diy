@@ -45,6 +45,11 @@ vi.mock("~/vibes.diy/app/hooks/useSession", () => ({
 }));
 
 describe("Iframe Template", () => {
+  beforeEach(() => {
+    globalThis.document.body.innerHTML = "";
+    vi.clearAllMocks();
+    // Reset any necessary state before each test
+  });
   it("contains proper APP_CODE placeholder format", () => {
     // Verify the template contains the correct APP_CODE placeholder pattern
     expect(iframeTemplateRaw).toContain("{{APP_CODE}}");

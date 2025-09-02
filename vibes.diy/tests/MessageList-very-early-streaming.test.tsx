@@ -10,6 +10,7 @@ import type {
 import { MockThemeProvider } from "./utils/MockThemeProvider.js";
 
 beforeEach(() => {
+  globalThis.document.body.innerHTML = "";
   window.HTMLElement.prototype.scrollIntoView = vi.fn();
 });
 

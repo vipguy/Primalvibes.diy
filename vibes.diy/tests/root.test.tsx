@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mockUseAuth, resetMockAuthState } from "./__mocks__/useAuth.js";
 import { ErrorBoundary, Layout } from "~/vibes.diy/app/root.js";
@@ -185,10 +185,10 @@ describe("Root Component", () => {
   it("renders the ErrorBoundary component with an error", () => {
     const testError = new Error("Test error");
 
-    render(<ErrorBoundary error={testError} params={{}} />);
+    const res = render(<ErrorBoundary error={testError} params={{}} />);
 
     // Check that the error message is displayed
-    expect(screen.getByText("Oops!")).toBeDefined();
-    expect(screen.getByText("Test error")).toBeDefined();
+    expect(res.getByText("Oops!")).toBeDefined();
+    expect(res.getByText("Test error")).toBeDefined();
   });
 });

@@ -26,6 +26,7 @@ export async function publishApp({
   updateFirehoseShared,
   token,
   shareToFirehose,
+  fetch,
 }: {
   sessionId?: string;
   code: string;
@@ -36,6 +37,7 @@ export async function publishApp({
   updateFirehoseShared?: (shared: boolean) => Promise<void>;
   token?: string | null;
   shareToFirehose?: boolean;
+  fetch?: typeof globalThis.fetch;
 }): Promise<string | undefined> {
   try {
     if (!code || !sessionId) {
@@ -122,21 +124,24 @@ export async function publishApp({
       headers.Authorization = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${VibesDiyEnv.API_BASE_URL()}/api/apps`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        chatId: sessionId,
-        userId,
-        raw: code,
-        prompt,
-        code: transformedCode,
-        title,
-        remixOf, // Include information about the original app if this is a remix
-        screenshot: screenshotBase64, // Include the base64 screenshot if available
-        shareToFirehose, // Include the firehose sharing preference
-      }),
-    });
+    const response = await (fetch ? fetch : globalThis.fetch)(
+      `${VibesDiyEnv.API_BASE_URL()}/api/apps`,
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          chatId: sessionId,
+          userId,
+          raw: code,
+          prompt,
+          code: transformedCode,
+          title,
+          remixOf, // Include information about the original app if this is a remix
+          screenshot: screenshotBase64, // Include the base64 screenshot if available
+          shareToFirehose, // Include the firehose sharing preference
+        }),
+      },
+    );
 
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);

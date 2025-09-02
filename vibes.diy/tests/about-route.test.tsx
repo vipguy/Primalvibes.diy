@@ -1,6 +1,6 @@
 import React from "react";
-import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render } from "@testing-library/react";
 import About from "~/vibes.diy/app/routes/about.js";
 
 // Mock the SimpleAppLayout component
@@ -31,48 +31,52 @@ vi.mock("~/vibes.diy/app/components/VibesDIYLogo", () => ({
 
 describe("About Route", () => {
   const renderAbout = () => render(<About />);
+  beforeEach(() => {
+    globalThis.document.body.innerHTML = "";
+    vi.clearAllMocks();
+  });
 
   it("renders the about page with correct title and layout", () => {
-    renderAbout();
+    const res = renderAbout();
 
     // Check for header content
-    const headerSection = screen.getByTestId("header-left");
+    const headerSection = res.getByTestId("header-left");
     expect(headerSection).toBeInTheDocument();
 
     // Check the home icon exists in the header
-    const homeIcon = screen.getByTestId("home-icon");
+    const homeIcon = res.getByTestId("home-icon");
     expect(homeIcon).toBeInTheDocument();
 
     // Check for the logo
-    const logo = screen.getByTestId("vibes-diy-logo");
+    const logo = res.getByTestId("vibes-diy-logo");
     expect(logo).toBeInTheDocument();
   });
 
   it("displays the main about page heading", () => {
-    renderAbout();
-    const heading = screen.getByText("About");
+    const res = renderAbout();
+    const heading = res.getByText("About");
     expect(heading).toBeInTheDocument();
     expect(heading.tagName).toBe("H1");
   });
 
   it('displays the "What is Vibes DIY?" section', () => {
-    renderAbout();
-    const sectionHeading = screen.getByText("What is Vibes DIY?");
+    const res = renderAbout();
+    const sectionHeading = res.getByText("What is Vibes DIY?");
     expect(sectionHeading).toBeInTheDocument();
 
-    const description = screen.getByText(
+    const description = res.getByText(
       /An AI-powered app builder that lets you create custom applications/,
     );
     expect(description).toBeInTheDocument();
   });
 
   it('displays the "Open source" section with links', () => {
-    renderAbout();
-    const sectionHeading = screen.getByText("Open source");
+    const res = renderAbout();
+    const sectionHeading = res.getByText("Open source");
     expect(sectionHeading).toBeInTheDocument();
 
     // Check for the community link
-    const communityLink = screen.getByText("community");
+    const communityLink = res.getByText("community");
     expect(communityLink).toBeInTheDocument();
     expect(communityLink.getAttribute("href")).toBe(
       "https://discord.gg/vnpWycj4Ta",
@@ -80,7 +84,7 @@ describe("About Route", () => {
     expect(communityLink.getAttribute("target")).toBe("_blank");
 
     // Check for the repo link
-    const repoLink = screen.getByText("builder repo");
+    const repoLink = res.getByText("builder repo");
     expect(repoLink).toBeInTheDocument();
     expect(repoLink.getAttribute("href")).toBe(
       "https://github.com/fireproof-storage/vibes.diy",
@@ -88,32 +92,32 @@ describe("About Route", () => {
   });
 
   it('displays the "Key Features" section with bullet points', () => {
-    renderAbout();
-    const sectionHeading = screen.getByText("Key Features");
+    const res = renderAbout();
+    const sectionHeading = res.getByText("Key Features");
     expect(sectionHeading).toBeInTheDocument();
 
     // Check for feature bullet points
-    const aiFeature = screen.getByText(/AI-Powered Generation/);
+    const aiFeature = res.getByText(/AI-Powered Generation/);
     expect(aiFeature).toBeInTheDocument();
 
-    const stylingFeature = screen.getByText(/Custom Styling/);
+    const stylingFeature = res.getByText(/Custom Styling/);
     expect(stylingFeature).toBeInTheDocument();
 
-    const localFirstFeature = screen.getByText(/Local-First Architecture/);
+    const localFirstFeature = res.getByText(/Local-First Architecture/);
     expect(localFirstFeature).toBeInTheDocument();
 
-    const fireproofFeature = screen.getByText(/database/);
+    const fireproofFeature = res.getByText(/database/);
     expect(fireproofFeature).toBeInTheDocument();
 
-    const modelFeature = screen.getByText(/Choose Your Model/);
+    const modelFeature = res.getByText(/Choose Your Model/);
     expect(modelFeature).toBeInTheDocument();
   });
 
   it("has the correct external links", () => {
-    renderAbout();
+    const res = renderAbout();
 
     // Check Fireproof link - use the within scope of the feature list to be more specific
-    const fireproofLink = screen.getByText(
+    const fireproofLink = res.getByText(
       /Reliable, secure database that syncs across devices/,
     );
     const featureFireproofLink = fireproofLink.querySelector("a");
@@ -123,16 +127,16 @@ describe("About Route", () => {
     );
 
     // Check OpenRouter link
-    const openRouterLink = screen.getByText("OpenRouter");
+    const openRouterLink = res.getByText("OpenRouter");
     expect(openRouterLink).toBeInTheDocument();
     expect(openRouterLink.getAttribute("href")).toBe("https://openrouter.ai");
   });
 
   it("has a home navigation link", () => {
-    renderAbout();
+    const res = renderAbout();
 
     // Find link to home
-    const homeLink = screen.getByRole("link", { name: /go to home/i });
+    const homeLink = res.getByRole("link", { name: /go to home/i });
     expect(homeLink).toBeInTheDocument();
     expect(homeLink.getAttribute("href")).toBe("/");
   });

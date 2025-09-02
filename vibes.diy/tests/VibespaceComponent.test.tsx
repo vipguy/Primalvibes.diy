@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import VibespaceComponent from "~/vibes.diy/app/components/VibespaceComponent.js";
 
@@ -95,6 +95,10 @@ const renderWithRouter = (
 };
 
 describe("VibespaceComponent", () => {
+  beforeEach(() => {
+    globalThis.document.body.innerHTML = "";
+  });
+
   it("should render starfield for user with no vibes (tildeId)", () => {
     renderWithRouter(<VibespaceComponent tildeId="nonexistentuser" />);
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import ModelPicker from "~/vibes.diy/app/components/ModelPicker.js";
 import { MockThemeProvider } from "./utils/MockThemeProvider.js";
@@ -26,6 +26,10 @@ const MODELS = [
 ];
 
 describe("ModelPicker", () => {
+  beforeEach(() => {
+    globalThis.document.body.innerHTML = "";
+  });
+
   it("renders icon trigger and opens the dropdown", () => {
     const onChange = vi.fn();
     render(

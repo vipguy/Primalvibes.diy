@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ViewControls } from "~/vibes.diy/app/components/ResultPreview/ViewControls.js";
 
 describe("ViewControls", () => {
@@ -60,6 +60,11 @@ describe("ViewControls", () => {
       </span>
     ),
   }));
+
+  beforeEach(() => {
+    globalThis.document.body.innerHTML = "";
+    vi.clearAllMocks();
+  });
 
   it("renders all view controls", () => {
     render(

@@ -66,6 +66,7 @@ describe("Component Memoization", () => {
   describe("ChatHeader Memoization", () => {
     beforeEach(() => {
       // No need to mock useTestContext
+      globalThis.document.body.innerHTML = "";
     });
 
     it("does not re-render when props are unchanged", async () => {

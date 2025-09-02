@@ -19,9 +19,10 @@ describe("ShareModal", () => {
   let mockButtonRef: React.RefObject<HTMLButtonElement>;
 
   // Mock clipboard API
-  const originalClipboard = { ...global.navigator.clipboard };
+  const originalClipboard = { ...globalThis.navigator.clipboard };
 
   beforeEach(() => {
+    globalThis.document.body.innerHTML = "";
     // Reset mocks before each test
     mockOnClose.mockReset();
     mockOnPublish.mockReset().mockResolvedValue(undefined);

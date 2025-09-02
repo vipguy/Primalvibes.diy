@@ -113,6 +113,7 @@ const onOpenSidebar = vi.fn();
 
 describe("Component Rendering", () => {
   beforeEach(() => {
+    globalThis.document.body.innerHTML = "";
     vi.resetAllMocks();
     resetMockAuthState();
   });

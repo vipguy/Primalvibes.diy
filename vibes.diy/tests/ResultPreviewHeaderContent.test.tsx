@@ -188,6 +188,7 @@ describe("ResultPreviewHeaderContent", () => {
   ];
 
   beforeEach(() => {
+    globalThis.document.body.innerHTML = "";
     vi.resetAllMocks();
 
     // Default mocks

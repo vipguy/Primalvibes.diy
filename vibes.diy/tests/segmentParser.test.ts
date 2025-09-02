@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { parseContent } from "~/vibes.diy/app/utils/segmentParser.js";
-import fs from "fs";
-import path from "path";
+import { BuildURI, loadAsset, pathOps } from "@adviser/cement";
 
 describe("segmentParser utilities", () => {
   it("correctly parses markdown content with no code blocks", () => {
@@ -141,7 +140,7 @@ Final markdown
     expect(result.segments[1].content).toContain("function SearchResults");
   });
 
-  it("verifies segment types for all fixture files", () => {
+  it("verifies segment types for all fixture files", async () => {
     // make subset files for partial parse
     const fixtureExpectations = {
       "easy-message.txt": ["markdown", "code", "markdown"],
@@ -155,49 +154,72 @@ Final markdown
       "prefix-easy.txt": ["markdown", "code"],
     };
 
-    // Test each fixture file
-    Object.entries(fixtureExpectations).forEach(([filename, expectedTypes]) => {
-      const fixturePath = path.join(__dirname, "fixtures", filename);
-      expect(fs.existsSync(fixturePath)).toBe(true);
-
-      const content = fs.readFileSync(fixturePath, "utf-8");
-      const result = parseContent(content);
+    for (const [filename, expectedTypes] of Object.entries(
+      fixtureExpectations,
+    )) {
+      const content = await loadAsset(pathOps.join("fixtures", filename), {
+        basePath: () => {
+          const r = BuildURI.from(import.meta.url)
+            .cleanParams()
+            .pathname("/")
+            .toString();
+          return r;
+        },
+      });
+      const result = parseContent(content.Ok());
       const actualTypes = result.segments.map((segment) => segment.type);
-
       expect([filename, ...actualTypes]).toEqual([filename, ...expectedTypes]);
-    });
+    }
   });
 
-  it("correctly parses dependencies from easy-message5.txt fixture", () => {
+  it("correctly parses dependencies from easy-message5.txt fixture", async () => {
     // Read the fixture file
-    const fixturePath = path.join(__dirname, "fixtures", "easy-message5.txt");
-    expect(fs.existsSync(fixturePath)).toBe(true);
-
-    const content = fs.readFileSync(fixturePath, "utf-8");
-    const result = parseContent(content);
+    // const fixturePath = pathOps.join(__dirname, "fixtures", "easy-message5.txt");
+    // expect(fs.existsSync(fixturePath)).toBe(true);
+    // const content = fs.readFileSync(fixturePath, "utf-8");
+    const content = await loadAsset("fixtures/easy-message5.txt", {
+      basePath: () => {
+        const r = BuildURI.from(import.meta.url)
+          .cleanParams()
+          .pathname("/")
+          .toString();
+        return r;
+      },
+    });
+    const result = parseContent(content.Ok());
     expect(result.segments.length).toBe(3);
     expect(result.segments[1].type).toBe("code");
     expect(result.segments[1].content).toContain("react-modal");
   });
 });
 
-it("correctly parses dependencies from hard-message2.txt fixture", () => {
-  const fixturePath = path.join(__dirname, "fixtures", "hard-message2.txt");
-  expect(fs.existsSync(fixturePath)).toBe(true);
-
-  const content = fs.readFileSync(fixturePath, "utf-8");
-  const result = parseContent(content);
+it("correctly parses dependencies from hard-message2.txt fixture", async () => {
+  const rContent = await loadAsset("fixtures/hard-message2.txt", {
+    basePath: () => {
+      const r = BuildURI.from(import.meta.url)
+        .cleanParams()
+        .pathname("/")
+        .toString();
+      return r;
+    },
+  });
+  const result = parseContent(rContent.Ok());
   expect(result.segments.length).toBe(3);
   expect(result.segments[1].type).toBe("code");
   expect(result.segments[1].content).toContain("react-dropzone");
 });
 
-it("correctly parses markdown and code from hard-message4.txt fixture", () => {
-  const fixturePath = path.join(__dirname, "fixtures", "hard-message3.txt");
-  expect(fs.existsSync(fixturePath)).toBe(true);
-
-  const content = fs.readFileSync(fixturePath, "utf-8");
-  const result = parseContent(content);
+it("correctly parses markdown and code from hard-message3.txt fixture", async () => {
+  const rContent = await loadAsset("fixtures/hard-message3.txt", {
+    basePath: () => {
+      const r = BuildURI.from(import.meta.url)
+        .cleanParams()
+        .pathname("/")
+        .toString();
+      return r;
+    },
+  });
+  const result = parseContent(rContent.Ok());
 
   expect(result.segments.length).toBe(3);
   expect(result.segments[0].type).toBe("markdown");

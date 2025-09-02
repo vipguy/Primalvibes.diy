@@ -87,11 +87,14 @@ vi.mock("~/vibes.diy/app/components/ResultPreview/IframeContent", () => ({
 }));
 
 // Mock ResizeObserver
-global.ResizeObserver = vi.fn().mockImplementation(() => ({
-  observe: vi.fn(),
-  unobserve: vi.fn(),
-  disconnect: vi.fn(),
-}));
+vi.stubGlobal(
+  "ResizeObserver",
+  vi.fn().mockImplementation(() => ({
+    observe: vi.fn(),
+    unobserve: vi.fn(),
+    disconnect: vi.fn(),
+  })),
+);
 
 // Mock window.postMessage for preview communication
 const originalPostMessage = window.postMessage;
@@ -102,6 +105,7 @@ const originalGetItem = Storage.prototype.getItem;
 
 // Reset mocks between tests
 beforeEach(() => {
+  globalThis.document.body.innerHTML = "";
   vi.clearAllMocks();
   window.postMessage = vi.fn();
 

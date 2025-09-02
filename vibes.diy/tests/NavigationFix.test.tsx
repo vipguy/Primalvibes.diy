@@ -1,32 +1,43 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ViewControls } from "~/vibes.diy/app/components/ResultPreview/ViewControls.js";
 
 // Mock the SVG icons
-vi.mock("~/vibes.diy/app/components/HeaderContent/SvgIcons", () => ({
-  PreviewIcon: ({
-    className,
-  }: {
-    className: string;
-    isLoading?: boolean;
-    title?: string;
-  }) => (
-    <span data-testid="preview-icon" className={className}>
-      Preview Icon
-    </span>
-  ),
-  CodeIcon: ({ className }: { className: string; isLoading?: boolean }) => (
-    <span data-testid="code-icon" className={className}>
-      Code Icon
-    </span>
-  ),
-  DataIcon: ({ className }: { className: string }) => (
-    <span data-testid="data-icon" className={className}>
-      Data Icon
-    </span>
-  ),
-}));
+
+vi.mock(
+  "~/vibes.diy/app/components/HeaderContent/SvgIcons.js",
+  async (original) => {
+    const actual =
+      await original<
+        typeof import("~/vibes.diy/app/components/HeaderContent/SvgIcons.js")
+      >();
+    return {
+      ...actual,
+      PreviewIcon: ({
+        className,
+      }: {
+        className: string;
+        isLoading?: boolean;
+        title?: string;
+      }) => (
+        <span data-testid="preview-icon" className={className}>
+          Preview Icon
+        </span>
+      ),
+      CodeIcon: ({ className }: { className: string; isLoading?: boolean }) => (
+        <span data-testid="code-icon" className={className}>
+          Code Icon
+        </span>
+      ),
+      DataIcon: ({ className }: { className: string }) => (
+        <span data-testid="data-icon" className={className}>
+          Data Icon
+        </span>
+      ),
+    };
+  },
+);
 
 describe("Navigation Fix Tests", () => {
   // Test data for the view controls
@@ -47,6 +58,11 @@ describe("Navigation Fix Tests", () => {
       label: "Data",
     },
   };
+
+  beforeEach(() => {
+    globalThis.document.body.innerHTML = "";
+    vi.clearAllMocks();
+  });
 
   it("properly passes onClick handler to buttons", () => {
     const mockNavigateToView = vi.fn();

@@ -554,7 +554,7 @@ describe("useSimpleChat", () => {
     Element.prototype.scrollIntoView = vi.fn();
 
     // Mock environment variables
-    vi.stubEnv("VITE_CALLAI_API_KEY", "test-api-key");
+    // vi.stubEnv("VITE_CALLAI_API_KEY", "test-api-key");
 
     // Mock import.meta.env.MODE for testing
     vi.stubGlobal("import", {

@@ -18,6 +18,7 @@ describe("ChatInput Component", () => {
   let mockChatState: ChatState;
 
   beforeEach(() => {
+    globalThis.document.body.innerHTML = "";
     // Reset mocks and values before each test
     vi.resetAllMocks();
 

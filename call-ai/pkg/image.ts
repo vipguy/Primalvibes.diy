@@ -3,7 +3,8 @@
  * Integration with custom image generation API
  */
 import { ImageGenOptions, ImageResponse } from "./types.js";
-import { callAiEnv, callAiFetch } from "./utils.js";
+import { callAiFetch } from "./utils.js";
+import { callAiEnv } from "./env.js";
 import { PACKAGE_VERSION } from "./version.js";
 
 // Import package version for debugging (same as main API)

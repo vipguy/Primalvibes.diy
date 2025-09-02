@@ -9,6 +9,7 @@ const mockDownloadHtml = vi.fn();
 
 describe("Title Update Integration", () => {
   beforeEach(() => {
+    globalThis.document.body.innerHTML = "";
     vi.clearAllMocks();
   });
 

@@ -65,9 +65,14 @@ vi.mock("react-router-dom", () => ({
 }));
 
 // Mock the auth utility functions
-vi.mock("~/vibes.diy/app/utils/auth", () => ({
-  initiateAuthFlow: vi.fn(),
-}));
+vi.mock("~/vibes.diy/app/utils/auth.js", async (original) => {
+  const actual =
+    (await original()) as typeof import("~/vibes.diy/app/utils/auth.js");
+  return {
+    ...actual,
+    initiateAuthFlow: vi.fn(),
+  };
+});
 
 vi.mock("~/vibes.diy/app/utils/analytics", () => ({
   trackAuthClick: vi.fn(),
@@ -108,6 +113,7 @@ const renderWithAuthContext = (
 
 describe("Settings page", () => {
   beforeEach(() => {
+    globalThis.document.body.innerHTML = "";
     vi.clearAllMocks();
     // Reset the localStorage mock
     localStorageMock.clear();

@@ -16,7 +16,9 @@ class MockResizeObserver {
   }
 }
 
-global.ResizeObserver = MockResizeObserver;
+vi.stubGlobal("ResizeObserver", new MockResizeObserver());
+
+//global.ResizeObserver = MockResizeObserver;
 
 // Mock DOM methods
 Element.prototype.getBoundingClientRect = vi.fn().mockReturnValue({

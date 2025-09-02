@@ -4,7 +4,7 @@ import {
   ResolveOnce,
   Result,
 } from "@adviser/cement";
-import { loadAsset } from "./load-asset.js";
+import { loadDocs } from "./load-docs.js";
 
 export interface LlmCatalogEntry {
   name: string;
@@ -68,7 +68,7 @@ export async function getJsonDocs(fallBackUrl: CoerceURI): Promise<JsonDocs> {
   return jsonDocs.once(async () => {
     const m: JsonDocs = {} as JsonDocs;
     for (const f of files) {
-      const rAsset = await loadAsset(f, fallBackUrl);
+      const rAsset = await loadDocs(f, fallBackUrl);
       if (rAsset.isErr()) {
         console.error(`Failed to load asset ${f}: ${rAsset.Err()}`);
         continue;

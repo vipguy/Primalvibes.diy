@@ -1,5 +1,6 @@
 import { renderHook, act } from "@testing-library/react";
 import { useSession } from "~/vibes.diy/app/hooks/useSession.js";
+import { VibesDiyEnv } from "~/vibes.diy/app/config/env.js";
 import { vi, describe, test, expect, beforeEach } from "vitest";
 
 // Mock the databaseManager module first
@@ -24,9 +25,12 @@ vi.mock("~/vibes.diy/app/utils/databaseManager", () => {
 });
 
 // Mock the env module
-vi.mock("~/vibes.diy/app/config/env", () => ({
+VibesDiyEnv.env().sets({
   SETTINGS_DBNAME: "test-chat-history",
-}));
+});
+// vi.mock("~/vibes.diy/app/config/env", () => ({
+//   SETTINGS_DBNAME: "test-chat-history",
+// }));
 
 // Now mock use-fireproof
 vi.mock("use-fireproof", () => {
@@ -91,6 +95,7 @@ vi.mock("use-fireproof", () => {
 describe("useSession", () => {
   // Reset mocks before each test
   beforeEach(() => {
+    globalThis.document.body.innerHTML = "";
     vi.clearAllMocks();
   });
 

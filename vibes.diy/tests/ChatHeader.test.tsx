@@ -15,6 +15,7 @@ vi.mock("react-router", () => ({
 describe("ChatHeader", () => {
   beforeEach(() => {
     // Reset mocks before each test
+    globalThis.document.body.innerHTML = "";
     vi.resetAllMocks();
   });
 

@@ -6,13 +6,17 @@ import { VibesDiyEnv } from "~/vibes.diy/app/config/env.js";
 
 // IMPORTANT: Mock call-ai BEFORE any modules that might import it
 let callCount = 0;
-vi.mock("call-ai", () => ({
-  callAI: vi.fn(async () => {
-    // Return a different value on subsequent calls to simulate state change
-    callCount += 1;
-    return callCount === 1 ? "Mock Title" : "Updated Mock Title";
-  }),
-}));
+vi.mock("call-ai", async () => {
+  const al = await vi.importActual("call-ai");
+  return {
+    ...al,
+    callAI: vi.fn(async () => {
+      // Return a different value on subsequent calls to simulate state change
+      callCount += 1;
+      return callCount === 1 ? "Mock Title" : "Updated Mock Title";
+    }),
+  };
+});
 
 // Mock AuthContext to avoid state updates during tests
 vi.mock("~/vibes.diy/app/contexts/AuthContext", () => {
@@ -61,9 +65,13 @@ function formatAsSSE(chunks: string[]): string[] {
 }
 
 // Mock the prompts module
-vi.mock("~/vibes.diy/app/prompts.js", () => ({
-  makeBaseSystemPrompt: vi.fn().mockResolvedValue("Mocked system prompt"),
-}));
+vi.mock("@vibes.diy/prompts", async (improve) => {
+  const all = (await improve()) as typeof import("@vibes.diy/prompts");
+  return {
+    ...all,
+    makeBaseSystemPrompt: vi.fn().mockResolvedValue("Mocked system prompt"),
+  };
+});
 
 // Credit checking mocks no longer needed
 
@@ -97,30 +105,38 @@ VibesDiyEnv.env().sets({
 });
 
 // Mock Fireproof to prevent CRDT errors
-vi.mock("use-fireproof", () => ({
-  useFireproof: () => ({
-    useDocument: () => [{ _id: "mock-doc" }, vi.fn()],
-    useLiveQuery: () => [[]],
-    useFind: () => [[]],
-    useLiveFind: () => [[]],
-    useIndex: () => [[]],
-    useSubscribe: () => {
-      /* no-op */
-    },
-    database: {
-      put: vi.fn().mockResolvedValue({ id: "test-id" }),
-      get: vi
-        .fn()
-        .mockResolvedValue({ _id: "test-id", title: "Test Document" }),
-      query: vi.fn().mockResolvedValue({
-        rows: [
-          { id: "session1", key: "session1", value: { title: "Test Session" } },
-        ],
-      }),
-      delete: vi.fn().mockResolvedValue({ ok: true }),
-    },
-  }),
-}));
+vi.mock("use-fireproof", async (original) => {
+  const all = (await original()) as typeof import("use-fireproof");
+  return {
+    ...all,
+    useFireproof: () => ({
+      useDocument: () => [{ _id: "mock-doc" }, vi.fn()],
+      useLiveQuery: () => [[]],
+      useFind: () => [[]],
+      useLiveFind: () => [[]],
+      useIndex: () => [[]],
+      useSubscribe: () => {
+        /* no-op */
+      },
+      database: {
+        put: vi.fn().mockResolvedValue({ id: "test-id" }),
+        get: vi
+          .fn()
+          .mockResolvedValue({ _id: "test-id", title: "Test Document" }),
+        query: vi.fn().mockResolvedValue({
+          rows: [
+            {
+              id: "session1",
+              key: "session1",
+              value: { title: "Test Session" },
+            },
+          ],
+        }),
+        delete: vi.fn().mockResolvedValue({ ok: true }),
+      },
+    }),
+  };
+});
 
 // Define shared state and reset function *outside* the mock factory
 // interface MockDoc {
@@ -820,6 +836,7 @@ beforeEach(() => {
       body: stream,
       status: 200,
       statusText: "OK",
+      text: () => Promise.resolve("This is a test response"),
       headers: new Headers(),
     } as Response;
   });

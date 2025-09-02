@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import { vi, describe, test, expect } from "vitest";
+import { vi, describe, test, expect, beforeEach } from "vitest";
 import MessageList from "~/vibes.diy/app/components/MessageList.js";
 import type { UserChatMessage, AiChatMessage } from "@vibes.diy/prompts";
 import { MockThemeProvider } from "./utils/MockThemeProvider.js";
@@ -14,6 +14,9 @@ vi.mock("~/vibes.diy/app/components/Message.js", () => ({
 }));
 
 describe("MessageList", () => {
+  beforeEach(() => {
+    globalThis.document.body.innerHTML = "";
+  });
   test("renders messages correctly", () => {
     const messages = [
       {

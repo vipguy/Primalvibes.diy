@@ -14,6 +14,7 @@ describe("ShareButton", () => {
   const mockOnClick = vi.fn();
 
   beforeEach(() => {
+    globalThis.document.body.innerHTML = "";
     mockOnClick.mockReset();
   });
 

@@ -123,6 +123,7 @@ describe("Settings Route", () => {
   };
 
   beforeEach(() => {
+    globalThis.document.body.innerHTML = "";
     vi.clearAllMocks();
     // Setup fake timers
     vi.useFakeTimers();

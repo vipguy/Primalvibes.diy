@@ -127,7 +127,7 @@ export async function sendMessage(
   });
 
   const modelToUse = await resolveEffectiveModel(
-    { model: ctx.modelToUse[0] },
+    { model: ctx.modelToUse?.[0] },
     vibeDoc,
   );
 

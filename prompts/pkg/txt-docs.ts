@@ -1,5 +1,5 @@
 import { CoerceURI, ResolveOnce } from "@adviser/cement";
-import { loadAsset } from "./load-asset.js";
+import { loadDocs } from "./load-docs.js";
 
 export interface TxtDoc {
   readonly name: string;
@@ -30,7 +30,7 @@ export async function getTxtDocs(fallBackUrl: CoerceURI): Promise<TxtDocs> {
   return txtDocs.once(async () => {
     const m: TxtDocs = {} as TxtDocs;
     for (const f of files) {
-      const rAsset = await loadAsset(f, fallBackUrl);
+      const rAsset = await loadDocs(f, fallBackUrl);
       if (rAsset.isErr()) {
         console.error(`Failed to load asset ${f}: ${rAsset.Err()}`);
         continue;

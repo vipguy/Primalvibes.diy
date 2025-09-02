@@ -6,13 +6,13 @@ import VibeIframeContainer from "~/vibes.diy/app/routes/vibe.js";
 
 // Mock window.location.replace to prevent navigation errors
 const mockReplace = vi.fn();
-Object.defineProperty(window, "location", {
-  value: {
-    replace: mockReplace,
-    search: "",
-  },
-  writable: true,
-});
+// Object.defineProperty(window, "location", {
+//   value: {
+//     replace: mockReplace,
+//     search: "",
+//   },
+//   writable: true,
+// });
 
 // Mock the useParams hook to return a vibeSlug
 vi.mock("react-router-dom", async () => {
@@ -25,6 +25,7 @@ vi.mock("react-router-dom", async () => {
 
 describe("Vibe Route", () => {
   beforeEach(() => {
+    globalThis.document.body.innerHTML = "";
     mockReplace.mockClear();
   });
 
