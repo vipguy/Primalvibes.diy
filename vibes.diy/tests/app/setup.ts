@@ -4,7 +4,6 @@ import React from "react";
 
 // Import our module setup which configures the use-fireproof mock
 import { LinkProps } from "react-router";
-import { VibesDiyEnv } from "~/vibes.diy/app/config/env.js";
 
 // Mock the prompts module to avoid network/file IO during tests
 vi.mock("@vibes.diy/prompts.js", () => ({
@@ -51,7 +50,6 @@ vi.mock("@vibes.diy/prompts.js", () => ({
 }));
 
 // Note: Mock for use-fireproof is in tests/__mocks__/use-fireproof.ts
-VibesDiyEnv.env().set("DEV", "true");
 
 // Mock React Router modules globally
 vi.mock("@react-router/dev/vite", () => ({

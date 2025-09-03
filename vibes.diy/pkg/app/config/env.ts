@@ -57,7 +57,6 @@ class vibesDiyEnv {
   readonly POSTHOG_HOST = Lazy(() => this.env().get("VITE_POSTHOG_HOST") ?? "");
 
   // Application Behavior
-  readonly IS_DEV_MODE = Lazy(() => this.env().get("DEV") ?? false);
   readonly APP_MODE = Lazy(() => this.env().get("MODE") ?? "production");
   readonly APP_BASENAME = Lazy(
     () => this.env().get("VITE_APP_BASENAME") ?? "/",
