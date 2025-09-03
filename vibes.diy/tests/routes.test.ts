@@ -1,4 +1,16 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+
+// Mock React Router dev routes before importing
+vi.mock("@react-router/dev/routes", () => ({
+  index: (file: string) => ({ type: "index", file }),
+  route: (path: string, file: string, options?: any) => ({ 
+    type: "route", 
+    path, 
+    file, 
+    ...options 
+  }),
+}));
+
 import routes from "~/vibes.diy/app/routes.js";
 
 describe("Routes", () => {
