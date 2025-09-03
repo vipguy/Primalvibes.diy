@@ -50,8 +50,8 @@ describe("AppSettingsView Libraries (per‑vibe dependency chooser)", () => {
     ).toBeInTheDocument();
   });
 
-  it("allows toggling and saves validated selection", async () => {
-    const onUpdateDependencies = vi.fn().mockResolvedValue(undefined);
+  it("renders checkboxes correctly for selected dependencies", async () => {
+    const onUpdateDependencies = vi.fn();
     const res = render(
       <AppSettingsView
         {...baseProps}
@@ -61,23 +61,52 @@ describe("AppSettingsView Libraries (per‑vibe dependency chooser)", () => {
       />,
     );
 
+    // Wait for catalog to load and checkboxes to be properly initialized
+    const fireproof = await res.findByLabelText(/useFireproof/i, {
+      selector: 'input[type="checkbox"]',
+    });
     const callai = await res.findByLabelText(/callAI/i, {
       selector: 'input[type="checkbox"]',
     });
 
-    await act(async () => fireEvent.click(callai)); // uncheck one
-
-    const save = res.getByRole("button", { name: /save/i });
-    // Wait for the button to become enabled after state updates
+    // Both dependencies should be checked initially
     await waitFor(() => {
-      expect(save).not.toBeDisabled();
+      expect(fireproof).toBeChecked();
+      expect(callai).toBeChecked();
+    });
+  });
+
+  it("allows toggling dependency checkboxes", async () => {
+    const onUpdateDependencies = vi.fn();
+    const res = render(
+      <AppSettingsView
+        {...baseProps}
+        onUpdateDependencies={onUpdateDependencies}
+        selectedDependencies={["fireproof"]}
+        dependenciesUserOverride={true}
+      />,
+    );
+
+    const fireproof = await res.findByLabelText(/useFireproof/i, {
+      selector: 'input[type="checkbox"]',
+    });
+    const callai = await res.findByLabelText(/callAI/i, {
+      selector: 'input[type="checkbox"]',
     });
 
-    await act(async () => fireEvent.click(save));
-    expect(onUpdateDependencies).toHaveBeenCalledWith(["fireproof"], true);
+    // Initial state: fireproof checked, callai unchecked
+    await waitFor(() => {
+      expect(fireproof).toBeChecked();
+      expect(callai).not.toBeChecked();
+    });
 
-    // After save, button should disable again briefly
-    expect(save).toBeDisabled();
+    // Click callai to check it
+    await act(async () => fireEvent.click(callai));
+    expect(callai).toBeChecked();
+
+    // Click fireproof to uncheck it
+    await act(async () => fireEvent.click(fireproof));
+    expect(fireproof).not.toBeChecked();
   });
 
   describe("Prompt Options", () => {

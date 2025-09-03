@@ -65,7 +65,6 @@ const AppSettingsView: React.FC<AppSettingsViewProps> = ({
   }, []);
 
   const initialDeps = useMemo(() => {
-    console.log("initialDeps-memo");
     const useManual = !!dependenciesUserOverride;
     let input: string[];
 
@@ -79,15 +78,16 @@ const AppSettingsView: React.FC<AppSettingsViewProps> = ({
         : [];
     }
 
-    return input
+    const filtered = input
       .filter((n): n is string => typeof n === "string")
-      .filter((n) => catalogNames.has(n));
+      .filter((n) => catalogNames.size === 0 || catalogNames.has(n)); // Don't filter if catalog not loaded yet
+
+    return filtered;
   }, [
     selectedDependencies,
     aiSelectedDependencies,
     dependenciesUserOverride,
-    llmsCatalog,
-    catalogNames,
+    catalogNames, // Need to include this back so we re-run when catalog loads
   ]);
 
   const [deps, setDeps] = useState<string[]>([]);
@@ -95,20 +95,37 @@ const AppSettingsView: React.FC<AppSettingsViewProps> = ({
   const [saveDepsOk, setSaveDepsOk] = useState(false);
   const [saveDepsErr, setSaveDepsErr] = useState<string | null>(null);
 
+  // Track previous external dependencies to detect real changes
+  const previousExternalDepsRef = useRef<string[]>([]);
+
   useEffect(() => {
     setEditedName(title);
   }, [title]);
 
   useEffect(() => {
-    // Sync local selection when external changes land
-    setDeps((prev) => {
-      // Only reset unsaved flag if the external deps actually changed
-      const changed = JSON.stringify(prev) !== JSON.stringify(initialDeps);
-      if (changed) {
-        setHasUnsavedDeps(false);
-      }
-      return initialDeps;
-    });
+    // Only sync when external dependencies actually change (not internal state changes)
+    // AND when we're not in the middle of user changes (hasUnsavedDeps)
+    const externalDepsChanged =
+      JSON.stringify(previousExternalDepsRef.current) !==
+      JSON.stringify(initialDeps);
+
+    if (externalDepsChanged && !hasUnsavedDeps) {
+      // This is a real external change and user hasn't made unsaved changes
+      setDeps(initialDeps);
+      setHasUnsavedDeps(false);
+      previousExternalDepsRef.current = [...initialDeps];
+    } else if (externalDepsChanged && hasUnsavedDeps) {
+      // External change but user has unsaved changes - just update the reference
+      previousExternalDepsRef.current = [...initialDeps];
+    }
+  }, [initialDeps, hasUnsavedDeps]);
+
+  // Initialize on first render
+  useEffect(() => {
+    if (previousExternalDepsRef.current.length === 0) {
+      setDeps(initialDeps);
+      previousExternalDepsRef.current = [...initialDeps];
+    }
   }, [initialDeps]);
 
   const handleEditNameStart = useCallback(() => {
@@ -144,19 +161,16 @@ const AppSettingsView: React.FC<AppSettingsViewProps> = ({
   );
 
   // Libraries handlers
-  const toggleDependency = useCallback(
-    (name: string, checked: boolean) => {
-      setDeps((prev) => {
-        const set = new Set(prev);
-        if (checked) set.add(name);
-        else set.delete(name);
-        console.log("Toggling dependency", prev, set);
-        return Array.from(set);
-      });
-      setHasUnsavedDeps(true);
-    },
-    [llmsCatalog, catalogNames],
-  );
+  const toggleDependency = useCallback((name: string, checked: boolean) => {
+    setDeps((prev) => {
+      const set = new Set(prev);
+      if (checked) set.add(name);
+      else set.delete(name);
+      const newDeps = Array.from(set);
+      return newDeps;
+    });
+    setHasUnsavedDeps(true);
+  }, []);
 
   const handleSaveDeps = useCallback(async () => {
     setSaveDepsErr(null);
