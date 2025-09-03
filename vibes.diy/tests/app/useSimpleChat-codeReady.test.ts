@@ -14,6 +14,10 @@ vi.mock("~/vibes.diy/app/prompts.js", () => ({
 
 // Mock the env module
 vi.mock("~/vibes.diy/app/config/env", () => ({
+  VibesDiyEnv: {
+    CALLAI_ENDPOINT: () => "mock-callai-api-key-for-testing",
+    SETTINGS_DBNAME: () => "test-chat-history",
+  },
   CALLAI_API_KEY: "mock-callai-api-key-for-testing",
   SETTINGS_DBNAME: "test-chat-history",
 }));

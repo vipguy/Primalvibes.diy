@@ -15,7 +15,7 @@ export default defineConfig({
   },
   // cacheDir: "./node_modules/.vibes.diy-vite-cache",
   test: {
-    setupFiles: ["./moduleSetup.ts", "./setup.ts"],
+    // setupFiles: ["./moduleSetup.ts", "./setup.ts"],
     name: "vibes.diy",
     exclude: ["dist/**", "node_modules/**"],
     include: ["**/*test.?(c|m)[jt]s?(x)"],

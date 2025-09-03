@@ -36,6 +36,24 @@ vi.mock("react-markdown", () => {
 // Mock the scrollIntoView method
 window.HTMLElement.prototype.scrollIntoView = vi.fn();
 
+// Mock Link component from react-router-dom
+vi.mock("react-router-dom", () => {
+  return {
+    Link: vi.fn(({ to, children, onClick, ...props }) => {
+      return React.createElement(
+        "a",
+        {
+          "data-testid": "router-link",
+          href: to,
+          onClick: onClick,
+          ...props,
+        },
+        children,
+      );
+    }),
+  };
+});
+
 // Mock the useAuth hook for SessionSidebar
 vi.mock("~/vibes.diy/app/contexts/AuthContext", () => ({
   useAuth: mockUseAuth,

@@ -37,8 +37,8 @@ import { trackAuthClick } from "~/vibes.diy/app/utils/analytics.js";
 // Import mocked functions
 import { initiateAuthFlow } from "~/vibes.diy/app/utils/auth.js";
 
-// Mock Link component from react-router
-vi.mock("react-router", () => {
+// Mock Link component from react-router-dom
+vi.mock("react-router-dom", () => {
   return {
     Link: vi.fn(({ to, children, onClick, ...props }) => {
       // Use React.createElement instead of JSX

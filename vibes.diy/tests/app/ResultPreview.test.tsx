@@ -6,10 +6,11 @@ import { mockResultPreviewProps } from "./mockData.js";
 import { MockThemeProvider } from "./utils/MockThemeProvider.js";
 
 // Mock clipboard API
-Object.assign(navigator, {
-  clipboard: {
+Object.defineProperty(navigator, 'clipboard', {
+  value: {
     writeText: vi.fn().mockImplementation(() => Promise.resolve()),
   },
+  writable: true,
 });
 
 // Mock URL methods that aren't available in test environment
