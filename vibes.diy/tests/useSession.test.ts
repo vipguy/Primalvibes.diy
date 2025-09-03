@@ -16,6 +16,12 @@ vi.mock("use-fireproof", async (original) => {
   const mockSubmitUserMessage = vi.fn().mockResolvedValue({ ok: true });
   const id = Math.random().toString(36).substring(2, 15);
   const mockUseFireproof = vi.fn().mockImplementation((name) => {
+    // console.log("Mock fireproof called", name);
+    if (!name) {
+
+      console.trace("missing name")
+      throw(new Error("missing NAME"))
+    }
     return {
       id,
       useDocument: () => ({
@@ -35,11 +41,11 @@ vi.mock("use-fireproof", async (original) => {
   };
 });
 
-vi.mock("~/vibes.diy/app/utils/databaseManager.js", () => ({
-  getSessionDatabaseName: vi
-    .fn()
-    .mockImplementation((id) => `session-${id || "default"}`),
-}));
+// vi.mock("~/vibes.diy/app/utils/databaseManager.js", () => ({
+//   getSessionDatabaseName: vi
+//     .fn()
+//     .mockImplementation((id) => `vibe-${id || "default"}`),
+// }));
 
 import { useFireproof } from "use-fireproof";
 
@@ -56,19 +62,22 @@ describe("useSession", () => {
 
   it("should initialize database eagerly with provided sessionId", async () => {
     renderHook(() => useSession("test-id"));
-    expect(mockUseFireproof).toHaveBeenCalledWith("session-test-id");
+    expect(mockUseFireproof).toHaveBeenCalledWith("vibe-test-id");
+    expect(mockUseFireproof.mock.calls.length).toBe(2);
   });
 
   it("should initialize database eagerly even when sessionId is not provided", () => {
     console.log(
       "pre ",
-      (mockUseFireproof() as unknown as { id: string }).id,
+      // (mockUseFireproof() as unknown as { id: string }).id,
+      mockUseFireproof.mock.calls.length,
       mockUseFireproof.mock.calls,
     );
     const { result } = renderHook(() => useSession(undefined));
     console.log(
       "pos ",
-      (mockUseFireproof() as unknown as { id: string }).id,
+      // (mockUseFireproof() as unknown as { id: string }).id,
+      mockUseFireproof.mock.calls.length,
       mockUseFireproof.mock.calls,
     );
 
@@ -76,9 +85,9 @@ describe("useSession", () => {
     expect(result.current.session._id).toBeTruthy();
     // Verify the database is initialized eagerly on first render
     // Called for the session DB and the settings DB (may be called more times during re-renders)
-    expect(mockUseFireproof.mock.calls.length).toBeGreaterThanOrEqual(2);
+    expect(mockUseFireproof.mock.calls.length).toBe(2);
     expect(mockUseFireproof).toHaveBeenCalledWith(
-      expect.stringMatching(/^session-/),
+      expect.stringMatching(/^vibe-/),
     );
     // Check that the settings database is called (may be test-chat-history or vibes-chats)
     const hasValidSettingsCall = mockUseFireproof.mock.calls.some(
@@ -102,9 +111,11 @@ describe("useSession", () => {
       // expect(result.current.loading).toBe(false);
     });
 
+    console.log(mockUseFireproof.mock.calls.length, mockUseFireproof.mock.calls);
+
     // Step 1: Database should be initialized immediately on first render
     // At least one call for the session DB and one for the settings DB
-    expect(mockUseFireproof.mock.calls.length).toBeGreaterThanOrEqual(2);
+    expect(mockUseFireproof.mock.calls.length).toBe(2);
 
     // Step 2: Session document and functions should be available
     expect(result.current.session._id).toBeTruthy();
@@ -138,7 +149,7 @@ describe("useSession", () => {
     // Get the initial call count
     const initialCallCount = mockUseFireproof.mock.calls.length;
     const initialCall = mockUseFireproof.mock.calls[0][0];
-    expect(initialCall).toMatch(/^session-/);
+    expect(initialCall).toMatch(/^vibe-/);
 
     // Simulate URL update with new session ID (after first message response)
     rerender({ id: "new-session-id" });
@@ -148,6 +159,6 @@ describe("useSession", () => {
     expect(mockUseFireproof.mock.calls.length).toBeGreaterThan(
       initialCallCount,
     );
-    expect(mockUseFireproof).toHaveBeenCalledWith("session-new-session-id");
+    expect(mockUseFireproof).toHaveBeenCalledWith("vibe-new-session-id");
   });
 });
