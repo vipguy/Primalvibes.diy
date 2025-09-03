@@ -119,7 +119,9 @@ function callPathname(pathnameFn?: () => string) {
   return pathnameFn ? pathnameFn() : globalThis.window.location.pathname;
 }
 
-export function initiateAuthFlow({ pathnameFn }: { pathnameFn?: () => string } = {}): {
+export function initiateAuthFlow({
+  pathnameFn,
+}: { pathnameFn?: () => string } = {}): {
   connectUrl: string;
   resultId: string;
 } | null {

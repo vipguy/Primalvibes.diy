@@ -370,7 +370,7 @@ describe("SessionSidebar component", () => {
 
     // Click each link and verify onClose is called
     for (const link of navLinks) {
-      console.log("link", link)
+      console.log("link", link);
       await act(() => fireEvent.click(link));
       expect(onClose).toHaveBeenCalled();
       onClose.mockClear();

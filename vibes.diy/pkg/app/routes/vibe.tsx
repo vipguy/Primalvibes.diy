@@ -20,10 +20,16 @@ export function VibeIframeContainerComponent({
 }
 
 function callReplace(replaceFn?: (url: string) => void) {
-  return replaceFn ? replaceFn : (url: string) => globalThis.window.location.replace(url)
+  return replaceFn
+    ? replaceFn
+    : (url: string) => globalThis.window.location.replace(url);
 }
 
-export default function VibeIframeContainer({ replace }: { replace: (url: string) => void }) {
+export default function VibeIframeContainer({
+  replace,
+}: {
+  replace: (url: string) => void;
+}) {
   const { vibeSlug } = useParams<{ vibeSlug: string }>();
 
   useEffect(() => {

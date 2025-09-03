@@ -10,7 +10,7 @@ export default defineConfig({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }) as any,
   ],
-  cacheDir: './node_modules/.vibes.diy-useSimpleChat-vite-cache',
+  cacheDir: "./node_modules/.vibes.diy-useSimpleChat-vite-cache",
   test: {
     setupFiles: ["./useSimpleChat/setup.tsx"],
     name: "vibes.diy:useSimpleChat",

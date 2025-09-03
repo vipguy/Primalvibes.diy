@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import VibeIframeContainer from "~/vibes.diy/app/routes/vibe.js";
-import { BuildURI, } from "@adviser/cement";
+import { BuildURI } from "@adviser/cement";
 
 // Mock window.location.replace to prevent navigation errors
 // const mockReplace = vi.fn();
@@ -28,11 +28,11 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-  // const  mockReplace = vi
-  //     .spyOn(window.location, "replace")
-  //     // .mockImplementation(() => {
-  //     //   console.log("Mock replace called");
-  //     // });
+// const  mockReplace = vi
+//     .spyOn(window.location, "replace")
+//     // .mockImplementation(() => {
+//     //   console.log("Mock replace called");
+//     // });
 
 // const origReplace = () => globalThis.window.location
 // globalThis.window.location = {
@@ -47,9 +47,8 @@ vi.mock("react-router-dom", async () => {
 //   origReplace()
 // })
 
-
 describe("Vibe Route", () => {
-  const mockReplace = vi.fn()
+  const mockReplace = vi.fn();
   beforeEach(() => {
     globalThis.document.body.innerHTML = "";
     mockReplace.mockClear();
@@ -59,7 +58,10 @@ describe("Vibe Route", () => {
     render(
       <MemoryRouter initialEntries={["/vibe/sound-panda-9086"]}>
         <Routes>
-          <Route path="/vibe/:vibeSlug" element={<VibeIframeContainer replace={mockReplace} />} />
+          <Route
+            path="/vibe/:vibeSlug"
+            element={<VibeIframeContainer replace={mockReplace} />}
+          />
         </Routes>
       </MemoryRouter>,
     );
@@ -68,16 +70,19 @@ describe("Vibe Route", () => {
     expect(screen.getByText("Redirecting...")).toBeInTheDocument();
 
     // Check that window.location.replace was called with correct URL
-    expect(BuildURI.from(mockReplace.mock.calls[0][0]).cleanParams().toString()).toBe(
-      "https://sound-panda-9086.vibesdiy.app/",
-    );
+    expect(
+      BuildURI.from(mockReplace.mock.calls[0][0]).cleanParams().toString(),
+    ).toBe("https://sound-panda-9086.vibesdiy.app/");
   });
 
   it("redirects without showing header content", () => {
     render(
       <MemoryRouter initialEntries={["/vibe/sound-panda-9086"]}>
         <Routes>
-          <Route path="/vibe/:vibeSlug" element={<VibeIframeContainer replace={mockReplace} />} />
+          <Route
+            path="/vibe/:vibeSlug"
+            element={<VibeIframeContainer replace={mockReplace} />}
+          />
         </Routes>
       </MemoryRouter>,
     );
@@ -90,8 +95,8 @@ describe("Vibe Route", () => {
     expect(screen.queryByText("Remix")).not.toBeInTheDocument();
 
     // Ensure redirect was called
-    expect(BuildURI.from(mockReplace.mock.calls[0][0]).cleanParams().toString()).toBe(
-      "https://sound-panda-9086.vibesdiy.app/",
-    );
+    expect(
+      BuildURI.from(mockReplace.mock.calls[0][0]).cleanParams().toString(),
+    ).toBe("https://sound-panda-9086.vibesdiy.app/");
   });
 });

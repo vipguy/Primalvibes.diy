@@ -3,7 +3,6 @@ import { useSession } from "~/vibes.diy/app/hooks/useSession.js";
 import { vi, describe, it, expect, beforeEach, Mock } from "vitest";
 import { VibesDiyEnv } from "~/vibes.diy/app/config/env.js";
 
-
 // Mock all required dependencies
 VibesDiyEnv.env().sets({
   SETTINGS_DBNAME: "test-chat-history",
@@ -64,9 +63,17 @@ describe("useSession", () => {
   });
 
   it("should initialize database eagerly even when sessionId is not provided", () => {
-    console.log("pre ", (mockUseFireproof() as unknown as { id: string }).id, mockUseFireproof.mock.calls);
+    console.log(
+      "pre ",
+      (mockUseFireproof() as unknown as { id: string }).id,
+      mockUseFireproof.mock.calls,
+    );
     const { result } = renderHook(() => useSession(undefined));
-    console.log("pos ", (mockUseFireproof() as unknown as { id: string }).id, mockUseFireproof.mock.calls);
+    console.log(
+      "pos ",
+      (mockUseFireproof() as unknown as { id: string }).id,
+      mockUseFireproof.mock.calls,
+    );
 
     // Verify we have a session ID generated (in the session document)
     expect(result.current.session._id).toBeTruthy();
@@ -75,7 +82,7 @@ describe("useSession", () => {
     expect(mockUseFireproof.mock.calls).toEqual({});
     expect(mockUseFireproof).toHaveBeenCalledTimes(2);
     expect(mockUseFireproof).toHaveBeenCalledWith(
-      expect.stringMatching(/^session-/)
+      expect.stringMatching(/^session-/),
     );
     expect(mockUseFireproof).toHaveBeenCalledWith("test-chat-history");
   });
@@ -120,7 +127,7 @@ describe("useSession", () => {
       ({ id }: { id?: string }) => useSession(id),
       {
         initialProps: { id: undefined } as { id?: string },
-      }
+      },
     );
 
     await waitFor(() => {
@@ -139,7 +146,7 @@ describe("useSession", () => {
     // Verify new database is initialized with the new session ID
     // The call count should have increased
     expect(mockUseFireproof.mock.calls.length).toBeGreaterThan(
-      initialCallCount
+      initialCallCount,
     );
     expect(mockUseFireproof).toHaveBeenCalledWith("session-new-session-id");
   });

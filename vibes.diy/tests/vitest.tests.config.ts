@@ -11,9 +11,9 @@ export default defineConfig({
     }) as any,
   ],
   optimizeDeps: {
-    exclude: ['fsevents', 'lightningcss']
+    exclude: ["fsevents", "lightningcss"],
   },
-  cacheDir: './node_modules/.vibes.diy-vite-cache',
+  cacheDir: "./node_modules/.vibes.diy-vite-cache",
   test: {
     setupFiles: ["./moduleSetup.ts", "./setup.ts"],
     name: "vibes.diy",

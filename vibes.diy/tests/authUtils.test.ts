@@ -176,7 +176,9 @@ describe("auth utils", () => {
       //   pathname: "/not/callback",
       // } as Location);
 
-      const result = auth.initiateAuthFlow({ pathnameFn: () => "/not/callback" });
+      const result = auth.initiateAuthFlow({
+        pathnameFn: () => "/not/callback",
+      });
       expect(result).toBeTruthy();
       expect(result?.connectUrl).toContain("/token");
       expect(result?.connectUrl).toContain("result_id=");

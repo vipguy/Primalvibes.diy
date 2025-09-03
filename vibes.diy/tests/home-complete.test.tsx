@@ -42,7 +42,7 @@ let locationMock = {
 vi.mock("react-router-dom", async () => {
   const actual =
     await vi.importActual<typeof import("react-router-dom")>(
-      "react-router-dom"
+      "react-router-dom",
     );
   return {
     ...actual,
@@ -65,7 +65,7 @@ interface ChatInterfaceProps {
   chatState: {
     messages: ChatMessage[];
     setMessages: (
-      newMessages: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])
+      newMessages: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[]),
     ) => void;
     input: string;
     setInput: React.Dispatch<React.SetStateAction<string>>;
@@ -153,7 +153,7 @@ vi.mock("~/vibes.diy/app/components/ResultPreview/ResultPreview", () => ({
         data-testid="share-button"
         onClick={() =>
           navigator.clipboard.writeText(
-            `${window.location.origin}/shared?state=mockState`
+            `${window.location.origin}/shared?state=mockState`,
           )
         }
       >
@@ -194,9 +194,9 @@ vi.mock("~/vibes.diy/app/utils/segmentParser.js", async (original) => {
 // Mock useSimpleChat hook to return a chat with completed AI message containing code
 vi.mock("~/vibes.diy/app/hooks/useSimpleChat", async (original) => {
   const mockCode = Array(210)
-  .fill(0)
-  .map((_, i) => `console.log("Line ${i}");`)
-  .join("\n");
+    .fill(0)
+    .map((_, i) => `console.log("Line ${i}");`)
+    .join("\n");
   const { mockChatStateProps } = await import("./mockData.js");
   const all =
     (await original()) as typeof import("~/vibes.diy/app/hooks/useSimpleChat.js");
@@ -294,12 +294,12 @@ describe("Home Route in completed state", () => {
             <UnifiedSession />
           </AuthContext.Provider>
         </MemoryRouter>
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     await waitFor(() => {
       expect(screen.getByTestId("code-line-count")).toHaveTextContent(
-        "210 lines of code"
+        "210 lines of code",
       );
     });
   });
@@ -320,7 +320,7 @@ describe("Home Route in completed state", () => {
             <UnifiedSession />
           </AuthContext.Provider>
         </MemoryRouter>
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     const shareButton = await screen.findByTestId("share-button");
@@ -363,12 +363,12 @@ describe("Home Route in completed state", () => {
             <UnifiedSession />
           </AuthContext.Provider>
         </MemoryRouter>
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Find create session button and click it
     const createSessionButton = await screen.findByTestId(
-      "create-session-button"
+      "create-session-button",
     );
     fireEvent.click(createSessionButton);
 
@@ -386,7 +386,7 @@ describe("Home Route in completed state", () => {
           expect(path.includes("/chat/")).toBe(true);
         }
       },
-      { timeout: 2000 }
+      { timeout: 2000 },
     );
   });
 
@@ -415,7 +415,7 @@ describe("Home Route in completed state", () => {
             <UnifiedSession />
           </AuthContext.Provider>
         </MemoryRouter>
-      </MockThemeProvider>
+      </MockThemeProvider>,
     );
 
     // Verify the component renders without crashing
