@@ -1,5 +1,11 @@
 import React from "react";
-import { act, fireEvent, screen, render, cleanup } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  screen,
+  render,
+  cleanup,
+} from "@testing-library/react";
 // Vitest will automatically use mocks from __mocks__ directory
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resetMockAuthState, setMockAuthState } from "./__mocks__/useAuth.js";
@@ -33,23 +39,30 @@ vi.mock("~/vibes.diy/app/utils/analytics", () => ({
   trackAuthClick: vi.fn(),
 }));
 
+// Create a mock for initiateLogin that we can track
+const mockInitiateLogin = vi.fn().mockResolvedValue(undefined);
+
 // Mock useAuthPopup hook
 vi.mock("~/vibes.diy/app/hooks/useAuthPopup", () => ({
   useAuthPopup: () => ({
     isPolling: false,
     pollError: null,
-    initiateLogin: vi.fn().mockResolvedValue(undefined),
+    initiateLogin: mockInitiateLogin,
   }),
 }));
 
 // Mock VibesDIYLogo component
 vi.mock("~/vibes.diy/app/components/VibesDIYLogo", () => ({
   default: ({ width, className }: { width: number; className: string }) =>
-    React.createElement("div", { 
-      "data-testid": "vibes-diy-logo", 
-      style: { width: `${width}px` }, 
-      className 
-    }, "Logo"),
+    React.createElement(
+      "div",
+      {
+        "data-testid": "vibes-diy-logo",
+        style: { width: `${width}px` },
+        className,
+      },
+      "Logo",
+    ),
   randomColorway: () => "default",
 }));
 
@@ -82,7 +95,11 @@ vi.mock("~/vibes.diy/app/components/SessionSidebar/StarIcon", () => ({
 
 vi.mock("~/vibes.diy/app/components/SessionSidebar/FirehoseIcon", () => ({
   FirehoseIcon: ({ className }: { className: string }) =>
-    React.createElement("div", { className, "data-testid": "firehose-icon" }, "🔥"),
+    React.createElement(
+      "div",
+      { className, "data-testid": "firehose-icon" },
+      "🔥",
+    ),
 }));
 
 import { trackAuthClick } from "~/vibes.diy/app/utils/analytics.js";
@@ -131,6 +148,7 @@ describe("SessionSidebar component", () => {
     // Reset mocks
     vi.mocked(initiateAuthFlow).mockClear();
     vi.mocked(trackAuthClick).mockClear();
+    mockInitiateLogin.mockClear();
     // No window event listeners needed anymore
     // Reset DOM
   });
@@ -204,9 +222,8 @@ describe("SessionSidebar component", () => {
       await Promise.resolve();
     });
 
-    // Verify that initiateAuthFlow and trackAuthClick were called
-    expect(initiateAuthFlow).toHaveBeenCalledTimes(1);
-    expect(trackAuthClick).toHaveBeenCalledTimes(1);
+    // Verify that initiateLogin was called
+    expect(mockInitiateLogin).toHaveBeenCalledTimes(1);
   });
 
   // Test removed - needsLogin functionality no longer exists

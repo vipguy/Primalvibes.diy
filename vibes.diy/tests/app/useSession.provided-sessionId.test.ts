@@ -18,9 +18,8 @@ vi.mock("use-fireproof", async (original) => {
   const mockUseFireproof = vi.fn().mockImplementation((name) => {
     // console.log("Mock fireproof called", name);
     if (!name) {
-
-      console.trace("missing name")
-      throw(new Error("missing NAME"))
+      console.trace("missing name");
+      throw new Error("missing NAME");
     }
     return {
       id,
@@ -65,5 +64,4 @@ describe("useSession", () => {
     expect(mockUseFireproof).toHaveBeenCalledWith("vibe-test-id");
     expect(mockUseFireproof.mock.calls.length).toBe(2);
   });
-
 });

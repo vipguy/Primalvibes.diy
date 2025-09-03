@@ -215,7 +215,8 @@ const mockMergeUserMessage = vi.fn(mergeUserMessageImpl);
 
 // Mock the useSession hook
 vi.mock("~/vibes.diy/app/hooks/useSession", async (original) => {
-  const all = await original() as typeof import("~/vibes.diy/app/hooks/useSession.js");
+  const all =
+    (await original()) as typeof import("~/vibes.diy/app/hooks/useSession.js");
   return {
     ...all,
     // updateAiSelectedDependencies: vi.fn(),

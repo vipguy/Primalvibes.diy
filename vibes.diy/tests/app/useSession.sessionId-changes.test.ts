@@ -18,9 +18,8 @@ vi.mock("use-fireproof", async (original) => {
   const mockUseFireproof = vi.fn().mockImplementation((name) => {
     // console.log("Mock fireproof called", name);
     if (!name) {
-
-      console.trace("missing name")
-      throw(new Error("missing NAME"))
+      console.trace("missing name");
+      throw new Error("missing NAME");
     }
     return {
       id,
@@ -59,7 +58,6 @@ describe("useSession", () => {
     mockUseFireproof.mockClear();
     vi.clearAllMocks();
   });
-
 
   /**
    * This test verifies session ID transition behavior with eager initialization

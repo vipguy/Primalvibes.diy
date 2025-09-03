@@ -6,7 +6,7 @@ import { mockResultPreviewProps } from "./mockData.js";
 import { MockThemeProvider } from "./utils/MockThemeProvider.js";
 
 // Mock clipboard API
-Object.defineProperty(navigator, 'clipboard', {
+Object.defineProperty(navigator, "clipboard", {
   value: {
     writeText: vi.fn().mockImplementation(() => Promise.resolve()),
   },

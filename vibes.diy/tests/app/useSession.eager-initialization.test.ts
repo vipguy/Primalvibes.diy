@@ -18,9 +18,8 @@ vi.mock("use-fireproof", async (original) => {
   const mockUseFireproof = vi.fn().mockImplementation((name) => {
     // console.log("Mock fireproof called", name);
     if (!name) {
-
-      console.trace("missing name")
-      throw(new Error("missing NAME"))
+      console.trace("missing name");
+      throw new Error("missing NAME");
     }
     return {
       id,
@@ -60,7 +59,6 @@ describe("useSession", () => {
     vi.clearAllMocks();
   });
 
-
   /**
    * NEW BEHAVIOR: Eager database initialization for observable side effects
    *
@@ -92,5 +90,4 @@ describe("useSession", () => {
     // The submitUserMessage should have been called once
     // (we can't easily test the mock submit function from inside the closure)
   });
-
 });
