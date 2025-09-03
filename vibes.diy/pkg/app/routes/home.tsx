@@ -395,6 +395,7 @@ export default function UnifiedSession() {
         }
         mobilePreviewShown={displayView === "chat" ? false : mobilePreviewShown}
       />
+      {console.log("SessionSidebar props:", { isVisible: isSidebarVisible, sessionId: chatState.sessionId || "", onClose: closeSidebar })}
       <SessionSidebar
         isVisible={isSidebarVisible}
         onClose={closeSidebar}

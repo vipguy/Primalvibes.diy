@@ -210,11 +210,16 @@ function SessionSidebar({ isVisible, onClose }: SessionSidebarProps) {
 
 // Export a memoized version of the component to prevent unnecessary re-renders
 export default memo(SessionSidebar, (prevProps, nextProps) => {
-  console.log("memo-session-sidebar");
+  console.log("memo-session-sidebar", {
+    isVisible: { prev: prevProps.isVisible, next: nextProps.isVisible, same: prevProps.isVisible === nextProps.isVisible },
+    onClose: { same: prevProps.onClose === nextProps.onClose },
+    sessionId: { prev: prevProps.sessionId, next: nextProps.sessionId, same: prevProps.sessionId === nextProps.sessionId }
+  });
   // Only re-render if isVisible changes
   // Note: Functions should be memoized by parent components
   return (
     prevProps.isVisible === nextProps.isVisible &&
-    prevProps.onClose === nextProps.onClose
+    prevProps.onClose === nextProps.onClose &&
+    prevProps.sessionId === nextProps.sessionId
   );
 });
