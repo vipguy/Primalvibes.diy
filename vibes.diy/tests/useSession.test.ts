@@ -16,7 +16,6 @@ vi.mock("use-fireproof", async (original) => {
   const mockSubmitUserMessage = vi.fn().mockResolvedValue({ ok: true });
   const id = Math.random().toString(36).substring(2, 15);
   const mockUseFireproof = vi.fn().mockImplementation((name) => {
-    console.log("Mock useFireproof called", id, name, new Error().stack);
     return {
       id,
       useDocument: () => ({
@@ -29,7 +28,6 @@ vi.mock("use-fireproof", async (original) => {
       database: { get: vi.fn(), put: vi.fn() },
     } as unknown as ReturnType<typeof useFireproof>;
   });
-  console.log("Original module:");
   return {
     ...originalModule,
     // fireproof: mockFireproof,
@@ -52,7 +50,6 @@ describe("useSession", () => {
   beforeEach(() => {
     globalThis.document.body.innerHTML = "";
     mockUseFireproof = vi.mocked(useFireproof);
-    console.log("clear ", (mockUseFireproof() as unknown as { id: string }).id);
     mockUseFireproof.mockClear();
     vi.clearAllMocks();
   });

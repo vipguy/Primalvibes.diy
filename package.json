@@ -20,6 +20,7 @@
     "build": "core-cli tsc",
     "lint": "eslint .",
     "test": "vitest --run",
+    "test:all": "pnpm test && cd vibes.diy/tests && pnpm run test && cd ../../prompts/tests && pnpm run test && cd ../../use-vibes/tests && pnpm run test",
     "format": "prettier --write  --log-level silent .",
     "dev": "cd vibes.diy/pkg && pnpm run dev",
     "dev:router": "cd vibes.diy/pkg && pnpm run dev:router",

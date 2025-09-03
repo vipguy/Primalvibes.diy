@@ -21,6 +21,8 @@ export default defineConfig({
     name: 'use-vibes:browser',
     exclude: ['dist/**', 'node_modules/**'],
     include: ['**/*test.?(c|m)[jt]s?(x)'],
+    testTimeout: 30000,
+    hookTimeout: 10000,
     browser: {
       enabled: true,
       headless: true,
