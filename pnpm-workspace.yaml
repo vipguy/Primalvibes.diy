@@ -6,7 +6,8 @@ packages:
   - "use-vibes/pkg"
   - "use-vibes/tests"
   - "vibes.diy/pkg"
-  - "vibes.diy/tests"
+  - "vibes.diy/tests/app"
+  - "vibes.diy/tests/simple-chat"
   - "prompts/pkg"
   - "prompts/tests"
 

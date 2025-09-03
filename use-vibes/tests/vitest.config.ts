@@ -18,7 +18,7 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    name: 'use-vibes:browser',
+    name: 'use-vibes',
     exclude: ['dist/**', 'node_modules/**'],
     include: ['**/*test.?(c|m)[jt]s?(x)'],
     testTimeout: 30000,

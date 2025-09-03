@@ -10,12 +10,15 @@ export default defineConfig({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }) as any,
   ],
-  cacheDir: "./node_modules/.vibes.diy-useSimpleChat-vite-cache",
+  optimizeDeps: {
+    exclude: ["fsevents", "lightningcss"],
+  },
+  // cacheDir: "./node_modules/.vibes.diy-vite-cache",
   test: {
-    setupFiles: ["./useSimpleChat/setup.tsx"],
-    name: "vibes.diy:useSimpleChat",
+    setupFiles: ["./moduleSetup.ts", "./setup.ts"],
+    name: "vibes.diy",
     exclude: ["dist/**", "node_modules/**"],
-    include: ["./useSimpleChat/**/*test.?(c|m)[jt]s?(x)"],
+    include: ["**/*test.?(c|m)[jt]s?(x)"],
     /*
     server: {
       noExternal: [/\.txt$/],
@@ -31,5 +34,7 @@ export default defineConfig({
         },
       ],
     },
+    testTimeout: 30000,
+    hookTimeout: 10000,
   },
 });
