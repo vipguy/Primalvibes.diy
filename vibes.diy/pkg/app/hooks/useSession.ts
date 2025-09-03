@@ -83,6 +83,7 @@ export function useSession(routedSessionId?: string): UseSession {
 
   const sessionId = effectiveSessionId;
   const sessionDbName = getSessionDatabaseName(sessionId);
+  console.log("useSession", { sessionId, sessionDbName });
   const {
     database: sessionDatabase,
     useDocument: useSessionDocument,

@@ -16,10 +16,12 @@ vi.mock("jose", () => ({
 
 // Import jose after mocking to get the mocked version
 import * as jose from "jose";
+import { VibesDiyEnv } from "~/vibes.diy/app/config/env.js";
 
 // Helper for setting up import.meta.env
 function setEnv(vars: Record<string, string>) {
-  (import.meta.env as Record<string, string>) = { ...vars };
+  // (import.meta.env as Record<string, string>) = { ...vars };
+  VibesDiyEnv.env().sets({ ...vars });
 }
 
 describe("auth utils", () => {
@@ -170,11 +172,11 @@ describe("auth utils", () => {
     it("returns connectUrl and resultId and sets sessionStorage", () => {
       // Set the connect URL environment variable to match the actual .env file
       setEnv({ VITE_CONNECT_URL: "http://localhost:7370/token" });
-      vi.spyOn(window, "location", "get").mockReturnValue({
-        pathname: "/not/callback",
-      } as Location);
+      // vi.spyOn(window, "location", "get").mockReturnValue({
+      //   pathname: "/not/callback",
+      // } as Location);
 
-      const result = auth.initiateAuthFlow();
+      const result = auth.initiateAuthFlow({ pathnameFn: () => "/not/callback" });
       expect(result).toBeTruthy();
       expect(result?.connectUrl).toContain("/token");
       expect(result?.connectUrl).toContain("result_id=");
@@ -185,10 +187,12 @@ describe("auth utils", () => {
     });
 
     it("returns null if already on callback page", () => {
-      vi.spyOn(window, "location", "get").mockReturnValue({
-        pathname: "/auth/callback",
-      } as Location);
-      const result = auth.initiateAuthFlow();
+      // vi.spyOn(window, "location", "get").mockReturnValue({
+      //   pathname: "/auth/callback",
+      // } as Location);
+      const result = auth.initiateAuthFlow({
+        pathnameFn: () => "/auth/callback",
+      });
       expect(result).toBeNull();
     });
   });

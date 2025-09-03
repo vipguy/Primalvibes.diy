@@ -73,6 +73,7 @@ Object.defineProperty(globalThis.URL, "revokeObjectURL", {
 
 describe("SessionSidebar component", () => {
   beforeEach(() => {
+    globalThis.document.body.innerHTML = "";
     vi.clearAllMocks();
     resetMockAuthState();
     // Reset mocks
@@ -80,7 +81,6 @@ describe("SessionSidebar component", () => {
     vi.mocked(trackAuthClick).mockClear();
     // No window event listeners needed anymore
     // Reset DOM
-    document.body.innerHTML = "";
   });
 
   it("should correctly render SessionSidebar component with menu items when authenticated", () => {
@@ -345,7 +345,7 @@ describe("SessionSidebar component", () => {
     }
   });
 
-  it("has navigation links that call onClose when clicked", () => {
+  it("has navigation links that call onClose when clicked", async () => {
     // Mock useAuth to return authenticated state
     setMockAuthState({
       isAuthenticated: true,
@@ -370,9 +370,11 @@ describe("SessionSidebar component", () => {
 
     // Click each link and verify onClose is called
     for (const link of navLinks) {
-      fireEvent.click(link);
+      console.log("link", link)
+      await act(() => fireEvent.click(link));
       expect(onClose).toHaveBeenCalled();
       onClose.mockClear();
     }
+    console.log("Finished clicking all links");
   });
 });

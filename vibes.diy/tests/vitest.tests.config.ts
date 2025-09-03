@@ -10,6 +10,10 @@ export default defineConfig({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }) as any,
   ],
+  optimizeDeps: {
+    exclude: ['fsevents', 'lightningcss']
+  },
+  cacheDir: './node_modules/.vibes.diy-vite-cache',
   test: {
     setupFiles: ["./moduleSetup.ts", "./setup.ts"],
     name: "vibes.diy",

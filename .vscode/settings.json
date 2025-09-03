@@ -18,5 +18,8 @@
     "titleBar.inactiveBackground": "#3388bb99",
     "titleBar.inactiveForeground": "#e7e7e799"
   },
-  "peacock.color": "#38b"
+  "peacock.color": "#38b",
+  "vitest": {
+    "maximumConfigs": 20
+  }
 }

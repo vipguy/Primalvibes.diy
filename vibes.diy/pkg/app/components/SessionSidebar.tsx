@@ -15,6 +15,7 @@ import { dark, light } from "./colorways.js";
  * Component that displays a navigation sidebar with menu items
  */
 function SessionSidebar({ isVisible, onClose }: SessionSidebarProps) {
+  console.log("SessionSidebar rendered");
   const sidebarRef = useRef<HTMLDivElement>(null);
   const { isAuthenticated, isLoading } = useAuth();
   const { isPolling, pollError, initiateLogin } = useAuthPopup();
@@ -209,6 +210,7 @@ function SessionSidebar({ isVisible, onClose }: SessionSidebarProps) {
 
 // Export a memoized version of the component to prevent unnecessary re-renders
 export default memo(SessionSidebar, (prevProps, nextProps) => {
+  console.log("memo-session-sidebar");
   // Only re-render if isVisible changes
   // Note: Functions should be memoized by parent components
   return (

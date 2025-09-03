@@ -114,12 +114,17 @@ function decodePublicKeyJWK(encodedString: string): JWK {
  * No redirect is performed. The resultId is stored in sessionStorage for later polling.
  * Returns an object with { connectUrl, resultId }
  */
-export function initiateAuthFlow(): {
+
+function callPathname(pathnameFn?: () => string) {
+  return pathnameFn ? pathnameFn() : globalThis.window.location.pathname;
+}
+
+export function initiateAuthFlow({ pathnameFn }: { pathnameFn?: () => string } = {}): {
   connectUrl: string;
   resultId: string;
 } | null {
   // Don't initiate if already on the callback page
-  if (window.location.pathname.includes("/auth/callback")) {
+  if (callPathname(pathnameFn).includes("/auth/callback")) {
     return null;
   }
 
