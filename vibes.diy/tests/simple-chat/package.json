@@ -36,11 +36,14 @@
     "react-router": "^7.4.1",
     "use-fireproof": "0.23.13",
     "use-vibes": "workspace:*",
-    "vibes-diy": "workspace:*"
+    "vibes-diy": "workspace:*",
+    "@vibes.diy/prompts": "workspace:*"
   },
   "devDependencies": {
     "@fireproof/core-cli": "^0.23.11",
     "@testing-library/react": "^16.3.0",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"
   }

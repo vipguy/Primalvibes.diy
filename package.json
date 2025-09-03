@@ -20,7 +20,7 @@
     "build": "core-cli tsc",
     "lint": "eslint .",
     "test": "DISABLE_REACT_ROUTER=true vitest --run",
-    "test:all": "cd vibes.diy/tests/app && pnpm run test && cd ../simple-chat && pnpm run test && cd ../../prompts/tests && pnpm run test && cd ../../use-vibes/tests && pnpm run test && cd ../../call-ai/tests && pnpm run test",
+    "test:all": "cd vibes.diy/tests/app && pnpm run test && cd ../simple-chat && pnpm run test && cd ../../../prompts/tests && pnpm run test && cd ../../use-vibes/tests && pnpm run test && cd ../../call-ai/tests && pnpm run test",
     "format": "prettier --write  --log-level silent .",
     "dev": "cd vibes.diy/pkg && pnpm run dev",
     "dev:router": "cd vibes.diy/pkg && pnpm run dev:router",
