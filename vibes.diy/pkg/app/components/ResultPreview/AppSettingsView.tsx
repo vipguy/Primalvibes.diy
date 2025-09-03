@@ -101,8 +101,14 @@ const AppSettingsView: React.FC<AppSettingsViewProps> = ({
 
   useEffect(() => {
     // Sync local selection when external changes land
-    setDeps(initialDeps);
-    setHasUnsavedDeps(false);
+    setDeps((prev) => {
+      // Only reset unsaved flag if the external deps actually changed
+      const changed = JSON.stringify(prev) !== JSON.stringify(initialDeps);
+      if (changed) {
+        setHasUnsavedDeps(false);
+      }
+      return initialDeps;
+    });
   }, [initialDeps]);
 
   const handleEditNameStart = useCallback(() => {
@@ -149,7 +155,7 @@ const AppSettingsView: React.FC<AppSettingsViewProps> = ({
       });
       setHasUnsavedDeps(true);
     },
-    [llmsCatalog, catalogNames, deps],
+    [llmsCatalog, catalogNames],
   );
 
   const handleSaveDeps = useCallback(async () => {
@@ -184,8 +190,6 @@ const AppSettingsView: React.FC<AppSettingsViewProps> = ({
     },
     [onUpdateDemoDataOverride],
   );
-
-  console.log("xxxxxx", hasUnsavedDeps, deps);
 
   return (
     <div

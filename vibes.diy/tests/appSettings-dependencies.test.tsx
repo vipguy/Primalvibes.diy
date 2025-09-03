@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent, act } from "@testing-library/react";
+import { render, fireEvent, act, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import AppSettingsView from "~/vibes.diy/app/components/ResultPreview/AppSettingsView.js";
 
@@ -68,7 +68,10 @@ describe("AppSettingsView Libraries (per‑vibe dependency chooser)", () => {
     await act(async () => fireEvent.click(callai)); // uncheck one
 
     const save = res.getByRole("button", { name: /save/i });
-    expect(save).not.toBeDisabled();
+    // Wait for the button to become enabled after state updates
+    await waitFor(() => {
+      expect(save).not.toBeDisabled();
+    });
 
     await act(async () => fireEvent.click(save));
     expect(onUpdateDependencies).toHaveBeenCalledWith(["fireproof"], true);
