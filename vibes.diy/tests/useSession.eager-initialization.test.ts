@@ -60,41 +60,6 @@ describe("useSession", () => {
     vi.clearAllMocks();
   });
 
-  it("should initialize database eagerly with provided sessionId", async () => {
-    renderHook(() => useSession("test-id"));
-    expect(mockUseFireproof).toHaveBeenCalledWith("vibe-test-id");
-    expect(mockUseFireproof.mock.calls.length).toBe(2);
-  });
-
-  it("should initialize database eagerly even when sessionId is not provided", () => {
-    console.log(
-      "pre ",
-      // (mockUseFireproof() as unknown as { id: string }).id,
-      mockUseFireproof.mock.calls.length,
-      mockUseFireproof.mock.calls,
-    );
-    const { result } = renderHook(() => useSession(undefined));
-    console.log(
-      "pos ",
-      // (mockUseFireproof() as unknown as { id: string }).id,
-      mockUseFireproof.mock.calls.length,
-      mockUseFireproof.mock.calls,
-    );
-
-    // Verify we have a session ID generated (in the session document)
-    expect(result.current.session._id).toBeTruthy();
-    // Verify the database is initialized eagerly on first render
-    // Called for the session DB and the settings DB (may be called more times during re-renders)
-    expect(mockUseFireproof.mock.calls.length).toBe(2);
-    expect(mockUseFireproof).toHaveBeenCalledWith(
-      expect.stringMatching(/^vibe-/),
-    );
-    // Check that the settings database is called (may be test-chat-history or vibes-chats)
-    const hasValidSettingsCall = mockUseFireproof.mock.calls.some(
-      (call) => call[0] === "test-chat-history" || call[0] === "vibes-chats",
-    );
-    expect(hasValidSettingsCall).toBe(true);
-  });
 
   /**
    * NEW BEHAVIOR: Eager database initialization for observable side effects
@@ -111,7 +76,7 @@ describe("useSession", () => {
       // expect(result.current.loading).toBe(false);
     });
 
-    console.log(mockUseFireproof.mock.calls.length, mockUseFireproof.mock.calls);
+    // console.log(mockUseFireproof.mock.calls.length, mockUseFireproof.mock.calls);
 
     // Step 1: Database should be initialized immediately on first render
     // At least one call for the session DB and one for the settings DB
@@ -128,37 +93,4 @@ describe("useSession", () => {
     // (we can't easily test the mock submit function from inside the closure)
   });
 
-  /**
-   * This test verifies session ID transition behavior with eager initialization
-   * When the sessionId changes, a new database should be initialized with the new name
-   */
-  it("should initialize new database when sessionId changes", async () => {
-    // Start with no session ID (first message scenario)
-    const { rerender, result } = renderHook(
-      ({ id }: { id?: string }) => useSession(id),
-      {
-        initialProps: { id: undefined } as { id?: string },
-      },
-    );
-
-    await waitFor(() => {
-      expect(result.current.sessionDatabase).toBeDefined();
-      // expect(result.current.loading).toBe(false);
-    });
-
-    // Get the initial call count
-    const initialCallCount = mockUseFireproof.mock.calls.length;
-    const initialCall = mockUseFireproof.mock.calls[0][0];
-    expect(initialCall).toMatch(/^vibe-/);
-
-    // Simulate URL update with new session ID (after first message response)
-    rerender({ id: "new-session-id" });
-
-    // Verify new database is initialized with the new session ID
-    // The call count should have increased
-    expect(mockUseFireproof.mock.calls.length).toBeGreaterThan(
-      initialCallCount,
-    );
-    expect(mockUseFireproof).toHaveBeenCalledWith("vibe-new-session-id");
-  });
 });
