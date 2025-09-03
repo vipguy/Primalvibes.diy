@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from "vitest";
 // Mock React Router dev routes before importing
 vi.mock("@react-router/dev/routes", () => ({
   index: (file: string) => ({ type: "index", file }),
-  route: (path: string, file: string, options?: any) => ({
+  route: (path: string, file: string, options?: Record<string, unknown>) => ({
     type: "route",
     path,
     file,

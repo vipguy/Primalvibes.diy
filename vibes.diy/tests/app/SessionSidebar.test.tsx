@@ -422,9 +422,6 @@ describe("SessionSidebar component", () => {
     }
   });
 
-  // NOTE: This test is skipped due to a Vitest/Chromium hanging issue
-  // The test itself passes but hangs after cleanup completes
-  // Root cause: Vitest browser environment cleanup issue, not test code
   it.skip("has navigation links that call onClose when clicked", () => {
     // Mock useAuth to return authenticated state
     setMockAuthState({
