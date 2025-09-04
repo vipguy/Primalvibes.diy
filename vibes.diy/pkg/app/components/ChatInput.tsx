@@ -7,11 +7,11 @@ import React, {
   useImperativeHandle,
   useState,
 } from "react";
-import type { ChatState } from "@vibes.diy/prompts";
+import type { BaseChatState } from "@vibes.diy/prompts";
 import ModelPicker, { type ModelOption } from "./ModelPicker.js";
 
 interface ChatInputProps {
-  chatState: ChatState;
+  chatState: BaseChatState;
   onSend: () => void;
   // Optional model picker props (for backward compatibility in tests/stories)
   currentModel?: string;

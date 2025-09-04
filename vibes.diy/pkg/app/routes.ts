@@ -5,6 +5,7 @@ export default [
   // This route is only needed for dev server to prevent 404 flash
   route("index.html", "./routes/home.tsx", { id: "index-html" }),
 
+  route("chat/:sessionId", "./routes/home.tsx", { id: "chat-session" }),
   route("chat/:sessionId/:title", "./routes/home.tsx", { id: "chat" }),
   route("chat/:sessionId/:title/app", "./routes/home.tsx", { id: "chat-app" }),
   route("chat/:sessionId/:title/code", "./routes/home.tsx", {

@@ -153,7 +153,7 @@ export type SystemChatMessage = ChatMessage & {
 };
 
 // ===== Component Props =====
-export interface ChatState {
+export interface BaseChatState {
   isEmpty: boolean;
   docs: ChatMessageDocument[];
   input: string;
@@ -169,7 +169,6 @@ export interface ChatState {
   title: string;
   updateTitle: (title: string, isManual?: boolean) => Promise<void>;
   addScreenshot: (screenshot: string | null) => Promise<void>;
-  sessionId?: string | null;
   setSelectedResponseId: (id: string) => void;
   selectedResponseDoc?: ChatMessageDocument;
   selectedSegments?: Segment[];
@@ -186,6 +185,14 @@ export interface ChatState {
   advisoryErrors: RuntimeError[];
   addError: (error: RuntimeError) => void;
   vibeDoc?: VibeDocument;
+}
+
+export interface ChatState extends BaseChatState {
+  sessionId: string;
+}
+
+export interface NewSessionChatState extends BaseChatState {
+  sessionId: null;
 }
 
 export interface ChatInterfaceProps extends ChatState {

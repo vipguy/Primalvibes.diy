@@ -108,7 +108,7 @@ export default function SessionView({ sessionId }: SessionViewProps) {
   // TEMPORARILY DISABLED - Testing if useViewState causes render loop
   const { displayView, navigateToView, viewControls, showViewControls } =
     useViewState({
-      sessionId: chatState.sessionId || undefined, // Handle null
+      sessionId: chatState.sessionId, // sessionId is guaranteed non-null from interface
       title: chatState.title || undefined, // Handle null
       code: chatState.selectedCode?.content || "",
       isStreaming: chatState.isStreaming,
@@ -222,7 +222,7 @@ export default function SessionView({ sessionId }: SessionViewProps) {
       } else if (currentPath.includes(`/chat/${chatState.sessionId}`)) {
         // If it's the base chat URL without suffix, default to /app
         // Unless there's a captured prompt that hasn't been sent yet
-        suffix = capturedPrompt ? "" : "/app";
+        suffix = capturedPrompt ? "/chat" : "/app";
       }
 
       const newUrl = `/chat/${chatState.sessionId}/${encodeTitle(chatState.title)}${suffix}`;
@@ -320,7 +320,7 @@ export default function SessionView({ sessionId }: SessionViewProps) {
 
   // Switch to 2-column view immediately when a message is submitted
   const shouldUseFullWidthChat =
-    chatState.docs.length === 0 && !sessionId && !hasSubmittedMessage;
+    chatState.docs.length === 0 && !hasSubmittedMessage;
 
   // Debug logging for SessionView render - this might be causing the render loop!
   // console.log("SessionSidebar props:", { isVisible: isSidebarVisible, sessionId: chatState.sessionId || "", onClose: closeSidebar });
@@ -351,7 +351,7 @@ export default function SessionView({ sessionId }: SessionViewProps) {
               isStreaming={chatState.isStreaming}
               // Props needed by usePublish and useSession within ResultPreviewHeaderContent:
               code={chatState.selectedCode?.content || ""}
-              sessionId={chatState.sessionId || undefined} // Handle null
+              sessionId={chatState.sessionId} // sessionId is guaranteed non-null from interface
               title={chatState.title || undefined} // Handle null
               previewReady={previewReady} // needed for publish button visibility logic
               // Props for code editing
@@ -372,7 +372,7 @@ export default function SessionView({ sessionId }: SessionViewProps) {
           <ResultPreview
             title={chatState.title}
             updateTitle={chatState.updateTitle}
-            sessionId={chatState.sessionId || ""}
+            sessionId={chatState.sessionId} // sessionId is guaranteed non-null from interface
             code={chatState.selectedCode?.content || ""}
             isStreaming={chatState.isStreaming}
             codeReady={chatState.codeReady}
@@ -423,7 +423,7 @@ export default function SessionView({ sessionId }: SessionViewProps) {
       <SessionSidebar
         isVisible={isSidebarVisible}
         onClose={closeSidebar}
-        sessionId={chatState.sessionId || ""}
+        sessionId={chatState.sessionId} // sessionId is guaranteed non-null from interface
       />
     </>
   );

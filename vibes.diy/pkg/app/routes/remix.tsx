@@ -19,8 +19,14 @@ export default function Remix() {
   const [error, setError] = useState<string | null>(null);
   const [appDomain, setAppDomain] = useState<string | null>(null);
 
+  // Generate a sessionId for this remix session
+  const [sessionId] = useState(
+    () =>
+      `remix-${Date.now().toString(36).padStart(9, "f")}${Math.random().toString(36).slice(2, 11).padEnd(9, "0")}`,
+  );
+
   // Get database instances from hooks
-  const { session, sessionDatabase, updateTitle } = useSession(undefined);
+  const { session, sessionDatabase, updateTitle } = useSession(sessionId);
 
   // Get API key for title generation
   // const { apiKey } = useApiKey(userPayload?.userId);
@@ -117,7 +123,7 @@ export default function Remix() {
           targetUrl += `?prompt=${encodeURIComponent(promptParameter.trim())}`;
         }
 
-        navigate(targetUrl);
+        window.location.href = targetUrl;
       } catch (error) {
         console.error("Error in remix process:", error);
         setError(

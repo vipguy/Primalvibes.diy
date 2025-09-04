@@ -30,7 +30,8 @@ describe("useSimpleChat", () => {
     >(async () => {
       return Promise.resolve({ id: pendingId } as DocResponse);
     });
-    vi.mocked(useSession)(undefined).sessionDatabase.put = mockPendingPut;
+    vi.mocked(useSession)("test-session-id").sessionDatabase.put =
+      mockPendingPut;
 
     act(() => {
       result.current.setInput("trigger pending");
@@ -45,7 +46,7 @@ describe("useSimpleChat", () => {
       const id = doc._id || `ai-message-${Date.now()}`;
       return Promise.resolve({ id } as DocResponse);
     });
-    vi.mocked(useSession)(undefined).sessionDatabase.put = originalPut;
+    vi.mocked(useSession)("test-session-id").sessionDatabase.put = originalPut;
 
     await act(async () => {
       result.current.setSelectedResponseId("");

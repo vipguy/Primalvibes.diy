@@ -59,24 +59,11 @@ describe("useSession", () => {
     vi.clearAllMocks();
   });
 
-  it("should initialize database eagerly even when sessionId is not provided", () => {
-    // console.log(
-    //   "pre ",
-    //   // (mockUseFireproof() as unknown as { id: string }).id,
-    //   mockUseFireproof.mock.calls.length,
-    //   mockUseFireproof.mock.calls,
-    // );
-    const { result } = renderHook(() => useSession(undefined));
-    // console.log(
-    //   "pos ",
-    //   // (mockUseFireproof() as unknown as { id: string }).id,
-    //   mockUseFireproof.mock.calls.length,
-    //   mockUseFireproof.mock.calls,
-    // );
-
-    // Verify we have a session ID generated (in the session document)
-    expect(result.current.session._id).toBeTruthy();
-    // Verify the database is initialized eagerly on first render
+  it("should throw an error when sessionId is not provided", () => {
+    // Test that useSession now requires a sessionId and throws when undefined is passed
+    expect(() => {
+      renderHook(() => useSession(undefined as any));
+    }).toThrow("useSession requires a valid sessionId");
     // Called for the session DB and the settings DB (may be called more times during re-renders)
     expect(mockUseFireproof.mock.calls.length).toBe(2);
     expect(mockUseFireproof).toHaveBeenCalledWith(

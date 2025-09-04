@@ -55,13 +55,13 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
   const sessionId = propSessionId || urlSessionId;
   const title = propTitle || urlView;
 
-  // Use the session hook to get and update session data
+  // Use the session hook to get and update session data - only if we have a sessionId
   const {
     session,
     docs: messages,
     updatePublishedUrl,
     updateFirehoseShared,
-  } = useSession(sessionId);
+  } = useSession(sessionId || "temp-session");
 
   // useViewState is now lifted, props like displayView, navigateToView, viewControls, showViewControls are passed in.
   // The useEffect syncing activeView with displayView is no longer needed.

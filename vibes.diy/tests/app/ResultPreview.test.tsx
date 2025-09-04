@@ -569,6 +569,7 @@ describe("ResultPreview", () => {
             /* no-op */
           }}
           updateTitle={() => Promise.resolve()}
+          sessionId="test-session-id"
         />
       </MockThemeProvider>,
     );

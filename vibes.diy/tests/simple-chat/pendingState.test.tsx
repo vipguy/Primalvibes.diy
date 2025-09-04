@@ -41,7 +41,7 @@ describe("useSimpleChat", () => {
     >(async () => {
       return Promise.resolve({ id: generatedId } as DocResponse);
     });
-    vi.mocked(useSession)(undefined).sessionDatabase.put = mockPut;
+    vi.mocked(useSession)("test-session-id").sessionDatabase.put = mockPut;
 
     act(() => {
       result.current.setInput("Trigger stream");
@@ -51,7 +51,7 @@ describe("useSimpleChat", () => {
     });
 
     act(() => {
-      const sessionHookResult = useSession();
+      const sessionHookResult = useSession("test-session-id");
       const mockDocs = sessionHookResult.docs as unknown as {
         _id: string;
         type: string;

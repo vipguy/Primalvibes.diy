@@ -64,11 +64,11 @@ describe("useSession", () => {
    * When the sessionId changes, a new database should be initialized with the new name
    */
   it("should initialize new database when sessionId changes", async () => {
-    // Start with no session ID (first message scenario)
+    // Start with first session ID
     const { rerender, result } = renderHook(
-      ({ id }: { id?: string }) => useSession(id),
+      ({ id }: { id: string }) => useSession(id),
       {
-        initialProps: { id: undefined } as { id?: string },
+        initialProps: { id: "test-session-1" } as { id: string },
       },
     );
 

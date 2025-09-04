@@ -9,7 +9,7 @@ export const isMobileViewport = () => {
 };
 
 export interface ViewStateProps {
-  sessionId?: string;
+  sessionId: string;
   title?: string;
   code: string;
   isStreaming: boolean;

@@ -2,15 +2,11 @@ import { useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router";
 import type {
   ChatMessageDocument,
-  ChatState,
+  NewSessionChatState,
   VibeDocument,
   Segment,
 } from "@vibes.diy/prompts";
 import { RuntimeError } from "use-vibes";
-
-export interface NewSessionChatState extends ChatState {
-  // All properties from ChatState are included via extension
-}
 
 export function useNewSessionChat(
   onSessionCreate: (sessionId: string) => void,

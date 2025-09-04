@@ -5,7 +5,7 @@ export interface ResultPreviewProps {
   code: string;
   dependencies?: Record<string, string>;
   onScreenshotCaptured?: (screenshotData: string | null) => void;
-  sessionId?: string;
+  sessionId: string;
   title?: string;
   updateTitle: (title: string, isManual?: boolean) => Promise<void>;
   isStreaming?: boolean;

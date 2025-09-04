@@ -67,7 +67,7 @@ describe("useSession", () => {
    * This is the opposite of the previous lazy loading behavior.
    */
   it("should follow eager database initialization pattern for observable side effects", async () => {
-    const { result } = renderHook(() => useSession(undefined));
+    const { result } = renderHook(() => useSession("test-session-id"));
 
     await waitFor(() => {
       expect(result.current.sessionDatabase).toBeDefined();

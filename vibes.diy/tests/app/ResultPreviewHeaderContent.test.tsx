@@ -147,6 +147,7 @@ describe("ResultPreviewHeaderContent", () => {
   const mockHandlePublish = vi.fn();
 
   const mockNavigateToView = vi.fn();
+  const TEST_SESSION_ID = "test-session-id";
   const mockViewControlsMap = {
     preview: {
       id: "preview",
@@ -232,6 +233,7 @@ describe("ResultPreviewHeaderContent", () => {
         isStreaming={false}
         code="const App = () => <div>Test</div>"
         setMobilePreviewShown={mockSetMobilePreviewShown}
+        sessionId={TEST_SESSION_ID}
       />,
     );
 
@@ -320,6 +322,7 @@ describe("ResultPreviewHeaderContent", () => {
         isStreaming={false}
         code="const App = () => <div>Test</div>"
         setMobilePreviewShown={mockSetMobilePreviewShown}
+        sessionId={TEST_SESSION_ID}
       />,
     );
   });
@@ -382,6 +385,7 @@ describe("ResultPreviewHeaderContent", () => {
         isStreaming={false}
         code="const App = () => <div>Test</div>"
         setMobilePreviewShown={mockSetMobilePreviewShown}
+        sessionId={TEST_SESSION_ID}
       />,
     );
 
@@ -400,6 +404,7 @@ describe("ResultPreviewHeaderContent", () => {
         isStreaming={false}
         code="const App = () => <div>Test</div>"
         setMobilePreviewShown={mockSetMobilePreviewShown}
+        sessionId={TEST_SESSION_ID}
       />,
     );
 

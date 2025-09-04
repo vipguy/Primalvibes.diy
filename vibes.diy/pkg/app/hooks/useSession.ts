@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   type AiChatMessageDocument,
   type UserChatMessageDocument,
@@ -62,26 +62,10 @@ export interface UseSession {
   vibeDoc: VibeDocument;
 }
 
-export function useSession(routedSessionId?: string): UseSession {
-  const [generatedSessionId] = useState(
-    () =>
-      `${Date.now().toString(36).padStart(9, "f")}${Math.random().toString(36).slice(2, 11).padEnd(9, "0")}`,
-  );
-
-  // Using useState to track the effective sessionId and ensure it updates properly
-  // when routedSessionId changes from undefined to a real ID
-  const [effectiveSessionId, setEffectiveSessionId] = useState(
-    routedSessionId || generatedSessionId,
-  );
-
-  // Update effectiveSessionId whenever routedSessionId changes
-  useEffect(() => {
-    if (routedSessionId) {
-      setEffectiveSessionId(routedSessionId);
-    }
-  }, [routedSessionId]);
-
-  const sessionId = effectiveSessionId;
+export function useSession(sessionId: string): UseSession {
+  if (!sessionId) {
+    throw new Error("useSession requires a valid sessionId");
+  }
   const sessionDbName = getSessionDatabaseName(sessionId);
   const {
     database: sessionDatabase,

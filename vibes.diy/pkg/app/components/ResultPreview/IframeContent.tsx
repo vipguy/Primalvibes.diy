@@ -16,7 +16,7 @@ interface IframeContentProps {
   isStreaming: boolean;
   codeReady: boolean;
   isDarkMode: boolean;
-  sessionId?: string;
+  sessionId: string;
   onCodeSave?: (code: string) => void;
   onCodeChange?: (hasChanges: boolean, saveHandler: () => void) => void;
   onSyntaxErrorChange?: (errorCount: number) => void;
