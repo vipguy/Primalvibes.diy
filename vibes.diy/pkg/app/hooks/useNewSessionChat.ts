@@ -23,25 +23,35 @@ export function useNewSessionChat(
   const sendMessage = useCallback(
     async (textOverride?: string) => {
       const messageText = textOverride || input;
-      if (!messageText.trim()) return;
+      console.log("useNewSessionChat - sendMessage called with:", {
+        messageText,
+        textOverride,
+        input,
+      });
+
+      if (!messageText.trim()) {
+        console.log("useNewSessionChat - empty message, returning");
+        return;
+      }
 
       try {
+        console.log("useNewSessionChat - starting session creation");
         setIsStreaming(true);
 
         // Create new session ID
         const newSessionId = `session-${Date.now()}`;
+        console.log("useNewSessionChat - created sessionId:", newSessionId);
 
         // Store the message text for later processing
         const userMessage = messageText.trim();
+        console.log("useNewSessionChat - userMessage:", userMessage);
 
-        // Trigger session creation which will re-render with SessionView
-        onSessionCreate(newSessionId);
+        // Navigate to the new session URL with prompt parameter - this will trigger a page load
+        const targetUrl = `/chat/${newSessionId}?prompt=${encodeURIComponent(userMessage)}`;
+        console.log("useNewSessionChat - navigating to:", targetUrl);
 
-        // Navigate to the new session URL
-        navigate(`/chat/${newSessionId}`, {
-          replace: true,
-          state: { pendingMessage: userMessage },
-        });
+        // Use window.location to trigger a real page load instead of React Router navigation
+        window.location.href = targetUrl;
       } catch (error) {
         console.error("Failed to create session:", error);
         setIsStreaming(false);

@@ -21,7 +21,7 @@ interface SessionViewProps {
 
 let renderCount = 0;
 export default function SessionView({ sessionId }: SessionViewProps) {
-  console.log(`SessionView render #${++renderCount}`);
+  console.log(`SessionView ${sessionId} render #${++renderCount}`);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -49,10 +49,15 @@ export default function SessionView({ sessionId }: SessionViewProps) {
     const navigationState = location.state as {
       pendingMessage?: string;
     } | null;
+    console.log("SessionView mount - navigation state:", navigationState);
     if (
       navigationState?.pendingMessage &&
       navigationState.pendingMessage.trim()
     ) {
+      console.log(
+        "Setting captured prompt from pending message:",
+        navigationState.pendingMessage,
+      );
       setCapturedPrompt(navigationState.pendingMessage);
     }
   }, []); // Empty dependency array - runs only on mount

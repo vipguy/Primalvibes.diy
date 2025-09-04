@@ -16,10 +16,30 @@ export default function SessionWrapper() {
     urlSessionId || null,
   );
 
+  console.log(
+    "SessionWrapper render - urlSessionId:",
+    urlSessionId,
+    "sessionId:",
+    sessionId,
+  );
+
+  const handleSessionCreate = (newSessionId: string) => {
+    console.log("SessionWrapper - onSessionCreate called with:", newSessionId);
+    setSessionId(newSessionId);
+    console.log(
+      "SessionWrapper - setSessionId called, should trigger re-render",
+    );
+  };
+
   // Conditional rendering - true deferred session creation
   if (!sessionId) {
-    return <NewSessionView onSessionCreate={setSessionId} />;
+    console.log("SessionWrapper - rendering NewSessionView");
+    return <NewSessionView onSessionCreate={handleSessionCreate} />;
   }
 
+  console.log(
+    "SessionWrapper - rendering SessionView with sessionId:",
+    sessionId,
+  );
   return <SessionView sessionId={sessionId} />;
 }
