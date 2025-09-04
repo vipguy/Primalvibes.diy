@@ -185,37 +185,37 @@ export default function SessionView({ sessionId }: SessionViewProps) {
   }, []); // chatState.isStreaming, chatState.codeReady removed as setActiveView is gone and useViewState handles this logic
 
   // TEMPORARILY DISABLED - Testing if this causes render loop
-  // useEffect(() => {
-  //   if (chatState.title) {
-  //     // Check if the current path has a tab suffix
-  //     // Add null check for location to prevent errors in tests
-  //     const currentPath = location?.pathname || "";
-  //     let suffix = "";
+  useEffect(() => {
+    if (chatState.title) {
+      // Check if the current path has a tab suffix
+      // Add null check for location to prevent errors in tests
+      const currentPath = location?.pathname || "";
+      let suffix = "";
 
-  //     // Preserve the tab suffix when updating the URL
-  //     if (currentPath.endsWith("/app")) {
-  //       suffix = "/app";
-  //     } else if (currentPath.endsWith("/code")) {
-  //       suffix = "/code";
-  //     } else if (currentPath.endsWith("/data")) {
-  //       suffix = "/data";
-  //     } else if (currentPath.endsWith("/chat")) {
-  //       suffix = "/chat";
-  //     } else if (currentPath.endsWith("/settings")) {
-  //       suffix = "/settings";
-  //     } else if (currentPath.includes(`/chat/${chatState.sessionId}`)) {
-  //       // If it's the base chat URL without suffix, default to /app
-  //       // Unless there's a captured prompt that hasn't been sent yet
-  //       suffix = capturedPrompt ? "" : "/app";
-  //     }
+      // Preserve the tab suffix when updating the URL
+      if (currentPath.endsWith("/app")) {
+        suffix = "/app";
+      } else if (currentPath.endsWith("/code")) {
+        suffix = "/code";
+      } else if (currentPath.endsWith("/data")) {
+        suffix = "/data";
+      } else if (currentPath.endsWith("/chat")) {
+        suffix = "/chat";
+      } else if (currentPath.endsWith("/settings")) {
+        suffix = "/settings";
+      } else if (currentPath.includes(`/chat/${chatState.sessionId}`)) {
+        // If it's the base chat URL without suffix, default to /app
+        // Unless there's a captured prompt that hasn't been sent yet
+        suffix = capturedPrompt ? "" : "/app";
+      }
 
-  //     const newUrl = `/chat/${chatState.sessionId}/${encodeTitle(chatState.title)}${suffix}`;
+      const newUrl = `/chat/${chatState.sessionId}/${encodeTitle(chatState.title)}${suffix}`;
 
-  //     if (location && newUrl !== location.pathname) {
-  //       navigate(newUrl, { replace: true });
-  //     }
-  //   }
-  // }, [chatState.title, location.pathname, chatState.sessionId, navigate]);
+      if (location && newUrl !== location.pathname) {
+        navigate(newUrl, { replace: true });
+      }
+    }
+  }, [chatState.title, location.pathname, chatState.sessionId, navigate]);
 
   // We're now passing chatState directly to ChatInput
 
