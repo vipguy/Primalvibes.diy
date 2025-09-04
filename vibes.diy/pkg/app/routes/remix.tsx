@@ -11,7 +11,13 @@ export function meta() {
   ];
 }
 
-export default function Remix() {
+interface RemixProps {
+  onNavigate?: (url: string) => void;
+}
+
+export default function Remix({
+  onNavigate = (url) => (window.location.href = url),
+}: RemixProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { vibeSlug } = useParams<{ vibeSlug?: string }>();
@@ -123,7 +129,7 @@ export default function Remix() {
           targetUrl += `?prompt=${encodeURIComponent(promptParameter.trim())}`;
         }
 
-        window.location.href = targetUrl;
+        onNavigate(targetUrl);
       } catch (error) {
         console.error("Error in remix process:", error);
         setError(

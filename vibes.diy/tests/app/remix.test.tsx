@@ -116,7 +116,6 @@ vi.mock("~/vibes.diy/app/hooks/useApiKey", () => ({
 }));
 
 // Mock variables for React Router
-const navigateMock = vi.fn();
 let locationMock = {
   search: "?prompt=Make+it+pink",
   pathname: "/remix/test-app-slug",
@@ -125,7 +124,7 @@ let locationMock = {
 // Mock React Router
 vi.mock("react-router", () => ({
   useParams: () => ({ vibeSlug: "test-app-slug" }),
-  useNavigate: () => navigateMock,
+  useNavigate: () => vi.fn(), // Still needed by the component even though we don't use it in tests
   useLocation: () => locationMock,
 }));
 
@@ -164,8 +163,7 @@ vi.mock("~/vibes.diy/app/utils/databaseManager", () => ({
 
 describe("Remix Route", () => {
   beforeEach(() => {
-    // Reset mocks before each test
-    navigateMock.mockReset();
+    // Reset mocks before each test (navigateMock no longer needed)
 
     // Mock localStorage
     Object.defineProperty(window, "localStorage", {
@@ -186,15 +184,16 @@ describe("Remix Route", () => {
       pathname: "/remix/test-app-slug",
     };
 
-    renderWithAuthContext(<Remix />);
+    const mockOnNavigate = vi.fn();
+    renderWithAuthContext(<Remix onNavigate={mockOnNavigate} />);
     // Verify loading screen is displayed
     expect(screen.getByText(/REMIXING TEST-APP-SLUG/i)).toBeInTheDocument();
 
     // Wait for the navigation to occur with the prompt parameter
     await waitFor(() => {
-      expect(navigateMock).toHaveBeenCalled();
+      expect(mockOnNavigate).toHaveBeenCalled();
       // Check that the URL contains the expected parts
-      const callArg = navigateMock.mock.calls[0][0];
+      const callArg = mockOnNavigate.mock.calls[0][0];
       expect(callArg).toContain("/chat/");
       expect(callArg).toContain("/chat?prompt=Make");
     });
@@ -204,15 +203,16 @@ describe("Remix Route", () => {
     // Set up location without prompt parameter
     locationMock = { search: "", pathname: "/remix/test-app-slug" };
 
-    renderWithAuthContext(<Remix />);
+    const mockOnNavigate = vi.fn();
+    renderWithAuthContext(<Remix onNavigate={mockOnNavigate} />);
 
     // Wait for the navigation to occur without prompt parameter
     await waitFor(() => {
-      expect(navigateMock).toHaveBeenCalled();
-      expect(navigateMock).toHaveBeenCalledWith(
+      expect(mockOnNavigate).toHaveBeenCalled();
+      expect(mockOnNavigate).toHaveBeenCalledWith(
         expect.stringMatching(/\/chat\/.*\/.*\/chat$/),
       );
-      expect(navigateMock).not.toHaveBeenCalledWith(
+      expect(mockOnNavigate).not.toHaveBeenCalledWith(
         expect.stringMatching(/\?prompt=/),
       );
     });
