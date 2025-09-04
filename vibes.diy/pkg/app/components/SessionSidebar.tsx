@@ -211,17 +211,27 @@ function SessionSidebar({ isVisible, onClose }: SessionSidebarProps) {
 // Export a memoized version of the component to prevent unnecessary re-renders
 let memoCallCount = 0;
 export default memo(SessionSidebar, (prevProps, nextProps) => {
-  const shouldSkipRender = (
+  const shouldSkipRender =
     prevProps.isVisible === nextProps.isVisible &&
     prevProps.onClose === nextProps.onClose &&
-    prevProps.sessionId === nextProps.sessionId
+    prevProps.sessionId === nextProps.sessionId;
+
+  console.log(
+    `memo-session-sidebar #${++memoCallCount} - ${shouldSkipRender ? "SKIPPED" : "RENDERING"}`,
+    {
+      isVisible: {
+        prev: prevProps.isVisible,
+        next: nextProps.isVisible,
+        same: prevProps.isVisible === nextProps.isVisible,
+      },
+      onClose: { same: prevProps.onClose === nextProps.onClose },
+      sessionId: {
+        prev: prevProps.sessionId,
+        next: nextProps.sessionId,
+        same: prevProps.sessionId === nextProps.sessionId,
+      },
+    },
   );
-  
-  console.log(`memo-session-sidebar #${++memoCallCount} - ${shouldSkipRender ? 'SKIPPED' : 'RENDERING'}`, {
-    isVisible: { prev: prevProps.isVisible, next: nextProps.isVisible, same: prevProps.isVisible === nextProps.isVisible },
-    onClose: { same: prevProps.onClose === nextProps.onClose },
-    sessionId: { prev: prevProps.sessionId, next: nextProps.sessionId, same: prevProps.sessionId === nextProps.sessionId }
-  });
-  
+
   return shouldSkipRender;
 });

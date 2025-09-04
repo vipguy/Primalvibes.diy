@@ -19,7 +19,10 @@ interface SessionViewProps {
   sessionId: string;
 }
 
+let renderCount = 0;
 export default function SessionView({ sessionId }: SessionViewProps) {
+  console.log(`SessionView render #${++renderCount}`);
+
   const navigate = useNavigate();
   const location = useLocation();
   const chatState = useSimpleChat(sessionId);
@@ -86,7 +89,7 @@ export default function SessionView({ sessionId }: SessionViewProps) {
   );
   const [syntaxErrorCount, setSyntaxErrorCount] = useState(0);
 
-  // Centralized view state management
+  // TEMPORARILY DISABLED - Testing if useViewState causes render loop
   const { displayView, navigateToView, viewControls, showViewControls } =
     useViewState({
       sessionId: chatState.sessionId || undefined, // Handle null
@@ -97,6 +100,12 @@ export default function SessionView({ sessionId }: SessionViewProps) {
       isIframeFetching: isIframeFetching,
       capturedPrompt: capturedPrompt,
     });
+
+  // Temporary fallback values for testing
+  // const displayView = "chat";
+  // const navigateToView = () => {};
+  // const viewControls = {};
+  // const showViewControls = false;
 
   // Handle code save from the editor
   const handleCodeSave = useCallback(
@@ -175,37 +184,38 @@ export default function SessionView({ sessionId }: SessionViewProps) {
     // setActiveView('preview'); // This is now handled by useViewState when previewReady changes
   }, []); // chatState.isStreaming, chatState.codeReady removed as setActiveView is gone and useViewState handles this logic
 
-  useEffect(() => {
-    if (chatState.title) {
-      // Check if the current path has a tab suffix
-      // Add null check for location to prevent errors in tests
-      const currentPath = location?.pathname || "";
-      let suffix = "";
+  // TEMPORARILY DISABLED - Testing if this causes render loop
+  // useEffect(() => {
+  //   if (chatState.title) {
+  //     // Check if the current path has a tab suffix
+  //     // Add null check for location to prevent errors in tests
+  //     const currentPath = location?.pathname || "";
+  //     let suffix = "";
 
-      // Preserve the tab suffix when updating the URL
-      if (currentPath.endsWith("/app")) {
-        suffix = "/app";
-      } else if (currentPath.endsWith("/code")) {
-        suffix = "/code";
-      } else if (currentPath.endsWith("/data")) {
-        suffix = "/data";
-      } else if (currentPath.endsWith("/chat")) {
-        suffix = "/chat";
-      } else if (currentPath.endsWith("/settings")) {
-        suffix = "/settings";
-      } else if (currentPath.includes(`/chat/${chatState.sessionId}`)) {
-        // If it's the base chat URL without suffix, default to /app
-        // Unless there's a captured prompt that hasn't been sent yet
-        suffix = capturedPrompt ? "" : "/app";
-      }
+  //     // Preserve the tab suffix when updating the URL
+  //     if (currentPath.endsWith("/app")) {
+  //       suffix = "/app";
+  //     } else if (currentPath.endsWith("/code")) {
+  //       suffix = "/code";
+  //     } else if (currentPath.endsWith("/data")) {
+  //       suffix = "/data";
+  //     } else if (currentPath.endsWith("/chat")) {
+  //       suffix = "/chat";
+  //     } else if (currentPath.endsWith("/settings")) {
+  //       suffix = "/settings";
+  //     } else if (currentPath.includes(`/chat/${chatState.sessionId}`)) {
+  //       // If it's the base chat URL without suffix, default to /app
+  //       // Unless there's a captured prompt that hasn't been sent yet
+  //       suffix = capturedPrompt ? "" : "/app";
+  //     }
 
-      const newUrl = `/chat/${chatState.sessionId}/${encodeTitle(chatState.title)}${suffix}`;
+  //     const newUrl = `/chat/${chatState.sessionId}/${encodeTitle(chatState.title)}${suffix}`;
 
-      if (location && newUrl !== location.pathname) {
-        navigate(newUrl, { replace: true });
-      }
-    }
-  }, [chatState.title, location.pathname, chatState.sessionId, navigate]);
+  //     if (location && newUrl !== location.pathname) {
+  //       navigate(newUrl, { replace: true });
+  //     }
+  //   }
+  // }, [chatState.title, location.pathname, chatState.sessionId, navigate]);
 
   // We're now passing chatState directly to ChatInput
 
@@ -296,8 +306,8 @@ export default function SessionView({ sessionId }: SessionViewProps) {
   const shouldUseFullWidthChat =
     chatState.docs.length === 0 && !sessionId && !hasSubmittedMessage;
 
-  // Debug logging for SessionSidebar props
-  console.log("SessionSidebar props:", { isVisible: isSidebarVisible, sessionId: chatState.sessionId || "", onClose: closeSidebar });
+  // Debug logging for SessionView render - this might be causing the render loop!
+  // console.log("SessionSidebar props:", { isVisible: isSidebarVisible, sessionId: chatState.sessionId || "", onClose: closeSidebar });
 
   return (
     <>

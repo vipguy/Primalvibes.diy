@@ -11,7 +11,9 @@ export function meta() {
 
 export default function SessionWrapper() {
   const { sessionId: urlSessionId } = useParams<{ sessionId: string }>();
-  const [sessionId, setSessionId] = useState<string | null>(urlSessionId || null);
+  const [sessionId, setSessionId] = useState<string | null>(
+    urlSessionId || null,
+  );
 
   // TODO: Implement new session UI and sessionId creation logic
   // For now, directly use urlSessionId to maintain existing behavior

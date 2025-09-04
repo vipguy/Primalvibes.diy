@@ -3,7 +3,6 @@ import {
   resolveEffectiveModel,
   type AiChatMessageDocument,
   type ChatMessageDocument,
-  type UserChatMessageDocument,
   type VibeDocument,
 } from "@vibes.diy/prompts";
 import { trackChatInputClick } from "../utils/analytics.js";
@@ -13,7 +12,6 @@ import { generateTitle } from "../utils/titleGenerator.js";
 
 export interface SendMessageContext {
   userMessage: ChatMessageDocument;
-  mergeUserMessage: (msg: Partial<UserChatMessageDocument>) => void;
   setPendingUserDoc: (doc: ChatMessageDocument) => void;
   setIsStreaming: (v: boolean) => void;
   ensureApiKey: () => Promise<{ key: string } | null>;
@@ -42,14 +40,12 @@ export interface SendMessageContext {
   vibeDoc: VibeDocument;
 }
 
-export async function sendMessage(
+export async function sendChatMessage(
   ctx: SendMessageContext,
   textOverride?: string,
-  skipSubmit = false,
 ): Promise<void> {
   const {
     userMessage,
-    mergeUserMessage,
     setPendingUserDoc,
     setIsStreaming,
     ensureApiKey,
@@ -82,24 +78,14 @@ export async function sendMessage(
     setNeedsLogin(true, "sendMessage not authenticated");
   }
 
-  if (typeof textOverride === "string" && !skipSubmit) {
-    // Update the transient userMessage state so UI reflects any override text
-    // Only update when we are not in retry mode (skipSubmit === false)
-    mergeUserMessage({ text: textOverride });
-  }
-
   setPendingUserDoc({
     ...userMessage,
     text: promptText,
   });
 
-  // Always submit the user message first unless we are retrying the same
-  // message (e.g. after login / API key refresh)
-  if (!skipSubmit) {
-    await submitUserMessage();
-    // Clear the chat input once the user message has been submitted
-    setInput("");
-  }
+  await submitUserMessage();
+  // Clear the chat input once the user message has been submitted
+  setInput("");
 
   setIsStreaming(true);
 

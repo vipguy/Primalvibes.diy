@@ -17,7 +17,7 @@ import { useSession } from "./useSession.js";
 import { useMessageSelection } from "./useMessageSelection.js";
 // Import our custom hooks
 import type { SendMessageContext } from "./sendMessage.js";
-import { sendMessage as sendChatMessage } from "./sendMessage.js";
+import { sendChatMessage } from "./sendMessage.js";
 import { useSystemPromptManager } from "./useSystemPromptManager.js";
 import { useThrottledUpdates } from "./useThrottledUpdates.js";
 import { RuntimeError } from "use-vibes";
@@ -189,10 +189,9 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
    * @param textOverride Optional text to use instead of the current userMessage
    */
   const sendMessage = useCallback(
-    (textOverride?: string, skipSubmit = false) => {
+    (textOverride?: string) => {
       const ctx: SendMessageContext = {
         userMessage,
-        mergeUserMessage,
         setPendingUserDoc,
         setIsStreaming,
         ensureApiKey,
@@ -214,7 +213,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
         isAuthenticated,
         vibeDoc,
       };
-      return sendChatMessage(ctx, textOverride, skipSubmit);
+      return sendChatMessage(ctx, textOverride);
     },
     [
       userMessage.text,
