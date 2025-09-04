@@ -31,7 +31,10 @@ const TITLE_MODEL = "meta-llama/llama-3.1-8b-instruct";
  * Uses session-based architecture with individual message documents
  * @returns ChatState object with all chat functionality and state
  */
-export function useSimpleChat(sessionId: string | undefined): ChatState {
+export function useSimpleChat(sessionId: string): ChatState {
+  if (!sessionId) {
+    throw new Error("No session ID provided");
+  }
   // Get userId from auth system
   const { userPayload, isAuthenticated, setNeedsLogin } = useAuth();
   const userId = userPayload?.userId;
