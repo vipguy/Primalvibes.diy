@@ -44,6 +44,17 @@ export default function SessionView({ sessionId }: SessionViewProps) {
     if (promptParam && promptParam.trim()) {
       setCapturedPrompt(promptParam);
     }
+
+    // Check for pending message from new session creation
+    const navigationState = location.state as {
+      pendingMessage?: string;
+    } | null;
+    if (
+      navigationState?.pendingMessage &&
+      navigationState.pendingMessage.trim()
+    ) {
+      setCapturedPrompt(navigationState.pendingMessage);
+    }
   }, []); // Empty dependency array - runs only on mount
 
   // Handle captured prompt by setting input and focusing
