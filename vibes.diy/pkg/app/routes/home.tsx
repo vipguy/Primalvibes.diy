@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useParams } from "react-router";
 import SessionView from "../components/SessionView.js";
+import NewSessionView from "../components/NewSessionView.js";
 
 export function meta() {
   return [
@@ -15,14 +16,9 @@ export default function SessionWrapper() {
     urlSessionId || null,
   );
 
-  // TODO: Implement new session UI and sessionId creation logic
-  // For now, directly use urlSessionId to maintain existing behavior
+  // Conditional rendering - true deferred session creation
   if (!sessionId) {
-    // This will be replaced with proper new session UI
-    // For now, generate a sessionId immediately to maintain compatibility
-    const newSessionId = urlSessionId || `session-${Date.now()}`;
-    setSessionId(newSessionId);
-    return null; // Loading state while sessionId is being set
+    return <NewSessionView onSessionCreate={setSessionId} />;
   }
 
   return <SessionView sessionId={sessionId} />;
