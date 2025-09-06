@@ -5,7 +5,6 @@ import ChatHeaderContent from "./ChatHeaderContent.js";
 import ChatInput, { ChatInputRef } from "./ChatInput.js";
 import models from "../data/models.json" with { type: "json" };
 import ChatInterface from "./ChatInterface.js";
-import QuickSuggestions from "./QuickSuggestions.js";
 import ResultPreview from "./ResultPreview/ResultPreview.js";
 import ResultPreviewHeaderContent from "./ResultPreview/ResultPreviewHeaderContent.js";
 import SessionSidebar from "./SessionSidebar.js";
@@ -34,9 +33,6 @@ export default function SessionView({
   const chatInputRef = useRef<ChatInputRef>(null);
 
   const { setMessageHasBeenSent } = useCookieConsent();
-
-  // Track message submission events
-  const [hasSubmittedMessage, setHasSubmittedMessage] = useState(false);
 
   // Capture URL prompt on first render
   const [capturedPrompt, setCapturedPrompt] = useState<string | null>(null);
@@ -235,24 +231,6 @@ export default function SessionView({
 
   // We're now passing chatState directly to ChatInput
 
-  // Handle suggestion selection directly
-  const handleSelectSuggestion = useCallback(
-    (suggestion: string) => {
-      chatState.setInput(suggestion);
-
-      // Focus the input and position cursor at the end
-      setTimeout(() => {
-        if (chatState.inputRef.current) {
-          chatState.inputRef.current.focus();
-          // Move cursor to end of text
-          chatState.inputRef.current.selectionStart =
-            chatState.inputRef.current.selectionEnd = suggestion.length;
-        }
-      }, 0);
-    },
-    [chatState.setInput, chatState.inputRef],
-  );
-
   // Track if user manually clicked back to chat during streaming
   const [userClickedBack, setUserClickedBack] = useState(false);
 
@@ -319,14 +297,10 @@ export default function SessionView({
     }
   }, [chatState.sessionId, chatState.title, navigate, location.pathname]);
 
-  // Switch to 2-column view immediately when a message is submitted
-  const shouldUseFullWidthChat =
-    chatState.docs.length === 0 && !hasSubmittedMessage;
-
   return (
     <>
       <AppLayout
-        fullWidthChat={shouldUseFullWidthChat}
+        fullWidthChat={false}
         headerLeft={
           <ChatHeaderContent
             remixOf={chatState.vibeDoc?.remixOf}
@@ -407,15 +381,10 @@ export default function SessionView({
             globalModel={chatState.globalModel}
             onSend={() => {
               setMessageHasBeenSent(true);
-              setHasSubmittedMessage(true);
             }}
           />
         }
-        suggestionsComponent={
-          chatState.isEmpty ? (
-            <QuickSuggestions onSelectSuggestion={handleSelectSuggestion} />
-          ) : undefined
-        }
+        suggestionsComponent={undefined}
         mobilePreviewShown={displayView === "chat" ? false : mobilePreviewShown}
       />
       <SessionSidebar
