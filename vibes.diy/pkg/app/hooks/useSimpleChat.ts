@@ -66,31 +66,6 @@ export function useSimpleChat(sessionId: string): ChatState {
     updateSelectedModel,
   } = useSession(sessionId);
 
-  // DEBUG: Track useSession hook return values
-  useEffect(() => {
-    console.log(`useSession ${sessionId} return values:`, {
-      sessionId: session?._id?.substring(0, 10) + "..." || "none",
-      sessionTitle: session?.title?.substring(0, 10) + "..." || "none",
-      docsCount: docs?.length,
-      hasUserMessage: !!userMessage,
-      userMessageId: userMessage?._id?.substring(0, 10) + "..." || "none",
-      hasAiMessage: !!aiMessage,
-      aiMessageId: aiMessage?._id?.substring(0, 10) + "..." || "none",
-      hasVibeDoc: !!vibeDoc,
-      vibeDocId: vibeDoc?._id?.substring(0, 10) + "..." || "none",
-      effectiveModel: String(effectiveModel),
-      timestamp: Date.now(),
-    });
-  }, [
-    session,
-    docs,
-    userMessage,
-    aiMessage,
-    vibeDoc,
-    effectiveModel,
-    sessionId,
-  ]);
-
   // Get main database directly for settings document
   const { useDocument } = useFireproof(VibesDiyEnv.SETTINGS_DBNAME());
 
@@ -112,9 +87,6 @@ export function useSimpleChat(sessionId: string): ChatState {
 
   // Reset didSendErrors after it's been processed
   useEffect(() => {
-    console.log(
-      `🔥 useEffect [RESET_ERRORS] executing - useSimpleChat ${sessionId}`,
-    );
     if (didSendErrors) {
       // Small delay to ensure the errors are cleared before resetting
       const timer = setTimeout(() => {
@@ -137,26 +109,6 @@ export function useSimpleChat(sessionId: string): ChatState {
   const [selectedResponseId, setSelectedResponseId] = useState<string>("");
   const [pendingAiMessage, setPendingAiMessage] =
     useState<ChatMessageDocument | null>(null);
-
-  // DEBUG: Track useSimpleChat internal state changes
-  useEffect(() => {
-    console.log(`useSimpleChat ${sessionId} state change:`, {
-      isStreaming,
-      selectedResponseId:
-        selectedResponseId?.substring(0, 20) + "..." || "none",
-      hasPendingAiMessage: !!pendingAiMessage,
-      pendingAiMessageId:
-        pendingAiMessage?._id?.substring(0, 10) + "..." || "none",
-      didSendErrors,
-      timestamp: Date.now(),
-    });
-  }, [
-    isStreaming,
-    selectedResponseId,
-    pendingAiMessage,
-    didSendErrors,
-    sessionId,
-  ]);
 
   // setNeedsLogin is now obtained from AuthContext above
 
@@ -298,9 +250,6 @@ export function useSimpleChat(sessionId: string): ChatState {
 
   // Effect to clear pending message once it appears in the main docs list
   useEffect(() => {
-    console.log(
-      `🔥 useEffect [CLEAR_PENDING] executing - useSimpleChat ${sessionId}`,
-    );
     if (
       pendingAiMessage &&
       docs.some((doc) => doc._id === pendingAiMessage._id)
@@ -384,9 +333,6 @@ ${code}
 
   // Monitor advisory errors whenever they change (non-critical errors)
   useEffect(() => {
-    console.log(
-      `🔥 useEffect [MONITOR_ADVISORIES] executing - useSimpleChat ${sessionId}`,
-    );
     // Advisories are handled through the system messages mechanism
     // No additional action needed here
   }, [advisoryErrors]);

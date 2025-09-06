@@ -37,40 +37,6 @@ export function useViewState(
 
   // Navigate function passed as parameter - logging handled by SessionWrapper
 
-  // DEBUG: Track props changes in useViewState (limited to first 20)
-  const viewStateLogCountRef = useRef(0);
-  useEffect(() => {
-    if (viewStateLogCountRef.current < 20) {
-      viewStateLogCountRef.current++;
-      console.log(
-        `useViewState props CHANGED (#${viewStateLogCountRef.current}):`,
-        {
-          propsSessionId: props.sessionId,
-          propsTitle: props.title,
-          propsCodeLength: props.code?.length || 0,
-          propsIsStreaming: props.isStreaming,
-          propsPreviewReady: props.previewReady,
-          propsIsIframeFetching: props.isIframeFetching,
-          propsCapturedPrompt: props.capturedPrompt,
-          currentTime: Date.now(),
-        },
-      );
-    } else if (viewStateLogCountRef.current === 20) {
-      viewStateLogCountRef.current++;
-      console.log(
-        `useViewState props CHANGED (#21) - VIEWSTATE LOGGING DISABLED`,
-      );
-    }
-  }, [
-    props.sessionId,
-    props.title,
-    props.code,
-    props.isStreaming,
-    props.previewReady,
-    props.isIframeFetching,
-    props.capturedPrompt,
-  ]);
-
   // Derive view from URL path
   const getViewFromPath = (): ViewType => {
     if (pathname.endsWith("/app")) return "preview";
@@ -91,9 +57,6 @@ export function useViewState(
 
   // Auto-navigate based on app state changes
   useEffect(() => {
-    console.log(
-      `🔥 useEffect [AUTO_NAVIGATE] executing - useViewState ${sessionId}`,
-    );
     // Don't auto-navigate if we don't have session and title info for URLs
     if (!sessionId || !encodedTitle) return;
 
@@ -116,12 +79,6 @@ export function useViewState(
 
       // If current path has a view suffix, remove it for auto-navigation to work
       if (path !== basePath) {
-        console.log(`ViewState NAVIGATING:`, {
-          from: path,
-          to: `/chat/${sessionId}/${encodedTitle}`,
-          reason: "Remove view suffix during streaming",
-          timestamp: Date.now(),
-        });
         navigate(`/chat/${sessionId}/${encodedTitle}`);
       }
     }
@@ -135,12 +92,6 @@ export function useViewState(
       const hasCapturedPrompt =
         props.capturedPrompt && props.capturedPrompt.trim().length > 0;
       if (!isInDataView && !isInCodeView && !hasCapturedPrompt) {
-        console.log(`ViewState NAVIGATING:`, {
-          from: pathname,
-          to: `/chat/${sessionId}/${encodedTitle}/app`,
-          reason: "Preview ready - navigate to app",
-          timestamp: Date.now(),
-        });
         navigate(`/chat/${sessionId}/${encodedTitle}/app`, { replace: true });
       }
     }
@@ -161,9 +112,6 @@ export function useViewState(
   // We handle the initial view display without changing the URL
   // This allows for proper auto-navigation to app view when preview is ready
   useEffect(() => {
-    console.log(
-      `🔥 useEffect [DISPLAY_HANDLING] executing - useViewState ${sessionId}`,
-    );
     // The actual display of code view is handled by the component that uses this hook
     // We don't navigate to /code on initial load anymore
   }, []);

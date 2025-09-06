@@ -15,7 +15,6 @@ import { dark, light } from "./colorways.js";
  * Component that displays a navigation sidebar with menu items
  */
 function SessionSidebar({ isVisible, onClose }: SessionSidebarProps) {
-  console.log("SessionSidebar rendered");
   const sidebarRef = useRef<HTMLDivElement>(null);
   const { isAuthenticated, isLoading } = useAuth();
   const { isPolling, pollError, initiateLogin } = useAuthPopup();
