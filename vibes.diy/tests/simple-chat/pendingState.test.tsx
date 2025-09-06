@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, it, vi } from "vitest";
-import { createWrapper, formatAsSSE } from "./setup.js";
+import { createWrapper, formatAsSSE, sharedSessionDatabase } from "./setup.js";
 import { useSimpleChat } from "~/vibes.diy/app/hooks/useSimpleChat.js";
 import { useSession } from "~/vibes.diy/app/hooks/useSession.js";
 import { DocResponse } from "use-fireproof";
@@ -41,7 +41,7 @@ describe("useSimpleChat", () => {
     >(async () => {
       return Promise.resolve({ id: generatedId } as DocResponse);
     });
-    vi.mocked(useSession)("test-session-id").sessionDatabase.put = mockPut;
+    sharedSessionDatabase.put = mockPut;
 
     act(() => {
       result.current.setInput("Trigger stream");

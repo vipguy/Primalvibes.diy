@@ -37,6 +37,7 @@ import type {
   ChatMessage,
   UserChatMessage,
 } from "@vibes.diy/prompts";
+import type { DocResponse } from "use-fireproof";
 import { parseContent } from "~/vibes.diy/app/utils/segmentParser.js";
 
 // Helper function to convert chunks into SSE format
@@ -213,6 +214,62 @@ const mergeUserMessageImpl = (data?: { text: string }) => {
 // Create a spy wrapping the implementation
 const mockMergeUserMessage = vi.fn(mergeUserMessageImpl);
 
+// A single shared sessionDatabase instance used by the mocked useSession hook.
+// Tests can override these methods at runtime to affect the hook under test.
+type SessionDoc = AiChatMessage | UserChatMessage;
+type SessionDatabase = {
+  put: (
+    doc: Partial<SessionDoc> & { _id?: string }
+  ) => Promise<DocResponse>;
+  get: (id: string) => Promise<SessionDoc>;
+  query: (
+    field: string,
+    options: { key: string },
+  ) => Promise<{ rows: { id: string; doc: SessionDoc }[] }>;
+  delete: (id: string) => Promise<{ ok: boolean }>;
+};
+
+function makeDefaultSessionDatabase(): SessionDatabase {
+  return {
+    put: vi.fn(async (doc: Partial<SessionDoc> & { _id?: string }) => {
+      const id = doc._id || `doc-${Date.now()}`;
+      return Promise.resolve({ id } as DocResponse);
+    }),
+    get: vi.fn(async (id: string) => {
+      const found = mockDocs.find((d) => d._id === id);
+      if (found) return Promise.resolve(found);
+      return Promise.reject(new Error("Not found"));
+    }),
+    query: vi.fn(async (field: string, options: { key: string }) => {
+      const key = options?.key;
+      const filtered = mockDocs.filter((doc) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return (doc as any)[field] === key;
+      });
+      return Promise.resolve({
+        rows: filtered.map((doc) => ({ id: doc._id as string, doc })),
+      });
+    }),
+    delete: vi.fn(async (id: string) => {
+      const idx = mockDocs.findIndex((d) => d._id === id);
+      if (idx >= 0) mockDocs.splice(idx, 1);
+      return Promise.resolve({ ok: true });
+    }),
+  };
+}
+
+const sharedSessionDatabase: SessionDatabase = makeDefaultSessionDatabase();
+
+export { sharedSessionDatabase };
+
+function resetSharedSessionDatabase() {
+  const defaults = makeDefaultSessionDatabase();
+  sharedSessionDatabase.put = defaults.put;
+  sharedSessionDatabase.get = defaults.get;
+  sharedSessionDatabase.query = defaults.query;
+  sharedSessionDatabase.delete = defaults.delete;
+}
+
 // Mock the useSession hook
 vi.mock("~/vibes.diy/app/hooks/useSession", async (original) => {
   const all =
@@ -234,27 +291,7 @@ vi.mock("~/vibes.diy/app/hooks/useSession", async (original) => {
           .fn()
           .mockImplementation(async (_title) => Promise.resolve()),
         addScreenshot: vi.fn(),
-        sessionDatabase: {
-          put: vi.fn(async (doc) => {
-            const id = doc._id || `doc-${Date.now()}`;
-            return Promise.resolve({ id: id });
-          }),
-          get: vi.fn(async (id: string) => {
-            const found = mockDocs.find((doc) => doc._id === id);
-            if (found) return Promise.resolve(found);
-            return Promise.reject(new Error("Not found"));
-          }),
-          query: vi.fn(async (field: string, options: { key: string }) => {
-            const key = options?.key;
-            const filtered = mockDocs.filter((doc) => {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              return (doc as any)[field] === key;
-            });
-            return Promise.resolve({
-              rows: filtered.map((doc) => ({ id: doc._id, doc })),
-            });
-          }),
-        },
+        sessionDatabase: sharedSessionDatabase,
         openSessionDatabase: vi.fn(),
         userMessage: currentUserMessage,
         mergeUserMessage: mockMergeUserMessage,
@@ -851,6 +888,7 @@ beforeEach(() => {
   // vi.stubEnv("VITE_CALLAI_API_KEY", "test-api-key");
 
   resetMockState();
+  resetSharedSessionDatabase();
 
   vi.spyOn(Storage.prototype, "getItem");
   localStorage.getItem = vi.fn((key) => {
