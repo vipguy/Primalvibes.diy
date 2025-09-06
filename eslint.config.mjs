@@ -33,6 +33,8 @@ const opts = tseslint.config(
       "**/.esm-cache/**",
       "**/build/**",
       "**/.wrangler/**",
+      "**/debug-tests/**",
+      "playwright.config.js",
     ],
   },
   {

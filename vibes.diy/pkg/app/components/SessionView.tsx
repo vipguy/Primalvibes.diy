@@ -20,8 +20,8 @@ interface SessionViewProps {
   search: string;
   hash: string;
   locationKey: string;
-  locationState: any;
-  navigate: (...args: any[]) => any;
+  locationState: unknown;
+  navigate: (...args: unknown[]) => unknown;
 }
 
 let renderCount = 0;
@@ -29,8 +29,8 @@ export default function SessionView({
   sessionId,
   pathname,
   search,
-  hash,
-  locationKey,
+  _hash,
+  _locationKey,
   locationState,
   navigate,
 }: SessionViewProps) {

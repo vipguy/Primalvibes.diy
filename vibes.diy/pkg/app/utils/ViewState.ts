@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { encodeTitle } from "../components/SessionSidebar/utils.js";
 import { ViewControlsType, ViewState, ViewType } from "@vibes.diy/prompts";
@@ -21,7 +21,7 @@ export interface ViewStateProps {
 export function useViewState(
   props: Partial<ViewStateProps>,
   pathname: string,
-  navigate: (...args: any[]) => any,
+  navigate: (...args: unknown[]) => unknown,
 ): Partial<ViewState> {
   const { sessionId: paramSessionId, title: paramTitle } = useParams<{
     sessionId: string;

@@ -62,7 +62,7 @@ describe("useSession", () => {
   it("should throw an error when sessionId is not provided", () => {
     // Test that useSession now requires a sessionId and throws when undefined is passed
     expect(() => {
-      renderHook(() => useSession(undefined as any));
+      renderHook(() => useSession(undefined as unknown as string));
     }).toThrow("useSession requires a valid sessionId");
 
     // The current implementation may throw early, preventing useFireproof calls

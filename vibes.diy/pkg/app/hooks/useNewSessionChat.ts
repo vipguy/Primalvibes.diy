@@ -1,12 +1,6 @@
 import { useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router";
-import type {
-  ChatMessageDocument,
-  NewSessionChatState,
-  VibeDocument,
-  Segment,
-} from "@vibes.diy/prompts";
-import { RuntimeError } from "use-vibes";
+import type { NewSessionChatState } from "@vibes.diy/prompts";
 
 export function useNewSessionChat(
   onSessionCreate: (sessionId: string) => void,

@@ -54,7 +54,7 @@ vi.mock("react-router", async () => {
 // Remove duplicate mock - the first mock above is sufficient
 
 // Define types for mock components
-interface ChatInterfaceProps {
+interface _ChatInterfaceProps {
   chatState: {
     messages: ChatMessage[];
     setMessages: (
@@ -79,7 +79,7 @@ interface ChatInterfaceProps {
   onSessionCreated?: (sessionId: string) => void;
 }
 
-interface ResultPreviewProps {
+interface _ResultPreviewProps {
   code: string;
   dependencies?: Record<string, string>;
   onShare?: () => void;
