@@ -69,15 +69,15 @@ export function useSimpleChat(sessionId: string): ChatState {
   // DEBUG: Track useSession hook return values
   useEffect(() => {
     console.log(`useSession ${sessionId} return values:`, {
-      sessionId: session?.sessionId?.substring(0, 10) + "..." || "none",
+      sessionId: session?._id?.substring(0, 10) + "..." || "none",
       sessionTitle: session?.title?.substring(0, 10) + "..." || "none",
       docsCount: docs?.length,
       hasUserMessage: !!userMessage,
-      userMessageId: userMessage?.messageId?.substring(0, 10) + "..." || "none",
+      userMessageId: userMessage?._id?.substring(0, 10) + "..." || "none",
       hasAiMessage: !!aiMessage,
-      aiMessageId: aiMessage?.messageId?.substring(0, 10) + "..." || "none",
+      aiMessageId: aiMessage?._id?.substring(0, 10) + "..." || "none",
       hasVibeDoc: !!vibeDoc,
-      vibeDocId: vibeDoc?.appId?.substring(0, 10) + "..." || "none",
+      vibeDocId: vibeDoc?._id?.substring(0, 10) + "..." || "none",
       effectiveModel: String(effectiveModel),
       timestamp: Date.now(),
     });
@@ -145,7 +145,8 @@ export function useSimpleChat(sessionId: string): ChatState {
       selectedResponseId:
         selectedResponseId?.substring(0, 20) + "..." || "none",
       hasPendingAiMessage: !!pendingAiMessage,
-      pendingAiMessageId: pendingAiMessage?.messageId?.substring(0, 10) + "..." || "none",
+      pendingAiMessageId:
+        pendingAiMessage?._id?.substring(0, 10) + "..." || "none",
       didSendErrors,
       timestamp: Date.now(),
     });

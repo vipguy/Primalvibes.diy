@@ -10,10 +10,7 @@ export function meta() {
   ];
 }
 
-let homeRenderCount = 0;
 export default function SessionWrapper() {
-  console.log(`SessionWrapper (home) render #${++homeRenderCount}`);
-
   const { sessionId: urlSessionId } = useParams<{ sessionId: string }>();
   const location = useLocation();
   const originalNavigate = useNavigate();
@@ -24,21 +21,14 @@ export default function SessionWrapper() {
     [location?.pathname],
   );
   const search = useMemo(() => location?.search || "", [location?.search]);
-  const hash = useMemo(() => location?.hash || "", [location?.hash]);
-  const locationKey = useMemo(() => location?.key || "", [location?.key]);
   const locationState = useMemo(
     () => location?.state || null,
     [location?.state],
   );
 
-  // Create stable navigate function with logging
+  // Create stable navigate function
   const navigate = useCallback(
     (to: string, options?: { replace?: boolean }) => {
-      console.log("🚨 NAVIGATE CALL from SessionWrapper:", {
-        to,
-        options,
-        timestamp: Date.now(),
-      });
       return originalNavigate(to, options);
     },
     [originalNavigate],
@@ -48,43 +38,20 @@ export default function SessionWrapper() {
     () => urlSessionId || null,
   );
 
-  // DEBUG: Track what's causing re-renders with detailed logging
-  console.log(
-    "SessionWrapper render - urlSessionId:",
-    urlSessionId,
-    "sessionId:",
-    sessionId,
-    "useParams object reference:",
-    useParams,
-    "timestamp:",
-    Date.now(),
-  );
-
   const handleSessionCreate = (newSessionId: string) => {
-    console.log("SessionWrapper - onSessionCreate called with:", newSessionId);
     setSessionId(newSessionId);
-    console.log(
-      "SessionWrapper - setSessionId called, should trigger re-render",
-    );
   };
 
   // Conditional rendering - true deferred session creation
   if (!sessionId) {
-    console.log("SessionWrapper - rendering NewSessionView");
     return <NewSessionView onSessionCreate={handleSessionCreate} />;
   }
 
-  console.log(
-    "SessionWrapper - rendering SessionView with sessionId:",
-    sessionId,
-  );
   return (
     <SessionView
       sessionId={sessionId}
       pathname={pathname}
       search={search}
-      hash={hash}
-      locationKey={locationKey}
       locationState={locationState}
       navigate={navigate}
     />

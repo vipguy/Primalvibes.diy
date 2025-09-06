@@ -21,7 +21,7 @@ export interface ViewStateProps {
 export function useViewState(
   props: Partial<ViewStateProps>,
   pathname: string,
-  navigate: (...args: unknown[]) => unknown,
+  navigate: (to: string, options?: { replace?: boolean }) => void,
 ): Partial<ViewState> {
   const { sessionId: paramSessionId, title: paramTitle } = useParams<{
     sessionId: string;

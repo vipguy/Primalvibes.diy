@@ -18,32 +18,17 @@ interface SessionViewProps {
   sessionId: string;
   pathname: string;
   search: string;
-  hash: string;
-  locationKey: string;
   locationState: unknown;
-  navigate: (...args: unknown[]) => unknown;
+  navigate: (to: string, options?: { replace?: boolean }) => void;
 }
 
-let renderCount = 0;
 export default function SessionView({
   sessionId,
   pathname,
   search,
-  _hash,
-  _locationKey,
   locationState,
   navigate,
 }: SessionViewProps) {
-  if (renderCount < 20) {
-    console.log(`SessionView ${sessionId} render #${++renderCount}`);
-  } else if (renderCount === 20) {
-    console.log(
-      `SessionView ${sessionId} render #${++renderCount} - LOGGING DISABLED AFTER 20 RENDERS`,
-    );
-  } else {
-    renderCount++;
-  }
-
   const chatState = useSimpleChat(sessionId);
   const hasAutoSentMessage = useRef(false);
   const chatInputRef = useRef<ChatInputRef>(null);
@@ -68,15 +53,10 @@ export default function SessionView({
     const navigationState = locationState as {
       pendingMessage?: string;
     } | null;
-    console.log("SessionView mount - navigation state:", navigationState);
     if (
       navigationState?.pendingMessage &&
       navigationState.pendingMessage.trim()
     ) {
-      console.log(
-        "Setting captured prompt from pending message:",
-        navigationState.pendingMessage,
-      );
       setCapturedPrompt(navigationState.pendingMessage);
     }
   }, []); // Empty dependency array - runs only on mount
@@ -135,40 +115,6 @@ export default function SessionView({
     capturedPrompt: capturedPrompt,
   };
 
-  // DEBUG: Log only when useViewState props change (limited to first 20)
-  const [propsChangeCount, setPropsChangeCount] = useState(0);
-  useEffect(() => {
-    if (propsChangeCount < 20) {
-      console.log(
-        `SessionView ${sessionId} useViewState props CHANGED (#${propsChangeCount + 1}):`,
-        {
-          sessionId: viewStateProps.sessionId,
-          title: viewStateProps.title,
-          codeLength: viewStateProps.code?.length || 0,
-          isStreaming: viewStateProps.isStreaming,
-          previewReady: viewStateProps.previewReady,
-          isIframeFetching: viewStateProps.isIframeFetching,
-          capturedPrompt: viewStateProps.capturedPrompt,
-          timestamp: Date.now(),
-        },
-      );
-      setPropsChangeCount((prev) => prev + 1);
-    } else if (propsChangeCount === 20) {
-      console.log(
-        `SessionView ${sessionId} useViewState props CHANGED (#21) - PROPS LOGGING DISABLED`,
-      );
-      setPropsChangeCount((prev) => prev + 1);
-    }
-  }, [
-    viewStateProps.sessionId,
-    viewStateProps.title,
-    viewStateProps.code,
-    viewStateProps.isStreaming,
-    viewStateProps.previewReady,
-    viewStateProps.isIframeFetching,
-    viewStateProps.capturedPrompt,
-  ]);
-
   const { displayView, navigateToView, viewControls, showViewControls } =
     useViewState(viewStateProps, pathname, navigate);
 
@@ -193,7 +139,6 @@ export default function SessionView({
         // Navigate to app view to show the result
         navigateToView?.("preview");
       } catch (error) {
-        console.error("Failed to save code:", error);
         chatState.addError({
           type: "error",
           message:
@@ -255,16 +200,8 @@ export default function SessionView({
     // setActiveView('preview'); // This is now handled by useViewState when previewReady changes
   }, []); // chatState.isStreaming, chatState.codeReady removed as setActiveView is gone and useViewState handles this logic
 
-  // URL update effect - track dependencies for debugging
+  // URL update effect
   useEffect(() => {
-    // DEBUG: Log what triggered this effect
-    console.log(`SessionView ${sessionId} URL update effect triggered:`, {
-      title: chatState.title,
-      pathname: location?.pathname,
-      sessionId: chatState.sessionId,
-      currentTime: Date.now(),
-    });
-
     if (chatState.title) {
       // Check if the current path has a tab suffix
       // Add null check for location to prevent errors in tests
@@ -289,12 +226,6 @@ export default function SessionView({
       }
 
       const newUrl = `/chat/${chatState.sessionId}/${encodeTitle(chatState.title)}${suffix}`;
-
-      console.log(`SessionView ${sessionId} URL comparison:`, {
-        currentPath: location?.pathname,
-        newUrl,
-        willNavigate: location && newUrl !== location.pathname,
-      });
 
       if (location && newUrl !== location.pathname) {
         navigate(newUrl, { replace: true });
@@ -361,17 +292,8 @@ export default function SessionView({
     wasStreamingRef.current = chatState.isStreaming;
   }, [chatState.selectedCode, chatState.isStreaming, previewReady]);
 
-  // Initial URL navigation effect - track dependencies for debugging
+  // Initial URL navigation effect
   useEffect(() => {
-    // DEBUG: Log what triggered this effect
-    console.log(`SessionView ${sessionId} initial URL navigation effect:`, {
-      sessionId: chatState.sessionId,
-      title: chatState.title,
-      pathname: location?.pathname,
-      capturedPrompt,
-      currentTime: Date.now(),
-    });
-
     const path = location?.pathname || "";
     const hasTabSuffix =
       path.endsWith("/app") ||
@@ -390,16 +312,6 @@ export default function SessionView({
       encodedAppTitle &&
       !capturedPrompt;
 
-    console.log(`SessionView ${sessionId} initial navigation check:`, {
-      hasTabSuffix,
-      hasSessionId: !!chatState.sessionId,
-      hasTitle: !!encodedAppTitle,
-      hasCapturedPrompt: !!capturedPrompt,
-      shouldNavigate,
-      targetUrl,
-      currentPath: path,
-    });
-
     if (shouldNavigate) {
       navigate(targetUrl, {
         replace: true,
@@ -410,9 +322,6 @@ export default function SessionView({
   // Switch to 2-column view immediately when a message is submitted
   const shouldUseFullWidthChat =
     chatState.docs.length === 0 && !hasSubmittedMessage;
-
-  // Debug logging for SessionView render - this might be causing the render loop!
-  // console.log("SessionSidebar props:", { isVisible: isSidebarVisible, sessionId: chatState.sessionId || "", onClose: closeSidebar });
 
   return (
     <>

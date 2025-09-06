@@ -26,7 +26,7 @@
     "dev:router": "cd vibes.diy/pkg && pnpm run dev:router",
     "pack": "echo skip pack",
     "publish": "echo skip publish",
-    "check": "pnpm format && pnpm build && pnpm test"
+    "check": "pnpm format && pnpm build && pnpm test && pnpm lint"
   },
   "keywords": [
     "ai",
