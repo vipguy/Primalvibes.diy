@@ -28,6 +28,35 @@ export function useViewState(
   const navigate = useNavigate();
   const location = useLocation();
 
+  // DEBUG: Track props changes in useViewState (limited to first 20)
+  const viewStateLogCountRef = useRef(0);
+  useEffect(() => {
+    if (viewStateLogCountRef.current < 20) {
+      viewStateLogCountRef.current++;
+      console.log(`useViewState props CHANGED (#${viewStateLogCountRef.current}):`, {
+        propsSessionId: props.sessionId,
+        propsTitle: props.title,
+        propsCodeLength: props.code?.length || 0,
+        propsIsStreaming: props.isStreaming,
+        propsPreviewReady: props.previewReady,
+        propsIsIframeFetching: props.isIframeFetching,
+        propsCapturedPrompt: props.capturedPrompt,
+        currentTime: Date.now(),
+      });
+    } else if (viewStateLogCountRef.current === 20) {
+      viewStateLogCountRef.current++;
+      console.log(`useViewState props CHANGED (#21) - VIEWSTATE LOGGING DISABLED`);
+    }
+  }, [
+    props.sessionId,
+    props.title,
+    props.code,
+    props.isStreaming,
+    props.previewReady,
+    props.isIframeFetching,
+    props.capturedPrompt
+  ]);
+
   // Consolidate session and title from props or params
   const sessionId = props.sessionId || paramSessionId;
   const title = props.title || paramTitle;

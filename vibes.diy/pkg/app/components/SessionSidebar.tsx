@@ -216,22 +216,29 @@ export default memo(SessionSidebar, (prevProps, nextProps) => {
     prevProps.onClose === nextProps.onClose &&
     prevProps.sessionId === nextProps.sessionId;
 
-  console.log(
-    `memo-session-sidebar #${++memoCallCount} - ${shouldSkipRender ? "SKIPPED" : "RENDERING"}`,
-    {
-      isVisible: {
-        prev: prevProps.isVisible,
-        next: nextProps.isVisible,
-        same: prevProps.isVisible === nextProps.isVisible,
+  // DEBUG: Limit memo logging to first 20 calls
+  if (memoCallCount < 20) {
+    console.log(
+      `memo-session-sidebar #${++memoCallCount} - ${shouldSkipRender ? "SKIPPED" : "RENDERING"}`,
+      {
+        isVisible: {
+          prev: prevProps.isVisible,
+          next: nextProps.isVisible,
+          same: prevProps.isVisible === nextProps.isVisible,
+        },
+        onClose: { same: prevProps.onClose === nextProps.onClose },
+        sessionId: {
+          prev: prevProps.sessionId,
+          next: nextProps.sessionId,
+          same: prevProps.sessionId === nextProps.sessionId,
+        },
       },
-      onClose: { same: prevProps.onClose === nextProps.onClose },
-      sessionId: {
-        prev: prevProps.sessionId,
-        next: nextProps.sessionId,
-        same: prevProps.sessionId === nextProps.sessionId,
-      },
-    },
-  );
+    );
+  } else if (memoCallCount === 20) {
+    console.log(`memo-session-sidebar #${++memoCallCount} - SIDEBAR MEMO LOGGING DISABLED`);
+  } else {
+    memoCallCount++;
+  }
 
   return shouldSkipRender;
 });

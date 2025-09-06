@@ -21,7 +21,13 @@ interface SessionViewProps {
 
 let renderCount = 0;
 export default function SessionView({ sessionId }: SessionViewProps) {
-  console.log(`SessionView ${sessionId} render #${++renderCount}`);
+  if (renderCount < 20) {
+    console.log(`SessionView ${sessionId} render #${++renderCount}`);
+  } else if (renderCount === 20) {
+    console.log(`SessionView ${sessionId} render #${++renderCount} - LOGGING DISABLED AFTER 20 RENDERS`);
+  } else {
+    renderCount++;
+  }
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -105,17 +111,48 @@ export default function SessionView({ sessionId }: SessionViewProps) {
   );
   const [syntaxErrorCount, setSyntaxErrorCount] = useState(0);
 
-  // TEMPORARILY DISABLED - Testing if useViewState causes render loop
+  // Add dependency tracking for useViewState props
+  const viewStateProps = {
+    sessionId: chatState.sessionId, // sessionId is guaranteed non-null from interface
+    title: chatState.title || undefined, // Handle null
+    code: chatState.selectedCode?.content || "",
+    isStreaming: chatState.isStreaming,
+    previewReady: previewReady,
+    isIframeFetching: isIframeFetching,
+    capturedPrompt: capturedPrompt,
+  };
+
+  // DEBUG: Log only when useViewState props change (limited to first 20)
+  const [propsChangeCount, setPropsChangeCount] = useState(0);
+  useEffect(() => {
+    if (propsChangeCount < 20) {
+      console.log(`SessionView ${sessionId} useViewState props CHANGED (#${propsChangeCount + 1}):`, {
+        sessionId: viewStateProps.sessionId,
+        title: viewStateProps.title,
+        codeLength: viewStateProps.code?.length || 0,
+        isStreaming: viewStateProps.isStreaming,
+        previewReady: viewStateProps.previewReady,
+        isIframeFetching: viewStateProps.isIframeFetching,
+        capturedPrompt: viewStateProps.capturedPrompt,
+        timestamp: Date.now(),
+      });
+      setPropsChangeCount(prev => prev + 1);
+    } else if (propsChangeCount === 20) {
+      console.log(`SessionView ${sessionId} useViewState props CHANGED (#21) - PROPS LOGGING DISABLED`);
+      setPropsChangeCount(prev => prev + 1);
+    }
+  }, [
+    viewStateProps.sessionId,
+    viewStateProps.title, 
+    viewStateProps.code,
+    viewStateProps.isStreaming,
+    viewStateProps.previewReady,
+    viewStateProps.isIframeFetching,
+    viewStateProps.capturedPrompt
+  ]);
+
   const { displayView, navigateToView, viewControls, showViewControls } =
-    useViewState({
-      sessionId: chatState.sessionId, // sessionId is guaranteed non-null from interface
-      title: chatState.title || undefined, // Handle null
-      code: chatState.selectedCode?.content || "",
-      isStreaming: chatState.isStreaming,
-      previewReady: previewReady,
-      isIframeFetching: isIframeFetching,
-      capturedPrompt: capturedPrompt,
-    });
+    useViewState(viewStateProps);
 
   // Temporary fallback values for testing
   // const displayView = "chat";
@@ -200,8 +237,16 @@ export default function SessionView({ sessionId }: SessionViewProps) {
     // setActiveView('preview'); // This is now handled by useViewState when previewReady changes
   }, []); // chatState.isStreaming, chatState.codeReady removed as setActiveView is gone and useViewState handles this logic
 
-  // TEMPORARILY DISABLED - Testing if this causes render loop
+  // URL update effect - track dependencies for debugging
   useEffect(() => {
+    // DEBUG: Log what triggered this effect
+    console.log(`SessionView ${sessionId} URL update effect triggered:`, {
+      title: chatState.title,
+      pathname: location?.pathname,
+      sessionId: chatState.sessionId,
+      currentTime: Date.now(),
+    });
+
     if (chatState.title) {
       // Check if the current path has a tab suffix
       // Add null check for location to prevent errors in tests
@@ -226,6 +271,12 @@ export default function SessionView({ sessionId }: SessionViewProps) {
       }
 
       const newUrl = `/chat/${chatState.sessionId}/${encodeTitle(chatState.title)}${suffix}`;
+
+      console.log(`SessionView ${sessionId} URL comparison:`, {
+        currentPath: location?.pathname,
+        newUrl,
+        willNavigate: location && newUrl !== location.pathname,
+      });
 
       if (location && newUrl !== location.pathname) {
         navigate(newUrl, { replace: true });
@@ -292,9 +343,17 @@ export default function SessionView({ sessionId }: SessionViewProps) {
     wasStreamingRef.current = chatState.isStreaming;
   }, [chatState.selectedCode, chatState.isStreaming, previewReady]);
 
-  // Handle initial URL path navigation if no view suffix.
-  // useViewState handles subsequent auto-navigation based on state changes (e.g. previewReady).
+  // Initial URL navigation effect - track dependencies for debugging  
   useEffect(() => {
+    // DEBUG: Log what triggered this effect
+    console.log(`SessionView ${sessionId} initial URL navigation effect:`, {
+      sessionId: chatState.sessionId,
+      title: chatState.title,
+      pathname: location?.pathname,
+      capturedPrompt,
+      currentTime: Date.now(),
+    });
+
     const path = location?.pathname || "";
     const hasTabSuffix =
       path.endsWith("/app") ||
@@ -306,13 +365,21 @@ export default function SessionView({ sessionId }: SessionViewProps) {
 
     // If there's a session and title, but no specific view suffix in the URL, navigate to the 'app' (preview) view.
     // Skip navigation if there's a captured prompt that hasn't been sent yet.
-    if (
-      !hasTabSuffix &&
-      chatState.sessionId &&
-      encodedAppTitle &&
-      !capturedPrompt
-    ) {
-      navigate(`/chat/${chatState.sessionId}/${encodedAppTitle}/app`, {
+    const targetUrl = `/chat/${chatState.sessionId}/${encodedAppTitle}/app`;
+    const shouldNavigate = !hasTabSuffix && chatState.sessionId && encodedAppTitle && !capturedPrompt;
+
+    console.log(`SessionView ${sessionId} initial navigation check:`, {
+      hasTabSuffix,
+      hasSessionId: !!chatState.sessionId,
+      hasTitle: !!encodedAppTitle,
+      hasCapturedPrompt: !!capturedPrompt,
+      shouldNavigate,
+      targetUrl,
+      currentPath: path,
+    });
+
+    if (shouldNavigate) {
+      navigate(targetUrl, {
         replace: true,
       });
     }
