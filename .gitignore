@@ -10,3 +10,9 @@ node_modules
 
 # Ignore editor backup files
 **~
+
+## Playwright debug files
+test-results/
+playwright-report/
+playwright/.cache/
+

@@ -49,7 +49,7 @@ describe("useViewState during streaming", () => {
     // Render hook with initial state (no streaming, no code)
     const { unmount } = renderHook(
       (props) => {
-        hookResult = useViewState(props);
+        hookResult = useViewState(props, "/chat/session123/title", vi.fn());
         return hookResult;
       },
       {
@@ -69,7 +69,7 @@ describe("useViewState during streaming", () => {
     // Re-render with streaming started and some code
     const { rerender } = renderHook(
       (props) => {
-        hookResult = useViewState(props);
+        hookResult = useViewState(props, "/chat/session123/title", vi.fn());
         return hookResult;
       },
       {
@@ -108,7 +108,7 @@ describe("useViewState during streaming", () => {
     // Initialize with streaming in progress
     const { unmount } = renderHook(
       (props) => {
-        hookResult = useViewState(props);
+        hookResult = useViewState(props, "/chat/session123/title", vi.fn());
         return hookResult;
       },
       {
@@ -128,7 +128,7 @@ describe("useViewState during streaming", () => {
     // Reinitialize with streaming
     const { rerender } = renderHook(
       (props) => {
-        hookResult = useViewState(props);
+        hookResult = useViewState(props, "/chat/session123/title", vi.fn());
         return hookResult;
       },
       {
@@ -191,7 +191,7 @@ describe("useViewState during streaming", () => {
     // Initialize with streaming active and on code view
     const { unmount } = renderHook(
       (props) => {
-        hookResult = useViewState(props);
+        hookResult = useViewState(props, "/chat/session123/title", vi.fn());
         return hookResult;
       },
       {
@@ -211,7 +211,7 @@ describe("useViewState during streaming", () => {
     // Reinitialize with streaming on code view
     const { rerender } = renderHook(
       (props) => {
-        hookResult = useViewState(props);
+        hookResult = useViewState(props, "/chat/session123/title", vi.fn());
         return hookResult;
       },
       {
@@ -249,7 +249,7 @@ describe("useViewState during streaming", () => {
     // Initialize on data view
     const { unmount } = renderHook(
       (props) => {
-        hookResult = useViewState(props);
+        hookResult = useViewState(props, "/chat/session123/title", vi.fn());
         return hookResult;
       },
       {
@@ -269,7 +269,7 @@ describe("useViewState during streaming", () => {
     // Reinitialize on data view
     const { rerender } = renderHook(
       (props) => {
-        hookResult = useViewState(props);
+        hookResult = useViewState(props, "/chat/session123/title", vi.fn());
         return hookResult;
       },
       {
@@ -310,7 +310,7 @@ describe("useViewState during streaming", () => {
     // Initialize at root with streaming starting
     const { unmount } = renderHook(
       (props) => {
-        hookResult = useViewState(props);
+        hookResult = useViewState(props, "/chat/session123/title", vi.fn());
         return hookResult;
       },
       {
@@ -333,7 +333,7 @@ describe("useViewState during streaming", () => {
     // Simulate streaming starts but still no session/title (first part of response)
     const { rerender } = renderHook(
       (props) => {
-        hookResult = useViewState(props);
+        hookResult = useViewState(props, "/chat/session123/title", vi.fn());
         return hookResult;
       },
       {
@@ -417,7 +417,7 @@ describe("useViewState during streaming", () => {
     // Initialize at root, no streaming yet
     const { unmount } = renderHook(
       (props) => {
-        hookResult = useViewState(props);
+        hookResult = useViewState(props, "/chat/session123/title", vi.fn());
         return hookResult;
       },
       {
@@ -440,7 +440,7 @@ describe("useViewState during streaming", () => {
     // NOW: Streaming starts with first empty message
     const { rerender } = renderHook(
       (props) => {
-        hookResult = useViewState(props);
+        hookResult = useViewState(props, "/chat/session123/title", vi.fn());
         return hookResult;
       },
       {
@@ -486,7 +486,7 @@ describe("useViewState during streaming", () => {
     // Initialize at root, no streaming yet
     const { unmount } = renderHook(
       (props) => {
-        hookResult = useViewState(props);
+        hookResult = useViewState(props, "/chat/session123/title", vi.fn());
         return hookResult;
       },
       {
@@ -505,7 +505,7 @@ describe("useViewState during streaming", () => {
     // Streaming starts with first empty message
     const { rerender } = renderHook(
       (props) => {
-        hookResult = useViewState(props);
+        hookResult = useViewState(props, "/chat/session123/title", vi.fn());
         return hookResult;
       },
       {

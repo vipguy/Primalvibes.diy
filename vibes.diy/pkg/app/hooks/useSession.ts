@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   type AiChatMessageDocument,
   type UserChatMessageDocument,
@@ -268,12 +268,8 @@ export function useSession(sessionId: string): UseSession {
   useEffect(() => {
     resolveEffectiveModel(settingsDoc, vibeDoc).then((i) => {
       setEffectiveModel([i]);
-      // return [settingsDoc?.model, vibeDoc?.selectedModel]
     });
-  });
-  // const effectiveModel = useMemo(
-  //   () => resolveEffectiveModel(settingsDoc, vibeDoc), [settingsDoc?.model, vibeDoc?.selectedModel],
-  // );
+  }, [settingsDoc?.model, vibeDoc?.selectedModel]);
 
   // Add a screenshot to the session (in session-specific database)
   const addScreenshot = useCallback(
@@ -314,42 +310,70 @@ export function useSession(sessionId: string): UseSession {
     firehoseShared?: boolean;
   }
 
-  const session: SessionView = {
-    _id: sessionId,
-    title: vibeDoc.title,
-    publishedUrl: vibeDoc.publishedUrl,
-    firehoseShared: vibeDoc.firehoseShared,
-  };
+  const session: SessionView = useMemo(
+    () => ({
+      _id: sessionId,
+      title: vibeDoc.title,
+      publishedUrl: vibeDoc.publishedUrl,
+      firehoseShared: vibeDoc.firehoseShared,
+    }),
+    [sessionId, vibeDoc.title, vibeDoc.publishedUrl, vibeDoc.firehoseShared],
+  );
 
-  return {
-    // Session information
-    session,
-    docs,
+  return useMemo(
+    () => ({
+      // Session information
+      session,
+      docs,
 
-    // Databases
-    sessionDatabase,
+      // Databases
+      sessionDatabase,
 
-    // Session management functions
-    updateTitle,
-    updatePublishedUrl,
-    updateFirehoseShared,
-    addScreenshot,
-    // Message management
-    userMessage,
-    submitUserMessage: wrappedSubmitUserMessage,
-    mergeUserMessage,
-    aiMessage,
-    submitAiMessage,
-    mergeAiMessage,
-    saveAiMessage,
-    // Vibe document management
-    vibeDoc,
-    selectedModel: vibeDoc?.selectedModel,
-    effectiveModel,
-    updateDependencies,
-    updateInstructionalTextOverride,
-    updateDemoDataOverride,
-    updateAiSelectedDependencies,
-    updateSelectedModel,
-  };
+      // Session management functions
+      updateTitle,
+      updatePublishedUrl,
+      updateFirehoseShared,
+      addScreenshot,
+      // Message management
+      userMessage,
+      submitUserMessage: wrappedSubmitUserMessage,
+      mergeUserMessage,
+      aiMessage,
+      submitAiMessage,
+      mergeAiMessage,
+      saveAiMessage,
+      // Vibe document management
+      vibeDoc,
+      selectedModel: vibeDoc?.selectedModel,
+      effectiveModel,
+      updateDependencies,
+      updateInstructionalTextOverride,
+      updateDemoDataOverride,
+      updateAiSelectedDependencies,
+      updateSelectedModel,
+    }),
+    [
+      session,
+      docs,
+      sessionDatabase,
+      updateTitle,
+      updatePublishedUrl,
+      updateFirehoseShared,
+      addScreenshot,
+      userMessage,
+      wrappedSubmitUserMessage,
+      mergeUserMessage,
+      aiMessage,
+      submitAiMessage,
+      mergeAiMessage,
+      saveAiMessage,
+      vibeDoc,
+      effectiveModel,
+      updateDependencies,
+      updateInstructionalTextOverride,
+      updateDemoDataOverride,
+      updateAiSelectedDependencies,
+      updateSelectedModel,
+    ],
+  );
 }

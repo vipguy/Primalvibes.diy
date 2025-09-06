@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useParams } from "react-router";
+import React, { useState, useMemo, useCallback } from "react";
+import { useParams, useLocation, useNavigate } from "react-router";
 import SessionView from "../components/SessionView.js";
 import NewSessionView from "../components/NewSessionView.js";
 
@@ -10,17 +10,54 @@ export function meta() {
   ];
 }
 
+let homeRenderCount = 0;
 export default function SessionWrapper() {
+  console.log(`SessionWrapper (home) render #${++homeRenderCount}`);
+
   const { sessionId: urlSessionId } = useParams<{ sessionId: string }>();
-  const [sessionId, setSessionId] = useState<string | null>(
-    urlSessionId || null,
+  const location = useLocation();
+  const originalNavigate = useNavigate();
+
+  // Extract all location properties as stable strings to prevent useEffect dependency issues
+  const pathname = useMemo(
+    () => location?.pathname || "",
+    [location?.pathname],
+  );
+  const search = useMemo(() => location?.search || "", [location?.search]);
+  const hash = useMemo(() => location?.hash || "", [location?.hash]);
+  const locationKey = useMemo(() => location?.key || "", [location?.key]);
+  const locationState = useMemo(
+    () => location?.state || null,
+    [location?.state],
   );
 
+  // Create stable navigate function with logging
+  const navigate = useCallback(
+    (to: string, options?: { replace?: boolean }) => {
+      console.log("🚨 NAVIGATE CALL from SessionWrapper:", {
+        to,
+        options,
+        timestamp: Date.now(),
+      });
+      return originalNavigate(to, options);
+    },
+    [originalNavigate],
+  );
+
+  const [sessionId, setSessionId] = useState<string | null>(
+    () => urlSessionId || null,
+  );
+
+  // DEBUG: Track what's causing re-renders with detailed logging
   console.log(
     "SessionWrapper render - urlSessionId:",
     urlSessionId,
     "sessionId:",
     sessionId,
+    "useParams object reference:",
+    useParams,
+    "timestamp:",
+    Date.now(),
   );
 
   const handleSessionCreate = (newSessionId: string) => {
@@ -41,5 +78,15 @@ export default function SessionWrapper() {
     "SessionWrapper - rendering SessionView with sessionId:",
     sessionId,
   );
-  return <SessionView sessionId={sessionId} />;
+  return (
+    <SessionView
+      sessionId={sessionId}
+      pathname={pathname}
+      search={search}
+      hash={hash}
+      locationKey={locationKey}
+      locationState={locationState}
+      navigate={navigate}
+    />
+  );
 }

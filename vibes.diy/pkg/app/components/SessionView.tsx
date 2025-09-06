@@ -1,5 +1,4 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import { useLocation, useNavigate } from "react-router";
 import { encodeTitle } from "./SessionSidebar/utils.js";
 import AppLayout from "./AppLayout.js";
 import ChatHeaderContent from "./ChatHeaderContent.js";
@@ -17,20 +16,34 @@ import { ViewType, ViewControlsType } from "@vibes.diy/prompts";
 
 interface SessionViewProps {
   sessionId: string;
+  pathname: string;
+  search: string;
+  hash: string;
+  locationKey: string;
+  locationState: any;
+  navigate: (...args: any[]) => any;
 }
 
 let renderCount = 0;
-export default function SessionView({ sessionId }: SessionViewProps) {
+export default function SessionView({
+  sessionId,
+  pathname,
+  search,
+  hash,
+  locationKey,
+  locationState,
+  navigate,
+}: SessionViewProps) {
   if (renderCount < 20) {
     console.log(`SessionView ${sessionId} render #${++renderCount}`);
   } else if (renderCount === 20) {
-    console.log(`SessionView ${sessionId} render #${++renderCount} - LOGGING DISABLED AFTER 20 RENDERS`);
+    console.log(
+      `SessionView ${sessionId} render #${++renderCount} - LOGGING DISABLED AFTER 20 RENDERS`,
+    );
   } else {
     renderCount++;
   }
 
-  const navigate = useNavigate();
-  const location = useLocation();
   const chatState = useSimpleChat(sessionId);
   const hasAutoSentMessage = useRef(false);
   const chatInputRef = useRef<ChatInputRef>(null);
@@ -45,14 +58,14 @@ export default function SessionView({ sessionId }: SessionViewProps) {
 
   // Capture URL prompt parameter once on mount
   useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
+    const searchParams = new URLSearchParams(search);
     const promptParam = searchParams.get("prompt");
     if (promptParam && promptParam.trim()) {
       setCapturedPrompt(promptParam);
     }
 
     // Check for pending message from new session creation
-    const navigationState = location.state as {
+    const navigationState = locationState as {
       pendingMessage?: string;
     } | null;
     console.log("SessionView mount - navigation state:", navigationState);
@@ -126,33 +139,38 @@ export default function SessionView({ sessionId }: SessionViewProps) {
   const [propsChangeCount, setPropsChangeCount] = useState(0);
   useEffect(() => {
     if (propsChangeCount < 20) {
-      console.log(`SessionView ${sessionId} useViewState props CHANGED (#${propsChangeCount + 1}):`, {
-        sessionId: viewStateProps.sessionId,
-        title: viewStateProps.title,
-        codeLength: viewStateProps.code?.length || 0,
-        isStreaming: viewStateProps.isStreaming,
-        previewReady: viewStateProps.previewReady,
-        isIframeFetching: viewStateProps.isIframeFetching,
-        capturedPrompt: viewStateProps.capturedPrompt,
-        timestamp: Date.now(),
-      });
-      setPropsChangeCount(prev => prev + 1);
+      console.log(
+        `SessionView ${sessionId} useViewState props CHANGED (#${propsChangeCount + 1}):`,
+        {
+          sessionId: viewStateProps.sessionId,
+          title: viewStateProps.title,
+          codeLength: viewStateProps.code?.length || 0,
+          isStreaming: viewStateProps.isStreaming,
+          previewReady: viewStateProps.previewReady,
+          isIframeFetching: viewStateProps.isIframeFetching,
+          capturedPrompt: viewStateProps.capturedPrompt,
+          timestamp: Date.now(),
+        },
+      );
+      setPropsChangeCount((prev) => prev + 1);
     } else if (propsChangeCount === 20) {
-      console.log(`SessionView ${sessionId} useViewState props CHANGED (#21) - PROPS LOGGING DISABLED`);
-      setPropsChangeCount(prev => prev + 1);
+      console.log(
+        `SessionView ${sessionId} useViewState props CHANGED (#21) - PROPS LOGGING DISABLED`,
+      );
+      setPropsChangeCount((prev) => prev + 1);
     }
   }, [
     viewStateProps.sessionId,
-    viewStateProps.title, 
+    viewStateProps.title,
     viewStateProps.code,
     viewStateProps.isStreaming,
     viewStateProps.previewReady,
     viewStateProps.isIframeFetching,
-    viewStateProps.capturedPrompt
+    viewStateProps.capturedPrompt,
   ]);
 
   const { displayView, navigateToView, viewControls, showViewControls } =
-    useViewState(viewStateProps);
+    useViewState(viewStateProps, pathname, navigate);
 
   // Temporary fallback values for testing
   // const displayView = "chat";
@@ -343,7 +361,7 @@ export default function SessionView({ sessionId }: SessionViewProps) {
     wasStreamingRef.current = chatState.isStreaming;
   }, [chatState.selectedCode, chatState.isStreaming, previewReady]);
 
-  // Initial URL navigation effect - track dependencies for debugging  
+  // Initial URL navigation effect - track dependencies for debugging
   useEffect(() => {
     // DEBUG: Log what triggered this effect
     console.log(`SessionView ${sessionId} initial URL navigation effect:`, {
@@ -366,7 +384,11 @@ export default function SessionView({ sessionId }: SessionViewProps) {
     // If there's a session and title, but no specific view suffix in the URL, navigate to the 'app' (preview) view.
     // Skip navigation if there's a captured prompt that hasn't been sent yet.
     const targetUrl = `/chat/${chatState.sessionId}/${encodedAppTitle}/app`;
-    const shouldNavigate = !hasTabSuffix && chatState.sessionId && encodedAppTitle && !capturedPrompt;
+    const shouldNavigate =
+      !hasTabSuffix &&
+      chatState.sessionId &&
+      encodedAppTitle &&
+      !capturedPrompt;
 
     console.log(`SessionView ${sessionId} initial navigation check:`, {
       hasTabSuffix,

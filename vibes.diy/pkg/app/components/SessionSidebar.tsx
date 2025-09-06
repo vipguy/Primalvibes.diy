@@ -235,7 +235,9 @@ export default memo(SessionSidebar, (prevProps, nextProps) => {
       },
     );
   } else if (memoCallCount === 20) {
-    console.log(`memo-session-sidebar #${++memoCallCount} - SIDEBAR MEMO LOGGING DISABLED`);
+    console.log(
+      `memo-session-sidebar #${++memoCallCount} - SIDEBAR MEMO LOGGING DISABLED`,
+    );
   } else {
     memoCallCount++;
   }

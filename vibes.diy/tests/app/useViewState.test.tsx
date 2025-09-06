@@ -45,11 +45,15 @@ describe("useViewState", () => {
     } as ReturnType<typeof useLocation>);
 
     const { result: appResult } = renderHook(() =>
-      useViewState({
-        code: "const test = true;",
-        isStreaming: false,
-        previewReady: true,
-      }),
+      useViewState(
+        {
+          code: "const test = true;",
+          isStreaming: false,
+          previewReady: true,
+        },
+        "/chat/session123/title/app",
+        vi.fn(),
+      ),
     );
 
     expect(appResult.current.currentView).toBe("preview");
@@ -60,11 +64,15 @@ describe("useViewState", () => {
     } as ReturnType<typeof useLocation>);
 
     const { result: codeResult } = renderHook(() =>
-      useViewState({
-        code: "const test = true;",
-        isStreaming: false,
-        previewReady: true,
-      }),
+      useViewState(
+        {
+          code: "const test = true;",
+          isStreaming: false,
+          previewReady: true,
+        },
+        "/chat/session123/title/code",
+        vi.fn(),
+      ),
     );
 
     expect(codeResult.current.currentView).toBe("code");
@@ -75,11 +83,15 @@ describe("useViewState", () => {
     } as ReturnType<typeof useLocation>);
 
     const { result: dataResult } = renderHook(() =>
-      useViewState({
-        code: "const test = true;",
-        isStreaming: false,
-        previewReady: true,
-      }),
+      useViewState(
+        {
+          code: "const test = true;",
+          isStreaming: false,
+          previewReady: true,
+        },
+        "/chat/session123/title/data",
+        vi.fn(),
+      ),
     );
 
     expect(dataResult.current.currentView).toBe("data");
@@ -93,11 +105,15 @@ describe("useViewState", () => {
 
     // Initialize with preview not ready
     const { result, rerender } = renderHook(() =>
-      useViewState({
-        code: 'console.log("test")',
-        isStreaming: false,
-        previewReady: false,
-      }),
+      useViewState(
+        {
+          code: 'console.log("test")',
+          isStreaming: false,
+          previewReady: false,
+        },
+        "/chat/session123/title/app",
+        vi.fn(),
+      ),
     );
 
     // Verify initial state
@@ -123,11 +139,15 @@ describe("useViewState", () => {
 
     // Initialize with preview not ready
     const { result, rerender } = renderHook(() =>
-      useViewState({
-        code: 'console.log("test")',
-        isStreaming: false,
-        previewReady: false,
-      }),
+      useViewState(
+        {
+          code: 'console.log("test")',
+          isStreaming: false,
+          previewReady: false,
+        },
+        "/chat/session123/title/code",
+        vi.fn(),
+      ),
     );
 
     // Verify initial state
@@ -153,11 +173,15 @@ describe("useViewState", () => {
 
     // Initialize with preview not ready
     const { result, rerender } = renderHook(() =>
-      useViewState({
-        code: 'console.log("test")',
-        isStreaming: false,
-        previewReady: false,
-      }),
+      useViewState(
+        {
+          code: 'console.log("test")',
+          isStreaming: false,
+          previewReady: false,
+        },
+        "/chat/session123/title/data",
+        vi.fn(),
+      ),
     );
 
     // Verify initial state
@@ -189,7 +213,7 @@ describe("useViewState", () => {
     // Initialize with preview not ready - first render creates the refs
     const { unmount } = renderHook(
       (props) => {
-        hookResult = useViewState(props);
+        hookResult = useViewState(props, "/chat/session123/title", vi.fn());
         return hookResult;
       },
       {
@@ -209,7 +233,7 @@ describe("useViewState", () => {
     // Recreate with preview not ready first to initialize the refs
     const { rerender } = renderHook(
       (props) => {
-        hookResult = useViewState(props);
+        hookResult = useViewState(props, "/chat/session123/title", vi.fn());
         return hookResult;
       },
       {
@@ -253,7 +277,7 @@ describe("useViewState", () => {
     // Initialize with preview not ready - first render to set up refs
     const { unmount } = renderHook(
       (props) => {
-        hookResult = useViewState(props);
+        hookResult = useViewState(props, "/chat/session123/title", vi.fn());
         return hookResult;
       },
       {
@@ -273,7 +297,7 @@ describe("useViewState", () => {
     // Recreate the hook with preview not ready to establish baseline
     const { rerender } = renderHook(
       (props) => {
-        hookResult = useViewState(props);
+        hookResult = useViewState(props, "/chat/session123/title", vi.fn());
         return hookResult;
       },
       {
@@ -327,11 +351,15 @@ describe("useViewState", () => {
     } as ReturnType<typeof useLocation>);
 
     const { result } = renderHook(() =>
-      useViewState({
-        code: "const test = true;",
-        isStreaming: false,
-        previewReady: true,
-      }),
+      useViewState(
+        {
+          code: "const test = true;",
+          isStreaming: false,
+          previewReady: true,
+        },
+        "/chat/session123/title/settings",
+        vi.fn(),
+      ),
     );
 
     expect(result.current.currentView).toBe("settings");
