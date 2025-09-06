@@ -216,22 +216,22 @@ const mockMergeUserMessage = vi.fn(mergeUserMessageImpl);
 
 // A single shared sessionDatabase instance used by the mocked useSession hook.
 // Tests can override these methods at runtime to affect the hook under test.
-type SessionDoc = AiChatMessage | UserChatMessage;
-type SessionDatabase = {
+type AnyChatMessage = AiChatMessage | UserChatMessage;
+interface SessionDatabase {
   put: (
-    doc: Partial<SessionDoc> & { _id?: string }
+    doc: Partial<AnyChatMessage> & { _id?: string },
   ) => Promise<DocResponse>;
-  get: (id: string) => Promise<SessionDoc>;
+  get: (id: string) => Promise<AnyChatMessage>;
   query: (
     field: string,
     options: { key: string },
-  ) => Promise<{ rows: { id: string; doc: SessionDoc }[] }>;
+  ) => Promise<{ rows: { id: string; doc: AnyChatMessage }[] }>;
   delete: (id: string) => Promise<{ ok: boolean }>;
-};
+}
 
 function makeDefaultSessionDatabase(): SessionDatabase {
   return {
-    put: vi.fn(async (doc: Partial<SessionDoc> & { _id?: string }) => {
+    put: vi.fn(async (doc: Partial<AnyChatMessage> & { _id?: string }) => {
       const id = doc._id || `doc-${Date.now()}`;
       return Promise.resolve({ id } as DocResponse);
     }),
