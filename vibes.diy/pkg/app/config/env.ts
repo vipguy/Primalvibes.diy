@@ -81,15 +81,23 @@ class vibesDiyEnv {
 
   // Vibes Service API
   readonly API_BASE_URL = Lazy(
-    () => this.env().get("VITE_API_BASE_URL") ?? "https://vibes-diy-api.com",
+    () =>
+      new URL(
+        this.env().get("VITE_API_BASE_URL") ?? "https://vibes-diy-api.com",
+      ).href, // Keep trailing slash - standardize on YES trailing slash
   );
   readonly APP_HOST_BASE_URL = Lazy(
-    () => this.env().get("VITE_APP_HOST_BASE_URL") ?? "https://vibesdiy.app",
+    () =>
+      new URL(
+        this.env().get("VITE_APP_HOST_BASE_URL") ?? "https://vibesdiy.app",
+      ).href, // Keep trailing slash - standardize on YES trailing slash
   );
 
   // CallAI Endpoint
   readonly CALLAI_ENDPOINT = Lazy(
-    () => this.env().get("VITE_CALLAI_ENDPOINT") ?? this.API_BASE_URL(),
+    () =>
+      new URL(this.env().get("VITE_CALLAI_ENDPOINT") ?? this.API_BASE_URL())
+        .href, // Keep trailing slash - standardize on YES trailing slash
   );
 
   // Chat History Database

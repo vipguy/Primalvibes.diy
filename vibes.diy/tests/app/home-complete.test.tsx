@@ -28,6 +28,7 @@ vi.mock("~/vibes.diy/app/contexts/CookieConsentContext", () => ({
 
 // We need to define the mock before importing any modules that might use it
 const navigateMock = vi.fn();
+let mockParams: Record<string, string | undefined> = {};
 
 // Mock for useLocation that we can control per test
 let locationMock = {
@@ -38,27 +39,19 @@ let locationMock = {
   key: "",
 };
 
-// Create mock implementations for react-router-dom
-vi.mock("react-router-dom", async () => {
+// Create mock implementations for react-router (note: not react-router-dom)
+vi.mock("react-router", async () => {
   const actual =
-    await vi.importActual<typeof import("react-router-dom")>(
-      "react-router-dom",
-    );
+    await vi.importActual<typeof import("react-router")>("react-router");
   return {
     ...actual,
     useNavigate: () => navigateMock,
     useLocation: () => locationMock,
+    useParams: () => mockParams,
   };
 });
 
-// Mock useNavigate hook from react-router - this mock applies to all tests
-vi.mock("react-router", () => {
-  return {
-    useParams: () => ({}),
-    useNavigate: () => navigateMock,
-    useLocation: () => locationMock,
-  };
-});
+// Remove duplicate mock - the first mock above is sufficient
 
 // Define types for mock components
 interface ChatInterfaceProps {
@@ -276,6 +269,8 @@ describe("Home Route in completed state", () => {
     globalThis.document.body.innerHTML = "";
     // Clear all mocks before each test
     vi.clearAllMocks();
+    // Reset mock params
+    mockParams = {};
 
     // vi.spyOn(segmentParser, "parseDependencies").mockReturnValue({
     //   react: "^18.2.0",
@@ -284,6 +279,9 @@ describe("Home Route in completed state", () => {
   });
 
   it("displays the correct number of code lines in the preview when session exists", async () => {
+    // Set mock params to simulate sessionId in URL
+    mockParams = { sessionId: "test-session-123" };
+
     render(
       <MockThemeProvider>
         <MemoryRouter initialEntries={["/chat/test-session-123"]}>
@@ -310,6 +308,9 @@ describe("Home Route in completed state", () => {
   });
 
   it("shows share button and handles sharing when session exists", async () => {
+    // Set mock params to simulate sessionId in URL
+    mockParams = { sessionId: "test-session-123" };
+
     render(
       <MockThemeProvider>
         <MemoryRouter initialEntries={["/chat/test-session-123"]}>
@@ -396,6 +397,9 @@ describe("Home Route in completed state", () => {
   });
 
   it("renders NewSessionView by default when no session in URL", async () => {
+    // Clear mock params to simulate no sessionId in URL
+    mockParams = {};
+
     render(
       <MockThemeProvider>
         <MemoryRouter initialEntries={["/"]}>

@@ -247,7 +247,7 @@ export async function selectLlmsAndOptions(
 
   const options: CallAIOptions = {
     chatUrl: opts.callAiEndpoint
-      ? URI.from(opts.callAiEndpoint).toString()
+      ? URI.from(opts.callAiEndpoint).toString().replace(/\/+$/, "") // Remove trailing slash to prevent double slash
       : undefined,
     apiKey: "sk-vibes-proxy-managed",
     model,

@@ -42,7 +42,7 @@ export async function streamAI(
   // Configure call-ai options with default maximum token limit
   const defaultMaxTokens = userId ? 150000 : 75000;
   const options: CallAIOptions = {
-    chatUrl: VibesDiyEnv.CALLAI_ENDPOINT(),
+    chatUrl: VibesDiyEnv.CALLAI_ENDPOINT().replace(/\/+$/, ""), // Remove trailing slash to prevent double slash
     apiKey: apiKey, // Pass through the API key (including dummy keys)
     model: model,
     transforms: ["middle-out"],
