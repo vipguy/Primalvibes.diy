@@ -243,8 +243,11 @@ function makeDefaultSessionDatabase(): SessionDatabase {
     query: vi.fn(async (field: string, options: { key: string }) => {
       const key = options?.key;
       const filtered = mockDocs.filter((doc) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return (doc as any)[field] === key;
+        // Type-safe field access for known chat message fields
+        if (field === "session_id") return doc.session_id === key;
+        if (field === "type") return doc.type === key;
+        if (field === "_id") return doc._id === key;
+        return false; // Unknown field, no match
       });
       return Promise.resolve({
         rows: filtered.map((doc) => ({ id: doc._id as string, doc })),
@@ -864,23 +867,28 @@ const testJwt =
 beforeEach(() => {
   // Credit checking mocks no longer needed
 
-  vi.spyOn(window, "fetch").mockImplementation(async () => {
-    const stream = new ReadableStream({
-      start(controller) {
-        controller.enqueue(new TextEncoder().encode("This is a test response"));
-        controller.close();
-      },
-    });
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () => {
+      const stream = new ReadableStream({
+        start(controller) {
+          controller.enqueue(
+            new TextEncoder().encode("This is a test response"),
+          );
+          controller.close();
+        },
+      });
 
-    return {
-      ok: true,
-      body: stream,
-      status: 200,
-      statusText: "OK",
-      text: () => Promise.resolve("This is a test response"),
-      headers: new Headers(),
-    } as Response;
-  });
+      return {
+        ok: true,
+        body: stream,
+        status: 200,
+        statusText: "OK",
+        text: () => Promise.resolve("This is a test response"),
+        headers: new Headers(),
+      } as Response;
+    }),
+  );
 
   Element.prototype.scrollIntoView = vi.fn();
 

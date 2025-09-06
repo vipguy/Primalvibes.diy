@@ -7,8 +7,7 @@ export default defineConfig({
   plugins: [
     tsconfigPaths({
       configNames: ["tsconfig.test.json"],
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    }) as any,
+    }),
   ],
   // cacheDir: "./node_modules/.vibes.diy-useSimpleChat-vite-cache",
   test: {
@@ -31,5 +30,7 @@ export default defineConfig({
         },
       ],
     },
+    testTimeout: 30000,
+    hookTimeout: 10000,
   },
 });

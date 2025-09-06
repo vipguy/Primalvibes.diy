@@ -7,8 +7,7 @@ export default defineConfig({
   plugins: [
     tsconfigPaths({
       configNames: ["tsconfig.test.json"],
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    }) as any,
+    }),
   ],
   optimizeDeps: {
     exclude: ["fsevents", "lightningcss"],
