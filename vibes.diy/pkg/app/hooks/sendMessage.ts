@@ -15,7 +15,7 @@ export interface SendMessageContext {
   setPendingUserDoc: (doc: ChatMessageDocument) => void;
   setIsStreaming: (v: boolean) => void;
   ensureApiKey: () => Promise<{ key: string } | null>;
-  setNeedsLogin: (v: boolean, reason: string) => void;
+  setNeedsLogin: (v: boolean) => void;
   ensureSystemPrompt: (overrides?: {
     userPrompt?: string;
     history?: { role: "user" | "assistant" | "system"; content: string }[];
@@ -75,7 +75,7 @@ export async function sendChatMessage(
 
   // Allow user message to be submitted, but check authentication for AI processing
   if (!isAuthenticated) {
-    setNeedsLogin(true, "sendMessage not authenticated");
+    setNeedsLogin(true);
   }
 
   setPendingUserDoc({

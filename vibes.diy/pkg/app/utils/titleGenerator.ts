@@ -47,7 +47,7 @@ export async function generateTitle(
 
   // Configure callAI options
   const options = {
-    chatUrl: VibesDiyEnv.CALLAI_ENDPOINT(),
+    chatUrl: VibesDiyEnv.CALLAI_ENDPOINT().replace(/\/+$/, ""), // Remove trailing slash to prevent double slash
     apiKey: apiKey || "sk-vibes-proxy-managed", // Use dummy key if no key provided
     model: model,
     headers: {
