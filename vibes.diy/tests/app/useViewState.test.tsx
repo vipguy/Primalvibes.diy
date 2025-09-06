@@ -20,15 +20,15 @@ vi.mock("~/vibes.diy/app/components/SessionSidebar/utils", () => {
 
 // Import mocked modules
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { ViewState } from "@vibes.diy/prompts";
 
 describe("useViewState", () => {
-  const mockNavigate = vi.fn();
+  let mockNavigate: ReturnType<typeof vi.fn>;
   const mockSessionId = "test-session-123";
   const mockTitle = "test-title";
 
   beforeEach(() => {
     vi.resetAllMocks();
+    mockNavigate = vi.fn();
 
     // Setup default mocks
     vi.mocked(useNavigate).mockReturnValue(mockNavigate);
