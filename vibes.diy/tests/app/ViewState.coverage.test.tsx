@@ -58,7 +58,11 @@ describe("ViewState Coverage Tests", () => {
     // First initialize with streaming state
     const { unmount } = renderHook(
       (props) => {
-        hookResult = useViewState(props, "/chat/session123/title", vi.fn());
+        hookResult = useViewState(
+          props,
+          "/chat/session123/title",
+          mockNavigate,
+        );
         return hookResult;
       },
       {
@@ -72,7 +76,11 @@ describe("ViewState Coverage Tests", () => {
     // Render the hook with initial streaming state
     const { rerender } = renderHook(
       (props) => {
-        hookResult = useViewState(props, "/chat/session123/title", vi.fn());
+        hookResult = useViewState(
+          props,
+          "/chat/session123/title",
+          mockNavigate,
+        );
         return hookResult;
       },
       {
@@ -182,7 +190,11 @@ describe("ViewState Coverage Tests", () => {
     // First render to establish the wasStreamingRef value as true
     const { unmount } = renderHook(
       (props) => {
-        hookResult = useViewState(props, "/chat/session123/title", vi.fn());
+        hookResult = useViewState(
+          props,
+          "/chat/session123/title",
+          mockNavigate,
+        );
         return hookResult;
       },
       {
@@ -202,7 +214,11 @@ describe("ViewState Coverage Tests", () => {
     // Re-render to get fresh refs
     const { rerender } = renderHook(
       (props) => {
-        hookResult = useViewState(props, "/chat/session123/title", vi.fn());
+        hookResult = useViewState(
+          props,
+          "/chat/session123/title",
+          mockNavigate,
+        );
         return hookResult;
       },
       {

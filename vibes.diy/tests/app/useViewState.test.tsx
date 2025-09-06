@@ -52,7 +52,7 @@ describe("useViewState", () => {
           previewReady: true,
         },
         "/chat/session123/title/app",
-        vi.fn(),
+        mockNavigate,
       ),
     );
 
@@ -71,7 +71,7 @@ describe("useViewState", () => {
           previewReady: true,
         },
         "/chat/session123/title/code",
-        vi.fn(),
+        mockNavigate,
       ),
     );
 
@@ -90,7 +90,7 @@ describe("useViewState", () => {
           previewReady: true,
         },
         "/chat/session123/title/data",
-        vi.fn(),
+        mockNavigate,
       ),
     );
 
@@ -112,7 +112,7 @@ describe("useViewState", () => {
           previewReady: false,
         },
         "/chat/session123/title/app",
-        vi.fn(),
+        mockNavigate,
       ),
     );
 
@@ -146,7 +146,7 @@ describe("useViewState", () => {
           previewReady: false,
         },
         "/chat/session123/title/code",
-        vi.fn(),
+        mockNavigate,
       ),
     );
 
@@ -180,7 +180,7 @@ describe("useViewState", () => {
           previewReady: false,
         },
         "/chat/session123/title/data",
-        vi.fn(),
+        mockNavigate,
       ),
     );
 
@@ -358,7 +358,7 @@ describe("useViewState", () => {
           previewReady: true,
         },
         "/chat/session123/title/settings",
-        vi.fn(),
+        mockNavigate,
       ),
     );
 

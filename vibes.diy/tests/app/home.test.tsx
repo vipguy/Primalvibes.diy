@@ -112,41 +112,55 @@ vi.mock("~/vibes.diy/app/components/AppLayout", () => {
   };
 });
 
-// Mock our ChatInterface
-vi.mock("~/vibes.diy/app/components/ChatInterface", () => {
+// Mock NewSessionView and SessionView components
+vi.mock("~/vibes.diy/app/components/NewSessionView", () => {
   return {
     __esModule: true,
-    default: (_props: unknown) => {
-      return <div data-testid="chat-interface">Chat Interface</div>;
-    },
-    getChatInputComponent: (_props: unknown) => {
-      return <div data-testid="chat-input">Chat Input</div>;
-    },
-    getSuggestionsComponent: (_props: unknown) => {
-      return <div data-testid="suggestions">Suggestions</div>;
+    default: ({
+      onSessionCreate,
+    }: {
+      onSessionCreate: (id: string) => void;
+    }) => {
+      return (
+        <div data-testid="new-session-view">
+          <div data-testid="chat-interface">Chat Interface</div>
+          <button
+            data-testid="create-session"
+            onClick={() => onSessionCreate("test-session-id")}
+          >
+            Create Session
+          </button>
+        </div>
+      );
     },
   };
 });
 
-// Mock ResultPreview
-vi.mock("~/vibes.diy/app/components/ResultPreview/ResultPreview", () => {
+vi.mock("~/vibes.diy/app/components/SessionView", () => {
   return {
     __esModule: true,
-    default: (_props: unknown) => {
-      return <div data-testid="result-preview">Result Preview</div>;
+    default: () => {
+      return (
+        <div data-testid="session-view">
+          <div data-testid="chat-interface">Chat Interface</div>
+          <div data-testid="result-preview">Result Preview</div>
+        </div>
+      );
     },
   };
 });
+
+// Remove this mock since we're now mocking at the component level
 
 describe("Home Route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("should render the chat interface and result preview", async () => {
+  it("should render NewSessionView when no sessionId in URL", async () => {
     render(
       <MockThemeProvider>
-        <MemoryRouter>
+        <MemoryRouter initialEntries={["/"]}>
           <AuthContext.Provider
             value={{
               token: "mock-token",
@@ -174,7 +188,43 @@ describe("Home Route", () => {
     );
 
     await waitFor(() => {
-      // Check for our components which should be visible
+      expect(screen.getByTestId("new-session-view")).toBeInTheDocument();
+      expect(screen.getByTestId("chat-interface")).toBeInTheDocument();
+    });
+  });
+
+  it("should render SessionView when sessionId exists in URL", async () => {
+    render(
+      <MockThemeProvider>
+        <MemoryRouter initialEntries={["/chat/test-session-123"]}>
+          <AuthContext.Provider
+            value={{
+              token: "mock-token",
+              isAuthenticated: true,
+              isLoading: false,
+              userPayload: {
+                userId: "test",
+                exp: 9999999999,
+                tenants: [],
+                ledgers: [],
+                iat: 1234567890,
+                iss: "FP_CLOUD",
+                aud: "PUBLIC",
+              },
+              needsLogin: false,
+              setNeedsLogin: vi.fn(),
+              checkAuthStatus: vi.fn(),
+              processToken: vi.fn(),
+            }}
+          >
+            <UnifiedSession />
+          </AuthContext.Provider>
+        </MemoryRouter>
+      </MockThemeProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("session-view")).toBeInTheDocument();
       expect(screen.getByTestId("chat-interface")).toBeInTheDocument();
       expect(screen.getByTestId("result-preview")).toBeInTheDocument();
     });

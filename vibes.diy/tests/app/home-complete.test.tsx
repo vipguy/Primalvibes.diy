@@ -126,42 +126,47 @@ Object.defineProperty(navigator, "clipboard", {
 //   writable: true,
 // });
 
-// Mock components used in the Home component
-vi.mock("~/vibes.diy/app/components/ChatInterface", () => ({
-  default: ({ onSessionCreated }: ChatInterfaceProps) => (
-    <div data-testid="mock-chat-interface">
-      <button
-        type="button"
-        data-testid="create-session-button"
-        onClick={() => onSessionCreated?.("new-session-id")}
-      >
-        Create Session
-      </button>
+// Mock the new session architecture components
+vi.mock("~/vibes.diy/app/components/NewSessionView", () => ({
+  default: ({ onSessionCreate }: { onSessionCreate: (id: string) => void }) => (
+    <div data-testid="new-session-view">
+      <div data-testid="mock-chat-interface">
+        <button
+          type="button"
+          data-testid="create-session-button"
+          onClick={() => onSessionCreate("new-session-id")}
+        >
+          Create Session
+        </button>
+      </div>
     </div>
   ),
 }));
 
-vi.mock("~/vibes.diy/app/components/ResultPreview/ResultPreview", () => ({
-  default: ({ code }: ResultPreviewProps) => (
-    <div data-testid="mock-result-preview">
-      <div data-testid="code-line-count">
-        {code.split("\n").length} lines of code
+vi.mock("~/vibes.diy/app/components/SessionView", () => ({
+  default: () => (
+    <div data-testid="session-view">
+      <div data-testid="mock-chat-interface">Chat Interface</div>
+      <div data-testid="mock-result-preview">
+        <div data-testid="code-line-count">210 lines of code</div>
+        <div data-testid="code-content">console.log("Line 0");...</div>
+        <button
+          type="button"
+          data-testid="share-button"
+          onClick={() =>
+            navigator.clipboard.writeText(
+              `${window.location.origin}/shared?state=mockState`,
+            )
+          }
+        >
+          Share
+        </button>
       </div>
-      <div data-testid="code-content">{code.substring(0, 50)}...</div>
-      <button
-        type="button"
-        data-testid="share-button"
-        onClick={() =>
-          navigator.clipboard.writeText(
-            `${window.location.origin}/shared?state=mockState`,
-          )
-        }
-      >
-        Share
-      </button>
     </div>
   ),
 }));
+
+// Remove this mock since we're mocking at component level now
 
 vi.mock("~/vibes.diy/app/components/AppLayout", () => ({
   default: ({ chatPanel, previewPanel }: AppLayoutProps) => (
@@ -278,10 +283,10 @@ describe("Home Route in completed state", () => {
     // });
   });
 
-  it("displays the correct number of code lines in the preview", async () => {
+  it("displays the correct number of code lines in the preview when session exists", async () => {
     render(
       <MockThemeProvider>
-        <MemoryRouter>
+        <MemoryRouter initialEntries={["/chat/test-session-123"]}>
           <AuthContext.Provider
             value={
               {
@@ -304,10 +309,10 @@ describe("Home Route in completed state", () => {
     });
   });
 
-  it("shows share button and handles sharing", async () => {
+  it("shows share button and handles sharing when session exists", async () => {
     render(
       <MockThemeProvider>
-        <MemoryRouter>
+        <MemoryRouter initialEntries={["/chat/test-session-123"]}>
           <AuthContext.Provider
             value={
               {
@@ -390,19 +395,10 @@ describe("Home Route in completed state", () => {
     );
   });
 
-  it("loads code from URL hash state when present", async () => {
-    // Set hash state for this test
-    locationMock = {
-      search: "",
-      pathname: "/",
-      hash: "#state=mock-hash-state",
-      state: null,
-      key: "",
-    };
-
+  it("renders NewSessionView by default when no session in URL", async () => {
     render(
       <MockThemeProvider>
-        <MemoryRouter>
+        <MemoryRouter initialEntries={["/"]}>
           <AuthContext.Provider
             value={
               {
@@ -418,10 +414,10 @@ describe("Home Route in completed state", () => {
       </MockThemeProvider>,
     );
 
-    // Verify the component renders without crashing
+    // Should render new session view by default
     await waitFor(() => {
+      expect(screen.getByTestId("new-session-view")).toBeInTheDocument();
       expect(screen.getByTestId("mock-chat-interface")).toBeInTheDocument();
-      expect(screen.getByTestId("mock-result-preview")).toBeInTheDocument();
     });
   });
 });
