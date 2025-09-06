@@ -38,7 +38,7 @@ describe("exportHtml utilities", () => {
       expect(html).not.toContain(sessionId);
 
       // Environment tokens should be replaced with values from env.ts fallbacks
-      const expectedEndpoint = "https://vibes-diy-api.com"; // API_BASE_URL default, used by CALLAI_ENDPOINT fallback
+      const expectedEndpoint = "https://vibes-diy-api.com/"; // API_BASE_URL default with trailing slash, used by CALLAI_ENDPOINT fallback
       expect(html).toContain(`window.CALLAI_CHAT_URL = "${expectedEndpoint}"`);
       expect(html).toContain(`window.CALLAI_IMG_URL = "${expectedEndpoint}"`);
       expect(html).not.toContain("{{CALLAI_ENDPOINT}}");

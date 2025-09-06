@@ -124,7 +124,7 @@ describe("ViewState Coverage Tests", () => {
 
     // Render the hook
     const { result } = renderHook(() =>
-      useViewState(props, "/chat/session123/title", vi.fn()),
+      useViewState(props, "/chat/session123/title", mockNavigate),
     );
 
     // Call navigateToView to navigate to data view
@@ -168,7 +168,7 @@ describe("ViewState Coverage Tests", () => {
 
     // Render the hook
     const { result } = renderHook(() =>
-      useViewState(props, "/chat/session123/title", vi.fn()),
+      useViewState(props, "/chat/session123/title", mockNavigate),
     );
 
     // Attempt to navigate to data view (which should be disabled)

@@ -200,42 +200,22 @@ describe("useViewState", () => {
   });
 
   test("should auto-navigate to /app when on base path and preview becomes ready", () => {
-    // The key is to properly simulate ref state tracking for wasPreviewReadyRef
-
     // Setup location with base path (no view suffix)
     vi.mocked(useLocation).mockReturnValue({
       pathname: `/chat/${mockSessionId}/${mockTitle}`,
     } as ReturnType<typeof useLocation>);
 
-    // We need to create a fresh instance for each test to ensure refs start clean
-    let hookResult: Partial<ViewState>;
+    // Create a new mock navigate for this specific test
+    const testNavigate = vi.fn();
 
-    // Initialize with preview not ready - first render creates the refs
-    const { unmount } = renderHook(
-      (props) => {
-        hookResult = useViewState(props, "/chat/session123/title", vi.fn());
-        return hookResult;
-      },
-      {
-        initialProps: {
-          sessionId: mockSessionId,
-          title: mockTitle,
-          code: 'console.log("test")',
-          isStreaming: false,
-          previewReady: false,
-        },
-      },
-    );
-
-    // Unmount to clean up the first instance
-    unmount();
-
-    // Recreate with preview not ready first to initialize the refs
+    // Initialize with preview not ready
     const { rerender } = renderHook(
-      (props) => {
-        hookResult = useViewState(props, "/chat/session123/title", vi.fn());
-        return hookResult;
-      },
+      (props) =>
+        useViewState(
+          props,
+          `/chat/${mockSessionId}/${mockTitle}`,
+          testNavigate,
+        ),
       {
         initialProps: {
           sessionId: mockSessionId,
@@ -246,6 +226,9 @@ describe("useViewState", () => {
         },
       },
     );
+
+    // Verify navigate not called initially
+    expect(testNavigate).not.toHaveBeenCalled();
 
     // Now trigger the useEffect with a change to previewReady
     rerender({
@@ -257,7 +240,7 @@ describe("useViewState", () => {
     });
 
     // Should navigate to /app when on base path
-    expect(mockNavigate).toHaveBeenCalledWith(
+    expect(testNavigate).toHaveBeenCalledWith(
       `/chat/${mockSessionId}/${mockTitle}/app`,
       {
         replace: true,
@@ -271,35 +254,17 @@ describe("useViewState", () => {
       pathname: `/chat/${mockSessionId}/${mockTitle}`,
     } as ReturnType<typeof useLocation>);
 
-    // We need to create a fresh instance to ensure refs are properly tracked
-    let hookResult: Partial<ViewState> = {};
+    // Create a new mock navigate for this specific test
+    const testNavigate = vi.fn();
 
-    // Initialize with preview not ready - first render to set up refs
-    const { unmount } = renderHook(
-      (props) => {
-        hookResult = useViewState(props, "/chat/session123/title", vi.fn());
-        return hookResult;
-      },
-      {
-        initialProps: {
-          sessionId: mockSessionId,
-          title: mockTitle,
-          code: 'console.log("test")',
-          isStreaming: false,
-          previewReady: false,
-        },
-      },
-    );
-
-    // Unmount to clean up
-    unmount();
-
-    // Recreate the hook with preview not ready to establish baseline
+    // Initialize with preview not ready
     const { rerender } = renderHook(
-      (props) => {
-        hookResult = useViewState(props, "/chat/session123/title", vi.fn());
-        return hookResult;
-      },
+      (props) =>
+        useViewState(
+          props,
+          `/chat/${mockSessionId}/${mockTitle}`,
+          testNavigate,
+        ),
       {
         initialProps: {
           sessionId: mockSessionId,
@@ -321,8 +286,8 @@ describe("useViewState", () => {
     });
 
     // Should navigate to /app once
-    expect(mockNavigate).toHaveBeenCalledTimes(1);
-    expect(mockNavigate).toHaveBeenCalledWith(
+    expect(testNavigate).toHaveBeenCalledTimes(1);
+    expect(testNavigate).toHaveBeenCalledWith(
       `/chat/${mockSessionId}/${mockTitle}/app`,
       {
         replace: true,
@@ -330,7 +295,7 @@ describe("useViewState", () => {
     );
 
     // Reset mock to check if another call happens
-    mockNavigate.mockReset();
+    testNavigate.mockReset();
 
     // Re-render again with previewReady still true
     rerender({
@@ -342,7 +307,7 @@ describe("useViewState", () => {
     });
 
     // Should not navigate again since wasPreviewReadyRef is now true
-    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(testNavigate).not.toHaveBeenCalled();
   });
 
   test("should determine settings view from path", () => {
