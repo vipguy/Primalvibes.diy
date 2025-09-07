@@ -1,9 +1,4 @@
-import {
-  callAI,
-  type Message,
-  type CallAIOptions,
-  Mocks,
-} from "call-ai";
+import { callAI, type Message, type CallAIOptions, Mocks } from "call-ai";
 
 // Import all LLM text files statically
 // import { getTxtDocs } from "./llms/txt-docs.js";
@@ -268,17 +263,17 @@ export async function selectLlmsAndOptions(
 
   try {
     // ISSUE DOCUMENTATION: Schema returns undefined in prompts package environment
-    // 
+    //
     // During debugging, we found that even with identical configuration to main branch:
     // - API returns 200 status (succeeds)
     // - Same endpoint URL (opts.callAiEndpoint vs direct CALLAI_ENDPOINT)
-    // - Same auth token setup (async getAuthToken vs localStorage access) 
+    // - Same auth token setup (async getAuthToken vs localStorage access)
     // - Same import naming (callAI vs realCallAI)
     // - Same exact CallAIOptions parameters
-    // 
+    //
     // The call-ai library consistently returns `undefined` when schema is present
     // in the prompts package environment, but works in main branch app environment.
-    // 
+    //
     // This suggests an environmental/build difference between packages that affects
     // how call-ai processes schema requests, not a configuration issue.
     console.log("Module/options selection request:", {
@@ -317,20 +312,35 @@ export async function selectLlmsAndOptions(
       ]);
 
     // DEBUG: Log call parameters before calling (CURRENT VERSION)
-    console.log("CURRENT VERSION - callAI function:", typeof callAI, callAI.name);
-    console.log("CURRENT VERSION - messages:", messages.map(m => ({role: m.role, contentLength: m.content.length})));
-    console.log("CURRENT VERSION - options:", {...options, headers: "[REDACTED]"});
-    
+    console.log(
+      "CURRENT VERSION - callAI function:",
+      typeof callAI,
+      callAI.name,
+    );
+    console.log(
+      "CURRENT VERSION - messages:",
+      messages.map((m) => ({ role: m.role, contentLength: m.content.length })),
+    );
+    console.log("CURRENT VERSION - options:", {
+      ...options,
+      headers: "[REDACTED]",
+    });
+
     const raw = (await withTimeout(callAI(messages, options))) as string;
-    console.log("CURRENT VERSION - Module/options selection raw response:", JSON.stringify(raw));
-    
+    console.log(
+      "CURRENT VERSION - Module/options selection raw response:",
+      JSON.stringify(raw),
+    );
+
     // Handle the undefined response issue documented above
     if (raw === undefined || raw === null) {
-      console.warn("Module/options selection: call-ai returned undefined with schema present");
+      console.warn(
+        "Module/options selection: call-ai returned undefined with schema present",
+      );
       console.warn("This is a known issue in the prompts package environment");
       return { selected: [], instructionalText: true, demoData: true };
     }
-    
+
     const parsed = JSON.parse(raw) ?? {};
     const selected = Array.isArray(parsed?.selected)
       ? parsed.selected.filter((v: unknown) => typeof v === "string")
@@ -349,7 +359,7 @@ export async function selectLlmsAndOptions(
 }
 
 function callCallAI(option: CallAIOptions) {
-  return option.mock?.callAI || realCallAI;
+  return option.mock?.callAI || callAI;
 }
 
 // Public: preload all llms text files (triggered on form focus)
