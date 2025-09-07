@@ -36,20 +36,19 @@ class CallAIEnv {
   }
 
   getWindowCALLAI_API_KEY() {
-    const w = globalThis.window as { callAi?: { API_KEY?: string } };
-    return w.callAi?.API_KEY;
+    const w = globalThis.window as { 
+      CALLAI_API_KEY?: string;
+      callAi?: { API_KEY?: string };
+    };
+    return w.CALLAI_API_KEY ?? w.callAi?.API_KEY;
   }
 
   get CALLAI_API_KEY() {
-    const x =
-      this.env().get("CALLAI_API_KEY") ??
-      this.env().get("OPENROUTER_API_KEY") ??
-      this.getWindowCALLAI_API_KEY() ??
-      this.env().get("LOW_BALANCE_OPENROUTER_API_KEY");
-    // if (x) {
-    //   console.log("[callAi] Using API key from", x, this.envs.length, new Error().stack);
-    // }
-    return x;
+    return this.env().get("CALLAI_API_KEY") ??
+           this.env().get("OPENROUTER_API_KEY") ??
+           this.getWindowCALLAI_API_KEY() ??
+           this.env().get("LOW_BALANCE_OPENROUTER_API_KEY") ??
+           'sk-vibes-proxy-managed';
   }
   get CALLAI_REFRESH_ENDPOINT() {
     return this.env().get("CALLAI_REFRESH_ENDPOINT");
