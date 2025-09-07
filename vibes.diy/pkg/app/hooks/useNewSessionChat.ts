@@ -1,6 +1,8 @@
 import { useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router";
-import type { NewSessionChatState } from "@vibes.diy/prompts";
+import type { NewSessionChatState, UserSettings } from "@vibes.diy/prompts";
+import { useFireproof } from "use-fireproof";
+import { VibesDiyEnv } from "../config/env.js";
 
 export function useNewSessionChat(
   onSessionCreate: (sessionId: string) => void,
@@ -9,6 +11,12 @@ export function useNewSessionChat(
   const [isStreaming, setIsStreaming] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const navigate = useNavigate();
+
+  // Get settings document to read showModelPickerInChat preference
+  const { useDocument } = useFireproof(VibesDiyEnv.SETTINGS_DBNAME());
+  const { doc: settingsDoc } = useDocument<UserSettings>({
+    _id: "user_settings",
+  });
 
   const sendMessage = useCallback(
     async (textOverride?: string) => {
@@ -71,7 +79,7 @@ export function useNewSessionChat(
     codeReady: false, // No code ready in new session
     title: "", // No title for new session
     sessionId: null, // No session ID until created
-    showModelPickerInChat: false, // Keep simple for now
+    showModelPickerInChat: settingsDoc?.showModelPickerInChat || false,
     effectiveModel: "anthropic/claude-sonnet-4", // Default model
     globalModel: "anthropic/claude-sonnet-4",
     selectedModel: "anthropic/claude-sonnet-4",

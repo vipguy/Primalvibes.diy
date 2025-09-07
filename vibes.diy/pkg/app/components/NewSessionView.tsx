@@ -69,7 +69,7 @@ export default function NewSessionView({
               Shareable in seconds
             </h1>
             <p className="mb-8 text-center text-lg text-gray-600">
-            Make apps with your friends
+              Make apps with your friends
             </p>
 
             {/* Prompt suggestions section */}
