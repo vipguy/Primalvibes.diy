@@ -37,7 +37,19 @@
 Run vibes.diy tests: `cd vibes.diy/tests && pnpm test`
 Run vibes.diy tests (quiet): `cd vibes.diy/tests && pnpm test --reporter=dot`
 
-## Call-AI Dev Release Process
+## Call-AI Release Process
+
+**IMPORTANT**: Never manually update version numbers in `call-ai/pkg/package.json`. The CI/CD system handles all versioning automatically based on git tags.
+
+### Production Release
+
+To release a new call-ai version:
+
+1. **Create Git Tag**: `git tag call-ai@v0.12.1 -m "Release message"` (use semantic version)
+2. **Push Tag**: `git push origin call-ai@v0.12.1`
+3. **Confirm GitHub Actions**: The CI will automatically extract the version from the tag and publish to npm
+
+### Dev Release Process
 
 To test call-ai fixes by releasing a dev version:
 
@@ -45,4 +57,4 @@ To test call-ai fixes by releasing a dev version:
 2. **Confirm GitHub Actions**: Approve the manual step in the triggered workflow
 3. **Verify NPM Dev Channel**: Check `npm view call-ai versions --json` for the new dev version
 
-The CI reads the version from `call-ai/pkg/package.json` (currently `0.0.0`) and publishes to npm dev channel (not latest).
+The CI reads the version from the git tag (not from package.json) and publishes accordingly. The `call-ai/pkg/package.json` version stays at `0.0.0` as a placeholder.
