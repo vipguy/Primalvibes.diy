@@ -36,3 +36,13 @@
 
 Run vibes.diy tests: `cd vibes.diy/tests && pnpm test`
 Run vibes.diy tests (quiet): `cd vibes.diy/tests && pnpm test --reporter=dot`
+
+## Call-AI Dev Release Process
+
+To test call-ai fixes by releasing a dev version:
+
+1. **Create Git Tag**: `git tag call-ai@v0.0.0-dev-prompts && git push origin call-ai@v0.0.0-dev-prompts`
+2. **Confirm GitHub Actions**: Approve the manual step in the triggered workflow
+3. **Verify NPM Dev Channel**: Check `npm view call-ai versions --json` for the new dev version
+
+The CI reads the version from `call-ai/pkg/package.json` (currently `0.0.0`) and publishes to npm dev channel (not latest).
