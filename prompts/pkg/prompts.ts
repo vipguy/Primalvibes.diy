@@ -316,8 +316,13 @@ export async function selectLlmsAndOptions(
           }),
       ]);
 
+    // DEBUG: Log call parameters before calling (CURRENT VERSION)
+    console.log("CURRENT VERSION - callAI function:", typeof callAI, callAI.name);
+    console.log("CURRENT VERSION - messages:", messages.map(m => ({role: m.role, contentLength: m.content.length})));
+    console.log("CURRENT VERSION - options:", {...options, headers: "[REDACTED]"});
+    
     const raw = (await withTimeout(callAI(messages, options))) as string;
-    console.log("Module/options selection raw response:", JSON.stringify(raw));
+    console.log("CURRENT VERSION - Module/options selection raw response:", JSON.stringify(raw));
     
     // Handle the undefined response issue documented above
     if (raw === undefined || raw === null) {

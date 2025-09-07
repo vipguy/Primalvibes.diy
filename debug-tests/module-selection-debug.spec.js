@@ -31,7 +31,7 @@ test("debug module/options selection undefined response", async ({ page }) => {
 
   // Navigate to the problematic URL
   console.log("Navigating to URL with superhero images prompt...");
-  await page.goto("http://localhost:8888/chat/123?prompt=superhero%20images");
+  await page.goto("http://localhost:8889/chat/123?prompt=superhero%20images");
 
   // Wait a bit for the page to load and make API calls
   await page.waitForTimeout(3000);
