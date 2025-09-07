@@ -326,7 +326,9 @@ export async function selectLlmsAndOptions(
       headers: "[REDACTED]",
     });
 
-    const raw = (await withTimeout(callAI(messages, options))) as string;
+    const raw = (await withTimeout(
+      callCallAI(options)(messages, options),
+    )) as string;
     console.log(
       "CURRENT VERSION - Module/options selection raw response:",
       JSON.stringify(raw),
