@@ -365,7 +365,7 @@ function prepareRequestParams(
     options.apiKey ||
     keyStore().current || // Try keyStore first in case it was refreshed in a previous call
     callAiEnv.CALLAI_API_KEY ||
-    null;
+    "sk-vibes-proxy-managed";
   // (typeof window !== "undefined" ? (window as any).CALLAI_API_KEY : null);
   const schema = options.schema || null;
 
