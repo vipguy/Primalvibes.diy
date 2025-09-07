@@ -353,6 +353,8 @@ export async function selectLlmsAndOptions(
         : true;
     const demoData =
       typeof parsed?.demoData === "boolean" ? parsed.demoData : true;
+    
+    console.log("CURRENT VERSION - Chosen modules for LLM text assembly:", selected);
     return { selected, instructionalText, demoData };
   } catch (err) {
     console.warn("Module/options selection call failed:", err);

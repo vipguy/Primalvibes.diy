@@ -143,7 +143,7 @@ export const claudeStrategy: ModelStrategy = {
     const jsonMatch =
       content.match(/```json\s*([\s\S]*?)\s*```/) || content.match(/```\s*([\s\S]*?)\s*```/) || content.match(/\{[\s\S]*\}/); // || [null, content];
 
-    return jsonMatch ? jsonMatch[1] : content;
+    return jsonMatch?.[1] || content;
   },
 };
 
