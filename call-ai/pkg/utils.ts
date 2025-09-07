@@ -3,6 +3,7 @@
  */
 
 import { ProcessedSchema } from "./types.js";
+import { URI } from "@adviser/cement";
 // import { process } from 'node:process';
 
 /**
@@ -70,4 +71,16 @@ export function entriesHeaders(headers: Headers) {
 
 export function callAiFetch(options: { mock?: { fetch?: typeof fetch } }): typeof fetch {
   return options.mock?.fetch || globalThis.fetch;
+}
+
+/**
+ * Safely joins a base URL with a path, avoiding double slashes
+ * Uses cement's URI utilities for proper URL handling
+ */
+export function joinUrlParts(baseUrl: string, path: string): string {
+  if (!baseUrl) return path;
+  if (!path) return baseUrl;
+
+  // Use cement's URI utilities to safely resolve the path
+  return URI.from(baseUrl).build().resolve(path).toString();
 }
