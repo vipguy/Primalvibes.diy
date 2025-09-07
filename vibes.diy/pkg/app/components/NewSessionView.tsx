@@ -66,10 +66,10 @@ export default function NewSessionView({
         <div className="flex-1 p-8">
           <div className="mx-auto max-w-4xl">
             <h1 className="mb-4 text-center text-3xl font-bold">
-              Apps in seconds
+              Shareable in seconds
             </h1>
             <p className="mb-8 text-center text-lg text-gray-600">
-              Be a hero for your friends, family, team, and community.
+            Make apps with your friends
             </p>
 
             {/* Prompt suggestions section */}
@@ -122,7 +122,7 @@ export default function NewSessionView({
               <h3 className="mb-4 text-center text-sm font-medium text-gray-600">
                 Or remix a featured vibe
               </h3>
-              <FeaturedVibes count={6} />
+              <FeaturedVibes count={9} />
             </div>
           </div>
         </div>
