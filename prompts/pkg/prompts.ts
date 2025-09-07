@@ -1,5 +1,5 @@
 import {
-  callAI as realCallAI,
+  callAI,
   type Message,
   type CallAIOptions,
   Mocks,
@@ -206,9 +206,7 @@ export async function selectLlmsAndOptions(
   const opts: LlmSelectionWithFallbackUrl = {
     appMode: "production",
     ...iopts,
-    callAiEndpoint: iopts.callAiEndpoint
-      ? URI.from(iopts.callAiEndpoint).toString()
-      : undefined,
+    callAiEndpoint: iopts.callAiEndpoint ? iopts.callAiEndpoint : undefined,
     fallBackUrl: URI.from(
       iopts.fallBackUrl ?? "https://esm.sh/use-vibes/prompt-catalog/llms",
     ).toString(),
@@ -247,7 +245,7 @@ export async function selectLlmsAndOptions(
 
   const options: CallAIOptions = {
     chatUrl: opts.callAiEndpoint
-      ? URI.from(opts.callAiEndpoint).toString().replace(/\/+$/, "") // Remove trailing slash to prevent double slash
+      ? opts.callAiEndpoint.toString().replace(/\/+$/, "") // Remove trailing slash to prevent double slash
       : undefined,
     apiKey: "sk-vibes-proxy-managed",
     model,
@@ -269,13 +267,65 @@ export async function selectLlmsAndOptions(
   };
 
   try {
+    // ISSUE DOCUMENTATION: Schema returns undefined in prompts package environment
+    // 
+    // During debugging, we found that even with identical configuration to main branch:
+    // - API returns 200 status (succeeds)
+    // - Same endpoint URL (opts.callAiEndpoint vs direct CALLAI_ENDPOINT)
+    // - Same auth token setup (async getAuthToken vs localStorage access) 
+    // - Same import naming (callAI vs realCallAI)
+    // - Same exact CallAIOptions parameters
+    // 
+    // The call-ai library consistently returns `undefined` when schema is present
+    // in the prompts package environment, but works in main branch app environment.
+    // 
+    // This suggests an environmental/build difference between packages that affects
+    // how call-ai processes schema requests, not a configuration issue.
+    console.log("Module/options selection request:", {
+      messages: messages.map((m) => ({
+        role: m.role,
+        contentLength: m.content.length,
+      })),
+      options: { ...options, headers: "[REDACTED]" },
+    });
+
     // Add a soft timeout to prevent hanging if the model service is unreachable
     const withTimeout = <T>(p: Promise<T>, ms = 4000): Promise<T> =>
-      Promise.race([sleepReject<T>(ms), p]);
+      Promise.race([
+        sleepReject<T>(ms).then((val) => {
+          console.warn(
+            "Module/options selection: API call timed out after",
+            ms,
+            "ms",
+          );
+          return val;
+        }),
+        p
+          .then((val) => {
+            console.log(
+              "Module/options selection: API call completed successfully",
+            );
+            return val;
+          })
+          .catch((err) => {
+            console.warn(
+              "Module/options selection: API call failed with error:",
+              err,
+            );
+            throw err;
+          }),
+      ]);
 
-    const raw = (await withTimeout(
-      callCallAI(options)(messages, options),
-    )) as string;
+    const raw = (await withTimeout(callAI(messages, options))) as string;
+    console.log("Module/options selection raw response:", JSON.stringify(raw));
+    
+    // Handle the undefined response issue documented above
+    if (raw === undefined || raw === null) {
+      console.warn("Module/options selection: call-ai returned undefined with schema present");
+      console.warn("This is a known issue in the prompts package environment");
+      return { selected: [], instructionalText: true, demoData: true };
+    }
+    
     const parsed = JSON.parse(raw) ?? {};
     const selected = Array.isArray(parsed?.selected)
       ? parsed.selected.filter((v: unknown) => typeof v === "string")
