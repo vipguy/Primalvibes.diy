@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { ImgGenModal, ImgGenModalProps } from '@vibes.diy/use-vibes-base';
+import type { DocFileMeta } from 'use-fireproof';
 
 // Mock ImgFile component
 vi.mock('use-fireproof', async (importOriginal) => {
@@ -24,11 +25,21 @@ vi.mock('use-fireproof', async (importOriginal) => {
 // });
 
 describe('ImgGenModal Component', () => {
-  let mockFile: File;
+  let mockFile: DocFileMeta;
   let mockProps: ImgGenModalProps;
 
   beforeEach(() => {
-    mockFile = new File(['dummy content'], 'dummy.png', { type: 'image/png' });
+    // Create a mock DocFileMeta object instead of File
+    const realFile = new File(['dummy content'], 'dummy.png', { type: 'image/png' });
+    mockFile = {
+      cid: { toString: () => 'mock-cid' },
+      size: realFile.size,
+      type: realFile.type,
+      lastModified: realFile.lastModified,
+      car: [],
+      file: () => Promise.resolve(realFile),
+    } as unknown as DocFileMeta;
+
     globalThis.document.body.innerHTML = ''; // Clear any existing modals in the document
     mockProps = {
       isOpen: true,

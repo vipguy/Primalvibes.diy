@@ -126,7 +126,7 @@ export function ImgGenDisplay({
     hasType: 'type' in (currentFile || {}),
     hasSize: 'size' in (currentFile || {}),
     hasFile: 'file' in (currentFile || {}),
-    fileIsFunction: typeof (currentFile as any)?.file === 'function',
+    fileIsFunction: typeof currentFile?.file === 'function',
   });
   // Get prompt text early (moved before portal)
   const promptInfo = getPromptInfo(document, versionIndex);

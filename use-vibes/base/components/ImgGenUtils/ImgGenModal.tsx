@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ImgFile } from 'use-fireproof';
+import { ImgFile, DocFileMeta } from 'use-fireproof';
 import { createPortal } from 'react-dom';
 import { ImageOverlay } from './overlays/ImageOverlay.js';
 import { ImgGenError } from './ImgGenError.js';
@@ -8,7 +8,7 @@ import { defaultClasses, ImgGenClasses } from '../../utils/style-utils.js';
 export interface ImgGenModalProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
-  readonly currentFile: File | undefined; // File object
+  readonly currentFile: DocFileMeta | undefined; // DocFileMeta object from Fireproof
   readonly alt?: string;
   readonly promptText: string;
   readonly editedPrompt: string | null;
