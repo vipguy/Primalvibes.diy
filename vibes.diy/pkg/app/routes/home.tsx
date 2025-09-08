@@ -1,7 +1,8 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router";
 import SessionView from "../components/SessionView.js";
 import NewSessionView from "../components/NewSessionView.js";
+import { encodeTitle } from "../components/SessionSidebar/utils.js";
 
 export function meta() {
   return [
@@ -41,6 +42,30 @@ export default function SessionWrapper() {
   const handleSessionCreate = (newSessionId: string) => {
     setSessionId(newSessionId);
   };
+
+  // Handle prompt query parameter forwarding for root page
+  useEffect(() => {
+    // Only handle forwarding when on root page (no sessionId) and there's a prompt query
+    if (!urlSessionId && search) {
+      const searchParams = new URLSearchParams(search);
+      const promptParam = searchParams.get("prompt");
+
+      if (promptParam && promptParam.trim()) {
+        // Generate a new session ID
+        const newSessionId = `session-${Date.now()}`;
+        
+        // Generate a title slug from the prompt (first 50 chars)
+        const promptTitle = promptParam.trim().slice(0, 50);
+        const encodedPromptTitle = encodeTitle(promptTitle);
+
+        // Forward to the new chat session URL with the prompt parameter
+        const targetUrl = `/chat/${newSessionId}/${encodedPromptTitle}?prompt=${encodeURIComponent(promptParam.trim())}`;
+
+        // Use window.location to trigger a real page load instead of React Router navigation
+        window.location.href = targetUrl;
+      }
+    }
+  }, [urlSessionId, search, navigate]);
 
   // Conditional rendering - true deferred session creation
   if (!sessionId) {
