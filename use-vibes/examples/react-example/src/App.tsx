@@ -1,16 +1,6 @@
 import { useState, useRef } from 'react';
-import { ImgGen } from 'use-vibes';
-import { useFireproof } from 'use-fireproof';
-import type { DocBase, DocFileMeta } from 'use-fireproof';
+import { ImgGen, useFireproof, type ImageDocument } from 'use-vibes';
 import './App.css';
-
-// Define interface for image documents
-interface ImageDocument extends DocBase {
-  type: 'image';
-  prompt: string;
-  created?: number;
-  _files?: Record<string, File | DocFileMeta>;
-}
 
 function App() {
   const [inputPrompt, setInputPrompt] = useState('');

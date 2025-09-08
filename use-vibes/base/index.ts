@@ -10,7 +10,7 @@ export type * as Fireproof from 'use-fireproof';
 export const useFireproof: typeof originalUseFireproof = (
   ...args: Parameters<typeof originalUseFireproof>
 ) => {
-  console.log('Using vibes-customized useFireproof');
+  // console.log('Using vibes-customized useFireproof');
   return originalUseFireproof(...args);
 };
 

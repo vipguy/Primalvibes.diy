@@ -5,6 +5,7 @@ packages:
   - "use-vibes/base"
   - "use-vibes/pkg"
   - "use-vibes/tests"
+  - "use-vibes/examples/react-example"
   - "vibes.diy/pkg"
   - "vibes.diy/tests/app"
   - "vibes.diy/tests/simple-chat"
