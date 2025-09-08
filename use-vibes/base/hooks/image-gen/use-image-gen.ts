@@ -525,6 +525,14 @@ async function loadOrGenerateImage({
           data = await callImageGeneration(prompt, generationOptions);
         }
 
+        // Log the API response for debugging
+        console.log('[ImgGen Response] API response received:', {
+          hasData: !!data,
+          hasImageData: !!data?.data?.[0]?.b64_json,
+          dataLength: data?.data?.[0]?.b64_json?.length,
+          prompt: prompt,
+        });
+
         // Process the data response
         if (data?.data?.[0]?.b64_json) {
           // Create a File object from the base64 data
@@ -632,14 +640,31 @@ async function loadOrGenerateImage({
                   },
                 };
 
+                // Log before saving to Fireproof
+                console.log('[ImgGen Response] About to save to Fireproof:', imgDoc);
+
                 // Save the new document to Fireproof
                 const result = await db.put(imgDoc);
+
+                // Log successful save
+                console.log('[ImgGen Response] Fireproof save result:', {
+                  success: !!result.id,
+                  docId: result.id,
+                });
 
                 // Store the document ID in our tracking map to prevent duplicates
                 MODULE_STATE.createdDocuments.set(stableKey, result.id);
 
                 // Get the document with the file attached
                 const doc = (await db.get(result.id)) as unknown as ImageDocument;
+
+                // Log document retrieval
+                console.log('[ImgGen Response] Retrieved document from Fireproof:', {
+                  docId: doc._id,
+                  hasVersions: !!doc.versions?.length,
+                  hasFiles: !!doc._files,
+                  fileKeys: doc._files ? Object.keys(doc._files) : [],
+                });
 
                 return { id: result.id, doc };
               })();
@@ -654,10 +679,14 @@ async function loadOrGenerateImage({
             try {
               // Wait for the document creation to complete
               const { doc } = await documentCreationPromise;
+              console.log('[ImgGen Response] Document creation completed successfully:', {
+                docId: doc._id,
+                hasFiles: !!doc._files,
+              });
               setDocument(doc);
               setImageData(data.data[0].b64_json);
             } catch (e) {
-              console.error('Error in document creation:', e);
+              console.error('[ImgGen Response] Error in document creation:', e);
               // Still show the image even if document creation fails
               setImageData(data.data[0].b64_json);
               // Clean up the failed promise so future requests can try again

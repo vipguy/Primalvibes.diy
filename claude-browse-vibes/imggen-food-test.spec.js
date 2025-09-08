@@ -1,6 +1,8 @@
 import { test, expect } from "@playwright/test";
 
-test("ImgGen food generation test - monitor console for 30s", async ({ page }) => {
+test("ImgGen food generation test - monitor console for 30s", async ({
+  page,
+}) => {
   // Listen for console logs to capture ImgGen debug output
   page.on("console", (msg) => {
     console.log(`[BROWSER] ${msg.type()}: ${msg.text()}`);
@@ -8,15 +10,23 @@ test("ImgGen food generation test - monitor console for 30s", async ({ page }) =
 
   // Listen for network requests to see API calls
   page.on("request", (request) => {
-    if (request.url().includes("vibecode.garden") || request.url().includes("api")) {
+    if (
+      request.url().includes("vibecode.garden") ||
+      request.url().includes("api")
+    ) {
       console.log(`[NETWORK] ${request.method()} to: ${request.url()}`);
     }
   });
 
   // Listen for network responses
   page.on("response", (response) => {
-    if (response.url().includes("vibecode.garden") || response.url().includes("api")) {
-      console.log(`[NETWORK] Response ${response.status()} from: ${response.url()}`);
+    if (
+      response.url().includes("vibecode.garden") ||
+      response.url().includes("api")
+    ) {
+      console.log(
+        `[NETWORK] Response ${response.status()} from: ${response.url()}`,
+      );
     }
   });
 
@@ -28,7 +38,7 @@ test("ImgGen food generation test - monitor console for 30s", async ({ page }) =
 
   // Wait for the page to load
   await page.waitForLoadState("networkidle");
-  
+
   // Take initial screenshot
   await page.screenshot({ path: "imggen-test-start.png" });
 
@@ -39,9 +49,9 @@ test("ImgGen food generation test - monitor console for 30s", async ({ page }) =
     'input[type="text"]',
     'input[placeholder*="prompt"]',
     'input[placeholder*="image"]',
-    'input.prompt-input',
-    '.input-container input',
-    'form input[type="text"]'
+    "input.prompt-input",
+    ".input-container input",
+    'form input[type="text"]',
   ];
 
   let promptInput = null;
@@ -64,7 +74,9 @@ test("ImgGen food generation test - monitor console for 30s", async ({ page }) =
       const type = await input.getAttribute("type");
       const placeholder = await input.getAttribute("placeholder");
       const className = await input.getAttribute("class");
-      console.log(`  Input ${i}: type="${type}" placeholder="${placeholder}" class="${className}"`);
+      console.log(
+        `  Input ${i}: type="${type}" placeholder="${placeholder}" class="${className}"`,
+      );
     }
     await page.screenshot({ path: "imggen-test-no-input-found.png" });
     return;
@@ -80,12 +92,12 @@ test("ImgGen food generation test - monitor console for 30s", async ({ page }) =
 
   // Try multiple selectors for the generate button
   const possibleButtonSelectors = [
-    'button.generate-button',
+    "button.generate-button",
     'button:has-text("Generate Image")',
     'button[type="submit"]:not([disabled])',
     'button:has-text("Generate"):not([disabled])',
-    '.generate-button',
-    'form button:not([disabled])'
+    ".generate-button",
+    "form button:not([disabled])",
   ];
 
   let generateButton = null;
@@ -94,7 +106,10 @@ test("ImgGen food generation test - monitor console for 30s", async ({ page }) =
     if ((await element.count()) > 0) {
       // Check if element is visible and enabled
       const firstElement = element.first();
-      if (await firstElement.isVisible() && await firstElement.isEnabled()) {
+      if (
+        (await firstElement.isVisible()) &&
+        (await firstElement.isEnabled())
+      ) {
         console.log(`✅ Found button with selector: ${selector}`);
         generateButton = firstElement;
         break;
@@ -113,7 +128,9 @@ test("ImgGen food generation test - monitor console for 30s", async ({ page }) =
       const type = await button.getAttribute("type");
       const className = await button.getAttribute("class");
       const disabled = await button.isDisabled();
-      console.log(`  Button ${i}: text="${text}" type="${type}" class="${className}" disabled=${disabled}`);
+      console.log(
+        `  Button ${i}: text="${text}" type="${type}" class="${className}" disabled=${disabled}`,
+      );
     }
     await page.screenshot({ path: "imggen-test-no-button-found.png" });
     return;
@@ -125,18 +142,24 @@ test("ImgGen food generation test - monitor console for 30s", async ({ page }) =
   // Take screenshot after clicking button
   await page.screenshot({ path: "imggen-test-after-click.png" });
 
-  console.log("⏱️  Monitoring console logs and network activity for 60 seconds...");
-  console.log("📊 Watch for ImgGen component activity, API calls, AI responses, and any errors...");
+  console.log(
+    "⏱️  Monitoring console logs and network activity for 60 seconds...",
+  );
+  console.log(
+    "📊 Watch for ImgGen component activity, API calls, AI responses, and any errors...",
+  );
 
   // Monitor for 60 seconds, taking screenshots every 15 seconds
   for (let i = 0; i < 4; i++) {
     await page.waitForTimeout(15000);
     console.log(`⏰ ${(i + 1) * 15} seconds elapsed...`);
-    await page.screenshot({ path: `imggen-test-progress-${(i + 1) * 15}s.png` });
+    await page.screenshot({
+      path: `imggen-test-progress-${(i + 1) * 15}s.png`,
+    });
   }
 
   console.log("✅ 60 seconds completed. Test finished!");
-  
+
   // Take final screenshot
   await page.screenshot({ path: "imggen-test-final.png" });
 });

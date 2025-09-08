@@ -30,8 +30,8 @@ export async function imageGen(prompt: string, options: ImageGenOptions = {}): P
     // Handle image generation
     if (!options.images || options.images.length === 0) {
       // Simple image generation with text prompt
-      // Use custom origin or document.location.origin
-      const origin = customOrigin || (typeof document !== "undefined" ? document.location.origin : "");
+      // Use custom origin or proper API fallback
+      const origin = customOrigin || callAiEnv.def.CALLAI_CHAT_URL;
       const generateEndpoint = `${origin}/api/openai-image/generate`;
 
       const response = await callAiFetch(options)(generateEndpoint, {
@@ -72,8 +72,8 @@ export async function imageGen(prompt: string, options: ImageGenOptions = {}): P
       if (options.quality) formData.append("quality", options.quality);
       if (options.style) formData.append("style", options.style);
 
-      // Use custom origin or document.location.origin
-      const origin = customOrigin || (typeof document !== "undefined" ? document.location.origin : "");
+      // Use custom origin or proper API fallback
+      const origin = customOrigin || callAiEnv.def.CALLAI_CHAT_URL;
       const editEndpoint = `${origin}/api/openai-image/edit`;
 
       const response = await callAiFetch(options)(editEndpoint, {

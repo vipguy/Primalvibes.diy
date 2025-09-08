@@ -87,7 +87,7 @@ describe("imageGen", () => {
     // Check that fetch was called with the correct parameters
     expect(global.fetch).toHaveBeenCalledTimes(1);
     expect(global.fetch).toHaveBeenCalledWith(
-      "/api/openai-image/generate",
+      "https://vibes-diy-api.com/api/openai-image/generate",
       expect.objectContaining({
         method: "POST",
         headers: expect.objectContaining({
@@ -133,7 +133,7 @@ describe("imageGen", () => {
     // Check that fetch was called with the correct parameters
     expect(global.fetch).toHaveBeenCalledTimes(1);
     expect(global.fetch).toHaveBeenCalledWith(
-      "/api/openai-image/edit",
+      "https://vibes-diy-api.com/api/openai-image/edit",
       expect.objectContaining({
         method: "POST",
         headers: expect.objectContaining({
