@@ -4,16 +4,12 @@ import { render, fireEvent } from '@testing-library/react';
 import { ImgGenModal, ImgGenModalProps } from '@vibes.diy/use-vibes-base';
 import type { DocFileMeta } from 'use-fireproof';
 
-// Mock ImgFile component
-vi.mock('use-fireproof', async (importOriginal) => {
-  const actual = (await importOriginal()) as Record<string, unknown>;
-  return {
-    ...actual,
-    ImgFile: ({ alt }: { alt: string; file: unknown; className?: string }) => (
-      <img data-testid="mock-img-file" alt={alt} />
-    ),
-  };
-});
+// Mock AsyncImg component
+vi.mock('../base/components/ImgGenUtils/AsyncImg.js', () => ({
+  AsyncImg: ({ alt, className, ...props }: { alt: string; file: unknown; className?: string }) => (
+    <img data-testid="mock-async-img" alt={alt} className={className} {...props} />
+  ),
+}));
 
 // // Mock createPortal to render content directly without portal
 // vi.mock('react-dom', async () => {
@@ -68,8 +64,8 @@ describe('ImgGenModal Component', () => {
 
     // Check that modal is rendered
     expect(res.getByRole('presentation')).toBeInTheDocument();
-    expect(res.getByTestId('mock-img-file')).toBeInTheDocument();
-    expect(res.getByTestId('mock-img-file')).toHaveAttribute('alt', 'Test image');
+    expect(res.getByTestId('mock-async-img')).toBeInTheDocument();
+    expect(res.getByTestId('mock-async-img')).toHaveAttribute('alt', 'Test image');
   });
 
   it('should not render modal when isOpen is false', () => {

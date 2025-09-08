@@ -178,9 +178,9 @@ describe('ImgGenDisplay Component', () => {
 
     const res = render(<ImgGenDisplay document={mockDoc} className="test-class" />);
 
-    // Our mock ImgFile renders with 'mock-img-file' test ID
-    // const imageElement = res.q
-    expect(res.getAllByTestId('mock-img-file')).toBeDefined();
+    // AsyncImg renders actual img elements
+    const imgElements = res.container.querySelectorAll('img');
+    expect(imgElements.length).toBeGreaterThan(0);
 
     // // Since we can't directly test the root element (which may be wrapped by the mock),
     // // we'll verify our mocks were called correctly with the right data
