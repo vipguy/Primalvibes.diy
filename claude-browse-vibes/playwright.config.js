@@ -1,8 +1,9 @@
-// Playwright config for debugging infinite re-renders
+// Playwright config for Claude browse/debug helpers
 import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
-  testDir: "./claude-browse-vibes",
+  // Specs live alongside this config inside claude-browse-vibes/
+  testDir: ".",
 
   // Run tests in parallel
   fullyParallel: true,
@@ -51,7 +52,7 @@ export default defineConfig({
     },
   ],
 
-  // Run your local dev server before starting the tests
+  // Expect a dev server already running locally; don't start one here
   webServer: {
     command: 'echo "Using existing server at localhost:8888"',
     url: "http://localhost:8889",
