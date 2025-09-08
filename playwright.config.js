@@ -2,7 +2,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
-  testDir: "./debug-tests",
+  testDir: "./claude-browse-vibes",
 
   // Run tests in parallel
   fullyParallel: true,

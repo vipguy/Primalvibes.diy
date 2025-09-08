@@ -23,7 +23,7 @@
 ### Debug and Development Code
 
 - **Console logs**: Remove all `console.log` statements from production code before committing
-- **Debug files**: Place browser debugging scripts in `debug-tests/` directory which is ignored by ESLint
+- **Debug files**: Place browser debugging scripts in `claude-browse-vibes/` directory which is ignored by ESLint
 - **Temporary code**: Remove commented debug code and temporary logging before finalizing changes
 
 ### React Patterns
