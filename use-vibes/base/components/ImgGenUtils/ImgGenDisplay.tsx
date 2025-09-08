@@ -120,6 +120,7 @@ export function ImgGenDisplay({
       ? (document._files[fileKey] as File)
       : (document?._files?.image as File);
 
+  console.log('[ImgGen Display] Current file:', currentFile);
   // Get prompt text early (moved before portal)
   const promptInfo = getPromptInfo(document, versionIndex);
   const promptText = promptInfo.currentPrompt || alt || 'Generated image';

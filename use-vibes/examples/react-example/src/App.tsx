@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { ImgGen, useFireproof, type ImageDocument } from 'use-vibes';
+import { ImgGen, useFireproof } from 'use-vibes';
 import './App.css';
 
 function App() {
@@ -73,7 +73,7 @@ function App() {
   };
 
   // Get all documents with type: 'image'
-  const { docs: imageDocuments } = useLiveQuery<ImageDocument>('type', {
+  const { docs: imageDocuments } = useLiveQuery('type', {
     key: 'image',
     descending: true,
   });

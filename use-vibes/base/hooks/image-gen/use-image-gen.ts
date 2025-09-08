@@ -659,12 +659,7 @@ async function loadOrGenerateImage({
                 const doc = (await db.get(result.id)) as unknown as ImageDocument;
 
                 // Log document retrieval
-                console.log('[ImgGen Response] Retrieved document from Fireproof:', {
-                  docId: doc._id,
-                  hasVersions: !!doc.versions?.length,
-                  hasFiles: !!doc._files,
-                  fileKeys: doc._files ? Object.keys(doc._files) : [],
-                });
+                console.log('[ImgGen Response] Retrieved document from Fireproof:', doc);
 
                 return { id: result.id, doc };
               })();
@@ -809,6 +804,8 @@ async function handleNewDoc({
         fileObj = imageFile as unknown as File;
       }
 
+      console.log('[ImgGen Response] File object:', fileObj);
+
       // Read the file as base64
       const reader = new FileReader();
       const base64Promise = new Promise<string>((resolve, reject) => {
@@ -822,7 +819,7 @@ async function handleNewDoc({
       });
       reader.readAsDataURL(fileObj);
       const base64Data = await base64Promise;
-
+      console.log('[ImgGen Response] Base64 data:', base64Data.length);
       setImageData(base64Data);
     } else {
       // Handle legacy files structure
