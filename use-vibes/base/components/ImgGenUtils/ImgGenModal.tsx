@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { ImgFile, DocFileMeta } from 'use-fireproof';
+import { DocFileMeta } from 'use-fireproof';
+import { AsyncImg } from './AsyncImg.js';
 import { createPortal } from 'react-dom';
 import { ImageOverlay } from './overlays/ImageOverlay.js';
 import { ImgGenError } from './ImgGenError.js';
@@ -127,7 +128,7 @@ export function ImgGenModal({
             <ImgGenError message={error.message} />
           </div>
         ) : (
-          <ImgFile
+          <AsyncImg
             file={currentFile}
             className="imggen-backdrop-image"
             style={{

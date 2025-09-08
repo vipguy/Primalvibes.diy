@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { ImgFile, DocFileMeta } from 'use-fireproof';
+import { DocFileMeta } from 'use-fireproof';
+import { AsyncImg } from './AsyncImg.js';
 import { ImgGenError } from './ImgGenError.js';
 import { ImgGenDisplayProps } from './types.js';
 import { combineClasses, defaultClasses } from '../../utils/style-utils.js';
@@ -330,7 +331,7 @@ export function ImgGenDisplay({
             <line x1="4" y1="19" x2="10" y2="13" />
           </svg>
         </button>
-        <ImgFile
+        <AsyncImg
           file={currentFile}
           className={combineClasses('imggen-image', classes.image)}
           alt={alt || 'Generated image'}

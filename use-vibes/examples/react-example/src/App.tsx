@@ -13,7 +13,7 @@ function App() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Use Fireproof to query all images
-  const { useLiveQuery, database } = useFireproof('ImgGen');
+  const { useLiveQuery, database } = useFireproof('ImgGen2');
 
   // State for testing direct AI response display (bypassing database)
   const [directAiImage, setDirectAiImage] = useState<string | null>(null);
