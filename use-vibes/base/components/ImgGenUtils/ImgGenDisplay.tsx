@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ImgFile } from 'use-fireproof';
+import { ImgFile, DocFileMeta } from 'use-fireproof';
 import { ImgGenError } from './ImgGenError.js';
 import { ImgGenDisplayProps } from './types.js';
 import { combineClasses, defaultClasses } from '../../utils/style-utils.js';
@@ -115,12 +115,19 @@ export function ImgGenDisplay({
   // ESC handling moved to ImgGenModal component
 
   // Determine which file to use - either the versioned file or the legacy 'image' file
-  const currentFile: File | undefined =
+  const currentFile: DocFileMeta | undefined =
     fileKey && document?._files
-      ? (document._files[fileKey] as File)
-      : (document?._files?.image as File);
+      ? (document._files[fileKey] as DocFileMeta)
+      : (document?._files?.image as DocFileMeta);
 
   console.log('[ImgGen Display] Current file:', currentFile);
+  console.log('[ImgGen Display] Current file properties:', Object.keys(currentFile || {}));
+  console.log('[ImgGen Display] Current file type check:', {
+    hasType: 'type' in (currentFile || {}),
+    hasSize: 'size' in (currentFile || {}),
+    hasFile: 'file' in (currentFile || {}),
+    fileIsFunction: typeof (currentFile as any)?.file === 'function',
+  });
   // Get prompt text early (moved before portal)
   const promptInfo = getPromptInfo(document, versionIndex);
   const promptText = promptInfo.currentPrompt || alt || 'Generated image';

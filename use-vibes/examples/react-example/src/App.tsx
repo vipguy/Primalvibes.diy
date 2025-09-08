@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ImgGen, useFireproof } from 'use-vibes';
 import './App.css';
 
@@ -13,7 +13,128 @@ function App() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Use Fireproof to query all images
-  const { useLiveQuery } = useFireproof('ImgGen');
+  const { useLiveQuery, database } = useFireproof('ImgGen');
+
+  // State for testing direct AI response display (bypassing database)
+  const [directAiImage, setDirectAiImage] = useState<string | null>(null);
+  const [directImageInfo, setDirectImageInfo] = useState<string>('');
+  const [interceptNextGeneration, setInterceptNextGeneration] = useState(false);
+
+  // Simple approach: Set up a global interceptor on window object
+  useEffect(() => {
+    if (interceptNextGeneration) {
+      // Create a global function that the use-image-gen hook can call
+      (window as any).interceptAiResponse = (base64Data: string, responseInfo: any) => {
+        console.log('[Direct AI Test] 🎯 Intercepted AI response data!', {
+          base64Length: base64Data.length,
+          responseInfo,
+        });
+
+        setDirectAiImage(base64Data);
+        setDirectImageInfo(`Intercepted AI Response - Length: ${base64Data.length} characters`);
+        setInterceptNextGeneration(false); // Reset the flag
+
+        // Clean up the global interceptor
+        delete (window as any).interceptAiResponse;
+      };
+
+      console.log('[Direct AI Test] 🎯 Global interceptor ready');
+
+      // Cleanup
+      return () => {
+        if ((window as any).interceptAiResponse) {
+          delete (window as any).interceptAiResponse;
+        }
+      };
+    }
+  }, [interceptNextGeneration]);
+
+  // Round-trip test for file storage on page load
+  useEffect(() => {
+    const testFileRoundTrip = async () => {
+      try {
+        console.log('[File Test] Starting round-trip test...');
+
+        // Create a simple text file
+        const testData = 'Hello, this is a test file from ' + new Date().toISOString();
+        const testFile = new File([testData], 'test.txt', { type: 'text/plain' });
+
+        console.log('[File Test] Created test file:', {
+          name: testFile.name,
+          size: testFile.size,
+          type: testFile.type,
+          lastModified: testFile.lastModified,
+        });
+
+        // Save it to Fireproof
+        const testDoc = {
+          type: 'file-test',
+          created: Date.now(),
+          _files: {
+            testFile: testFile,
+          },
+        };
+
+        const saveResult = await database.put(testDoc);
+        console.log('[File Test] Saved to Fireproof:', saveResult);
+
+        // Immediately read it back
+        const retrievedDoc = await database.get(saveResult.id);
+        console.log('[File Test] Retrieved document:', {
+          id: retrievedDoc._id,
+          type: retrievedDoc.type,
+          hasFiles: !!retrievedDoc._files,
+          fileKeys: Object.keys(retrievedDoc._files || {}),
+        });
+
+        // Check the file object that came back
+        const retrievedFileObj = retrievedDoc._files?.testFile;
+        console.log('[File Test] Retrieved file object:', {
+          type: typeof retrievedFileObj,
+          properties: Object.keys(retrievedFileObj || {}),
+          hasFileMethod: typeof retrievedFileObj?.file === 'function',
+          fileType: retrievedFileObj?.type,
+          fileSize: retrievedFileObj?.size,
+        });
+
+        // Try to get the actual file content
+        if (retrievedFileObj && typeof retrievedFileObj.file === 'function') {
+          const actualFile = await retrievedFileObj.file();
+          console.log('[File Test] Actual file from .file():', {
+            type: typeof actualFile,
+            isFile: actualFile instanceof File,
+            name: actualFile?.name,
+            size: actualFile?.size,
+            type: actualFile?.type,
+          });
+
+          // Try to read the content
+          const text = await actualFile.text();
+          console.log('[File Test] File content:', text);
+
+          // Test creating blob URL
+          const blobUrl = URL.createObjectURL(actualFile);
+          console.log('[File Test] Created blob URL:', blobUrl);
+
+          // Test if blob URL is accessible
+          try {
+            const response = await fetch(blobUrl);
+            const fetchedText = await response.text();
+            console.log('[File Test] Fetched from blob URL:', fetchedText);
+            URL.revokeObjectURL(blobUrl);
+          } catch (fetchError) {
+            console.error('[File Test] Failed to fetch from blob URL:', fetchError);
+          }
+        }
+      } catch (error) {
+        console.error('[File Test] Round-trip test failed:', error);
+      }
+    };
+
+    // Run test after a short delay to let everything initialize
+    const timer = setTimeout(testFileRoundTrip, 1000);
+    return () => clearTimeout(timer);
+  }, [database]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputPrompt(e.target.value);
@@ -214,6 +335,81 @@ function App() {
           </div>
         </div>
       )}
+
+      {/* Direct AI Response Test Display */}
+      {directAiImage && (
+        <div
+          style={{
+            marginTop: '20px',
+            border: '3px solid #4CAF50',
+            padding: '15px',
+            backgroundColor: '#f9fff9',
+            borderRadius: '8px',
+          }}
+        >
+          <h3 style={{ color: '#4CAF50', margin: '0 0 10px 0' }}>
+            ✅ Direct AI Response Test (Bypassing Database)
+          </h3>
+          <p style={{ margin: '5px 0', fontSize: '14px', color: '#666' }}>{directImageInfo}</p>
+          <img
+            src={`data:image/png;base64,${directAiImage}`}
+            alt="Direct AI Response Image"
+            style={{
+              maxWidth: '400px',
+              border: '2px solid #4CAF50',
+              borderRadius: '4px',
+              display: 'block',
+              marginTop: '10px',
+            }}
+            onLoad={() => console.log('[Direct AI Test] ✅ Image loaded successfully!')}
+            onError={(e) => console.error('[Direct AI Test] ❌ Image failed to load:', e)}
+          />
+          <button
+            onClick={() => {
+              setDirectAiImage(null);
+              setDirectImageInfo('');
+            }}
+            style={{
+              marginTop: '10px',
+              padding: '8px 16px',
+              backgroundColor: '#f44336',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+            }}
+          >
+            Clear Test Image
+          </button>
+        </div>
+      )}
+
+      {/* Test Control Button */}
+      <div style={{ marginTop: '20px', textAlign: 'center' }}>
+        <button
+          onClick={() => {
+            setInterceptNextGeneration(true);
+            console.log(
+              '[Direct AI Test] 🎯 Next generation will be intercepted for direct display'
+            );
+          }}
+          disabled={interceptNextGeneration}
+          style={{
+            padding: '12px 24px',
+            backgroundColor: interceptNextGeneration ? '#ccc' : '#FF9800',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: interceptNextGeneration ? 'not-allowed' : 'pointer',
+            fontSize: '16px',
+            fontWeight: 'bold',
+          }}
+        >
+          {interceptNextGeneration
+            ? '🎯 Ready to Intercept Next Generation'
+            : '🧪 Enable Direct AI Response Test'}
+        </button>
+      </div>
     </div>
   );
 }

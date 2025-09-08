@@ -535,6 +535,17 @@ async function loadOrGenerateImage({
 
         // Process the data response
         if (data?.data?.[0]?.b64_json) {
+          // Check if there's a global interceptor for testing direct AI responses
+          if ((window as any).interceptAiResponse) {
+            console.log('[Direct AI Test] 🎯 Calling global interceptor with AI response data');
+            (window as any).interceptAiResponse(data.data[0].b64_json, {
+              prompt: prompt,
+              dataLength: data.data[0].b64_json.length,
+              timestamp: new Date().toISOString(),
+            });
+            return; // Exit early to prevent database storage during test
+          }
+
           // Create a File object from the base64 data
           // Generate a filename based on the prompt text
           const filename = generateSafeFilename(prompt);
