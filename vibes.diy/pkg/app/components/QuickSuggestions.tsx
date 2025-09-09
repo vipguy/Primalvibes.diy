@@ -16,7 +16,7 @@ function QuickSuggestions({ onSelectSuggestion }: QuickSuggestionsProps) {
 
   useEffect(() => {
     const shuffled = [...quickSuggestions].sort(() => 0.5 - Math.random());
-    setRandomSuggestions(shuffled.slice(0, 5));
+    setRandomSuggestions(shuffled.slice(0, 8));
   }, []);
 
   return (

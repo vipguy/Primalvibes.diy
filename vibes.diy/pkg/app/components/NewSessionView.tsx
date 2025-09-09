@@ -1,9 +1,10 @@
 import React, { useCallback, useState } from "react";
 import { useNewSessionChat } from "../hooks/useNewSessionChat.js";
 import ChatInput from "./ChatInput.js";
-import QuickSuggestions from "./QuickSuggestions.js";
+import FeaturedVibes from "./FeaturedVibes.js";
 import SessionSidebar from "./SessionSidebar.js";
 import { MenuIcon } from "./ChatHeaderIcons.js";
+import { quickSuggestions } from "../data/quick-suggestions-data.js";
 import models from "../data/models.json" with { type: "json" };
 import { Toaster } from "react-hot-toast";
 
@@ -75,8 +76,27 @@ export default function NewSessionView({
               Make apps with your friends
             </p>
 
-            {/* Chat input form */}
+            {/* Prompt suggestions section */}
             <div className="mb-8">
+              <h3 className="mb-4 text-center text-sm font-medium text-gray-600">
+                Create custom vibes from a prompt
+              </h3>
+              <div className="flex flex-wrap justify-center gap-2">
+                {quickSuggestions.slice(0, 12).map((suggestion, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => handleSelectSuggestion(suggestion.text)}
+                    className="cursor-pointer rounded-md bg-light-background-01 px-3 py-1.5 text-sm font-medium text-light-primary transition-colors hover:bg-light-decorative-01 dark:bg-dark-background-01 dark:text-dark-primary dark:hover:bg-dark-decorative-01"
+                  >
+                    {suggestion.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Chat input form */}
+            <div className="mb-12">
               <ChatInput
                 chatState={chatState}
                 showModelPickerInChat={chatState.showModelPickerInChat}
@@ -101,8 +121,13 @@ export default function NewSessionView({
               />
             </div>
 
-            {/* Quick suggestions - includes both featured vibes and prompt suggestions */}
-            <QuickSuggestions onSelectSuggestion={handleSelectSuggestion} />
+            {/* Featured vibes section */}
+            <div>
+              <h3 className="mb-4 text-center text-sm font-medium text-gray-600">
+                Or remix a featured vibe
+              </h3>
+              <FeaturedVibes count={9} />
+            </div>
           </div>
         </div>
       </div>
