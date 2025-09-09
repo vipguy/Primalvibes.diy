@@ -82,6 +82,7 @@ export const imgGenStyles = {
     padding: imgGenTheme.dimensions.padding,
     backgroundColor: imgGenTheme.colors.overlayBg,
     backdropFilter: `blur(${imgGenTheme.effects.blurRadius})`,
+    WebkitBackdropFilter: `blur(${imgGenTheme.effects.blurRadius})`, // Safari support
     transition: `opacity ${imgGenTheme.effects.transitionSpeed} ease`,
     zIndex: 10,
     display: 'flex' as const,

@@ -181,3 +181,436 @@
 .read-the-docs {
   color: #888;
 }
+
+/* ---- ImgGen Component Styling System ---- */
+/* Restored from /Users/jchris/code/use-vibes/src/components/ImgGen.css */
+
+/* ---- CSS Custom Properties (Variables) ---- */
+:root {
+  /* Colors */
+  --imggen-text-color: #333;
+  --imggen-background: #333333;
+  --imggen-overlay-bg: rgba(255, 255, 255, 0.5);
+  --imggen-accent: #0066cc;
+  --imggen-flash: #fe0;
+  --imggen-error-bg: rgba(0, 0, 0, 0.7);
+  --imggen-error-border: #ff6666;
+  --imggen-error-text: #ff6666;
+  --imggen-button-bg: rgba(255, 255, 255, 0.7);
+  --imggen-error-text-body: #ffffff;
+  --imggen-delete-hover-color: #ff3333;
+
+  /* Dimensions */
+  --imggen-border-radius: 8px;
+  --imggen-padding: 8px;
+  --imggen-button-size: 28px;
+  --imggen-progress-height: 8px;
+
+  /* Typography */
+  --imggen-font-size: 14px;
+  --imggen-font-weight: bold;
+  --imggen-line-height: 1.5;
+
+  /* Effects */
+  --imggen-blur-radius: 4px;
+  --imggen-transition-speed: 0.2s;
+  --imggen-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* ---- Core Components ---- */
+
+/* Root container */
+.imggen-root {
+  position: relative;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* Image container */
+.imggen-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Image container with expand button */
+.imggen-image-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Expand button in upper left corner - THE KEY FIX */
+.imggen-expand-button {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 20;
+  background-color: var(--imggen-button-bg);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  opacity: 0; /* Initially invisible */
+  transition:
+    opacity var(--imggen-transition-speed) ease,
+    transform var(--imggen-transition-speed) ease;
+  padding: 0;
+  color: var(--imggen-text-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Show button on container hover */
+.imggen-image-container:hover .imggen-expand-button {
+  opacity: 0.5;
+}
+
+.imggen-expand-button:hover {
+  opacity: 1 !important;
+  transform: scale(1.1);
+}
+
+.imggen-expand-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+@media (hover: none) {
+  /* On touch devices, always show the expand button */
+  .imggen-expand-button {
+    opacity: 0.5 !important;
+  }
+}
+
+/* The image itself */
+.imggen-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ---- Overlays ---- */
+
+/* Base overlay that appears at the bottom */
+.imggen-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: var(--imggen-padding);
+  background-color: var(--imggen-overlay-bg);
+  backdrop-filter: blur(var(--imggen-blur-radius));
+  transition: opacity var(--imggen-transition-speed) ease;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Top line row with prompt and version indicator */
+.imggen-top-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* Prompt text container */
+.imggen-prompt {
+  width: 100%;
+  padding: 4px;
+  margin-bottom: 8px;
+}
+
+/* Prompt text styling */
+.imggen-prompt-text {
+  color: var(--imggen-text-color);
+  width: 100%;
+  text-align: center;
+  font-weight: var(--imggen-font-weight);
+  padding: 2px;
+  cursor: pointer;
+}
+
+/* Prompt input for editing */
+.imggen-prompt-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: var(--imggen-font-size);
+  font-weight: var(--imggen-font-weight);
+  color: var(--imggen-text-color);
+  background-color: white;
+}
+
+.imggen-edit-mode {
+  border: 2px solid var(--imggen-accent);
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+/* Controls row */
+.imggen-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding-top: 2px;
+}
+
+/* Control button group */
+.imggen-control-group {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* ---- Buttons ---- */
+
+/* Base button styling */
+.imggen-button {
+  background: var(--imggen-button-bg);
+  border-radius: 50%;
+  width: var(--imggen-button-size);
+  height: var(--imggen-button-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity var(--imggen-transition-speed) ease;
+  padding: 0;
+  font-size: var(--imggen-font-size);
+  color: var(--imggen-text-color);
+}
+
+.imggen-button-highlight {
+  background-color: var(--imggen-accent);
+  color: white;
+}
+
+.imggen-button:hover:not(:disabled) {
+  opacity: 1;
+}
+
+.imggen-button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* Delete button (top right corner) */
+.imggen-delete-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 20;
+  background-color: var(--imggen-button-bg);
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  font-size: 16px;
+  opacity: 0.5;
+  transition: opacity var(--imggen-transition-speed) ease;
+  padding: 0;
+}
+
+.imggen-delete-button:hover {
+  opacity: 1;
+  color: var(--imggen-delete-hover-color);
+}
+
+/* ---- Progress Indicators ---- */
+
+/* Progress bar container */
+.imggen-progress-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+}
+
+/* Actual progress bar */
+.imggen-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: var(--imggen-progress-height);
+  background-color: var(--imggen-accent);
+  transition: width 0.3s ease-in-out;
+  z-index: 11;
+}
+
+/* Version indicator text */
+.imggen-version-indicator {
+  font-size: var(--imggen-font-size);
+  color: var(--imggen-text-color);
+  transition: all 0.3s ease-in-out;
+}
+
+/* ---- Animations ---- */
+
+/* Version flash animation */
+@keyframes version-flash {
+  0% {
+    color: var(--imggen-text-color);
+    transform: scale(1);
+  }
+  30% {
+    color: var(--imggen-flash);
+    transform: scale(1.3);
+  }
+  70% {
+    color: var(--imggen-flash);
+    transform: scale(1.1);
+    font-weight: bold;
+  }
+  100% {
+    color: var(--imggen-text-color);
+    transform: scale(1);
+  }
+}
+
+.imggen-version-flash {
+  animation: version-flash 2s ease-in-out;
+}
+
+/* Regenerate spinner animation */
+@keyframes regen-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.imggen-regen-spinning {
+  animation: regen-spin 2s linear infinite;
+  display: inline-block;
+}
+
+/* Status text (e.g. Generating...) */
+.imggen-status-text {
+  width: 100%;
+  text-align: center;
+  font-size: var(--imggen-font-size);
+  color: var(--imggen-text-color);
+  opacity: 0.7;
+  padding: 8px 0;
+}
+
+/* ---- Placeholders & Errors ---- */
+
+/* Placeholder styling */
+.imggen-placeholder {
+  width: 100%;
+  height: 100%;
+  background-color: var(--imggen-background);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+/* Error container wrapper */
+.imggen-error-container {
+  background-color: #222;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  width: 100%;
+  border-radius: var(--imggen-border-radius);
+  overflow: hidden;
+}
+
+/* Error container */
+.imggen-error {
+  background-color: #000;
+  color: var(--imggen-error-text);
+  padding: 1.5rem;
+  border-radius: var(--imggen-border-radius);
+  border: 1px solid var(--imggen-error-border);
+  box-shadow: var(--imggen-shadow);
+  max-width: 80%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+/* Error message */
+.imggen-error-message {
+  white-space: pre-wrap;
+  color: var(--imggen-error-text-body);
+  font-size: var(--imggen-font-size);
+  line-height: var(--imggen-line-height);
+  text-align: left;
+  font-family: monospace, sans-serif;
+  margin-bottom: 0;
+}
+
+/* ---- Fullscreen Modal ---- */
+
+.imggen-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 5vh;
+  z-index: 9999;
+  gap: 8px;
+}
+
+.imggen-backdrop-image {
+  max-width: 90vw;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: var(--imggen-border-radius);
+}
+
+.imggen-backdrop .imggen-overlay {
+  position: static;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  background-color: var(--imggen-overlay-bg);
+  backdrop-filter: blur(var(--imggen-blur-radius));
+  border-radius: var(--imggen-border-radius);
+}
+
+.imggen-full-wrapper {
+  display: inline-block;
+  width: min(90vw, 70vh);
+  aspect-ratio: 1 / 1;
+}
+
+/* Helper classes */
+.imggen-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
