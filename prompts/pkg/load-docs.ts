@@ -27,7 +27,7 @@ export async function loadDocs(
           return deps.pathOps.join(base, llmPath, localPath);
         }
         case "fallback":
-          return deps.pathOps.join(base, localPath);
+          return localPath;
       }
     },
   });

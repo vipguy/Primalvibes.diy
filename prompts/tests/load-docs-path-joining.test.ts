@@ -136,8 +136,8 @@ describe("loadDocs path joining", () => {
       const base = "/base";
       const result = capturedPathCleaner(base, localPath, "fallback");
 
-      // In fallback mode, should just join base and localPath
-      expect(result).toEqual("/base/test-file.txt");
+      // In fallback mode, should return localPath as-is (not joined with base)
+      expect(result).toEqual("test-file.txt");
     }
   });
 
