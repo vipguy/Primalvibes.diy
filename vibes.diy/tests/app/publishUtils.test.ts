@@ -94,7 +94,7 @@ describe("publishApp", () => {
 
     (fireproof as Mock).mockReturnValue(mockFireproofDb);
     (getSessionDatabaseName as Mock).mockReturnValue("test-session-db");
-    (normalizeComponentExports as Mock).mockImplementation(
+    vi.mocked(normalizeComponentExports).mockImplementation(
       (code: string) => code,
     );
 
