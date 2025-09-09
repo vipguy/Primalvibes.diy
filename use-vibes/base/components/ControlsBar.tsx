@@ -111,7 +111,7 @@ export function ControlsBar({
         {showControls ? (
           <>
             {/* Left side: Delete button */}
-            <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flex: 1 }}>
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'flex-start' }}>
               {showDelete && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <button
@@ -120,6 +120,9 @@ export function ControlsBar({
                     className={combineClasses('imggen-button imggen-delete-button', classes.button)}
                     style={{
                       ...imgGenStyles.button,
+                      position: 'static', // Override CSS absolute positioning
+                      top: 'auto',
+                      right: 'auto',
                       backgroundColor: isConfirming
                         ? imgGenTheme.colors.errorBorder
                         : imgGenStyles.button.background,
