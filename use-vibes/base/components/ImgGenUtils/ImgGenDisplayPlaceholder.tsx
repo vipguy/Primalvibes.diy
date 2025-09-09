@@ -117,7 +117,6 @@ export function ImgGenDisplayPlaceholder({
         ...imgGenStyles.placeholder,
         flexDirection: 'column',
         textAlign: 'center',
-        minHeight: '200px',
         color: '#eee', // Light text color
       }}
     >

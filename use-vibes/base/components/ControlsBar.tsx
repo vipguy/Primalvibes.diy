@@ -111,7 +111,14 @@ export function ControlsBar({
         {showControls ? (
           <>
             {/* Left side: Delete button */}
-            <div style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'flex-start' }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: '6px',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+              }}
+            >
               {showDelete && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <button

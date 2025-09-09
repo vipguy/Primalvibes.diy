@@ -18,7 +18,7 @@ export const imgGenTheme = {
     errorTextBody: '#ffffff',
     buttonBg: 'rgba(255, 255, 255, 0.7)',
     deleteHover: '#ff3333',
-    
+
     // Form-specific theme-aware colors
     inputBorder: 'light-dark(#ccc, #555)',
     inputBg: 'light-dark(#ffffff, #2a2a2a)',
@@ -126,18 +126,7 @@ export const imgGenStyles = {
     cursor: 'pointer' as const,
   },
 
-  // Prompt input for editing
-  promptInput: {
-    width: '100%',
-    boxSizing: 'border-box' as const,
-    padding: '6px 8px',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
-    fontSize: imgGenTheme.typography.fontSize,
-    fontWeight: imgGenTheme.typography.fontWeight,
-    color: imgGenTheme.colors.text,
-    backgroundColor: 'white',
-  },
+  // Prompt input for editing (now using theme-aware version below)
 
   // Controls row
   controls: {
@@ -196,7 +185,7 @@ export const imgGenStyles = {
   // Placeholder styling
   placeholder: {
     width: '100%',
-    height: '100%',
+    aspectRatio: '1 / 1',
     backgroundColor: imgGenTheme.colors.background,
     position: 'relative' as const,
     overflow: 'hidden' as const,
@@ -282,6 +271,9 @@ export const imgGenStyles = {
     padding: '1rem',
     alignItems: 'center' as const,
     textAlign: 'center' as const,
+    backgroundColor: imgGenTheme.colors.inputBg,
+    borderRadius: imgGenTheme.dimensions.borderRadius,
+    border: `1px solid ${imgGenTheme.colors.inputBorder}`,
   },
 
   // Prompt form layout

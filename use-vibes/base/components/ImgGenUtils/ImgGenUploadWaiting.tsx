@@ -222,9 +222,11 @@ export function ImgGenUploadWaiting({
     >
       {/* Page title and description */}
       <div className="imggen-placeholder-content" style={{ textAlign: 'center' }}>
-        <h3 style={{ margin: '0 0 0.5rem 0', color: imgGenTheme.colors.titleText }}>Image Generator</h3>
+        <h3 style={{ margin: '0 0 0.5rem 0', color: imgGenTheme.colors.titleText }}>
+          Image Generator
+        </h3>
       </div>
-
+      <p style={{ color: imgGenTheme.colors.titleText }}>No prompt or file provided</p>
       {/* Prompt input form */}
       <form onSubmit={handleSubmit} className="imggen-prompt-form" style={imgGenStyles.promptForm}>
         <input
@@ -235,14 +237,14 @@ export function ImgGenUploadWaiting({
           className="imggen-prompt-input"
           style={imgGenStyles.promptInput}
         />
-        <button 
-          type="submit" 
-          disabled={!prompt.trim()} 
+        <button
+          type="submit"
+          disabled={!prompt.trim()}
           className="imggen-prompt-submit"
           style={{
             ...imgGenStyles.promptSubmit,
             opacity: !prompt.trim() ? 0.5 : 1,
-            cursor: !prompt.trim() ? 'not-allowed' : 'pointer'
+            cursor: !prompt.trim() ? 'not-allowed' : 'pointer',
           }}
         >
           Generate
@@ -269,7 +271,9 @@ export function ImgGenUploadWaiting({
               </div>
             ))}
             {inputFiles.length > 4 && (
-              <div className="imggen-more-count" style={imgGenStyles.moreCount}>+{inputFiles.length - 4} more</div>
+              <div className="imggen-more-count" style={imgGenStyles.moreCount}>
+                +{inputFiles.length - 4} more
+              </div>
             )}
           </div>
         </div>
