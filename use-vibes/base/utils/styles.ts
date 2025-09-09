@@ -262,6 +262,127 @@ export const imgGenStyles = {
     borderRadius: '6px',
   },
 
+  // Upload waiting container
+  uploadWaiting: {
+    display: 'flex' as const,
+    flexDirection: 'column' as const,
+    gap: '1rem',
+    padding: '1rem',
+    alignItems: 'center' as const,
+    textAlign: 'center' as const,
+  },
+
+  // Prompt form layout
+  promptForm: {
+    display: 'flex' as const,
+    gap: '0.5rem',
+    width: '100%',
+    maxWidth: '600px',
+    flexDirection: 'column' as const,
+  },
+
+  // Prompt input styling
+  promptInput: {
+    width: '100%',
+    padding: '0.8rem',
+    fontSize: '1rem',
+    border: '1px solid #ccc',
+    borderRadius: '4px',
+    boxSizing: 'border-box' as const,
+  },
+
+  // Prompt submit button
+  promptSubmit: {
+    padding: '0.8rem',
+    fontSize: '1rem',
+    backgroundColor: imgGenTheme.colors.accent,
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer' as const,
+    transition: 'background-color 0.3s',
+  },
+
+  // File drop zone base styling
+  fileDrop: {
+    border: '2px dashed #ccc',
+    borderRadius: '8px',
+    padding: '2rem',
+    textAlign: 'center' as const,
+    cursor: 'pointer' as const,
+    transition: 'border-color 0.3s, background-color 0.3s',
+    backgroundColor: '#fafafa',
+    marginTop: '1rem',
+  },
+
+  // File drop active state (when dragging over)
+  fileDropActive: {
+    borderColor: imgGenTheme.colors.accent,
+    backgroundColor: '#f0f8ff',
+  },
+
+  // File drop disabled state
+  fileDropDisabled: {
+    opacity: 0.5,
+    cursor: 'not-allowed' as const,
+  },
+
+  // File drop message text
+  fileDropMessage: {
+    color: '#666',
+    fontSize: '1rem',
+    fontWeight: 'normal' as const,
+  },
+
+  // Uploaded previews container
+  uploadedPreviews: {
+    width: '100%',
+    marginTop: '1rem',
+  },
+
+  // Upload count display
+  uploadCount: {
+    fontSize: '0.9rem',
+    color: '#666',
+    marginBottom: '0.5rem',
+    fontWeight: 'bold' as const,
+  },
+
+  // Thumbnails grid
+  thumbnails: {
+    display: 'grid' as const,
+    gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
+    gap: '0.5rem',
+    maxWidth: '400px',
+    margin: '0 auto',
+  },
+
+  // Individual thumbnail
+  thumbnail: {
+    aspectRatio: '1 / 1',
+    overflow: 'hidden' as const,
+    borderRadius: '4px',
+    border: '1px solid #ddd',
+  },
+
+  // Thumbnail image
+  thumbnailImg: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover' as const,
+  },
+
+  // More count indicator
+  moreCount: {
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    backgroundColor: '#f0f0f0',
+    color: '#666',
+    fontSize: '0.8rem',
+    fontWeight: 'bold' as const,
+  },
+
   // Helper classes
   truncate: {
     whiteSpace: 'nowrap' as const,

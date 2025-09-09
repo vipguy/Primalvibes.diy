@@ -3,6 +3,7 @@ import type { PartialImageDocument } from '../../hooks/image-gen/types.js';
 import { useFireproof, ImgFile, Database } from 'use-fireproof';
 import { ImgGenFileDrop } from '../ImgGenUtils/ImgGenFileDrop.js';
 import { ImgGenClasses, combineClasses } from '../../utils/style-utils.js';
+import { imgGenStyles } from '../../utils/styles.js';
 
 interface ImgGenUploadWaitingProps {
   /** Document with uploaded files (optional) */
@@ -217,6 +218,7 @@ export function ImgGenUploadWaiting({
         className || '',
         classes?.uploadWaiting || ''
       )}
+      style={imgGenStyles.uploadWaiting}
     >
       {/* Page title and description */}
       <div className="imggen-placeholder-content" style={{ textAlign: 'center' }}>
@@ -224,39 +226,50 @@ export function ImgGenUploadWaiting({
       </div>
 
       {/* Prompt input form */}
-      <form onSubmit={handleSubmit} className="imggen-prompt-form">
+      <form onSubmit={handleSubmit} className="imggen-prompt-form" style={imgGenStyles.promptForm}>
         <input
           type="text"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           placeholder="Enter a prompt..."
           className="imggen-prompt-input"
+          style={imgGenStyles.promptInput}
         />
-        <button type="submit" disabled={!prompt.trim()} className="imggen-prompt-submit">
+        <button 
+          type="submit" 
+          disabled={!prompt.trim()} 
+          className="imggen-prompt-submit"
+          style={{
+            ...imgGenStyles.promptSubmit,
+            opacity: !prompt.trim() ? 0.5 : 1,
+            cursor: !prompt.trim() ? 'not-allowed' : 'pointer'
+          }}
+        >
           Generate
         </button>
       </form>
 
       {/* Display thumbnails of uploaded files - only if we have files */}
       {inputFiles.length > 0 && (
-        <div className="imggen-uploaded-previews">
-          <div className="imggen-upload-count">
+        <div className="imggen-uploaded-previews" style={imgGenStyles.uploadedPreviews}>
+          <div className="imggen-upload-count" style={imgGenStyles.uploadCount}>
             {inputFiles.length} {inputFiles.length === 1 ? 'image' : 'images'} uploaded
           </div>
-          <div className="imggen-thumbnails">
+          <div className="imggen-thumbnails" style={imgGenStyles.thumbnails}>
             {inputFiles.slice(0, 4).map((fileKey) => (
-              <div key={fileKey} className="imggen-thumbnail">
+              <div key={fileKey} className="imggen-thumbnail" style={imgGenStyles.thumbnail}>
                 {document?._files && document._files[fileKey] && (
                   <ImgFile
                     file={document._files[fileKey]}
                     alt={`Upload ${fileKey}`}
                     className="imggen-thumbnail-img"
+                    style={imgGenStyles.thumbnailImg}
                   />
                 )}
               </div>
             ))}
             {inputFiles.length > 4 && (
-              <div className="imggen-more-count">+{inputFiles.length - 4} more</div>
+              <div className="imggen-more-count" style={imgGenStyles.moreCount}>+{inputFiles.length - 4} more</div>
             )}
           </div>
         </div>
