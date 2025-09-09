@@ -140,7 +140,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Reset needsLogin when user becomes authenticated
   useEffect(() => {
     if (isAuthenticated && needsLogin) {
-      console.log("User authenticated, resetting needsLogin");
       setNeedsLoginState(false);
     }
   }, [isAuthenticated, needsLogin]);

@@ -1,20 +1,5 @@
 import { callAI, type Message, type CallAIOptions, Mocks } from "call-ai";
 
-// Import all LLM text files statically
-// import { getTxtDocs } from "./llms/txt-docs.js";
-// import callaiTxt from "./llms/callai.txt?raw";
-// import fireproofTxt from "./llms/fireproof.txt?raw";
-// import imageGenTxt from "./llms/image-gen.txt?raw";
-// import webAudioTxt from "./llms/web-audio.txt?raw";
-// import threeJsTxt from "./llms/three-js.md?raw";
-// import d3Txt from "./llms/d3.md?raw";
-// import {
-//   DEFAULT_DEPENDENCIES,
-//   llmsCatalog,
-//   type LlmsCatalogEntry,
-//   CATALOG_DEPENDENCY_NAMES,
-// } from "./llms/catalog.js";
-// import models from "./data/models.json" with { type: "json" };
 import type { HistoryMessage, UserSettings } from "./settings.js";
 import { CoerceURI, Lazy, runtimeFn, URI } from "@adviser/cement";
 import {
@@ -30,18 +15,6 @@ export async function defaultCodingModel() {
   return "anthropic/claude-sonnet-4";
 }
 
-// // Public: stable set of valid model IDs sourced from app/data/models.json
-// // Exposed as ReadonlySet in TypeScript to discourage mutation by consumers.
-// export const MODEL_IDS: ReadonlySet<string> = new Set(
-//   (models as { id: string }[]).map((m) => m.id),
-// );
-
-// // Public: validator helper for model IDs (strict - only known models)
-// export function isValidModelId(id: unknown): id is string {
-//   return typeof id === "string" && MODEL_IDS.has(id);
-// }
-
-// Relaxed validator for any reasonable model ID format (for custom models)
 function normalizeModelIdInternal(id: unknown): string | undefined {
   if (typeof id !== "string") return undefined;
   const trimmed = id.trim();
@@ -56,7 +29,6 @@ export function isPermittedModelId(id: unknown): id is string {
   return typeof normalizeModelIdInternal(id) === "string";
 }
 
-// Resolve the effective model id given optional session and global settings
 export async function resolveEffectiveModel(
   settingsDoc?: { model?: string },
   vibeDoc?: { selectedModel?: string },
@@ -68,36 +40,10 @@ export async function resolveEffectiveModel(
   return defaultCodingModel();
 }
 
-// Static mapping of LLM text content
-// const llmsTextContent: Record<string, string> = {
-//   callai: callaiTxt,
-//   fireproof: fireproofTxt,
-//   "image-gen": imageGenTxt,
-//   "web-audio": webAudioTxt,
-//   "three-js": threeJsTxt,
-//   d3: d3Txt,
-// };
-
-// Cache for LLM text documents to prevent redundant fetches/imports
-// const llmsTextCache: Record<string, string> = {};
-
-// Load raw text for a single LLM by name using static imports
-// function loadLlmsTextByName(name: string): string | undefined {
-//   try {
-//     const text = llmsTextContent[name] || "";
-//     return text || undefined;
-//   } catch (_err) {
-//     console.warn("Failed to load raw LLM text for:", name, _err);
-//     return undefined;
-//   }
-// }
-
-// Escape for RegExp construction
 function escapeRegExp(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-// Precompile import-detection regexes once per module entry
 const llmImportRegexes = Lazy((fallBackUrl: CoerceURI) => {
   return getJsonDocs(fallBackUrl).then((docs) =>
     Object.values(docs)
@@ -126,7 +72,6 @@ const llmImportRegexes = Lazy((fallBackUrl: CoerceURI) => {
   );
 });
 
-// Detect modules already referenced in history imports
 async function detectModulesInHistory(
   history: HistoryMessage[],
   opts: LlmSelectionOptions,
@@ -148,9 +93,9 @@ async function detectModulesInHistory(
 }
 
 export interface LlmSelectionDecisions {
-  selected: string[]; // names from catalog
-  instructionalText: boolean; // whether to include usage instructions in prompt
-  demoData: boolean; // whether to instruct adding Demo Data button/flow
+  selected: string[];
+  instructionalText: boolean;
+  demoData: boolean;
 }
 
 const warnOnce = Lazy(() => console.warn("auth_token is not support on node"));
@@ -191,7 +136,6 @@ async function sleepReject<T>(ms: number) {
   return new Promise<T>((_, rj) => setTimeout(rj, ms));
 }
 
-// Ask LLM which modules and options to include based on catalog + user prompt + history
 export async function selectLlmsAndOptions(
   model: string,
   userPrompt: string,
@@ -208,17 +152,6 @@ export async function selectLlmsAndOptions(
     getAuthToken: defaultGetAuthToken(iopts.getAuthToken),
   };
   const llmsCatalog = await getLlmCatalog(opts.fallBackUrl);
-  // In test mode, avoid network and return all modules to keep deterministic coverage
-  // if (
-  //   opts.appMode === "test" &&
-  //   !/localhost|127\.0\.0\.1/i.test(String(opts.callAiEndpoint))
-  // ) {
-  //   return {
-  //     selected: llmsCatalog.map((l) => l.name),
-  //     instructionalText: false,
-  //     demoData: false,
-  //   };
-  // }
   const catalog = llmsCatalog.map((l) => ({
     name: l.name,
     description: l.description || "",
@@ -240,7 +173,7 @@ export async function selectLlmsAndOptions(
 
   const options: CallAIOptions = {
     chatUrl: opts.callAiEndpoint
-      ? opts.callAiEndpoint.toString().replace(/\/+$/, "") // Remove trailing slash to prevent double slash
+      ? opts.callAiEndpoint.toString().replace(/\/+$/, "")
       : undefined,
     apiKey: "sk-vibes-proxy-managed",
     model,
@@ -262,29 +195,6 @@ export async function selectLlmsAndOptions(
   };
 
   try {
-    // ISSUE DOCUMENTATION: Schema returns undefined in prompts package environment
-    //
-    // During debugging, we found that even with identical configuration to main branch:
-    // - API returns 200 status (succeeds)
-    // - Same endpoint URL (opts.callAiEndpoint vs direct CALLAI_ENDPOINT)
-    // - Same auth token setup (async getAuthToken vs localStorage access)
-    // - Same import naming (callAI vs realCallAI)
-    // - Same exact CallAIOptions parameters
-    //
-    // The call-ai library consistently returns `undefined` when schema is present
-    // in the prompts package environment, but works in main branch app environment.
-    //
-    // This suggests an environmental/build difference between packages that affects
-    // how call-ai processes schema requests, not a configuration issue.
-    console.log("Module/options selection request:", {
-      messages: messages.map((m) => ({
-        role: m.role,
-        contentLength: m.content.length,
-      })),
-      options: { ...options, headers: "[REDACTED]" },
-    });
-
-    // Add a soft timeout to prevent hanging if the model service is unreachable
     const withTimeout = <T>(p: Promise<T>, ms = 4000): Promise<T> =>
       Promise.race([
         sleepReject<T>(ms).then((val) => {
@@ -297,9 +207,6 @@ export async function selectLlmsAndOptions(
         }),
         p
           .then((val) => {
-            console.log(
-              "Module/options selection: API call completed successfully",
-            );
             return val;
           })
           .catch((err) => {
@@ -311,30 +218,10 @@ export async function selectLlmsAndOptions(
           }),
       ]);
 
-    // DEBUG: Log call parameters before calling (CURRENT VERSION)
-    console.log(
-      "CURRENT VERSION - callAI function:",
-      typeof callAI,
-      callAI.name,
-    );
-    console.log(
-      "CURRENT VERSION - messages:",
-      messages.map((m) => ({ role: m.role, contentLength: m.content.length })),
-    );
-    console.log("CURRENT VERSION - options:", {
-      ...options,
-      headers: "[REDACTED]",
-    });
-
     const raw = (await withTimeout(
       callCallAI(options)(messages, options),
     )) as string;
-    console.log(
-      "CURRENT VERSION - Module/options selection raw response:",
-      JSON.stringify(raw),
-    );
 
-    // Handle the undefined response issue documented above
     if (raw === undefined || raw === null) {
       console.warn(
         "Module/options selection: call-ai returned undefined with schema present",
@@ -354,10 +241,6 @@ export async function selectLlmsAndOptions(
     const demoData =
       typeof parsed?.demoData === "boolean" ? parsed.demoData : true;
 
-    console.log(
-      "CURRENT VERSION - Chosen modules for LLM text assembly:",
-      selected,
-    );
     return { selected, instructionalText, demoData };
   } catch (err) {
     console.warn("Module/options selection call failed:", err);
@@ -369,25 +252,6 @@ function callCallAI(option: CallAIOptions) {
   return option.mock?.callAI || callAI;
 }
 
-// Public: preload all llms text files (triggered on form focus)
-// export async function preloadLlmsText(): Promise<void> {
-//   llmsCatalog.forEach((llm) => {
-//     if (
-//       llmsTextCache[llm.name] ||
-//       (llm.llmsTxtUrl && llmsTextCache[llm.llmsTxtUrl])
-//     )
-//       return;
-//     const text = loadLlmsTextByName(llm.name);
-//     if (text) {
-//       llmsTextCache[llm.name] = text;
-//       if (llm.llmsTxtUrl) {
-//         llmsTextCache[llm.llmsTxtUrl] = text;
-//       }
-//     }
-//   });
-// }
-
-// Generate dynamic import statements from LLM configuration
 export function generateImportStatements(llms: LlmCatalogEntry[]) {
   const seen = new Set<string>();
   return llms
@@ -415,18 +279,15 @@ export function generateImportStatements(llms: LlmCatalogEntry[]) {
     .join("");
 }
 
-// Base system prompt for the AI
 export async function makeBaseSystemPrompt(
   model: string,
   sessionDoc: Partial<UserSettings> & LlmSelectionOptions,
   onAiDecisions?: (decisions: { selected: string[] }) => void,
 ) {
-  // Inputs for module selection
   const userPrompt = sessionDoc?.userPrompt || "";
   const history: HistoryMessage[] = Array.isArray(sessionDoc?.history)
     ? sessionDoc.history
     : [];
-  // Selection path with per‑vibe override preserved
   const useOverride = !!sessionDoc?.dependenciesUserOverride;
 
   let selectedNames: string[] = [];
@@ -440,7 +301,6 @@ export async function makeBaseSystemPrompt(
       .filter((v): v is string => typeof v === "string")
       .filter((name) => llmsCatalogNames.has(name));
   } else {
-    // Non‑override path: schema‑driven LLM selection (plus history retention)
     const decisions = await selectLlmsAndOptions(
       model,
       userPrompt,
@@ -454,15 +314,12 @@ export async function makeBaseSystemPrompt(
     const finalNames = new Set<string>([...decisions.selected, ...detected]);
     selectedNames = Array.from(finalNames);
 
-    // Fallback if empty: use deterministic DEFAULT_DEPENDENCIES
     if (selectedNames.length === 0)
       selectedNames = [...(await getDefaultDependencies())];
 
-    // Store AI decisions for UI display
     onAiDecisions?.({ selected: selectedNames });
   }
 
-  // Apply per-vibe overrides for instructional text and demo data
   if (typeof sessionDoc?.instructionalTextOverride === "boolean") {
     includeInstructional = sessionDoc.instructionalTextOverride;
   }
@@ -472,10 +329,8 @@ export async function makeBaseSystemPrompt(
 
   const chosenLlms = llmsCatalog.filter((l) => selectedNames.includes(l.name));
 
-  // 3) Concatenate docs for chosen modules
   let concatenatedLlmsTxt = "";
   for (const llm of chosenLlms) {
-    // Prefer cached content (preloaded on focus). If missing, try static import as a fallback.
     const text = await getTexts(llm.name, sessionDoc.fallBackUrl);
     if (!text) {
       console.warn(
@@ -495,10 +350,8 @@ ${text || ""}
 
   const defaultStylePrompt = `Create a UI theme inspired by the Memphis Group and Studio Alchimia from the 1980s. Incorporate bold, playful geometric shapes (squiggles, triangles, circles), vibrant primary colors (red, blue, yellow) with contrasting pastels (pink, mint, lavender), and asymmetrical layouts. Use quirky patterns like polka dots, zigzags, and terrazzo textures. Ensure a retro-futuristic vibe with a mix of matte and glossy finishes, evoking a whimsical yet functional design. Secretly name the theme 'Memphis Alchemy' to reflect its roots in Ettore Sotsass’s vision and global 1980s influences. Make sure the app background has some kind of charming patterned background using memphis styled dots or squiggly lines. Use thick "neo-brutalism" style borders for style to enhance legibility. Make sure to retain high contrast in your use of colors. Light background are better than dark ones. Use these colors: #70d6ff #ff70a6 #ff9770 #ffd670 #e9ff70 #242424 #ffffff Never use white text.`;
 
-  // Get style prompt from session document if available
   const stylePrompt = sessionDoc?.stylePrompt || defaultStylePrompt;
 
-  // Optionally include instructional/demo-data guidance based on decisions
   const instructionalLine = includeInstructional
     ? "- In the UI, include a vivid description of the app's purpose and detailed instructions how to use it, in italic text.\n"
     : "";
