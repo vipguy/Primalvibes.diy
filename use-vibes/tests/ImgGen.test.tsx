@@ -184,13 +184,15 @@ describe('ImgGen Component', () => {
     // Reset the mock behavior for a clean test
     mockImageGen.mockReset();
 
-    // Set up the mock to reject with an error, but wrap it to capture the rejection
-    // This creates a mock that returns a promise that's already been caught
+    // Set up the mock to reject with an error
+    // Add catch handler to prevent unhandled rejection in test environment
     mockImageGen.mockImplementation(() => {
-      return Promise.reject(new Error('API error')).catch((err) => {
-        // Return a rejected promise, but in a controlled way that won't cause unhandled rejection
-        return Promise.resolve({ error: err.message });
+      const promise = Promise.reject(new Error('API error'));
+      // Add empty catch handler to prevent unhandled rejection warning
+      promise.catch(() => {
+        // Error will be handled by the component
       });
+      return promise;
     });
 
     // Silence console errors for this test since we expect errors
@@ -310,5 +312,54 @@ describe('ImgGen Component', () => {
 
     // Clean up
     vi.useRealTimers();
+  });
+
+  it('should show generating state when _id is provided and document contains prompt', async () => {
+    // This test verifies that the ImgGen component can extract a prompt from a document
+    // and use it for generation when only an _id prop is provided (no prompt prop)
+
+    // Create a custom useImageGen mock that simulates finding a document with a prompt
+    const mockUseImageGenWithDocument = vi.fn().mockReturnValue({
+      imageData: null,
+      loading: true,
+      progress: 25,
+      error: null,
+      document: {
+        _id: 'test-doc-with-prompt',
+        type: 'image',
+        prompt: 'beautiful landscape from document',
+        versions: [], // No versions yet, so it should be in generating mode
+      },
+    });
+
+    // Clear previous mock calls
+    mockImageGen.mockClear();
+
+    // Use fake timers for timing control
+    vi.useFakeTimers();
+
+    // Render with custom useImageGen hook and only _id prop, no prompt prop
+    const { container } = render(
+      <ImgGen _id="test-doc-with-prompt" useImageGen={mockUseImageGenWithDocument} />
+    );
+
+    // Advance timers to trigger processing
+    await act(async () => {
+      vi.advanceTimersByTime(20);
+      await Promise.resolve();
+    });
+
+    // Restore real timers
+    vi.useRealTimers();
+
+    // Verify the component shows the prompt text from the document (indicating generating state)
+    expect(container.textContent).toContain('beautiful landscape from document');
+
+    // Verify the custom hook was called with the correct _id
+    expect(mockUseImageGenWithDocument).toHaveBeenCalledWith(
+      expect.objectContaining({
+        _id: 'test-doc-with-prompt',
+      })
+    );
   });
 });

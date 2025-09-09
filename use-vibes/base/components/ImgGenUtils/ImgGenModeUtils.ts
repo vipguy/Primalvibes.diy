@@ -32,9 +32,22 @@ export function getImgGenMode({
     return 'error';
   }
 
+  // Check for prompt in document if not provided directly
+  let effectivePrompt = prompt;
+  if (!effectivePrompt && document) {
+    // Check legacy prompt field
+    if (document.prompt && typeof document.prompt === 'string') {
+      effectivePrompt = document.prompt;
+    }
+    // Check newer structured prompts
+    else if (document.prompts && document.currentPromptKey) {
+      effectivePrompt = document.prompts[document.currentPromptKey]?.text;
+    }
+  }
+
   // Special case: When we have a prompt and loading, always show generating
   // This helps during initial generation before document is created
-  if (loading && prompt) {
+  if (loading && effectivePrompt) {
     if (debug) console.log('[ImgGenModeUtils] Prompt + loading → generating');
     return 'generating';
   }
@@ -54,6 +67,7 @@ export function getImgGenMode({
   if (debug) {
     console.log('[ImgGenModeUtils] Determining mode:', {
       prompt: !!prompt,
+      effectivePrompt: !!effectivePrompt,
       hasVersions,
       hasInputFiles,
       hasEmptyDoc,
@@ -61,22 +75,25 @@ export function getImgGenMode({
     });
   }
 
-  // Case 1: Total blank slate - no prompt, no document
+  // Case 1: Has prompt but no versions yet (or is currently loading) - generating mode
+  // This takes priority over document existence to show progress bar when prompt is provided
+  if ((effectivePrompt || loading) && !hasVersions) {
+    if (debug)
+      console.log('[ImgGenModeUtils] Has effective prompt but no versions - generating mode');
+    return 'generating';
+  }
+
+  // Case 2: Total blank slate - no prompt, no document
   if (!document) {
     if (debug) console.log('[ImgGenModeUtils] No document - placeholder mode');
     return 'placeholder';
   }
 
-  // Case 2: Has input files but no prompt yet - stay in upload waiting mode
-  if (hasInputFiles && !prompt && !hasVersions) {
-    if (debug) console.log('[ImgGenModeUtils] Has input files but no prompt - uploadWaiting mode');
+  // Case 3: Has input files but no prompt yet - stay in upload waiting mode
+  if (hasInputFiles && !effectivePrompt && !hasVersions) {
+    if (debug)
+      console.log('[ImgGenModeUtils] Has input files but no effective prompt - uploadWaiting mode');
     return 'uploadWaiting';
-  }
-
-  // Case 3: Has prompt but no versions yet (or is currently loading) - generating mode
-  if ((prompt || loading) && !hasVersions) {
-    if (debug) console.log('[ImgGenModeUtils] Has prompt but no versions - generating mode');
-    return 'generating';
   }
 
   // Case 4: Has versions - display mode
