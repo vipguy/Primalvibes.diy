@@ -47,7 +47,7 @@ export function getImgGenMode({
 
   // Special case: When we have a prompt and loading, always show generating
   // This helps during initial generation before document is created
-  if (loading && effectivePrompt) {
+  if (loading && prompt) {
     if (debug) console.log('[ImgGenModeUtils] Prompt + loading → generating');
     return 'generating';
   }
