@@ -71,6 +71,7 @@ describe("imageGen", () => {
       statusText: "OK",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       json: vi.fn<() => Promise<any>>().mockResolvedValue(mockImageResponse),
+      text: vi.fn<() => Promise<string>>().mockResolvedValue(JSON.stringify(mockImageResponse)),
     } as unknown as Response);
   });
 

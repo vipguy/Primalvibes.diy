@@ -24,6 +24,18 @@ const globalFetch = vi.fn(() =>
           },
         ],
       }),
+    text: () =>
+      Promise.resolve(
+        JSON.stringify({
+          created: Date.now(),
+          data: [
+            {
+              b64_json: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", // 1x1 px transparent PNG
+              revised_prompt: "Generated image based on prompt",
+            },
+          ],
+        }),
+      ),
   }),
 ) as unknown as typeof fetch;
 global.fetch = globalFetch;
