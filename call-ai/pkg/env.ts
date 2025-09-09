@@ -1,6 +1,6 @@
 import { Env, envFactory, Lazy } from "@adviser/cement";
 
-class CallAIEnv {
+export class CallAIEnv {
   env = Lazy(() => {
     return envFactory({ symbol: "callAi" });
   });
