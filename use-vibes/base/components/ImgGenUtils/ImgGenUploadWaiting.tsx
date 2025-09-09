@@ -3,7 +3,7 @@ import type { PartialImageDocument } from '../../hooks/image-gen/types.js';
 import { useFireproof, ImgFile, Database } from 'use-fireproof';
 import { ImgGenFileDrop } from '../ImgGenUtils/ImgGenFileDrop.js';
 import { ImgGenClasses, combineClasses } from '../../utils/style-utils.js';
-import { imgGenStyles } from '../../utils/styles.js';
+import { imgGenStyles, imgGenTheme } from '../../utils/styles.js';
 
 interface ImgGenUploadWaitingProps {
   /** Document with uploaded files (optional) */
@@ -222,7 +222,7 @@ export function ImgGenUploadWaiting({
     >
       {/* Page title and description */}
       <div className="imggen-placeholder-content" style={{ textAlign: 'center' }}>
-        <h3 style={{ margin: '0 0 0.5rem 0', color: '#333' }}>Image Generator</h3>
+        <h3 style={{ margin: '0 0 0.5rem 0', color: imgGenTheme.colors.titleText }}>Image Generator</h3>
       </div>
 
       {/* Prompt input form */}

@@ -5,7 +5,7 @@
 
 // CSS Custom Properties (Variables) as JavaScript constants
 export const imgGenTheme = {
-  // Colors
+  // Colors with dark mode support using light-dark() CSS function
   colors: {
     text: '#333',
     background: '#333333',
@@ -18,6 +18,18 @@ export const imgGenTheme = {
     errorTextBody: '#ffffff',
     buttonBg: 'rgba(255, 255, 255, 0.7)',
     deleteHover: '#ff3333',
+    
+    // Form-specific theme-aware colors
+    inputBorder: 'light-dark(#ccc, #555)',
+    inputBg: 'light-dark(#ffffff, #2a2a2a)',
+    inputText: 'light-dark(#333, #e0e0e0)',
+    dropZoneBorder: 'light-dark(#ccc, #555)',
+    dropZoneBg: 'light-dark(#fafafa, #2a2a2a)',
+    dropZoneActiveBg: 'light-dark(#f0f8ff, #1a3a4a)',
+    mutedText: 'light-dark(#666, #aaa)',
+    lightBg: 'light-dark(#f0f0f0, #404040)',
+    thumbnailBorder: 'light-dark(#ddd, #555)',
+    titleText: 'light-dark(#333, #e0e0e0)',
   },
 
   // Dimensions
@@ -286,9 +298,11 @@ export const imgGenStyles = {
     width: '100%',
     padding: '0.8rem',
     fontSize: '1rem',
-    border: '1px solid #ccc',
+    border: `1px solid ${imgGenTheme.colors.inputBorder}`,
     borderRadius: '4px',
     boxSizing: 'border-box' as const,
+    backgroundColor: imgGenTheme.colors.inputBg,
+    color: imgGenTheme.colors.inputText,
   },
 
   // Prompt submit button
@@ -305,20 +319,20 @@ export const imgGenStyles = {
 
   // File drop zone base styling
   fileDrop: {
-    border: '2px dashed #ccc',
+    border: `2px dashed ${imgGenTheme.colors.dropZoneBorder}`,
     borderRadius: '8px',
     padding: '2rem',
     textAlign: 'center' as const,
     cursor: 'pointer' as const,
     transition: 'border-color 0.3s, background-color 0.3s',
-    backgroundColor: '#fafafa',
+    backgroundColor: imgGenTheme.colors.dropZoneBg,
     marginTop: '1rem',
   },
 
   // File drop active state (when dragging over)
   fileDropActive: {
     borderColor: imgGenTheme.colors.accent,
-    backgroundColor: '#f0f8ff',
+    backgroundColor: imgGenTheme.colors.dropZoneActiveBg,
   },
 
   // File drop disabled state
@@ -329,7 +343,7 @@ export const imgGenStyles = {
 
   // File drop message text
   fileDropMessage: {
-    color: '#666',
+    color: imgGenTheme.colors.mutedText,
     fontSize: '1rem',
     fontWeight: 'normal' as const,
   },
@@ -343,7 +357,7 @@ export const imgGenStyles = {
   // Upload count display
   uploadCount: {
     fontSize: '0.9rem',
-    color: '#666',
+    color: imgGenTheme.colors.mutedText,
     marginBottom: '0.5rem',
     fontWeight: 'bold' as const,
   },
@@ -362,7 +376,7 @@ export const imgGenStyles = {
     aspectRatio: '1 / 1',
     overflow: 'hidden' as const,
     borderRadius: '4px',
-    border: '1px solid #ddd',
+    border: `1px solid ${imgGenTheme.colors.thumbnailBorder}`,
   },
 
   // Thumbnail image
@@ -377,8 +391,8 @@ export const imgGenStyles = {
     display: 'flex' as const,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
-    backgroundColor: '#f0f0f0',
-    color: '#666',
+    backgroundColor: imgGenTheme.colors.lightBg,
+    color: imgGenTheme.colors.mutedText,
     fontSize: '0.8rem',
     fontWeight: 'bold' as const,
   },
