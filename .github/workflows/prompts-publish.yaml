@@ -1,0 +1,20 @@
+name: "prompts-publish"
+on:
+  push:
+    paths:
+      - "prompts/**/*"
+    tags:
+      - "prompts@*"
+
+jobs:
+  compile_test:
+    runs-on: ubuntu-latest
+    environment: ${{ startsWith(github.ref, 'refs/tags/core@s') && 'staging' || startsWith(github.ref, 'refs/tags/core@p') && 'production' || 'dev' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./actions/base
+
+      - uses: ./prompts/actions/publish
+        with:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
