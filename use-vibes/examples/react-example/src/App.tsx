@@ -26,7 +26,11 @@ function App() {
   useEffect(() => {
     if (interceptNextGeneration) {
       // Create a global function that the use-image-gen hook can call
-      (window as any).interceptAiResponse = (base64Data: string, responseInfo: any) => {
+      (
+        window as unknown as {
+          interceptAiResponse?: (base64Data: string, responseInfo: unknown) => void;
+        }
+      ).interceptAiResponse = (base64Data: string, responseInfo: unknown) => {
         console.log('[Direct AI Test] 🎯 Intercepted AI response data!', {
           base64Length: base64Data.length,
           responseInfo,
@@ -37,15 +41,16 @@ function App() {
         setInterceptNextGeneration(false); // Reset the flag
 
         // Clean up the global interceptor
-        delete (window as any).interceptAiResponse;
+        delete (window as unknown as { interceptAiResponse?: unknown }).interceptAiResponse;
       };
 
       console.log('[Direct AI Test] 🎯 Global interceptor ready');
 
       // Cleanup
       return () => {
-        if ((window as any).interceptAiResponse) {
-          delete (window as any).interceptAiResponse;
+        const windowWithInterceptor = window as unknown as { interceptAiResponse?: unknown };
+        if (windowWithInterceptor.interceptAiResponse) {
+          delete windowWithInterceptor.interceptAiResponse;
         }
       };
     }
@@ -82,25 +87,18 @@ function App() {
 
         // Immediately read it back
         const retrievedDoc = await database.get(saveResult.id);
-        console.log('[File Test] Retrieved document:', {
-          id: retrievedDoc._id,
-          type: retrievedDoc.type,
-          hasFiles: !!retrievedDoc._files,
-          fileKeys: Object.keys(retrievedDoc._files || {}),
-        });
+        console.log('[File Test] Retrieved document:', retrievedDoc);
 
         // Check the file object that came back
         const retrievedFileObj = retrievedDoc._files?.testFile;
-        console.log('[File Test] Retrieved file object:', {
-          type: typeof retrievedFileObj,
-          properties: Object.keys(retrievedFileObj || {}),
-          hasFileMethod: typeof retrievedFileObj?.file === 'function',
-          fileType: retrievedFileObj?.type,
-          fileSize: retrievedFileObj?.size,
-        });
+        console.log('[File Test] Retrieved file object:', retrievedFileObj);
 
         // Try to get the actual file content
-        if (retrievedFileObj && typeof retrievedFileObj.file === 'function') {
+        if (
+          retrievedFileObj &&
+          'file' in retrievedFileObj &&
+          typeof retrievedFileObj.file === 'function'
+        ) {
           const actualFile = await retrievedFileObj.file();
           console.log(
             '[File Test] Actual file from .file():',
@@ -206,13 +204,7 @@ function App() {
   useEffect(() => {
     console.log('[App Debug] Image documents from useLiveQuery:', {
       count: imageDocuments.length,
-      documents: imageDocuments.map((doc) => ({
-        id: doc._id,
-        type: doc.type,
-        hasFiles: !!doc._files,
-        fileKeys: Object.keys(doc._files || {}),
-        prompt: doc.prompt,
-      })),
+      documents: imageDocuments,
     });
   }, [imageDocuments]);
 
