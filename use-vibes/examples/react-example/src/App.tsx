@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { ImgGen, useFireproof } from 'use-vibes';
 import './App.css';
 
+const APP_DBNAME = 'ImgGen2';
+
 function App() {
   const [inputPrompt, setInputPrompt] = useState('');
   const [activePrompt, setActivePrompt] = useState('');
@@ -13,7 +15,7 @@ function App() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Use Fireproof to query all images
-  const { useLiveQuery, database } = useFireproof('ImgGen2');
+  const { useLiveQuery, database } = useFireproof(APP_DBNAME);
 
   // State for testing direct AI response display (bypassing database)
   const [directAiImage, setDirectAiImage] = useState<string | null>(null);
@@ -100,13 +102,14 @@ function App() {
         // Try to get the actual file content
         if (retrievedFileObj && typeof retrievedFileObj.file === 'function') {
           const actualFile = await retrievedFileObj.file();
-          console.log('[File Test] Actual file from .file():', {
-            type: typeof actualFile,
-            isFile: actualFile instanceof File,
-            name: actualFile?.name,
-            size: actualFile?.size,
-            type: actualFile?.type,
-          });
+          console.log(
+            '[File Test] Actual file from .file():',
+            {
+              type: typeof actualFile,
+              isFile: actualFile instanceof File,
+            },
+            actualFile
+          );
 
           // Try to read the content
           const text = await actualFile.text();
@@ -198,6 +201,20 @@ function App() {
     key: 'image',
     descending: true,
   });
+
+  // Debug logging to track query results
+  useEffect(() => {
+    console.log('[App Debug] Image documents from useLiveQuery:', {
+      count: imageDocuments.length,
+      documents: imageDocuments.map((doc) => ({
+        id: doc._id,
+        type: doc.type,
+        hasFiles: !!doc._files,
+        fileKeys: Object.keys(doc._files || {}),
+        prompt: doc.prompt,
+      })),
+    });
+  }, [imageDocuments]);
 
   return (
     <div className="container">
@@ -300,6 +317,7 @@ function App() {
           prompt={activePrompt}
           _id={selectedImageId}
           images={uploadedImage ? [uploadedImage] : undefined}
+          database={APP_DBNAME}
           options={{
             debug: true,
             quality,
@@ -322,6 +340,7 @@ function App() {
                   <ImgGen
                     _id={doc._id}
                     className="thumbnail-img"
+                    database={APP_DBNAME}
                     debug={true}
                     options={{
                       quality: quality,

@@ -675,7 +675,12 @@ async function loadOrGenerateImage({
                 };
 
                 // Log before saving to Fireproof
-                console.log('[ImgGen Response] About to save to Fireproof:', imgDoc);
+                console.log('[ImgGen Response] About to save to Fireproof:', {
+                  docType: imgDoc.type,
+                  hasPrompt: !!imgDoc.prompts?.p1?.text,
+                  hasFiles: !!imgDoc._files?.v1,
+                  document: imgDoc,
+                });
 
                 // Save the new document to Fireproof
                 const result = await db.put(imgDoc);
@@ -684,6 +689,7 @@ async function loadOrGenerateImage({
                 console.log('[ImgGen Response] Fireproof save result:', {
                   success: !!result.id,
                   docId: result.id,
+                  documentType: imgDoc.type,
                 });
 
                 // Store the document ID in our tracking map to prevent duplicates
