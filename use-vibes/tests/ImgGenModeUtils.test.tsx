@@ -1,23 +1,28 @@
 import { describe, it, expect } from 'vitest';
-import { getImgGenMode, type ImgGenMode } from '../base/components/ImgGenUtils/ImgGenModeUtils.js';
+import { getImgGenMode } from '../base/components/ImgGenUtils/ImgGenModeUtils.js';
 import type { PartialImageDocument } from '../base/hooks/image-gen/types.js';
 
 describe('ImgGenModeUtils', () => {
   describe('getImgGenMode', () => {
     // Test data helpers
-    const createDocument = (overrides: Partial<PartialImageDocument> = {}): PartialImageDocument => ({
+    const createDocument = (
+      overrides: Partial<PartialImageDocument> = {}
+    ): PartialImageDocument => ({
       _id: 'test-doc-id',
       type: 'image',
       _files: {},
       ...overrides,
     });
 
-    const createDocumentWithVersions = (count: number = 1): PartialImageDocument => ({
+    const createDocumentWithVersions = (count = 1): PartialImageDocument => ({
       ...createDocument(),
-      versions: Array(count).fill(null).map((_, i) => ({
-        prompt: `Test prompt ${i + 1}`,
-        timestamp: Date.now() + i,
-      })),
+      versions: Array(count)
+        .fill(null)
+        .map((_, i) => ({
+          id: `v${i + 1}`,
+          created: Date.now() + i,
+          promptKey: `p${i + 1}`,
+        })),
     });
 
     const createDocumentWithPrompt = (prompt: string): PartialImageDocument => ({
@@ -62,7 +67,7 @@ describe('ImgGenModeUtils', () => {
       it('should return generating mode for structured document prompt + loading + no versions', () => {
         const document = createDocument({
           prompts: {
-            'p123': { text: 'structured prompt' },
+            p123: { text: 'structured prompt', created: Date.now() },
           },
           currentPromptKey: 'p123',
         });
@@ -128,7 +133,7 @@ describe('ImgGenModeUtils', () => {
       it('should return uploadWaiting mode when has input files but no prompt and no versions', () => {
         const document = createDocument({
           _files: {
-            'in-file1': { name: 'test.jpg', type: 'image/jpeg' },
+            'in-file1': new File(['test'], 'test.jpg', { type: 'image/jpeg' }),
           },
         });
         const mode = getImgGenMode({
