@@ -538,14 +538,6 @@ async function loadOrGenerateImage({
           data = await callImageGeneration(prompt, generationOptions);
         }
 
-        // Log the API response for debugging
-        console.log('[ImgGen Response] API response received:', {
-          hasData: !!data,
-          hasImageData: !!data?.data?.[0]?.b64_json,
-          dataLength: data?.data?.[0]?.b64_json?.length,
-          prompt: prompt,
-        });
-
         // Process the data response
         if (data?.data?.[0]?.b64_json) {
           // Check if there's a global interceptor for testing direct AI responses
@@ -674,23 +666,8 @@ async function loadOrGenerateImage({
                   },
                 };
 
-                // Log before saving to Fireproof
-                console.log('[ImgGen Response] About to save to Fireproof:', {
-                  docType: imgDoc.type,
-                  hasPrompt: !!imgDoc.prompts?.p1?.text,
-                  hasFiles: !!imgDoc._files?.v1,
-                  document: imgDoc,
-                });
-
                 // Save the new document to Fireproof
                 const result = await db.put(imgDoc);
-
-                // Log successful save
-                console.log('[ImgGen Response] Fireproof save result:', {
-                  success: !!result.id,
-                  docId: result.id,
-                  documentType: imgDoc.type,
-                });
 
                 // Store the document ID in our tracking map to prevent duplicates
                 MODULE_STATE.createdDocuments.set(stableKey, result.id);
@@ -699,7 +676,6 @@ async function loadOrGenerateImage({
                 const doc = (await db.get(result.id)) as unknown as ImageDocument;
 
                 // Log document retrieval
-                console.log('[ImgGen Response] Retrieved document from Fireproof:', doc);
 
                 return { id: result.id, doc };
               })();
@@ -714,14 +690,9 @@ async function loadOrGenerateImage({
             try {
               // Wait for the document creation to complete
               const { doc } = await documentCreationPromise;
-              console.log('[ImgGen Response] Document creation completed successfully:', {
-                docId: doc._id,
-                hasFiles: !!doc._files,
-              });
               setDocument(doc);
               setImageData(data.data[0].b64_json);
             } catch (e) {
-              console.error('[ImgGen Response] Error in document creation:', e);
               // Still show the image even if document creation fails
               setImageData(data.data[0].b64_json);
               // Clean up the failed promise so future requests can try again
@@ -844,8 +815,6 @@ async function handleNewDoc({
         fileObj = imageFile as unknown as File;
       }
 
-      console.log('[ImgGen Response] File object:', fileObj);
-
       // Read the file as base64
       const reader = new FileReader();
       const base64Promise = new Promise<string>((resolve, reject) => {
@@ -859,7 +828,6 @@ async function handleNewDoc({
       });
       reader.readAsDataURL(fileObj);
       const base64Data = await base64Promise;
-      console.log('[ImgGen Response] Base64 data:', base64Data.length);
       setImageData(base64Data);
     } else {
       // Handle legacy files structure

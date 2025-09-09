@@ -56,9 +56,9 @@ export async function imageGen(prompt: string, options: ImageGenOptions = {}): P
 
       const responseText = await response.text();
       if (debug) {
-        console.log(`[imageGen:${PACKAGE_VERSION}] Raw response:`, responseText.substring(0, 500) + '...');
+        console.log(`[imageGen:${PACKAGE_VERSION}] Raw response:`, responseText.substring(0, 500) + "...");
       }
-      
+
       try {
         const result = JSON.parse(responseText);
         return result;
@@ -68,7 +68,7 @@ export async function imageGen(prompt: string, options: ImageGenOptions = {}): P
           console.error(`[imageGen:${PACKAGE_VERSION}] Response text length:`, responseText.length);
           console.error(`[imageGen:${PACKAGE_VERSION}] Response sample:`, responseText.substring(0, 1000));
         }
-        throw new Error(`Failed to parse JSON response: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`);
+        throw new Error(`Failed to parse JSON response: ${parseError instanceof Error ? parseError.message : "Unknown error"}`);
       }
     } else {
       // Image editing with multiple input images
@@ -105,9 +105,9 @@ export async function imageGen(prompt: string, options: ImageGenOptions = {}): P
 
       const responseText = await response.text();
       if (debug) {
-        console.log(`[imageGen:${PACKAGE_VERSION}] Raw response:`, responseText.substring(0, 500) + '...');
+        console.log(`[imageGen:${PACKAGE_VERSION}] Raw response:`, responseText.substring(0, 500) + "...");
       }
-      
+
       try {
         const result = JSON.parse(responseText);
         return result;
@@ -117,7 +117,7 @@ export async function imageGen(prompt: string, options: ImageGenOptions = {}): P
           console.error(`[imageGen:${PACKAGE_VERSION}] Response text length:`, responseText.length);
           console.error(`[imageGen:${PACKAGE_VERSION}] Response sample:`, responseText.substring(0, 1000));
         }
-        throw new Error(`Failed to parse JSON response: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`);
+        throw new Error(`Failed to parse JSON response: ${parseError instanceof Error ? parseError.message : "Unknown error"}`);
       }
     }
   } catch (error) {

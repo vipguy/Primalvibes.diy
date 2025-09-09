@@ -121,14 +121,6 @@ export function ImgGenDisplay({
       ? (document._files[fileKey] as DocFileMeta)
       : (document?._files?.image as DocFileMeta);
 
-  console.log('[ImgGen Display] Current file:', currentFile);
-  console.log('[ImgGen Display] Current file properties:', Object.keys(currentFile || {}));
-  console.log('[ImgGen Display] Current file type check:', {
-    hasType: 'type' in (currentFile || {}),
-    hasSize: 'size' in (currentFile || {}),
-    hasFile: 'file' in (currentFile || {}),
-    fileIsFunction: typeof currentFile?.file === 'function',
-  });
   // Get prompt text early (moved before portal)
   const promptInfo = getPromptInfo(document, versionIndex);
   const promptText = promptInfo.currentPrompt || alt || 'Generated image';
