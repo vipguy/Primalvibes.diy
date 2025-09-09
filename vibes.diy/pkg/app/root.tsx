@@ -24,7 +24,7 @@ export const links: Route.LinksFunction = () => [
     type: "image/svg+xml",
     href: `${VibesDiyEnv.APP_BASENAME()}favicon.svg`,
   },
-  { rel: "alternate icon", href: `${VibesDiyEnv.APP_BASENAME}favicon.ico` },
+  { rel: "alternate icon", href: `${VibesDiyEnv.APP_BASENAME()}favicon.ico` },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
     rel: "preconnect",

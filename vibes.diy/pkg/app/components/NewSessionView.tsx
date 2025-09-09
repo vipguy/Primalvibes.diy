@@ -6,6 +6,7 @@ import SessionSidebar from "./SessionSidebar.js";
 import { MenuIcon } from "./ChatHeaderIcons.js";
 import { quickSuggestions } from "../data/quick-suggestions-data.js";
 import models from "../data/models.json" with { type: "json" };
+import { Toaster } from "react-hot-toast";
 
 interface NewSessionViewProps {
   onSessionCreate: (sessionId: string) => void;
@@ -48,6 +49,9 @@ export default function NewSessionView({
 
   return (
     <>
+      <div>
+        <Toaster />
+      </div>
       <div className="flex min-h-screen flex-col">
         {/* Header with menu button */}
         <div className="flex items-center justify-between p-4">
