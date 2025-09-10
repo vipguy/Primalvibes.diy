@@ -1,34 +1,20 @@
-import { CoerceURI, pathOps, Result, loadAsset } from "@adviser/cement";
-
-function needLocalLlmPath(localPath: string, pathOpsRef = pathOps): string {
-  const dirPart = pathOpsRef.dirname(localPath).replace(/^[./]+/, "");
-  if (dirPart.startsWith("llms") || localPath.startsWith("llms/")) {
-    return "";
-  }
-  return "llms";
-}
+import { CoerceURI, Result } from "@adviser/cement";
 
 export async function loadDocs(
   localPath: string,
-  fallBackUrl: CoerceURI,
-  deps = { pathOps, loadAsset },
+  baseUrl: CoerceURI,
 ): Promise<Result<string>> {
-  return deps.loadAsset(localPath, {
-    fallBackUrl,
-    basePath: () => import.meta.url,
-    pathCleaner: (base, localPath, mode) => {
-      switch (mode) {
-        case "normal": {
-          const llmPath = needLocalLlmPath(localPath, deps.pathOps);
-          if (llmPath === "") {
-            // Path already contains llms, use it directly
-            return deps.pathOps.join(base, localPath);
-          }
-          return deps.pathOps.join(base, llmPath, localPath);
-        }
-        case "fallback":
-          return localPath;
-      }
-    },
-  });
+  const url = `${baseUrl}/${localPath}`;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      return Result.Err(
+        `Failed to fetch ${url}: ${response.status} ${response.statusText}`,
+      );
+    }
+    const text = await response.text();
+    return Result.Ok(text);
+  } catch (error) {
+    return Result.Err(`Error fetching ${url}: ${error}`);
+  }
 }

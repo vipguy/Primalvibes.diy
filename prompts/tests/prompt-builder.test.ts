@@ -5,7 +5,12 @@ import {
   LlmCatalogEntry,
   makeBaseSystemPrompt,
 } from "@vibes.diy/prompts";
-import { describe, it, expect, beforeAll, vi } from "vitest";
+import { describe, it, expect, beforeAll, beforeEach, vi } from "vitest";
+import { createMockFetchFromPkgFiles } from "./helpers/load-mock-data.js";
+
+// Mock global fetch for the tests
+const mockFetch = vi.fn();
+globalThis.fetch = mockFetch;
 // await import("~/vibes.diy/app/llms/catalog.js");
 
 // import * as mod from "~/vibes.diy/app/prompts.js";
@@ -82,9 +87,11 @@ const opts = {
 };
 
 beforeAll(async () => {
-  llmsJsonModules = await getJsonDocs(new URL("http://localhost/test"));
+  // Set up mock using real files from pkg directory
+  mockFetch.mockImplementation(createMockFetchFromPkgFiles());
 
-  // llmsTxtModules = await getTxtDocs(new URL("http://localhost/test"));
+  // Now load the data after mocks are set up
+  llmsJsonModules = await getJsonDocs(new URL("http://localhost/test"));
 
   orderedLlms = Object.entries(llmsJsonModules)
     .filter(([path, _]) =>
@@ -92,13 +99,10 @@ beforeAll(async () => {
     )
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([_, mod]) => mod.obj);
+});
 
-  // Pull exported functions from the mocked module
-  // const mod = await import("~/vibes.diy/app/prompts.js");
-  // generateImportStatements = mod.generateImportStatements;
-  // makeBaseSystemPrompt = mod.makeBaseSystemPrompt;
-  // preloadLlmsText = mod.preloadLlmsText;
-  // ensure catalog loads for glob ordering
+beforeEach(() => {
+  mockFetch.mockClear();
 });
 
 describe("prompt builder (real implementation)", () => {

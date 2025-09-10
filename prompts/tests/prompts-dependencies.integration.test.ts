@@ -1,5 +1,10 @@
-import { describe, it, expect, beforeAll, vi } from "vitest";
+import { describe, it, expect, beforeAll, beforeEach, vi } from "vitest";
 import * as mod from "@vibes.diy/prompts";
+import { createMockFetchFromPkgFiles } from "./helpers/load-mock-data.js";
+
+// Mock global fetch for the integration tests
+const mockFetch = vi.fn();
+globalThis.fetch = mockFetch;
 
 // Ensure real implementation
 // (vi as any).doUnmock?.("~/vibes.diy/app/prompts");
@@ -13,6 +18,13 @@ beforeAll(async () => {
   // const mod = await import("~/vibes.diy/app/prompts.js");
   // makeBaseSystemPrompt = mod.makeBaseSystemPrompt;
   // preloadLlmsText = mod.preloadLlmsText;
+});
+
+beforeEach(() => {
+  mockFetch.mockClear();
+
+  // Set up mock using real files from pkg directory
+  mockFetch.mockImplementation(createMockFetchFromPkgFiles());
 });
 
 const opts = {
