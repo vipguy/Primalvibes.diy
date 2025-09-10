@@ -175,7 +175,6 @@ export function useImageGen({
     // Create a generator function with the current request ID
 
     const loadImageTimer = setTimeout(() => {
-      console.log('[useImageGen] Loading image...', isMounted);
       if (isMounted) {
         const callImageGeneration = createImageGenerator(requestId);
         loadOrGenerateImage({
@@ -317,9 +316,6 @@ async function loadOrGenerateImage({
 
           // If we have a prompt and only an original file, generate an image
           if (hasOnlyOriginalFile && currentPromptText && !generationId) {
-            console.log(
-              `Document ${_id} has only original file and prompt, generating edited image`
-            );
             setLoading(true);
 
             // Create options that include the document for access to the original file
@@ -540,21 +536,6 @@ async function loadOrGenerateImage({
 
         // Process the data response
         if (data?.data?.[0]?.b64_json) {
-          // Check if there's a global interceptor for testing direct AI responses
-          const windowWithInterceptor = window as Window & {
-            interceptAiResponse?: (base64Data: string, info: object) => void;
-          };
-
-          if (windowWithInterceptor.interceptAiResponse) {
-            console.log('[Direct AI Test] 🎯 Calling global interceptor with AI response data');
-            windowWithInterceptor.interceptAiResponse(data.data[0].b64_json, {
-              prompt: prompt,
-              dataLength: data.data[0].b64_json.length,
-              timestamp: new Date().toISOString(),
-            });
-            return; // Exit early to prevent database storage during test
-          }
-
           // Create a File object from base64 data (simple approach like working text file)
           const filename = generateSafeFilename(prompt);
           const base64Data = data.data[0].b64_json;
@@ -893,7 +874,6 @@ async function handleExistingDoc({
   // Document exists but has no files - check if it has a prompt field we can use
   if ('prompt' in existingDoc && typeof existingDoc.prompt === 'string' && existingDoc.prompt) {
     // Use the document's prompt to generate an image
-    console.log(`Document ${_id} has no files but has prompt, generating image`);
 
     // Extended debug info
     if (options?.debug) {

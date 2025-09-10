@@ -17,45 +17,6 @@ function App() {
   // Use Fireproof to query all images
   const { useLiveQuery, database } = useFireproof(APP_DBNAME);
 
-  // State for testing direct AI response display (bypassing database)
-  const [directAiImage, setDirectAiImage] = useState<string | null>(null);
-  const [directImageInfo, setDirectImageInfo] = useState<string>('');
-  const [interceptNextGeneration, setInterceptNextGeneration] = useState(false);
-
-  // Simple approach: Set up a global interceptor on window object
-  useEffect(() => {
-    if (interceptNextGeneration) {
-      // Create a global function that the use-image-gen hook can call
-      (
-        window as unknown as {
-          interceptAiResponse?: (base64Data: string, responseInfo: unknown) => void;
-        }
-      ).interceptAiResponse = (base64Data: string, responseInfo: unknown) => {
-        console.log('[Direct AI Test] 🎯 Intercepted AI response data!', {
-          base64Length: base64Data.length,
-          responseInfo,
-        });
-
-        setDirectAiImage(base64Data);
-        setDirectImageInfo(`Intercepted AI Response - Length: ${base64Data.length} characters`);
-        setInterceptNextGeneration(false); // Reset the flag
-
-        // Clean up the global interceptor
-        delete (window as unknown as { interceptAiResponse?: unknown }).interceptAiResponse;
-      };
-
-      console.log('[Direct AI Test] 🎯 Global interceptor ready');
-
-      // Cleanup
-      return () => {
-        const windowWithInterceptor = window as unknown as { interceptAiResponse?: unknown };
-        if (windowWithInterceptor.interceptAiResponse) {
-          delete windowWithInterceptor.interceptAiResponse;
-        }
-      };
-    }
-  }, [interceptNextGeneration]);
-
   // Round-trip test for file storage on page load
   useEffect(() => {
     const testFileRoundTrip = async () => {
@@ -346,81 +307,6 @@ function App() {
           </div>
         </div>
       )}
-
-      {/* Direct AI Response Test Display */}
-      {directAiImage && (
-        <div
-          style={{
-            marginTop: '20px',
-            border: '3px solid #4CAF50',
-            padding: '15px',
-            backgroundColor: '#f9fff9',
-            borderRadius: '8px',
-          }}
-        >
-          <h3 style={{ color: '#4CAF50', margin: '0 0 10px 0' }}>
-            ✅ Direct AI Response Test (Bypassing Database)
-          </h3>
-          <p style={{ margin: '5px 0', fontSize: '14px', color: '#666' }}>{directImageInfo}</p>
-          <img
-            src={`data:image/png;base64,${directAiImage}`}
-            alt="Direct AI Response Image"
-            style={{
-              maxWidth: '400px',
-              border: '2px solid #4CAF50',
-              borderRadius: '4px',
-              display: 'block',
-              marginTop: '10px',
-            }}
-            onLoad={() => console.log('[Direct AI Test] ✅ Image loaded successfully!')}
-            onError={(e) => console.error('[Direct AI Test] ❌ Image failed to load:', e)}
-          />
-          <button
-            onClick={() => {
-              setDirectAiImage(null);
-              setDirectImageInfo('');
-            }}
-            style={{
-              marginTop: '10px',
-              padding: '8px 16px',
-              backgroundColor: '#f44336',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            Clear Test Image
-          </button>
-        </div>
-      )}
-
-      {/* Test Control Button */}
-      <div style={{ marginTop: '20px', textAlign: 'center' }}>
-        <button
-          onClick={() => {
-            setInterceptNextGeneration(true);
-            console.log(
-              '[Direct AI Test] 🎯 Next generation will be intercepted for direct display'
-            );
-          }}
-          disabled={interceptNextGeneration}
-          style={{
-            padding: '12px 24px',
-            backgroundColor: interceptNextGeneration ? '#ccc' : '#FF9800',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: interceptNextGeneration ? 'not-allowed' : 'pointer',
-            fontSize: '16px',
-            fontWeight: 'bold',
-          }}
-        >
-          {interceptNextGeneration
-            ? '🎯 Ready to Intercept Next Generation'
-            : '🧪 Enable Direct AI Response Test'}
-        </button>
-      </div>
     </div>
   );
 }

@@ -185,18 +185,8 @@ const IframeContent: React.FC<IframeContentProps> = ({
             code: transformedCode,
             apiKey: "sk-vibes-proxy-managed",
             sessionId: sessionIdValue,
-            endpoint: VibesDiyEnv.CALLAI_ENDPOINT(), //.replace(/\/$/, ""),
+            endpoint: VibesDiyEnv.CALLAI_ENDPOINT(),
           };
-
-          // Log the environment data being sent to iframe
-          console.log("[IframeContent] Posting message to iframe:", {
-            type: messageData.type,
-            sessionId: messageData.sessionId,
-            endpoint: messageData.endpoint,
-            apiKey: messageData.apiKey,
-            codeLength: messageData.code.length,
-          });
-
           iframeRef.current.contentWindow.postMessage(messageData, "*");
         }
       };
