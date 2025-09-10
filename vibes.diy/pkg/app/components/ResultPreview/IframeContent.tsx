@@ -180,16 +180,24 @@ const IframeContent: React.FC<IframeContentProps> = ({
       // Send code via postMessage after iframe loads
       const handleIframeLoad = () => {
         if (iframeRef.current?.contentWindow) {
-          iframeRef.current.contentWindow.postMessage(
-            {
-              type: "execute-code",
-              code: transformedCode,
-              apiKey: "sk-vibes-proxy-managed",
-              sessionId: sessionIdValue,
-              endpoint: VibesDiyEnv.CALLAI_ENDPOINT(),
-            },
-            "*",
-          );
+          const messageData = {
+            type: "execute-code",
+            code: transformedCode,
+            apiKey: "sk-vibes-proxy-managed",
+            sessionId: sessionIdValue,
+            endpoint: VibesDiyEnv.CALLAI_ENDPOINT(), //.replace(/\/$/, ""),
+          };
+
+          // Log the environment data being sent to iframe
+          console.log("[IframeContent] Posting message to iframe:", {
+            type: messageData.type,
+            sessionId: messageData.sessionId,
+            endpoint: messageData.endpoint,
+            apiKey: messageData.apiKey,
+            codeLength: messageData.code.length,
+          });
+
+          iframeRef.current.contentWindow.postMessage(messageData, "*");
         }
       };
 

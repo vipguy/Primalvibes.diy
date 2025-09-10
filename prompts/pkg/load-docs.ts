@@ -1,10 +1,11 @@
 import { CoerceURI, Result } from "@adviser/cement";
+import { joinUrlParts } from "call-ai";
 
 export async function loadDocs(
   localPath: string,
   baseUrl: CoerceURI,
 ): Promise<Result<string>> {
-  const url = `${baseUrl}/${localPath}`;
+  const url = joinUrlParts(baseUrl?.toString() || "", localPath);
   try {
     const response = await fetch(url);
     if (!response.ok) {

@@ -3,7 +3,7 @@
  * Integration with custom image generation API
  */
 import { ImageGenOptions, ImageResponse } from "./types.js";
-import { callAiFetch } from "./utils.js";
+import { callAiFetch, joinUrlParts } from "./utils.js";
 import { callAiEnv } from "./env.js";
 import { PACKAGE_VERSION } from "./version.js";
 
@@ -32,7 +32,7 @@ export async function imageGen(prompt: string, options: ImageGenOptions = {}): P
       // Simple image generation with text prompt
       // Use custom origin or proper API fallback
       const origin = customOrigin || callAiEnv.def.CALLAI_CHAT_URL;
-      const generateEndpoint = `${origin}/api/openai-image/generate`;
+      const generateEndpoint = joinUrlParts(origin, "/api/openai-image/generate");
 
       const response = await callAiFetch(options)(generateEndpoint, {
         method: "POST",
@@ -88,7 +88,7 @@ export async function imageGen(prompt: string, options: ImageGenOptions = {}): P
 
       // Use custom origin or proper API fallback
       const origin = customOrigin || callAiEnv.def.CALLAI_CHAT_URL;
-      const editEndpoint = `${origin}/api/openai-image/edit`;
+      const editEndpoint = joinUrlParts(origin, "/api/openai-image/edit");
 
       const response = await callAiFetch(options)(editEndpoint, {
         method: "POST",
