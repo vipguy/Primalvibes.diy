@@ -97,6 +97,13 @@ export function getImgGenMode({
     return 'uploadWaiting';
   }
 
+  // Case 4: Has document with effective prompt but no versions yet - should generate
+  if (document && effectivePrompt && !hasVersions) {
+    if (debug)
+      console.log('[ImgGenModeUtils] Has document + prompt but no versions - generating mode');
+    return 'generating';
+  }
+
   // Fallback - if we have an empty document or other invalid state, go back to placeholder
   if (debug) console.log('[ImgGenModeUtils] Fallback - placeholder mode');
   return 'placeholder';
