@@ -1,35 +1,14 @@
-import {
-  CoerceURI,
-  exception2Result,
-  ResolveOnce,
-  Result,
-} from "@adviser/cement";
-import { loadDocs } from "./load-docs.js";
+import { CoerceURI, ResolveOnce } from "@adviser/cement";
+import { allConfigs } from "./llms/index.js";
+import type { LlmConfig } from "./llms/index.js";
 
-export interface LlmCatalogEntry {
-  name: string;
-  importType?: string;
-  label: string;
-  llmsTxtUrl?: string; // Optional - if not provided, loads from local repo
-  module: string;
-  description?: string;
-  importModule: string;
-  importName: string;
-}
+// Re-export the types for compatibility
+export type { LlmConfig as LlmCatalogEntry } from "./llms/index.js";
 
-export interface JsonDoc<T = LlmCatalogEntry> {
+export interface JsonDoc<T = LlmConfig> {
   readonly name: string;
   readonly obj: T;
 }
-
-const files = [
-  "callai.json",
-  "d3.json",
-  "fireproof.json",
-  "image-gen.json",
-  "three-js.json",
-  "web-audio.json",
-];
 
 export interface JsonDocs {
   "callai.json": JsonDoc;
@@ -52,38 +31,26 @@ export function getLlmCatalogNames(
   );
 }
 
-export function getLlmCatalog(
-  fallBackUrl: CoerceURI,
-): Promise<LlmCatalogEntry[]> {
+export function getLlmCatalog(fallBackUrl: CoerceURI): Promise<LlmConfig[]> {
   return getJsonDocArray(fallBackUrl).then((docs) => docs.map((i) => i.obj));
 }
 
-export function getJsonDocArray(fallBackUrl: CoerceURI): Promise<JsonDoc[]> {
-  return getJsonDocs(fallBackUrl).then((docs) => {
+export function getJsonDocArray(_fallBackUrl: CoerceURI): Promise<JsonDoc[]> {
+  return getJsonDocs(_fallBackUrl).then((docs) => {
     return Object.values(docs);
   });
 }
 
-export async function getJsonDocs(fallBackUrl: CoerceURI): Promise<JsonDocs> {
+export async function getJsonDocs(_fallBackUrl: CoerceURI): Promise<JsonDocs> {
   return jsonDocs.once(async () => {
     const m: JsonDocs = {} as JsonDocs;
-    for (const f of files) {
-      const rAsset = await loadDocs(f, fallBackUrl);
-      if (rAsset.isErr()) {
-        console.error(`Failed to load asset ${f}: ${rAsset.Err()}`);
-        continue;
-      }
-      const rObj = exception2Result(() =>
-        JSON.parse(rAsset.Ok()),
-      ) as Result<LlmCatalogEntry>;
-      if (rObj.isErr()) {
-        console.error(
-          `Failed to parse JSON from asset ${f}: ${rObj.Err()} [${rAsset.Ok()}]`,
-        );
-        continue;
-      }
-      m[f] = { name: f, obj: rObj.Ok() };
+
+    // Load configs from TypeScript modules instead of fetching JSON
+    for (const config of allConfigs) {
+      const filename = `${config.name}.json`;
+      m[filename] = { name: filename, obj: config };
     }
+
     return m;
   });
 }
