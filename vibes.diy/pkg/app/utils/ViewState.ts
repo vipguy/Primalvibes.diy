@@ -1,36 +1,15 @@
 import { useEffect, useRef } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { encodeTitle } from "../components/SessionSidebar/utils.js";
+import { ViewControlsType, ViewState, ViewType } from "@vibes.diy/prompts";
 
 // Helper to detect mobile viewport
 export const isMobileViewport = () => {
   return typeof window !== "undefined" && window.innerWidth < 768;
 };
 
-export type ViewType = "preview" | "code" | "data" | "chat" | "settings";
-
-export type ViewControlsType = Record<
-  Exclude<ViewType, "chat">,
-  {
-    enabled: boolean;
-    icon: string;
-    label: string;
-    loading?: boolean; // Made loading optional
-  }
->;
-
-export interface ViewState {
-  readonly currentView: ViewType;
-  readonly displayView: ViewType;
-  readonly navigateToView: (view: ViewType) => void;
-  readonly viewControls: ViewControlsType;
-  readonly showViewControls: boolean;
-  readonly sessionId: string;
-  readonly encodedTitle: string;
-}
-
 export interface ViewStateProps {
-  sessionId?: string;
+  sessionId: string;
   title?: string;
   code: string;
   isStreaming: boolean;
@@ -41,26 +20,30 @@ export interface ViewStateProps {
 
 export function useViewState(
   props: Partial<ViewStateProps>,
+  pathname: string,
+  navigate: (to: string, options?: { replace?: boolean }) => void,
 ): Partial<ViewState> {
   const { sessionId: paramSessionId, title: paramTitle } = useParams<{
     sessionId: string;
     title: string;
   }>();
-  const navigate = useNavigate();
-  const location = useLocation();
+
+  // Router hooks now passed as parameters to prevent infinite render loops
 
   // Consolidate session and title from props or params
   const sessionId = props.sessionId || paramSessionId;
   const title = props.title || paramTitle;
   const encodedTitle = title ? encodeTitle(title) : "";
 
+  // Navigate function passed as parameter - logging handled by SessionWrapper
+
   // Derive view from URL path
   const getViewFromPath = (): ViewType => {
-    if (location.pathname.endsWith("/app")) return "preview";
-    if (location.pathname.endsWith("/code")) return "code";
-    if (location.pathname.endsWith("/data")) return "data";
-    if (location.pathname.endsWith("/chat")) return "chat";
-    if (location.pathname.endsWith("/settings")) return "settings";
+    if (pathname.endsWith("/app")) return "preview";
+    if (pathname.endsWith("/code")) return "code";
+    if (pathname.endsWith("/data")) return "data";
+    if (pathname.endsWith("/chat")) return "chat";
+    if (pathname.endsWith("/settings")) return "settings";
     return "preview"; // Default
   };
 
@@ -91,7 +74,7 @@ export function useViewState(
       initialNavigationDoneRef.current = true;
 
       // Only if we're already at a specific view (app, code, data), should we navigate
-      const path = location.pathname;
+      const path = pathname;
       const basePath = path.replace(/\/(app|code|data|settings)$/, "");
 
       // If current path has a view suffix, remove it for auto-navigation to work
@@ -104,8 +87,8 @@ export function useViewState(
     // Removed mobile check to allow consistent behavior across all devices
     // Also skip if there's a capturedPrompt (URL prompt that hasn't been sent yet)
     if (props.previewReady && !wasPreviewReadyRef.current) {
-      const isInDataView = location.pathname.endsWith("/data");
-      const isInCodeView = location.pathname.endsWith("/code");
+      const isInDataView = pathname.endsWith("/data");
+      const isInCodeView = pathname.endsWith("/code");
       const hasCapturedPrompt =
         props.capturedPrompt && props.capturedPrompt.trim().length > 0;
       if (!isInDataView && !isInCodeView && !hasCapturedPrompt) {
@@ -195,10 +178,10 @@ export function useViewState(
   // Otherwise, if preview is ready, prioritize showing it
   // Finally, during streaming on desktop (without explicit navigation), show code view
   const hasExplicitViewInURL =
-    location.pathname.endsWith("/app") ||
-    location.pathname.endsWith("/code") ||
-    location.pathname.endsWith("/data") ||
-    location.pathname.endsWith("/settings");
+    pathname.endsWith("/app") ||
+    pathname.endsWith("/code") ||
+    pathname.endsWith("/data") ||
+    pathname.endsWith("/settings");
 
   const displayView = hasExplicitViewInURL
     ? currentView // Respect user's explicit view choice from URL

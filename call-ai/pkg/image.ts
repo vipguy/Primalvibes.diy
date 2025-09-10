@@ -3,7 +3,8 @@
  * Integration with custom image generation API
  */
 import { ImageGenOptions, ImageResponse } from "./types.js";
-import { callAiEnv, callAiFetch } from "./utils.js";
+import { callAiFetch, joinUrlParts } from "./utils.js";
+import { callAiEnv } from "./env.js";
 import { PACKAGE_VERSION } from "./version.js";
 
 // Import package version for debugging (same as main API)
@@ -29,9 +30,9 @@ export async function imageGen(prompt: string, options: ImageGenOptions = {}): P
     // Handle image generation
     if (!options.images || options.images.length === 0) {
       // Simple image generation with text prompt
-      // Use custom origin or document.location.origin
-      const origin = customOrigin || (typeof document !== "undefined" ? document.location.origin : "");
-      const generateEndpoint = `${origin}/api/openai-image/generate`;
+      // Use custom origin or proper API fallback
+      const origin = customOrigin || callAiEnv.def.CALLAI_CHAT_URL;
+      const generateEndpoint = joinUrlParts(origin, "/api/openai-image/generate");
 
       const response = await callAiFetch(options)(generateEndpoint, {
         method: "POST",
@@ -53,8 +54,22 @@ export async function imageGen(prompt: string, options: ImageGenOptions = {}): P
         throw new Error(`Image generation failed: ${response.status} ${response.statusText} - ${errorData}`);
       }
 
-      const result = await response.json();
-      return result;
+      const responseText = await response.text();
+      if (debug) {
+        console.log(`[imageGen:${PACKAGE_VERSION}] Raw response:`, responseText.substring(0, 500) + "...");
+      }
+
+      try {
+        const result = JSON.parse(responseText);
+        return result;
+      } catch (parseError) {
+        if (debug) {
+          console.error(`[imageGen:${PACKAGE_VERSION}] JSON Parse Error:`, parseError);
+          console.error(`[imageGen:${PACKAGE_VERSION}] Response text length:`, responseText.length);
+          console.error(`[imageGen:${PACKAGE_VERSION}] Response sample:`, responseText.substring(0, 1000));
+        }
+        throw new Error(`Failed to parse JSON response: ${parseError instanceof Error ? parseError.message : "Unknown error"}`);
+      }
     } else {
       // Image editing with multiple input images
       const formData = new FormData();
@@ -71,9 +86,9 @@ export async function imageGen(prompt: string, options: ImageGenOptions = {}): P
       if (options.quality) formData.append("quality", options.quality);
       if (options.style) formData.append("style", options.style);
 
-      // Use custom origin or document.location.origin
-      const origin = customOrigin || (typeof document !== "undefined" ? document.location.origin : "");
-      const editEndpoint = `${origin}/api/openai-image/edit`;
+      // Use custom origin or proper API fallback
+      const origin = customOrigin || callAiEnv.def.CALLAI_CHAT_URL;
+      const editEndpoint = joinUrlParts(origin, "/api/openai-image/edit");
 
       const response = await callAiFetch(options)(editEndpoint, {
         method: "POST",
@@ -88,8 +103,22 @@ export async function imageGen(prompt: string, options: ImageGenOptions = {}): P
         throw new Error(`Image editing failed: ${response.status} ${response.statusText} - ${errorData}`);
       }
 
-      const result = await response.json();
-      return result;
+      const responseText = await response.text();
+      if (debug) {
+        console.log(`[imageGen:${PACKAGE_VERSION}] Raw response:`, responseText.substring(0, 500) + "...");
+      }
+
+      try {
+        const result = JSON.parse(responseText);
+        return result;
+      } catch (parseError) {
+        if (debug) {
+          console.error(`[imageGen:${PACKAGE_VERSION}] JSON Parse Error:`, parseError);
+          console.error(`[imageGen:${PACKAGE_VERSION}] Response text length:`, responseText.length);
+          console.error(`[imageGen:${PACKAGE_VERSION}] Response sample:`, responseText.substring(0, 1000));
+        }
+        throw new Error(`Failed to parse JSON response: ${parseError instanceof Error ? parseError.message : "Unknown error"}`);
+      }
     }
   } catch (error) {
     if (debug) {

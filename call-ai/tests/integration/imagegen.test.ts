@@ -24,6 +24,18 @@ const globalFetch = vi.fn(() =>
           },
         ],
       }),
+    text: () =>
+      Promise.resolve(
+        JSON.stringify({
+          created: Date.now(),
+          data: [
+            {
+              b64_json: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", // 1x1 px transparent PNG
+              revised_prompt: "Generated image based on prompt",
+            },
+          ],
+        }),
+      ),
   }),
 ) as unknown as typeof fetch;
 global.fetch = globalFetch;
@@ -47,7 +59,7 @@ describe("imageGen function", () => {
       // Verify the fetch call was made correctly
       expect(fetch).toHaveBeenCalledTimes(1);
       expect(fetch).toHaveBeenCalledWith(
-        "/api/openai-image/generate",
+        "https://vibes-diy-api.com/api/openai-image/generate",
         expect.objectContaining({
           method: "POST",
           headers: expect.objectContaining({
@@ -90,7 +102,7 @@ describe("imageGen function", () => {
       // Verify the fetch call was made correctly
       expect(fetch).toHaveBeenCalledTimes(1);
       expect(fetch).toHaveBeenCalledWith(
-        "/api/openai-image/edit",
+        "https://vibes-diy-api.com/api/openai-image/edit",
         expect.objectContaining({
           method: "POST",
           headers: expect.objectContaining({

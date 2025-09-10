@@ -32,15 +32,37 @@ export function getImgGenMode({
     return 'error';
   }
 
-  // Special case: When we have a prompt and loading, always show generating
+  // Check for prompt in document if not provided directly
+  let effectivePrompt = prompt;
+  if (!effectivePrompt && document) {
+    // Check legacy prompt field
+    if (document.prompt && typeof document.prompt === 'string') {
+      effectivePrompt = document.prompt;
+    }
+    // Check newer structured prompts
+    else if (document.prompts && document.currentPromptKey) {
+      effectivePrompt = document.prompts[document.currentPromptKey]?.text;
+    }
+  }
+
+  // Check if we have versions (generated images) first
+  // This takes priority to ensure modal regeneration stays in display mode
+  const hasVersions = !!document?.versions?.length;
+
+  // Special case: When we have a prompt and loading, but no versions yet, show generating
   // This helps during initial generation before document is created
-  if (loading && prompt) {
-    if (debug) console.log('[ImgGenModeUtils] Prompt + loading → generating');
+  // Support both direct prompt prop and document-based prompts
+  if (loading && (prompt || effectivePrompt) && !hasVersions) {
+    if (debug) console.log('[ImgGenModeUtils] Prompt + loading + no versions → generating');
     return 'generating';
   }
 
-  // Check if we have versions (generated images)
-  const hasVersions = !!document?.versions?.length;
+  // Priority check: Has versions - display mode
+  // This ensures modal regeneration stays in display mode
+  if (hasVersions) {
+    if (debug) console.log('[ImgGenModeUtils] Has versions - display mode');
+    return 'display';
+  }
 
   // Check if document has input files (uploaded images waiting for prompt)
   const hasInputFiles =
@@ -54,6 +76,7 @@ export function getImgGenMode({
   if (debug) {
     console.log('[ImgGenModeUtils] Determining mode:', {
       prompt: !!prompt,
+      effectivePrompt: !!effectivePrompt,
       hasVersions,
       hasInputFiles,
       hasEmptyDoc,
@@ -67,22 +90,11 @@ export function getImgGenMode({
     return 'placeholder';
   }
 
-  // Case 2: Has input files but no prompt yet - stay in upload waiting mode
-  if (hasInputFiles && !prompt && !hasVersions) {
-    if (debug) console.log('[ImgGenModeUtils] Has input files but no prompt - uploadWaiting mode');
+  // Case 3: Has input files but no prompt yet - stay in upload waiting mode
+  if (hasInputFiles && !effectivePrompt && !hasVersions) {
+    if (debug)
+      console.log('[ImgGenModeUtils] Has input files but no effective prompt - uploadWaiting mode');
     return 'uploadWaiting';
-  }
-
-  // Case 3: Has prompt but no versions yet (or is currently loading) - generating mode
-  if ((prompt || loading) && !hasVersions) {
-    if (debug) console.log('[ImgGenModeUtils] Has prompt but no versions - generating mode');
-    return 'generating';
-  }
-
-  // Case 4: Has versions - display mode
-  if (hasVersions) {
-    if (debug) console.log('[ImgGenModeUtils] Has versions - display mode');
-    return 'display';
   }
 
   // Fallback - if we have an empty document or other invalid state, go back to placeholder

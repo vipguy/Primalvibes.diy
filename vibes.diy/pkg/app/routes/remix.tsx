@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
 import { encodeTitle } from "../components/SessionSidebar/utils.js";
-import type { VibeDocument } from "../types/chat.js";
 import { useSession } from "../hooks/useSession.js";
+import { VibeDocument } from "@vibes.diy/prompts";
 
 export function meta() {
   return [
@@ -11,7 +11,13 @@ export function meta() {
   ];
 }
 
-export default function Remix() {
+interface RemixProps {
+  onNavigate?: (url: string) => void;
+}
+
+export default function Remix({
+  onNavigate = (url) => (window.location.href = url),
+}: RemixProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { vibeSlug } = useParams<{ vibeSlug?: string }>();
@@ -19,8 +25,14 @@ export default function Remix() {
   const [error, setError] = useState<string | null>(null);
   const [appDomain, setAppDomain] = useState<string | null>(null);
 
+  // Generate a sessionId for this remix session
+  const [sessionId] = useState(
+    () =>
+      `remix-${Date.now().toString(36).padStart(9, "f")}${Math.random().toString(36).slice(2, 11).padEnd(9, "0")}`,
+  );
+
   // Get database instances from hooks
-  const { session, sessionDatabase, updateTitle } = useSession(undefined);
+  const { session, sessionDatabase, updateTitle } = useSession(sessionId);
 
   // Get API key for title generation
   // const { apiKey } = useApiKey(userPayload?.userId);
@@ -117,7 +129,7 @@ export default function Remix() {
           targetUrl += `?prompt=${encodeURIComponent(promptParameter.trim())}`;
         }
 
-        navigate(targetUrl);
+        onNavigate(targetUrl);
       } catch (error) {
         console.error("Error in remix process:", error);
         setError(

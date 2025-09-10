@@ -10,7 +10,10 @@ export function ImgGenError({
   classes = defaultClasses,
 }: Partial<ImgGenErrorProps>) {
   return (
-    <div className={combineClasses(className, classes.error)} style={imgGenStyles.error}>
+    <div
+      className={combineClasses('imggen-error-container', className, classes.error)}
+      style={imgGenStyles.error}
+    >
       <h3 style={imgGenStyles.errorTitle}>Error</h3>
       <p style={imgGenStyles.errorMessage}>{message || 'Failed to render image'}</p>
     </div>

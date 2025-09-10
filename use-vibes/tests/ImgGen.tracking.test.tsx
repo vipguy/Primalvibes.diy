@@ -1,21 +1,24 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, fireEvent, act, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import { render, waitFor } from '@testing-library/react';
 
 // Create a simpler mock approach that works with the new structure
-const mockCalls: Array<{ prompt?: string; _id?: string; regenerate?: boolean }> = [];
+const mockCalls: { prompt?: string; _id?: string; regenerate?: boolean }[] = [];
 
 // Mock call-ai to avoid actual AI calls
-vi.mock('call-ai', () => ({
-  imageGen: vi.fn().mockResolvedValue({
-    created: Date.now(),
-    data: [{ b64_json: 'mock-base64-image' }],
-  }),
-}));
+vi.mock('call-ai', async (importOriginal) => {
+  const actual = (await importOriginal()) as Record<string, unknown>;
+  return {
+    ...actual,
+    imageGen: vi.fn().mockResolvedValue({
+      created: Date.now(),
+      data: [{ b64_json: 'mock-base64-image' }],
+    }),
+  };
+});
 
 // Mock use-fireproof with a simple database
-vi.mock('use-fireproof', () => {
+vi.mock('use-vibes', (actual) => {
   const mockDb = {
     get: vi.fn().mockImplementation((id: string) => {
       if (id === 'test-document-id') {
@@ -37,11 +40,10 @@ vi.mock('use-fireproof', () => {
     }),
     remove: vi.fn(),
     query: vi.fn(),
-    getAttachment: vi.fn(),
-    putAttachment: vi.fn(),
   };
 
   return {
+    ...actual,
     useFireproof: vi.fn().mockReturnValue({ database: mockDb }),
     ImgFile: vi.fn().mockImplementation((props) =>
       React.createElement('div', {

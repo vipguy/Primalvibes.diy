@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { ImgFile } from 'use-fireproof';
+import { DocFileMeta } from 'use-fireproof';
+import { AsyncImg } from './AsyncImg.js';
 import { ImgGenError } from './ImgGenError.js';
 import { ImgGenDisplayProps } from './types.js';
 import { combineClasses, defaultClasses } from '../../utils/style-utils.js';
@@ -115,10 +116,10 @@ export function ImgGenDisplay({
   // ESC handling moved to ImgGenModal component
 
   // Determine which file to use - either the versioned file or the legacy 'image' file
-  const currentFile: File | undefined =
+  const currentFile: DocFileMeta | undefined =
     fileKey && document?._files
-      ? (document._files[fileKey] as File)
-      : (document?._files?.image as File);
+      ? (document._files[fileKey] as DocFileMeta)
+      : (document?._files?.image as DocFileMeta);
 
   // Get prompt text early (moved before portal)
   const promptInfo = getPromptInfo(document, versionIndex);
@@ -295,21 +296,68 @@ export function ImgGenDisplay({
 
   return (
     <div className={combineClasses('imggen-root', className, classes.root)} title={displayPrompt}>
-      <div className="imggen-image-container" style={{ position: 'relative', width: '100%' }}>
+      <div
+        className="imggen-image-container"
+        style={{ position: 'relative', width: '100%' }}
+        onMouseEnter={(e) => {
+          // Show expand button when hovering over container
+          const expandButton = e.currentTarget.querySelector('button') as HTMLElement;
+          if (expandButton && expandButton.style.opacity === '0') {
+            expandButton.style.opacity = '0.5';
+          }
+        }}
+        onMouseLeave={(e) => {
+          // Hide expand button when leaving container
+          const expandButton = e.currentTarget.querySelector('button') as HTMLElement;
+          if (expandButton && !expandButton.matches(':hover')) {
+            expandButton.style.opacity = '0';
+          }
+        }}
+      >
         <button
-          className="imggen-expand-button"
           onClick={(e) => {
             e.stopPropagation(); // Prevent click from propagating to parent elements
             openFullscreen();
           }}
           title="Expand image"
           aria-label="Expand image"
+          style={{
+            position: 'absolute',
+            top: '10px',
+            left: '10px',
+            zIndex: 20,
+            backgroundColor: 'rgba(255, 255, 255, 0.7)',
+            borderRadius: '50%',
+            width: '28px',
+            height: '28px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: 'none',
+            cursor: 'pointer',
+            opacity: 0, // Initially invisible
+            transition: 'opacity 0.2s ease, transform 0.2s ease',
+            padding: 0,
+            color: '#333',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.opacity = '1';
+            e.currentTarget.style.transform = 'scale(1.1)';
+          }}
+          onMouseLeave={(e) => {
+            // Check if parent container is being hovered
+            const container = e.currentTarget.closest('.imggen-image-container') as HTMLElement;
+            const isContainerHovered = container?.matches(':hover');
+            e.currentTarget.style.opacity = isContainerHovered ? '0.5' : '0';
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
-            width="24"
-            height="24"
+            width="20"
+            height="20"
             stroke="currentColor"
             strokeWidth="2"
             fill="none"
@@ -322,7 +370,7 @@ export function ImgGenDisplay({
             <line x1="4" y1="19" x2="10" y2="13" />
           </svg>
         </button>
-        <ImgFile
+        <AsyncImg
           file={currentFile}
           className={combineClasses('imggen-image', classes.image)}
           alt={alt || 'Generated image'}

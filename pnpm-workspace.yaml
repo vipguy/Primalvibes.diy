@@ -5,8 +5,12 @@ packages:
   - "use-vibes/base"
   - "use-vibes/pkg"
   - "use-vibes/tests"
+  - "use-vibes/examples/react-example"
   - "vibes.diy/pkg"
-  - "vibes.diy/tests"
+  - "vibes.diy/tests/app"
+  - "vibes.diy/tests/simple-chat"
+  - "prompts/pkg"
+  - "prompts/tests"
 
 # Avoid needing to interactively run 'pnpm approve-build' step during quickstart
 onlyBuiltDependencies:

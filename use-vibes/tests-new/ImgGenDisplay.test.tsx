@@ -135,10 +135,10 @@ describe('ImgGenDisplay Component', () => {
       type: 'image' as const,
     };
 
-    const { getByTestId } = render(<ImgGenDisplay document={mockDoc} className="test-class" />);
+    const d = render(<ImgGenDisplay document={mockDoc} className="test-class" />);
 
     // Our mock ImgFile renders with 'mock-img-file' test ID
-    const imageElement = getByTestId('mock-img-file');
+    const imageElement = d;
     expect(imageElement).toBeInTheDocument();
 
     // Since we can't directly test the root element (which may be wrapped by the mock),

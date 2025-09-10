@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
-import '@testing-library/jest-dom';
 
 // Mock ImageOverlay component
 vi.mock('@vibes.diy/use-vibes-base', async () => {
@@ -29,6 +28,7 @@ import { ImgGenDisplayPlaceholder, defaultClasses } from '@vibes.diy/use-vibes-b
 describe('ImgGenDisplayPlaceholder Component', () => {
   // Reset mocks before each test
   beforeEach(() => {
+    globalThis.document.body.innerHTML = ''; // Clear any existing modals in the document
     vi.clearAllMocks();
   });
 
@@ -37,7 +37,7 @@ describe('ImgGenDisplayPlaceholder Component', () => {
   //---------------------------------------------------------------
   describe('Base Rendering', () => {
     it('renders basic placeholder container with appropriate role and aria-label', () => {
-      const { container } = render(
+      render(
         <ImgGenDisplayPlaceholder
           className="test-class"
           alt="Test alt text"

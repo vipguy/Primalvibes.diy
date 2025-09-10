@@ -71,6 +71,7 @@ describe("imageGen", () => {
       statusText: "OK",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       json: vi.fn<() => Promise<any>>().mockResolvedValue(mockImageResponse),
+      text: vi.fn<() => Promise<string>>().mockResolvedValue(JSON.stringify(mockImageResponse)),
     } as unknown as Response);
   });
 
@@ -87,7 +88,7 @@ describe("imageGen", () => {
     // Check that fetch was called with the correct parameters
     expect(global.fetch).toHaveBeenCalledTimes(1);
     expect(global.fetch).toHaveBeenCalledWith(
-      "/api/openai-image/generate",
+      "https://vibes-diy-api.com/api/openai-image/generate",
       expect.objectContaining({
         method: "POST",
         headers: expect.objectContaining({
@@ -133,7 +134,7 @@ describe("imageGen", () => {
     // Check that fetch was called with the correct parameters
     expect(global.fetch).toHaveBeenCalledTimes(1);
     expect(global.fetch).toHaveBeenCalledWith(
-      "/api/openai-image/edit",
+      "https://vibes-diy-api.com/api/openai-image/edit",
       expect.objectContaining({
         method: "POST",
         headers: expect.objectContaining({

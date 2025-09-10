@@ -7,7 +7,6 @@ import SimpleAppLayout from "../components/SimpleAppLayout.js";
 import { VibeCardData } from "../components/VibeCardData.js";
 import VibesDIYLogo from "../components/VibesDIYLogo.js";
 import { useAuth } from "../contexts/AuthContext.js";
-import { useSession } from "../hooks/useSession.js";
 import { useVibes } from "../hooks/useVibes.js";
 
 export function meta() {
@@ -19,8 +18,7 @@ export function meta() {
 
 export default function MyVibesRoute(): ReactElement {
   const navigate = useNavigate();
-  // We need to call useSession() to maintain context but don't need its values yet
-  useSession();
+  // Removed useSession() call since this route doesn't need session context
 
   // Use the new hook and get userId from payload
   const { userPayload } = useAuth();

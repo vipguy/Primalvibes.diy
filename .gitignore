@@ -10,3 +10,10 @@ node_modules
 
 # Ignore editor backup files
 **~
+
+## Debug and test files
+claude-browse-vibes/*.png
+test-results/
+playwright-report/
+playwright/.cache/
+

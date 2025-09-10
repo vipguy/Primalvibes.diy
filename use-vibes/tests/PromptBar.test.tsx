@@ -1,10 +1,14 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import { PromptBar } from '@vibes.diy/use-vibes-base';
 
 describe('PromptBar Component', () => {
+  beforeEach(() => {
+    globalThis.document.body.innerHTML = ''; // Clear any existing modals in the document
+    vi.clearAllMocks();
+  });
+
   it('should display the prompt text in view mode', () => {
     // Mock functions
     const setEditedPrompt = vi.fn();

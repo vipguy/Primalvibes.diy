@@ -3,17 +3,20 @@
  * Central configuration file for environment variables
  * Provides fallback values for required environment variables
  */
+import { Lazy } from "@adviser/cement";
+import { ensureSuperThis } from "@fireproof/core-runtime";
+import { callAiEnv } from "call-ai";
 
 // Function to get the current database version from local storage
-const getDatabaseVersion = (): number => {
+function getDatabaseVersion(): number {
   if (typeof window === "undefined") return 0;
 
   const storedVersion = localStorage.getItem("vibes-db-version") || "";
   return storedVersion ? JSON.parse(storedVersion) : 0;
-};
+}
 
 // Function to increment the database version
-export const incrementDatabaseVersion = (): number => {
+export function incrementDatabaseVersion(): number {
   if (typeof window === "undefined") return 0;
 
   const currentVersion = getDatabaseVersion();
@@ -21,51 +24,88 @@ export const incrementDatabaseVersion = (): number => {
 
   localStorage.setItem("vibes-db-version", JSON.stringify(newVersion));
   return newVersion;
-};
+}
 
 // Fireproof database name with version suffix
-const getVersionSuffix = (): string => {
+export function getVersionSuffix(): string {
   const version = getDatabaseVersion();
   return version === 0 ? "" : `${version}`;
-};
+}
 
 // --- Vite Environment Variables ---
 // Access environment variables safely with fallbacks
 
 // Analytics
-export const GA_TRACKING_ID = import.meta.env.VITE_GOOGLE_ANALYTICS_ID || "";
 
-// PostHog
-export const POSTHOG_KEY = import.meta.env.VITE_POSTHOG_KEY || "";
-export const POSTHOG_HOST = import.meta.env.VITE_POSTHOG_HOST || "";
+class vibesDiyEnv {
+  readonly env = Lazy(() => callAiEnv.merge(ensureSuperThis().env));
 
-// Application Behavior
-export const IS_DEV_MODE = import.meta.env.DEV || false;
-export const APP_MODE = import.meta.env.MODE || "production"; // typically 'development', 'production', 'test'
-export const APP_BASENAME = import.meta.env.VITE_APP_BASENAME || "/";
+  readonly PROMPT_FALL_BACKURL = Lazy(
+    () =>
+      new URL(
+        this.env().get("PROMPT_FALL_BACKURL") ??
+          "https://esm.sh/@vibes.diy/prompts/llms",
+      ),
+  );
 
-// Fireproof Connect & Auth
-export const CONNECT_URL =
-  import.meta.env.VITE_CONNECT_URL || "https://connect.fireproof.direct/token";
-export const CONNECT_API_URL =
-  import.meta.env.VITE_CONNECT_API_URL ||
-  "https://connect.fireproof.direct/api";
-export const CLOUD_SESSION_TOKEN_PUBLIC_KEY =
-  import.meta.env.VITE_CLOUD_SESSION_TOKEN_PUBLIC ||
-  "zeWndr5LEoaySgKSo2aZniYqWtx2vKfVz4dd5GQwAuby3fPKcNyLp6mFpf9nCRFYbUcPiN2YT1ZApJ6f3WipiVjuMvyP1JYgHwkaoxDBpJiLoz1grRYkbao9ntukNNo2TQ4uSznUmNPrr4ZxjihoavHwB1zLhLNp5Qj78fBkjgEMA";
+  readonly GA_TRACKING_ID = Lazy(
+    () => this.env().get("VITE_GOOGLE_ANALYTICS_ID") ?? "",
+  );
 
-// Vibes Service API
-export const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "https://vibes-diy-api.com";
+  // PostHog
+  readonly POSTHOG_KEY = Lazy(() => this.env().get("VITE_POSTHOG_KEY") ?? "");
+  readonly POSTHOG_HOST = Lazy(() => this.env().get("VITE_POSTHOG_HOST") ?? "");
 
-export const APP_HOST_BASE_URL =
-  import.meta.env.VITE_APP_HOST_BASE_URL || "https://vibesdiy.app";
+  // Application Behavior
+  readonly APP_MODE = Lazy(() => this.env().get("MODE") ?? "production");
+  readonly APP_BASENAME = Lazy(
+    () => this.env().get("VITE_APP_BASENAME") ?? "/",
+  );
 
-// CallAI Endpoint
-export const CALLAI_ENDPOINT =
-  import.meta.env.VITE_CALLAI_ENDPOINT || API_BASE_URL;
+  // Fireproof Connect & Auth
+  readonly CONNECT_URL = Lazy(
+    () =>
+      this.env().get("VITE_CONNECT_URL") ??
+      "https://connect.fireproof.direct/token",
+  );
+  readonly CONNECT_API_URL = Lazy(
+    () =>
+      this.env().get("VITE_CONNECT_API_URL") ??
+      "https://connect.fireproof.direct/api",
+  );
+  readonly CLOUD_SESSION_TOKEN_PUBLIC_KEY = Lazy(
+    () =>
+      this.env().get("VITE_CLOUD_SESSION_TOKEN_PUBLIC") ??
+      "zeWndr5LEoaySgKSo2aZniYqWtx2vKfVz4dd5GQwAuby3fPKcNyLp6mFpf9nCRFYbUcPiN2YT1ZApJ6f3WipiVjuMvyP1JYgHwkaoxDBpJiLoz1grRYkbao9ntukNNo2TQ4uSznUmNPrr4ZxjihoavHwB1zLhLNp5Qj78fBkjgEMA",
+  );
 
-// Chat History Database
-export const SETTINGS_DBNAME =
-  (import.meta.env.VITE_VIBES_CHAT_HISTORY || "vibes-chats") +
-  getVersionSuffix();
+  // Vibes Service API
+  readonly API_BASE_URL = Lazy(
+    () =>
+      new URL(
+        this.env().get("VITE_API_BASE_URL") ?? "https://vibes-diy-api.com",
+      ).href, // Keep trailing slash - standardize on YES trailing slash
+  );
+  readonly APP_HOST_BASE_URL = Lazy(
+    () =>
+      new URL(
+        this.env().get("VITE_APP_HOST_BASE_URL") ?? "https://vibesdiy.app",
+      ).href, // Keep trailing slash - standardize on YES trailing slash
+  );
+
+  // CallAI Endpoint
+  readonly CALLAI_ENDPOINT = Lazy(
+    () =>
+      new URL(this.env().get("VITE_CALLAI_ENDPOINT") ?? this.API_BASE_URL())
+        .href, // Keep trailing slash - standardize on YES trailing slash
+  );
+
+  // Chat History Database
+  readonly SETTINGS_DBNAME = Lazy(
+    () =>
+      (this.env().get("VITE_VIBES_CHAT_HISTORY") ?? "vibes-chats") +
+      getVersionSuffix(),
+  );
+}
+
+export const VibesDiyEnv = new vibesDiyEnv();

@@ -66,11 +66,13 @@ export const geminiStrategy: ModelStrategy = {
     }
 
     // Try to extract JSON from content if it might be wrapped
-    const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/) ||
-      content.match(/```\s*([\s\S]*?)\s*```/) ||
-      content.match(/\{[\s\S]*\}/) || [null, content];
+    const jsonMatch =
+      content.match(/```json\s*([\s\S]*?)\s*```/) || content.match(/```\s*([\s\S]*?)\s*```/) || content.match(/\{[\s\S]*\}/);
 
-    return jsonMatch[1] || content;
+    if (jsonMatch && jsonMatch[1] !== undefined) {
+      return jsonMatch[1];
+    }
+    return content;
   },
 };
 
@@ -141,9 +143,12 @@ export const claudeStrategy: ModelStrategy = {
 
     // Try to extract JSON from content if it might be wrapped
     const jsonMatch =
-      content.match(/```json\s*([\s\S]*?)\s*```/) || content.match(/```\s*([\s\S]*?)\s*```/) || content.match(/\{[\s\S]*\}/); // || [null, content];
+      content.match(/```json\s*([\s\S]*?)\s*```/) || content.match(/```\s*([\s\S]*?)\s*```/) || content.match(/\{[\s\S]*\}/);
 
-    return jsonMatch ? jsonMatch[1] : content;
+    if (jsonMatch && jsonMatch[1] !== undefined) {
+      return jsonMatch[1];
+    }
+    return content;
   },
 };
 
@@ -185,11 +190,13 @@ export const systemMessageStrategy: ModelStrategy = {
     }
 
     // Try to extract JSON from content if it might be wrapped
-    const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/) ||
-      content.match(/```\s*([\s\S]*?)\s*```/) ||
-      content.match(/\{[\s\S]*\}/) || [null, content];
+    const jsonMatch =
+      content.match(/```json\s*([\s\S]*?)\s*```/) || content.match(/```\s*([\s\S]*?)\s*```/) || content.match(/\{[\s\S]*\}/);
 
-    return jsonMatch[1] || content;
+    if (jsonMatch && jsonMatch[1] !== undefined) {
+      return jsonMatch[1];
+    }
+    return content;
   },
 };
 

@@ -1,0 +1,50 @@
+{
+  "name": "vibes-diy-simple-chat-tests",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "scripts": {
+    "build": "core-cli tsc",
+    "test:router": "vitest run",
+    "test": "DISABLE_REACT_ROUTER=true vitest run",
+    "test:watch": "vitest",
+    "test:file-issues": "scripts/test-issues.sh",
+    "test:api-key": "node scripts/test-api-key.js",
+    "test:credits": "node scripts/test-credits.js",
+    "check": "pnpm format && pnpm typecheck && pnpm test",
+    "pack": "echo core-cli build --doPack",
+    "publish": "echo core-cli build"
+  },
+  "dependencies": {
+    "@adviser/cement": "^0.4.30",
+    "@monaco-editor/react": "^4.7.0",
+    "@react-router/node": "^7.4.1",
+    "@react-router/serve": "^7.4.1",
+    "@shikijs/monaco": "^3.2.1",
+    "@tailwindcss/typography": "^0.5.16",
+    "call-ai": "workspace:*",
+    "isbot": "^5.1.25",
+    "jose": "^6.0.10",
+    "multiformats": "^13.3.7",
+    "posthog-js": "^1.240.6",
+    "react": "^19.1.1",
+    "react-cookie-consent": "^9.0.0",
+    "react-dom": "^19.1.1",
+    "react-ga4": "^2.1.0",
+    "react-hot-toast": "^2.5.2",
+    "react-markdown": "^10.1.0",
+    "react-router": "^7.4.1",
+    "use-fireproof": "0.23.13",
+    "use-vibes": "workspace:*",
+    "vibes-diy": "workspace:*",
+    "@vibes.diy/prompts": "workspace:*"
+  },
+  "devDependencies": {
+    "@fireproof/core-cli": "^0.23.11",
+    "@testing-library/react": "^16.3.0",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.4"
+  }
+}

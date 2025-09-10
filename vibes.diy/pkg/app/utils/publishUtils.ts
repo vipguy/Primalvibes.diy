@@ -3,13 +3,14 @@
  */
 
 import { DocFileMeta, fireproof } from "use-fireproof";
-import { APP_HOST_BASE_URL, API_BASE_URL } from "../config/env.js";
+import { VibesDiyEnv } from "../config/env.js";
 import {
   getSessionDatabaseName,
   updateUserVibespaceDoc,
 } from "./databaseManager.js";
 import { normalizeComponentExports } from "./normalizeComponentExports.js";
-import { VibeDocument } from "../types/chat.js";
+import { VibeDocument } from "@vibes.diy/prompts";
+import { joinUrlParts } from "call-ai";
 
 /**
  * Publish an app to the server
@@ -26,6 +27,7 @@ export async function publishApp({
   updateFirehoseShared,
   token,
   shareToFirehose,
+  fetch,
 }: {
   sessionId?: string;
   code: string;
@@ -36,6 +38,7 @@ export async function publishApp({
   updateFirehoseShared?: (shared: boolean) => Promise<void>;
   token?: string | null;
   shareToFirehose?: boolean;
+  fetch?: typeof globalThis.fetch;
 }): Promise<string | undefined> {
   try {
     if (!code || !sessionId) {
@@ -122,21 +125,24 @@ export async function publishApp({
       headers.Authorization = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/apps`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        chatId: sessionId,
-        userId,
-        raw: code,
-        prompt,
-        code: transformedCode,
-        title,
-        remixOf, // Include information about the original app if this is a remix
-        screenshot: screenshotBase64, // Include the base64 screenshot if available
-        shareToFirehose, // Include the firehose sharing preference
-      }),
-    });
+    const response = await (fetch ? fetch : globalThis.fetch)(
+      joinUrlParts(VibesDiyEnv.API_BASE_URL(), "/api/apps"),
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          chatId: sessionId,
+          userId,
+          raw: code,
+          prompt,
+          code: transformedCode,
+          title,
+          remixOf, // Include information about the original app if this is a remix
+          screenshot: screenshotBase64, // Include the base64 screenshot if available
+          shareToFirehose, // Include the firehose sharing preference
+        }),
+      },
+    );
 
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
@@ -147,7 +153,7 @@ export async function publishApp({
       // Construct the app URL from the response data
       const appUrl =
         data.appUrl ||
-        `https://${data.app.slug}.${new URL(APP_HOST_BASE_URL).hostname}`;
+        `https://${data.app.slug}.${new URL(VibesDiyEnv.APP_HOST_BASE_URL()).hostname}`;
 
       // Get the user's vibespace database to check for existing data
       const userVibespaceDb = fireproof(`vu-${userId}`);

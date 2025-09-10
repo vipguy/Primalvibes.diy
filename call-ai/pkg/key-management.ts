@@ -3,7 +3,16 @@
  */
 
 import { CallAIErrorParams, Falsy, Mocks } from "./types.js";
-import { callAiEnv, callAiFetch, entriesHeaders } from "./utils.js";
+import { callAiFetch, entriesHeaders } from "./utils.js";
+import { callAiEnv, type CallAIEnv } from "./env.js";
+
+// Type for objects that have the environment properties we need
+export interface EnvLike {
+  readonly CALLAI_API_KEY?: unknown;
+  readonly CALLAI_REFRESH_ENDPOINT?: unknown;
+  readonly CALL_AI_REFRESH_TOKEN?: unknown;
+  readonly CALLAI_DEBUG?: unknown;
+}
 
 export interface KeyMetadata {
   key: string;
@@ -15,21 +24,23 @@ export interface KeyMetadata {
 }
 
 // Internal key store to keep track of the latest key
+const _keyStore = {
+  // Default key from environment or config
+  current: undefined as string | undefined,
+  // The refresh endpoint URL - defaults to vibecode.garden
+  refreshEndpoint: "https://vibecode.garden",
+  // Authentication token for refresh endpoint - defaults to use-vibes
+  refreshToken: "use-vibes" as string | Falsy,
+  // Flag to prevent concurrent refresh attempts
+  isRefreshing: false,
+  // Timestamp of last refresh attempt (to prevent too frequent refreshes)
+  lastRefreshAttempt: 0,
+  // Storage for key metadata (useful for future top-up implementation)
+  metadata: {} as Record<string, Partial<KeyMetadata>>,
+};
+
 export function keyStore() {
-  return {
-    // Default key from environment or config
-    current: undefined as string | undefined,
-    // The refresh endpoint URL - defaults to vibecode.garden
-    refreshEndpoint: "https://vibecode.garden",
-    // Authentication token for refresh endpoint - defaults to use-vibes
-    refreshToken: "use-vibes" as string | Falsy,
-    // Flag to prevent concurrent refresh attempts
-    isRefreshing: false,
-    // Timestamp of last refresh attempt (to prevent too frequent refreshes)
-    lastRefreshAttempt: 0,
-    // Storage for key metadata (useful for future top-up implementation)
-    metadata: {} as Record<string, Partial<KeyMetadata>>,
-  };
+  return _keyStore;
 }
 
 // Global debug flag
@@ -38,12 +49,14 @@ let globalDebug = false;
 /**
  * Initialize key store with environment variables
  */
-function initKeyStore() {
-  // Initialize with environment variables if available
-  keyStore().current = callAiEnv.CALLAI_API_KEY;
-  keyStore().refreshEndpoint = callAiEnv.CALLAI_REFRESH_ENDPOINT ?? "https://vibecode.garden";
-  keyStore().refreshToken = callAiEnv.CALL_AI_REFRESH_TOKEN ?? "use-vibes";
-  globalDebug = !!callAiEnv.CALLAI_DEBUG;
+function initKeyStore(env: CallAIEnv | EnvLike = callAiEnv) {
+  const store = keyStore();
+
+  // Only use string values, treat non-strings as undefined
+  store.current = typeof env.CALLAI_API_KEY === "string" ? env.CALLAI_API_KEY : undefined;
+  store.refreshEndpoint = typeof env.CALLAI_REFRESH_ENDPOINT === "string" ? env.CALLAI_REFRESH_ENDPOINT : "https://vibecode.garden";
+  store.refreshToken = typeof env.CALL_AI_REFRESH_TOKEN === "string" ? env.CALL_AI_REFRESH_TOKEN : "use-vibes";
+  globalDebug = !!env.CALLAI_DEBUG;
 }
 
 // Initialize on module load

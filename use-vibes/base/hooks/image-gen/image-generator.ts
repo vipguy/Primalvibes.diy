@@ -86,7 +86,9 @@ export async function imageGen(
                 const fileObj = await file.file();
                 imageFiles.push(fileObj);
               } catch (e) {
-                console.error(`Error getting file from DocFileMeta for key ${key}:`, e);
+                if (enhancedOptions.debug) {
+                  console.error(`Error getting file from DocFileMeta for key ${key}:`, e);
+                }
               }
             }
           }
@@ -111,7 +113,9 @@ export async function imageGen(
     // Direct import from call-ai - this works consistently with test mocks
     promise = originalImageGen(prompt, enhancedOptions);
   } catch (e) {
-    console.error(`[ImgGen Debug] Error with imageGen for request #${requestId}:`, e);
+    if (options?.debug) {
+      console.error(`[ImgGen Debug] Error with imageGen for request #${requestId}:`, e);
+    }
     promise = Promise.reject(e);
   }
 
@@ -127,9 +131,11 @@ export async function imageGen(
       return response;
     })
     .catch((error) => {
-      console.error(
-        `[ImgGen Debug] Request #${requestId} failed [key:${stableKey.slice(0, 12)}...]: ${error}`
-      );
+      if (options?.debug) {
+        console.error(
+          `[ImgGen Debug] Request #${requestId} failed [key:${stableKey.slice(0, 12)}...]: ${error}`
+        );
+      }
       // Even on failure, we'll keep the key in pendingPrompts to prevent repeated failures
       // but remove it from processing to allow potential retries after page reload
       MODULE_STATE.processingRequests.delete(stableKey);
@@ -174,7 +180,9 @@ export function createImageGenerator(requestHash: string) {
                   const fileObj = await file.file();
                   imageFiles.push(fileObj);
                 } catch (e) {
-                  console.error(`Error getting file from DocFileMeta for key ${key}:`, e);
+                  if (debug) {
+                    console.error(`Error getting file from DocFileMeta for key ${key}:`, e);
+                  }
                 }
               }
             }
@@ -218,7 +226,9 @@ export function createImageGenerator(requestHash: string) {
       const response = await imageGen(promptText, genOptions);
       return response;
     } catch (error) {
-      console.error(`[ImgGen Debug] Failed request [ID:${requestHash}]: ${error}`);
+      if (debug) {
+        console.error(`[ImgGen Debug] Failed request [ID:${requestHash}]: ${error}`);
+      }
       throw error;
     }
   };

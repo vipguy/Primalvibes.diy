@@ -84,7 +84,7 @@ export function ImgGenDisplayPlaceholder({
   if (error) {
     return (
       <div
-        className={combineClasses(className, classes.placeholder)}
+        className={combineClasses('imggen-error-container', className, classes.placeholder)}
         style={{
           ...imgGenStyles.errorContainer,
           minHeight: '512px', // Standard image height
@@ -117,7 +117,6 @@ export function ImgGenDisplayPlaceholder({
         ...imgGenStyles.placeholder,
         flexDirection: 'column',
         textAlign: 'center',
-        minHeight: '200px',
         color: '#eee', // Light text color
       }}
     >

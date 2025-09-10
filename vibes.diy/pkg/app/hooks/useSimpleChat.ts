@@ -4,27 +4,24 @@ import type {
   AiChatMessageDocument,
   ChatMessageDocument,
   ChatState,
-} from "../types/chat.js";
-import type { UserSettings } from "../types/settings.js";
+  UserSettings,
+} from "@vibes.diy/prompts";
 
 import { useFireproof } from "use-fireproof";
-import { SETTINGS_DBNAME } from "../config/env.js";
+import { VibesDiyEnv } from "../config/env.js";
 import { saveErrorAsSystemMessage } from "./saveErrorAsSystemMessage.js";
 import { useApiKey } from "./useApiKey.js";
 import { useImmediateErrorAutoSend } from "./useImmediateErrorAutoSend.js";
-import {
-  type ErrorCategory,
-  type RuntimeError,
-  useRuntimeErrors,
-} from "./useRuntimeErrors.js";
 import { useSession } from "./useSession.js";
 
 import { useMessageSelection } from "./useMessageSelection.js";
 // Import our custom hooks
 import type { SendMessageContext } from "./sendMessage.js";
-import { sendMessage as sendChatMessage } from "./sendMessage.js";
+import { sendChatMessage } from "./sendMessage.js";
 import { useSystemPromptManager } from "./useSystemPromptManager.js";
 import { useThrottledUpdates } from "./useThrottledUpdates.js";
+import { RuntimeError } from "use-vibes";
+import { ErrorCategory, useRuntimeErrors } from "./useRuntimeErrors.js";
 
 // Constants
 const TITLE_MODEL = "meta-llama/llama-3.1-8b-instruct";
@@ -34,7 +31,10 @@ const TITLE_MODEL = "meta-llama/llama-3.1-8b-instruct";
  * Uses session-based architecture with individual message documents
  * @returns ChatState object with all chat functionality and state
  */
-export function useSimpleChat(sessionId: string | undefined): ChatState {
+export function useSimpleChat(sessionId: string): ChatState {
+  if (!sessionId) {
+    throw new Error("No session ID provided");
+  }
   // Get userId from auth system
   const { userPayload, isAuthenticated, setNeedsLogin } = useAuth();
   const userId = userPayload?.userId;
@@ -67,7 +67,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
   } = useSession(sessionId);
 
   // Get main database directly for settings document
-  const { useDocument } = useFireproof(SETTINGS_DBNAME);
+  const { useDocument } = useFireproof(VibesDiyEnv.SETTINGS_DBNAME());
 
   // Function to save errors as system messages to the session database
   const saveErrorAsSystemMessageCb = useCallback(
@@ -192,10 +192,9 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
    * @param textOverride Optional text to use instead of the current userMessage
    */
   const sendMessage = useCallback(
-    (textOverride?: string, skipSubmit = false) => {
+    (textOverride?: string) => {
       const ctx: SendMessageContext = {
         userMessage,
-        mergeUserMessage,
         setPendingUserDoc,
         setIsStreaming,
         ensureApiKey,
@@ -217,7 +216,7 @@ export function useSimpleChat(sessionId: string | undefined): ChatState {
         isAuthenticated,
         vibeDoc,
       };
-      return sendChatMessage(ctx, textOverride, skipSubmit);
+      return sendChatMessage(ctx, textOverride);
     },
     [
       userMessage.text,
@@ -342,7 +341,7 @@ ${code}
     sessionId: session._id,
     vibeDoc,
     selectedModel: vibeDoc?.selectedModel,
-    effectiveModel,
+    // effectiveModel,
     globalModel: settingsDoc?.model,
     showModelPickerInChat: settingsDoc?.showModelPickerInChat || false,
     addScreenshot,

@@ -1,3 +1,9 @@
+import {
+  getLlmCatalogNames,
+  getDefaultDependencies,
+  getLlmCatalog,
+  LlmCatalogEntry,
+} from "@vibes.diy/prompts";
 import React, {
   useCallback,
   useEffect,
@@ -5,11 +11,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import {
-  CATALOG_DEPENDENCY_NAMES,
-  DEFAULT_DEPENDENCIES,
-  llmsCatalog,
-} from "../../llms/catalog.js";
+import { VibesDiyEnv } from "../../config/env.js";
 
 interface AppSettingsViewProps {
   title: string;
@@ -48,8 +50,20 @@ const AppSettingsView: React.FC<AppSettingsViewProps> = ({
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState(title);
   const nameInputRef = useRef<HTMLInputElement>(null);
+
+  const [catalogNames, setCatalogNames] = useState<Set<string>>(new Set());
+  const [llmsCatalog, setLlmsCatalog] = useState<LlmCatalogEntry[]>([]);
+
   // Per‑vibe libraries selection state
-  const catalogNames = useMemo(() => CATALOG_DEPENDENCY_NAMES, []);
+  useEffect(() => {
+    getLlmCatalogNames(VibesDiyEnv.PROMPT_FALL_BACKURL()).then((names) => {
+      setCatalogNames(names);
+    });
+    getLlmCatalog(VibesDiyEnv.PROMPT_FALL_BACKURL()).then((catalog) => {
+      setLlmsCatalog(catalog);
+    });
+  }, []);
+
   const initialDeps = useMemo(() => {
     const useManual = !!dependenciesUserOverride;
     let input: string[];
@@ -64,28 +78,54 @@ const AppSettingsView: React.FC<AppSettingsViewProps> = ({
         : [];
     }
 
-    return input
+    const filtered = input
       .filter((n): n is string => typeof n === "string")
-      .filter((n) => catalogNames.has(n));
+      .filter((n) => catalogNames.size === 0 || catalogNames.has(n)); // Don't filter if catalog not loaded yet
+
+    return filtered;
   }, [
     selectedDependencies,
     aiSelectedDependencies,
     dependenciesUserOverride,
-    catalogNames,
+    catalogNames, // Need to include this back so we re-run when catalog loads
   ]);
-  const [deps, setDeps] = useState<string[]>(initialDeps);
+
+  const [deps, setDeps] = useState<string[]>([]);
   const [hasUnsavedDeps, setHasUnsavedDeps] = useState(false);
   const [saveDepsOk, setSaveDepsOk] = useState(false);
   const [saveDepsErr, setSaveDepsErr] = useState<string | null>(null);
+
+  // Track previous external dependencies to detect real changes
+  const previousExternalDepsRef = useRef<string[]>([]);
 
   useEffect(() => {
     setEditedName(title);
   }, [title]);
 
   useEffect(() => {
-    // Sync local selection when external changes land
-    setDeps(initialDeps);
-    setHasUnsavedDeps(false);
+    // Only sync when external dependencies actually change (not internal state changes)
+    // AND when we're not in the middle of user changes (hasUnsavedDeps)
+    const externalDepsChanged =
+      JSON.stringify(previousExternalDepsRef.current) !==
+      JSON.stringify(initialDeps);
+
+    if (externalDepsChanged && !hasUnsavedDeps) {
+      // This is a real external change and user hasn't made unsaved changes
+      setDeps(initialDeps);
+      setHasUnsavedDeps(false);
+      previousExternalDepsRef.current = [...initialDeps];
+    } else if (externalDepsChanged && hasUnsavedDeps) {
+      // External change but user has unsaved changes - just update the reference
+      previousExternalDepsRef.current = [...initialDeps];
+    }
+  }, [initialDeps, hasUnsavedDeps]);
+
+  // Initialize on first render
+  useEffect(() => {
+    if (previousExternalDepsRef.current.length === 0) {
+      setDeps(initialDeps);
+      previousExternalDepsRef.current = [...initialDeps];
+    }
   }, [initialDeps]);
 
   const handleEditNameStart = useCallback(() => {
@@ -126,7 +166,8 @@ const AppSettingsView: React.FC<AppSettingsViewProps> = ({
       const set = new Set(prev);
       if (checked) set.add(name);
       else set.delete(name);
-      return Array.from(set);
+      const newDeps = Array.from(set);
+      return newDeps;
     });
     setHasUnsavedDeps(true);
   }, []);
@@ -136,14 +177,14 @@ const AppSettingsView: React.FC<AppSettingsViewProps> = ({
     try {
       const valid = deps.filter((n) => catalogNames.has(n));
       await onUpdateDependencies?.(
-        valid.length ? valid : DEFAULT_DEPENDENCIES,
+        valid.length ? valid : await getDefaultDependencies(),
         true,
       );
       setHasUnsavedDeps(false);
       setSaveDepsOk(true);
       setTimeout(() => setSaveDepsOk(false), 2000);
-    } catch (e: any) {
-      setSaveDepsErr(e?.message || "Failed to save libraries");
+    } catch (e) {
+      setSaveDepsErr((e as Error)?.message || "Failed to save libraries");
     }
   }, [deps, onUpdateDependencies, catalogNames]);
 

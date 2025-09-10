@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import React from 'react';
-import { act, render, screen, RenderResult } from '@testing-library/react';
-import '@testing-library/jest-dom/vitest';
+import { act, render, screen } from '@testing-library/react';
 import { ImgGen } from '@vibes.diy/use-vibes-base';
 
 // Create a mock base64 image for testing
@@ -29,7 +28,7 @@ const mockImageGen = vi.hoisted(() =>
 );
 
 // Create a fully mocked database for Fireproof
-const mockDb = vi.hoisted(() => ({
+const _mockDb = vi.hoisted(() => ({
   get: vi.fn().mockImplementation((id) => {
     // Create a proper promise with catch method
     const promise = new Promise((resolve, reject) => {
@@ -75,7 +74,7 @@ vi.mock('call-ai', async () => {
   };
 });
 
-vi.mock('use-fireproof', () => ({
+vi.mock('@vibes-diy/use-vibes-base', () => ({
   useFireproof: () => ({
     useDocument: () => [{ _id: 'mock-doc' }, vi.fn()],
     useLiveQuery: () => [[]],
@@ -123,7 +122,7 @@ describe('ImgGen Component', () => {
 
   it('should render a placeholder while loading', () => {
     // Render the component with a test prompt
-    const { container } = render(<ImgGen prompt="test image" />);
+    render(<ImgGen prompt="test image" />);
 
     // Check that the placeholder is rendered by looking for its aria role and content
     const placeholder = screen.getByRole('img', { name: /image placeholder|test image/i });
@@ -182,57 +181,33 @@ describe('ImgGen Component', () => {
   });
 
   it('should handle errors gracefully', async () => {
-    // Reset the mock behavior for a clean test
-    mockImageGen.mockReset();
-
-    // Set up the mock to reject with an error, but wrap it to capture the rejection
-    // This creates a mock that returns a promise that's already been caught
-    mockImageGen.mockImplementation(() => {
-      return Promise.reject(new Error('API error')).catch((err) => {
-        // Return a rejected promise, but in a controlled way that won't cause unhandled rejection
-        return Promise.resolve({ error: err.message });
-      });
+    // Test error handling by providing a custom useImageGen mock that returns an error state
+    const mockUseImageGenWithError = vi.fn().mockReturnValue({
+      imageData: null,
+      loading: false,
+      progress: 0,
+      error: new Error('API error'),
+      document: null,
     });
 
-    // Silence console errors for this test since we expect errors
-    const originalError = console.error;
-    console.error = vi.fn();
+    // Clear previous mock calls
+    mockImageGen.mockClear();
 
-    try {
-      // Use fake timers to control setTimeout behavior
-      vi.useFakeTimers();
+    // Render with custom useImageGen hook that simulates error state
+    const { container } = render(
+      <ImgGen prompt="error prompt" useImageGen={mockUseImageGenWithError} />
+    );
 
-      // Render with the error prompt
-      const renderResult = render(<ImgGen prompt="error prompt" />);
+    // Verify the component shows error container
+    const errorContainer = container.querySelector('.imggen-error-container');
+    expect(errorContainer).toBeInTheDocument();
 
-      // Wait for the setTimeout in useImageGen (10ms)
-      await act(async () => {
-        // Advance timers past the delay
-        vi.advanceTimersByTime(20);
-        // Give the promises a chance to resolve
-        await Promise.resolve();
-      });
-
-      // Restore real timers
-      vi.useRealTimers();
-
-      const { container } = renderResult;
-
-      // Verify the mock was called with the expected parameters
-      expect(mockImageGen).toHaveBeenCalledWith('error prompt', expect.anything());
-
-      // Check for the presence of any placeholder/error element
-      // Look for multiple possible class names after component refactoring
-      const placeholder = container.querySelector(
-        '.imggen-placeholder, .imggen-upload-waiting, .imggen-error-container, .imggen-display-progress'
-      );
-      expect(placeholder).toBeInTheDocument();
-    } finally {
-      // Restore console error
-      console.error = originalError;
-      // Reset the mock after test
-      mockImageGen.mockReset();
-    }
+    // Verify the custom hook was called
+    expect(mockUseImageGenWithError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prompt: 'error prompt',
+      })
+    );
   });
 
   it('should accept custom props', async () => {
@@ -259,34 +234,31 @@ describe('ImgGen Component', () => {
   });
 
   it('should show "Waiting for prompt" when prompt is falsy', async () => {
-    // Clear mocks to start fresh
-    vi.clearAllMocks();
-
-    // Override the mockDb.get behavior to simulate no existing document
-    mockDb.get.mockImplementation(() => {
-      return Promise.reject(new Error('Not found for this test'));
+    // Create a custom useImageGen mock that simulates no prompt/no document state
+    const mockUseImageGenEmpty = vi.fn().mockReturnValue({
+      imageData: null,
+      loading: false,
+      progress: 0,
+      error: null,
+      document: null,
     });
 
-    let renderResult: RenderResult | null = null;
+    // Clear previous mock calls
+    mockImageGen.mockClear();
 
-    // Wait for async rendering to complete
-    await act(async () => {
-      // Both prompt and _id need to be falsy to see 'Waiting for prompt'
-      renderResult = render(<ImgGen prompt="" />);
-      // Allow time for UI to update
-      await new Promise((resolve) => setTimeout(resolve, 50));
-    });
+    // Render with custom useImageGen hook and empty prompt
+    const { container } = render(<ImgGen prompt="" useImageGen={mockUseImageGenEmpty} />);
 
-    if (!renderResult) {
-      throw new Error('Failed to render component');
-    }
-
-    // Check the rendered output for the waitingForPrompt message
-    // The actual text could be in different formats or elements
-    const { container } = renderResult as RenderResult;
-
-    // Check if the container content includes our message (more flexible than exact text match)
+    // Check if the container content includes the upload message
     expect(container.textContent).toContain('click to upload');
+
+    // Verify the custom hook was called with empty prompt
+    expect(mockUseImageGenEmpty).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prompt: '',
+        skip: true, // Should skip processing when no prompt
+      })
+    );
 
     // Verify imageGen is not called when prompt is empty
     expect(mockImageGen).not.toHaveBeenCalled();
@@ -311,5 +283,54 @@ describe('ImgGen Component', () => {
 
     // Clean up
     vi.useRealTimers();
+  });
+
+  it('should show generating state when _id is provided and document contains prompt', async () => {
+    // This test verifies that the ImgGen component can extract a prompt from a document
+    // and use it for generation when only an _id prop is provided (no prompt prop)
+
+    // Create a custom useImageGen mock that simulates finding a document with a prompt
+    const mockUseImageGenWithDocument = vi.fn().mockReturnValue({
+      imageData: null,
+      loading: true,
+      progress: 25,
+      error: null,
+      document: {
+        _id: 'test-doc-with-prompt',
+        type: 'image',
+        prompt: 'beautiful landscape from document',
+        versions: [], // No versions yet, so it should be in generating mode
+      },
+    });
+
+    // Clear previous mock calls
+    mockImageGen.mockClear();
+
+    // Use fake timers for timing control
+    vi.useFakeTimers();
+
+    // Render with custom useImageGen hook and only _id prop, no prompt prop
+    const { container } = render(
+      <ImgGen _id="test-doc-with-prompt" useImageGen={mockUseImageGenWithDocument} />
+    );
+
+    // Advance timers to trigger processing
+    await act(async () => {
+      vi.advanceTimersByTime(20);
+      await Promise.resolve();
+    });
+
+    // Restore real timers
+    vi.useRealTimers();
+
+    // Verify the component shows the prompt text from the document (indicating generating state)
+    expect(container.textContent).toContain('beautiful landscape from document');
+
+    // Verify the custom hook was called with the correct _id
+    expect(mockUseImageGenWithDocument).toHaveBeenCalledWith(
+      expect.objectContaining({
+        _id: 'test-doc-with-prompt',
+      })
+    );
   });
 });

@@ -9,7 +9,8 @@ import { handleApiError, checkForInvalidModelError } from "./error-handling.js";
 import { createBackwardCompatStreamingProxy } from "./api-core.js";
 import { extractContent, extractClaudeResponse, PACKAGE_VERSION } from "./non-streaming.js";
 import { createStreamingGenerator } from "./streaming.js";
-import { callAiEnv, callAiFetch } from "./utils.js";
+import { callAiFetch, joinUrlParts } from "./utils.js";
+import { callAiEnv } from "./env.js";
 
 // Key management is now imported from ./key-management
 
@@ -364,7 +365,7 @@ function prepareRequestParams(
     options.apiKey ||
     keyStore().current || // Try keyStore first in case it was refreshed in a previous call
     callAiEnv.CALLAI_API_KEY ||
-    null;
+    "sk-vibes-proxy-managed";
   // (typeof window !== "undefined" ? (window as any).CALLAI_API_KEY : null);
   const schema = options.schema || null;
 
@@ -385,7 +386,9 @@ function prepareRequestParams(
   // Use custom origin or default OpenRouter URL
   const endpoint =
     options.endpoint ||
-    (customChatOrigin ? `${customChatOrigin}/api/v1/chat/completions` : "https://openrouter.ai/api/v1/chat/completions");
+    (customChatOrigin
+      ? joinUrlParts(customChatOrigin, "/api/v1/chat/completions")
+      : "https://openrouter.ai/api/v1/chat/completions");
 
   // Handle both string prompts and message arrays for backward compatibility
   const messages: Message[] = Array.isArray(prompt) ? prompt : [{ role: "user", content: prompt }];

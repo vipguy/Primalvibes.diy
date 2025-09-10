@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import React from 'react';
-import '@testing-library/jest-dom';
 
 // Create a mock base64 image for testing
 const mockBase64Image =
@@ -11,21 +10,21 @@ const dbPuts: UseImageGenOptions[] = [];
 
 // IMPORTANT: Use vi.hoisted for all mock functions used in vi.mock calls
 // since they're hoisted to the top of the file before normal initialization
-const mockImageGen = vi.hoisted(() => {
-  return vi.fn().mockImplementation((prompt, _options) => {
-    console.log(`[Mock imageGen] called with: ${prompt}`);
-    return Promise.resolve({
-      created: Date.now(),
-      data: [
-        {
-          b64_json: mockBase64Image,
-          url: null,
-          revised_prompt: 'Generated test image',
-        },
-      ],
-    });
-  });
-});
+// const mockImageGen = vi.hoisted(() => {
+//   return vi.fn().mockImplementation((prompt, _options) => {
+//     console.log(`[Mock imageGen] called with: ${prompt}`);
+//     return Promise.resolve({
+//       created: Date.now(),
+//       data: [
+//         {
+//           b64_json: mockBase64Image,
+//           url: null,
+//           revised_prompt: 'Generated test image',
+//         },
+//       ],
+//     });
+//   });
+// });
 
 // Mock the callImageGeneration function which is created by createImageGenerator
 const mockCallImageGen = vi.hoisted(() => {
@@ -45,7 +44,7 @@ const mockCallImageGen = vi.hoisted(() => {
 });
 
 // Mock the createImageGenerator function which creates callImageGeneration
-const mockCreateImageGenerator = vi.hoisted(() => {
+vi.hoisted(() => {
   return vi.fn().mockImplementation((_requestId) => {
     // Return a function that immediately calls mockCallImageGen when invoked
     // This ensures that the hook can call it properly with the right parameters
@@ -116,74 +115,77 @@ const mockImgFile = vi.hoisted(() => {
 });
 
 // Setup all mocks before imports
-vi.mock('call-ai', () => ({
-  imageGen: mockImageGen,
-}));
+// vi.mock('call-ai', () => ({
+//   imageGen: mockImageGen,
+// }));
 
 // Create a hoisted mock of the ImgGen component to ensure it's available at top level
-const MockImgGen = vi.hoisted(() => {
-  return vi.fn().mockImplementation((props: ImgGenProps) => {
-    const { prompt, options } = props;
+// const MockImgGen = vi.hoisted(() => {
+//   return vi.fn().mockImplementation((props: ImgGenProps) => {
+//     const { prompt, options } = props;
 
-    // Force proper assertions in tests
-    React.useEffect(() => {
-      // Create document on mount to ensure tests pass
-      const stableKey = `${prompt}-${JSON.stringify(options || undefined)}`;
-      const docId = `test-doc-${Date.now()}`;
-      const doc = {
-        _id: docId,
-        type: 'imgGen',
-        prompt,
-        options,
-        url: 'test-url',
-        b64_json: mockBase64Image,
-      };
+//     // Force proper assertions in tests
+//     React.useEffect(() => {
+//       // Create document on mount to ensure tests pass
+//       const stableKey = `${prompt}-${JSON.stringify(options || undefined)}`;
+//       const docId = `test-doc-${Date.now()}`;
+//       const doc = {
+//         _id: docId,
+//         type: 'imgGen',
+//         prompt,
+//         options,
+//         url: 'test-url',
+//         b64_json: mockBase64Image,
+//       };
 
-      // Track in module state and write to DB
-      MODULE_STATE.createdDocuments.set(stableKey, docId);
-      console.log(`[TEST] Creating document for prompt: ${prompt}`);
-      mockDbPut(doc);
-    }, [prompt, JSON.stringify(options)]);
+//       // Track in module state and write to DB
+//       MODULE_STATE.createdDocuments.set(stableKey, docId);
+//       console.log(`[TEST] Creating document for prompt: ${prompt}`);
+//       mockDbPut(doc);
+//     }, [prompt, JSON.stringify(options)]);
 
-    // Render a placeholder
-    return React.createElement(
-      'div',
-      {
-        'aria-label': prompt,
-        className: 'img-gen-placeholder',
-        role: 'img',
-        style: { width: '100%', height: '100%' },
-      },
-      'Generated Test Image'
-    );
-  });
-});
+//     // Render a placeholder
+//     return React.createElement(
+//       'div',
+//       {
+//         'aria-label': prompt,
+//         className: 'img-gen-placeholder',
+//         role: 'img',
+//         style: { width: '100%', height: '100%' },
+//       },
+//       'Generated Test Image'
+//     );
+//   });
+// });
 
 // Mock the ImgGen component with proper hoisting
-vi.mock('@vibes.diy/use-vibes-base', async () => {
-  const actual = await vi.importActual('@vibes.diy/use-vibes-base');
+// vi.mock('@vibes.diy/use-vibes-base', async () => {
+//   const actual = await vi.importActual('@vibes.diy/use-vibes-base');
+//   return {
+//     ...actual,
+//     ImgGen: MockImgGen,
+//   };
+// });
+
+vi.mock('use-vibes', (actual) => {
   return {
     ...actual,
-    ImgGen: MockImgGen,
+    useFireproof: () => ({
+      database: {
+        put: mockDbPut,
+        get: mockDbGet,
+        query: vi.fn().mockResolvedValue({ rows: [] }),
+        delete: vi.fn().mockResolvedValue({ ok: true }),
+      },
+    }),
+    ImgFile: mockImgFile,
+    // Mock File constructor
+    File: vi.fn().mockImplementation((data, name) => ({ name, size: data.length })),
   };
 });
 
-vi.mock('use-fireproof', () => ({
-  useFireproof: () => ({
-    database: {
-      put: mockDbPut,
-      get: mockDbGet,
-      query: vi.fn().mockResolvedValue({ rows: [] }),
-      delete: vi.fn().mockResolvedValue({ ok: true }),
-    },
-  }),
-  ImgFile: mockImgFile,
-  // Mock File constructor
-  File: vi.fn().mockImplementation((data, name) => ({ name, size: data.length })),
-}));
-
 // Import after mocks
-import { ImgGenProps, MODULE_STATE, UseImageGenOptions } from '@vibes.diy/use-vibes-base';
+import { MODULE_STATE, UseImageGenOptions } from '@vibes.diy/use-vibes-base';
 
 describe('ImgGen Document Deduplication', () => {
   beforeEach(() => {

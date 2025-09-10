@@ -1,15 +1,15 @@
 import * as React from 'react';
-import { ImgFile } from 'use-fireproof';
+import { DocFileMeta } from 'use-fireproof';
+import { AsyncImg } from './AsyncImg.js';
 import { createPortal } from 'react-dom';
 import { ImageOverlay } from './overlays/ImageOverlay.js';
 import { ImgGenError } from './ImgGenError.js';
 import { defaultClasses, ImgGenClasses } from '../../utils/style-utils.js';
-import { imgGenStyles } from '../../utils/styles.js';
 
 export interface ImgGenModalProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
-  readonly currentFile: File | undefined; // File object
+  readonly currentFile: DocFileMeta | undefined; // DocFileMeta object from Fireproof
   readonly alt?: string;
   readonly promptText: string;
   readonly editedPrompt: string | null;
@@ -128,7 +128,7 @@ export function ImgGenModal({
             <ImgGenError message={error.message} />
           </div>
         ) : (
-          <ImgFile
+          <AsyncImg
             file={currentFile}
             className="imggen-backdrop-image"
             style={{

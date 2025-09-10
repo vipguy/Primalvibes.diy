@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import '@testing-library/jest-dom';
 
 // Use vi.hoisted to define mocks that need to be referenced in vi.mock
 const mockImgFile = vi.hoisted(() =>
@@ -26,7 +25,8 @@ const mockImgFile = vi.hoisted(() =>
 );
 
 // Mock use-fireproof module (placed before imports that use it)
-vi.mock('use-fireproof', () => ({
+vi.mock('use-vibes', (actual) => ({
+  ...actual,
   ImgFile: mockImgFile,
   // Mock File constructor for tests
   File: vi.fn().mockImplementation((data, name, options) => ({ name, type: options?.type })),

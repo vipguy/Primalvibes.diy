@@ -5,7 +5,6 @@ import { UseImageGenOptions, UseImageGenResult, ImageDocument } from './types.js
 
 import {
   hashInput,
-  base64ToFile,
   addNewVersion,
   getVersionsFromDocument,
   getPromptsFromDocument,
@@ -176,7 +175,6 @@ export function useImageGen({
     // Create a generator function with the current request ID
 
     const loadImageTimer = setTimeout(() => {
-      console.log('[useImageGen] Loading image...', isMounted);
       if (isMounted) {
         const callImageGeneration = createImageGenerator(requestId);
         loadOrGenerateImage({
@@ -318,9 +316,6 @@ async function loadOrGenerateImage({
 
           // If we have a prompt and only an original file, generate an image
           if (hasOnlyOriginalFile && currentPromptText && !generationId) {
-            console.log(
-              `Document ${_id} has only original file and prompt, generating edited image`
-            );
             setLoading(true);
 
             // Create options that include the document for access to the original file
@@ -336,7 +331,12 @@ async function loadOrGenerateImage({
             if (data?.data?.[0]?.b64_json) {
               // Handle the generated image
               const filename = generateSafeFilename(currentPromptText);
-              const newImageFile = base64ToFile(data.data[0].b64_json, filename);
+              const base64Data = data.data[0].b64_json;
+
+              // Convert base64 to File using browser APIs
+              const response = await fetch(`data:image/png;base64,${base64Data}`);
+              const blob = await response.blob();
+              const newImageFile = new File([blob], filename, { type: 'image/png' });
 
               // Add as a new version to the document
               const updatedDoc = addNewVersion(existingDoc, newImageFile, currentPromptText);
@@ -374,10 +374,14 @@ async function loadOrGenerateImage({
             data = await callImageGeneration(currentPromptText, regenerationOptions);
 
             if (data?.data?.[0]?.b64_json) {
-              // Create a File object from the base64 data
-              // Generate a filename based on the prompt text
+              // Create a File object from base64 data using browser APIs
               const filename = generateSafeFilename(currentPromptText);
-              const newImageFile = base64ToFile(data.data[0].b64_json, filename);
+              const base64Data = data.data[0].b64_json;
+
+              // Convert base64 to File using browser APIs
+              const response = await fetch(`data:image/png;base64,${base64Data}`);
+              const blob = await response.blob();
+              const newImageFile = new File([blob], filename, { type: 'image/png' });
 
               // Ensure we preserve the original document ID
               const originalDocId = _id;
@@ -464,9 +468,14 @@ async function loadOrGenerateImage({
           data = await callImageGeneration(currentPromptText, regenerationOptions);
 
           if (data?.data?.[0]?.b64_json) {
-            // Create a File object from the base64 data
+            // Create a File object from the base64 data using browser APIs
             const filename = generateSafeFilename(currentPromptText);
-            const newImageFile = base64ToFile(data.data[0].b64_json, filename);
+            const base64Data = data.data[0].b64_json;
+
+            // Convert base64 to File using browser APIs
+            const response = await fetch(`data:image/png;base64,${base64Data}`);
+            const blob = await response.blob();
+            const newImageFile = new File([blob], filename, { type: 'image/png' });
 
             // Ensure we preserve the original document ID
             const originalDocId = document._id;
@@ -527,10 +536,16 @@ async function loadOrGenerateImage({
 
         // Process the data response
         if (data?.data?.[0]?.b64_json) {
-          // Create a File object from the base64 data
-          // Generate a filename based on the prompt text
+          // Create a File object from base64 data (simple approach like working text file)
           const filename = generateSafeFilename(prompt);
-          const imageFile = base64ToFile(data.data[0].b64_json, filename);
+          const base64Data = data.data[0].b64_json;
+
+          // Convert base64 to blob using fetch (browser handles this correctly)
+          const response = await fetch(`data:image/png;base64,${base64Data}`);
+          const blob = await response.blob();
+
+          // Create File from blob (like working text file approach)
+          const imageFile = new File([blob], filename, { type: 'image/png' });
 
           // Define a stable key for deduplication based on all relevant parameters.
           // Include _id (if present) and current time for regeneration requests
@@ -641,6 +656,8 @@ async function loadOrGenerateImage({
                 // Get the document with the file attached
                 const doc = (await db.get(result.id)) as unknown as ImageDocument;
 
+                // Log document retrieval
+
                 return { id: result.id, doc };
               })();
 
@@ -657,7 +674,6 @@ async function loadOrGenerateImage({
               setDocument(doc);
               setImageData(data.data[0].b64_json);
             } catch (e) {
-              console.error('Error in document creation:', e);
               // Still show the image even if document creation fails
               setImageData(data.data[0].b64_json);
               // Clean up the failed promise so future requests can try again
@@ -793,7 +809,6 @@ async function handleNewDoc({
       });
       reader.readAsDataURL(fileObj);
       const base64Data = await base64Promise;
-
       setImageData(base64Data);
     } else {
       // Handle legacy files structure
@@ -859,7 +874,6 @@ async function handleExistingDoc({
   // Document exists but has no files - check if it has a prompt field we can use
   if ('prompt' in existingDoc && typeof existingDoc.prompt === 'string' && existingDoc.prompt) {
     // Use the document's prompt to generate an image
-    console.log(`Document ${_id} has no files but has prompt, generating image`);
 
     // Extended debug info
     if (options?.debug) {
@@ -886,8 +900,10 @@ async function handleExistingDoc({
     if (data?.data?.[0]?.b64_json) {
       setImageData(data.data[0].b64_json);
 
-      // Create a file object from the base64 data
-      const blob = base64ToFile(data.data[0].b64_json, 'image/png');
+      // Create a file object from the base64 data using browser APIs
+      const base64Data = data.data[0].b64_json;
+      const response = await fetch(`data:image/png;base64,${base64Data}`);
+      const blob = await response.blob();
       const newImageFile = new File([blob], generateSafeFilename(docPrompt), {
         type: 'image/png',
       });

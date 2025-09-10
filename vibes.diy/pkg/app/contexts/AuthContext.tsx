@@ -21,7 +21,7 @@ export interface AuthContextType {
   isLoading: boolean;
   userPayload: TokenPayload | null; // Changed from userEmail
   needsLogin: boolean;
-  setNeedsLogin: (value: boolean, reason: string) => void;
+  setNeedsLogin: (value: boolean) => void;
   checkAuthStatus: () => Promise<void>;
   processToken: (token: string | null) => Promise<void>;
 }
@@ -124,13 +124,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Function to set needsLogin with a reason
   const setNeedsLogin = useCallback(
-    (value: boolean, reason: string) => {
-      console.log(`Setting needsLogin to ${value} due to: ${reason}`);
+    (value: boolean) => {
+      // console.log(`Setting needsLogin to ${value} due to: ${reason}`);
       setNeedsLoginState(value);
 
       // If user is already authenticated, don't set needsLogin to true
       if (value && isAuthenticated) {
-        console.log("User is already authenticated, not setting needsLogin");
+        // console.log("User is already authenticated, not setting needsLogin");
         setNeedsLoginState(false);
       }
     },
@@ -140,7 +140,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Reset needsLogin when user becomes authenticated
   useEffect(() => {
     if (isAuthenticated && needsLogin) {
-      console.log("User authenticated, resetting needsLogin");
       setNeedsLoginState(false);
     }
   }, [isAuthenticated, needsLogin]);

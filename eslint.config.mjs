@@ -24,7 +24,6 @@ const opts = tseslint.config(
       "**/pubdir/",
       "**/node_modules/",
       "**/scripts/",
-      "**/examples/",
       "scripts/",
       "smoke/react/",
       "src/missingTypes/lib.deno.d.ts",
@@ -33,6 +32,8 @@ const opts = tseslint.config(
       "**/.esm-cache/**",
       "**/build/**",
       "**/.wrangler/**",
+      "**/claude-browse-vibes/**",
+      "playwright.config.js",
     ],
   },
   {

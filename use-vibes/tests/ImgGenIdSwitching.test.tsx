@@ -1,74 +1,72 @@
 import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 // Create test file helper
-const createTestFile = () => new File(['test content'], 'test-image.png', { type: 'image/png' });
+// const createTestFile = () => new File(['test content'], 'test-image.png', { type: 'image/png' });
 
 // Mock call-ai to avoid actual AI calls
-vi.mock('call-ai', () => ({
-  imageGen: vi.fn().mockResolvedValue({
-    created: Date.now(),
-    data: [{ b64_json: 'mock-base64-image' }],
-  }),
-}));
+// vi.mock('call-ai', () => ({
+//   imageGen: vi.fn().mockResolvedValue({
+//     created: Date.now(),
+//     data: [{ b64_json: 'mock-base64-image' }],
+//   }),
+// }));
 
 // Mock Fireproof database
-vi.mock('use-fireproof', () => {
-  const mockDb = {
-    get: vi.fn().mockImplementation((id: string) => {
-      const baseDoc = {
-        _id: id,
-        _rev: 'test-rev',
-        type: 'image',
-        created: Date.now(),
-        prompt: `Test prompt for ${id}`,
-        currentVersion: 0,
-        versions: [{ id: 'v1', created: Date.now(), promptKey: 'p1' }],
-        prompts: { p1: { text: `Test prompt for ${id}`, created: Date.now() } },
-        _files: { v1: createTestFile() },
-      };
+// vi.mock('use-fireproof',  (actual) => {
+//   const mockDb = {
+//     get: vi.fn().mockImplementation((id: string) => {
+//       const baseDoc = {
+//         _id: id,
+//         _rev: 'test-rev',
+//         type: 'image',
+//         created: Date.now(),
+//         prompt: `Test prompt for ${id}`,
+//         currentVersion: 0,
+//         versions: [{ id: 'v1', created: Date.now(), promptKey: 'p1' }],
+//         prompts: { p1: { text: `Test prompt for ${id}`, created: Date.now() } },
+//         _files: { v1: createTestFile() },
+//       };
 
-      if (id === 'doc-with-multiple') {
-        return Promise.resolve({
-          ...baseDoc,
-          currentVersion: 2,
-          versions: [
-            { id: 'v1', created: Date.now() - 2000, promptKey: 'p1' },
-            { id: 'v2', created: Date.now() - 1000, promptKey: 'p1' },
-            { id: 'v3', created: Date.now(), promptKey: 'p1' },
-          ],
-          _files: {
-            v1: createTestFile(),
-            v2: createTestFile(),
-            v3: createTestFile(),
-          },
-        });
-      }
+//       if (id === 'doc-with-multiple') {
+//         return Promise.resolve({
+//           ...baseDoc,
+//           currentVersion: 2,
+//           versions: [
+//             { id: 'v1', created: Date.now() - 2000, promptKey: 'p1' },
+//             { id: 'v2', created: Date.now() - 1000, promptKey: 'p1' },
+//             { id: 'v3', created: Date.now(), promptKey: 'p1' },
+//           ],
+//           _files: {
+//             v1: createTestFile(),
+//             v2: createTestFile(),
+//             v3: createTestFile(),
+//           },
+//         });
+//       }
 
-      return Promise.resolve(baseDoc);
-    }),
-    put: vi.fn().mockImplementation((doc) => {
-      return Promise.resolve({ id: doc._id, rev: 'new-rev' });
-    }),
-    remove: vi.fn(),
-    query: vi.fn(),
-    getAttachment: vi.fn(),
-    putAttachment: vi.fn(),
-  };
+//       return Promise.resolve(baseDoc);
+//     }),
+//     put: vi.fn().mockImplementation((doc) => {
+//       return Promise.resolve({ id: doc._id, rev: 'new-rev' });
+//     }),
+//     remove: vi.fn(),
+//     query: vi.fn(),
+//   };
 
-  return {
-    useFireproof: vi.fn().mockReturnValue({ database: mockDb }),
-    ImgFile: vi.fn().mockImplementation((props) => {
-      return React.createElement('div', {
-        'data-testid': 'mock-img-file',
-        alt: props.alt || 'test image',
-        ...props,
-      });
-    }),
-  };
-});
+//   return {
+//     ...actual,
+//     useFireproof: vi.fn().mockReturnValue({ database: mockDb }),
+//     ImgFile: vi.fn().mockImplementation((props) => {
+//       return React.createElement('div', {
+//         'data-testid': 'mock-img-file',
+//         alt: props.alt || 'test image',
+//         ...props,
+//       });
+//     }),
+//   };
+// });
 
 // Import after mocks
 import { ImgGen } from '@vibes.diy/use-vibes-base';

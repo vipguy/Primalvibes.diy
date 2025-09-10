@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import '@testing-library/jest-dom';
 
 // Use vi.hoisted to define mocks that need to be referenced in vi.mock
 const mockImgFile = vi.hoisted(() =>
@@ -26,17 +25,22 @@ const mockImgFile = vi.hoisted(() =>
 );
 
 // Mock use-fireproof module (placed before imports that use it)
-vi.mock('use-fireproof', () => ({
-  ImgFile: mockImgFile,
-  // Mock File constructor for tests
-  File: vi.fn().mockImplementation((data, name, options) => ({ name, type: options?.type })),
-}));
+vi.mock('use-fireproof', async (importOriginal) => {
+  const actual = (await importOriginal()) as Record<string, unknown>;
+  return {
+    ...actual,
+    ImgFile: mockImgFile,
+    // Mock File constructor for tests
+    File: vi.fn().mockImplementation((data, name, options) => ({ name, type: options?.type })),
+  };
+});
 
 // Import the components directly to test them individually
 import { ControlsBar, ImageOverlay } from '@vibes.diy/use-vibes-base';
 
 describe('ImageOverlay Component', () => {
   beforeEach(() => {
+    globalThis.document.body.innerHTML = ''; // Clear any existing modals in the document
     vi.clearAllMocks();
   });
 

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { quickSuggestions } from "../data/quick-suggestions-data.js";
-import FeaturedVibes from "./FeaturedVibes.js";
 
 interface QuickSuggestionsProps {
   onSelectSuggestion: (suggestion: string) => void;
@@ -20,23 +19,17 @@ function QuickSuggestions({ onSelectSuggestion }: QuickSuggestionsProps) {
   }, []);
 
   return (
-    <div className="px-4 py-1">
-      <h3 className="text-accent-01 mb-2 text-center text-sm font-medium">
-        Remix a featured vibe
+    <div className="mb-8">
+      <h3 className="mb-4 text-center text-sm font-medium text-gray-600">
+        Create custom vibes from a prompt
       </h3>
-      <div className="mx-auto w-full max-w-2xl">
-        <FeaturedVibes count={3} />
-      </div>
-      <h3 className="text-accent-01 mb-2 pt-4 text-center text-sm font-medium">
-        or create custom vibes from a prompt
-      </h3>
-      <div className="flex flex-wrap gap-2">
-        {randomSuggestions.map((suggestion: Suggestion, index: number) => (
+      <div className="flex flex-wrap justify-center gap-2">
+        {randomSuggestions.map((suggestion, index) => (
           <button
             key={index}
             type="button"
             onClick={() => onSelectSuggestion(suggestion.text)}
-            className="bg-light-background-01 dark:bg-dark-background-01 text-light-primary dark:text-dark-primary hover:bg-light-decorative-01 dark:hover:bg-dark-decorative-01 cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
+            className="cursor-pointer rounded-md bg-light-background-01 px-3 py-1.5 text-sm font-medium text-light-primary transition-colors hover:bg-light-decorative-01 dark:bg-dark-background-01 dark:text-dark-primary dark:hover:bg-dark-decorative-01"
           >
             {suggestion.label}
           </button>

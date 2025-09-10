@@ -1,16 +1,8 @@
-import { useState, useRef } from 'react';
-import { ImgGen } from 'use-vibes';
-import { useFireproof } from 'use-fireproof';
-import type { DocBase, DocFileMeta } from 'use-fireproof';
+import { useState, useRef, useEffect } from 'react';
+import { ImgGen, useFireproof } from 'use-vibes';
 import './App.css';
 
-// Define interface for image documents
-interface ImageDocument extends DocBase {
-  type: 'image';
-  prompt: string;
-  created?: number;
-  _files?: Record<string, File | DocFileMeta>;
-}
+const APP_DBNAME = 'ImgGen2';
 
 function App() {
   const [inputPrompt, setInputPrompt] = useState('');
@@ -23,7 +15,88 @@ function App() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Use Fireproof to query all images
-  const { useLiveQuery } = useFireproof('ImgGen');
+  const { useLiveQuery, database } = useFireproof(APP_DBNAME);
+
+  // Round-trip test for file storage on page load
+  useEffect(() => {
+    const testFileRoundTrip = async () => {
+      try {
+        console.log('[File Test] Starting round-trip test...');
+
+        // Create a simple text file
+        const testData = 'Hello, this is a test file from ' + new Date().toISOString();
+        const testFile = new File([testData], 'test.txt', { type: 'text/plain' });
+
+        console.log('[File Test] Created test file:', {
+          name: testFile.name,
+          size: testFile.size,
+          type: testFile.type,
+          lastModified: testFile.lastModified,
+        });
+
+        // Save it to Fireproof
+        const testDoc = {
+          type: 'file-test',
+          created: Date.now(),
+          _files: {
+            testFile: testFile,
+          },
+        };
+
+        const saveResult = await database.put(testDoc);
+        console.log('[File Test] Saved to Fireproof:', saveResult);
+
+        // Immediately read it back
+        const retrievedDoc = await database.get(saveResult.id);
+        console.log('[File Test] Retrieved document:', retrievedDoc);
+
+        // Check the file object that came back
+        const retrievedFileObj = retrievedDoc._files?.testFile;
+        console.log('[File Test] Retrieved file object:', retrievedFileObj);
+
+        // Try to get the actual file content
+        if (
+          retrievedFileObj &&
+          'file' in retrievedFileObj &&
+          typeof retrievedFileObj.file === 'function'
+        ) {
+          const actualFile = await retrievedFileObj.file();
+          console.log(
+            '[File Test] Actual file from .file():',
+            {
+              type: typeof actualFile,
+              isFile: actualFile instanceof File,
+            },
+            actualFile
+          );
+
+          // Try to read the content
+          const text = await actualFile.text();
+          console.log('[File Test] File content:', text);
+
+          // Test creating blob URL
+          const blobUrl = URL.createObjectURL(actualFile);
+          console.log('[File Test] Created blob URL:', blobUrl);
+
+          // Test if blob URL is accessible
+          try {
+            const response = await fetch(blobUrl);
+            const fetchedText = await response.text();
+            console.log('[File Test] Fetched from blob URL:', fetchedText);
+            URL.revokeObjectURL(blobUrl);
+          } catch (fetchError) {
+            console.error('[File Test] Failed to fetch from blob URL:', fetchError);
+          }
+        }
+      } catch (error) {
+        console.error('[File Test] Round-trip test failed:', error);
+      }
+    };
+
+    // Run test after a short delay to let everything initialize
+    const timer = setTimeout(testFileRoundTrip, 1000);
+    return () => clearTimeout(timer);
+  }, [database]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputPrompt(e.target.value);
@@ -83,10 +156,18 @@ function App() {
   };
 
   // Get all documents with type: 'image'
-  const { docs: imageDocuments } = useLiveQuery<ImageDocument>('type', {
+  const { docs: imageDocuments } = useLiveQuery('type', {
     key: 'image',
     descending: true,
   });
+
+  // Debug logging to track query results
+  useEffect(() => {
+    console.log('[App Debug] Image documents from useLiveQuery:', {
+      count: imageDocuments.length,
+      documents: imageDocuments,
+    });
+  }, [imageDocuments]);
 
   return (
     <div className="container">
@@ -189,6 +270,7 @@ function App() {
           prompt={activePrompt}
           _id={selectedImageId}
           images={uploadedImage ? [uploadedImage] : undefined}
+          database={APP_DBNAME}
           options={{
             debug: true,
             quality,
@@ -211,6 +293,7 @@ function App() {
                   <ImgGen
                     _id={doc._id}
                     className="thumbnail-img"
+                    database={APP_DBNAME}
                     debug={true}
                     options={{
                       quality: quality,

@@ -5,7 +5,7 @@
 
 // CSS Custom Properties (Variables) as JavaScript constants
 export const imgGenTheme = {
-  // Colors
+  // Colors with dark mode support using light-dark() CSS function
   colors: {
     text: '#333',
     background: '#333333',
@@ -18,6 +18,18 @@ export const imgGenTheme = {
     errorTextBody: '#ffffff',
     buttonBg: 'rgba(255, 255, 255, 0.7)',
     deleteHover: '#ff3333',
+
+    // Form-specific theme-aware colors
+    inputBorder: 'light-dark(#ccc, #555)',
+    inputBg: 'light-dark(#ffffff, #2a2a2a)',
+    inputText: 'light-dark(#333, #e0e0e0)',
+    dropZoneBorder: 'light-dark(#ccc, #555)',
+    dropZoneBg: 'light-dark(#fafafa, #2a2a2a)',
+    dropZoneActiveBg: 'light-dark(#f0f8ff, #1a3a4a)',
+    mutedText: 'light-dark(#666, #aaa)',
+    lightBg: 'light-dark(#f0f0f0, #404040)',
+    thumbnailBorder: 'light-dark(#ddd, #555)',
+    titleText: 'light-dark(#333, #e0e0e0)',
   },
 
   // Dimensions
@@ -82,6 +94,7 @@ export const imgGenStyles = {
     padding: imgGenTheme.dimensions.padding,
     backgroundColor: imgGenTheme.colors.overlayBg,
     backdropFilter: `blur(${imgGenTheme.effects.blurRadius})`,
+    WebkitBackdropFilter: `blur(${imgGenTheme.effects.blurRadius})`, // Safari support
     transition: `opacity ${imgGenTheme.effects.transitionSpeed} ease`,
     zIndex: 10,
     display: 'flex' as const,
@@ -113,18 +126,7 @@ export const imgGenStyles = {
     cursor: 'pointer' as const,
   },
 
-  // Prompt input for editing
-  promptInput: {
-    width: '100%',
-    boxSizing: 'border-box' as const,
-    padding: '6px 8px',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
-    fontSize: imgGenTheme.typography.fontSize,
-    fontWeight: imgGenTheme.typography.fontWeight,
-    color: imgGenTheme.colors.text,
-    backgroundColor: 'white',
-  },
+  // Prompt input for editing (now using theme-aware version below)
 
   // Controls row
   controls: {
@@ -183,7 +185,7 @@ export const imgGenStyles = {
   // Placeholder styling
   placeholder: {
     width: '100%',
-    height: '100%',
+    aspectRatio: '1 / 1',
     backgroundColor: imgGenTheme.colors.background,
     position: 'relative' as const,
     overflow: 'hidden' as const,
@@ -261,6 +263,132 @@ export const imgGenStyles = {
     borderRadius: '6px',
   },
 
+  // Upload waiting container
+  uploadWaiting: {
+    display: 'flex' as const,
+    flexDirection: 'column' as const,
+    gap: '1rem',
+    padding: '1rem',
+    alignItems: 'center' as const,
+    textAlign: 'center' as const,
+    backgroundColor: imgGenTheme.colors.inputBg,
+    borderRadius: imgGenTheme.dimensions.borderRadius,
+    border: `1px solid ${imgGenTheme.colors.inputBorder}`,
+  },
+
+  // Prompt form layout
+  promptForm: {
+    display: 'flex' as const,
+    gap: '0.5rem',
+    width: '100%',
+    maxWidth: '600px',
+    flexDirection: 'column' as const,
+  },
+
+  // Prompt input styling
+  promptInput: {
+    width: '100%',
+    padding: '0.8rem',
+    fontSize: '1rem',
+    border: `1px solid ${imgGenTheme.colors.inputBorder}`,
+    borderRadius: '4px',
+    boxSizing: 'border-box' as const,
+    backgroundColor: imgGenTheme.colors.inputBg,
+    color: imgGenTheme.colors.inputText,
+  },
+
+  // Prompt submit button
+  promptSubmit: {
+    padding: '0.8rem',
+    fontSize: '1rem',
+    backgroundColor: imgGenTheme.colors.accent,
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer' as const,
+    transition: 'background-color 0.3s',
+  },
+
+  // File drop zone base styling
+  fileDrop: {
+    border: `2px dashed ${imgGenTheme.colors.dropZoneBorder}`,
+    borderRadius: '8px',
+    padding: '2rem',
+    textAlign: 'center' as const,
+    cursor: 'pointer' as const,
+    transition: 'border-color 0.3s, background-color 0.3s',
+    backgroundColor: imgGenTheme.colors.dropZoneBg,
+    marginTop: '1rem',
+  },
+
+  // File drop active state (when dragging over)
+  fileDropActive: {
+    borderColor: imgGenTheme.colors.accent,
+    backgroundColor: imgGenTheme.colors.dropZoneActiveBg,
+  },
+
+  // File drop disabled state
+  fileDropDisabled: {
+    opacity: 0.5,
+    cursor: 'not-allowed' as const,
+  },
+
+  // File drop message text
+  fileDropMessage: {
+    color: imgGenTheme.colors.mutedText,
+    fontSize: '1rem',
+    fontWeight: 'normal' as const,
+  },
+
+  // Uploaded previews container
+  uploadedPreviews: {
+    width: '100%',
+    marginTop: '1rem',
+  },
+
+  // Upload count display
+  uploadCount: {
+    fontSize: '0.9rem',
+    color: imgGenTheme.colors.mutedText,
+    marginBottom: '0.5rem',
+    fontWeight: 'bold' as const,
+  },
+
+  // Thumbnails grid
+  thumbnails: {
+    display: 'grid' as const,
+    gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
+    gap: '0.5rem',
+    maxWidth: '400px',
+    margin: '0 auto',
+  },
+
+  // Individual thumbnail
+  thumbnail: {
+    aspectRatio: '1 / 1',
+    overflow: 'hidden' as const,
+    borderRadius: '4px',
+    border: `1px solid ${imgGenTheme.colors.thumbnailBorder}`,
+  },
+
+  // Thumbnail image
+  thumbnailImg: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover' as const,
+  },
+
+  // More count indicator
+  moreCount: {
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    backgroundColor: imgGenTheme.colors.lightBg,
+    color: imgGenTheme.colors.mutedText,
+    fontSize: '0.8rem',
+    fontWeight: 'bold' as const,
+  },
+
   // Helper classes
   truncate: {
     whiteSpace: 'nowrap' as const,
@@ -271,26 +399,26 @@ export const imgGenStyles = {
 
 // Helper function to merge styles with theme variants
 export function createStyledVariant(
-  baseStyle: Record<string, any>,
-  variants: Record<string, any> = {}
-): Record<string, any> {
+  baseStyle: Record<string, unknown>,
+  variants: Record<string, unknown> = {}
+): Record<string, unknown> {
   return { ...baseStyle, ...variants };
 }
 
 // Utility functions for common style patterns
 export const styleUtils = {
   // Create hover state styles (for use with CSS-in-JS)
-  hover: (styles: Record<string, any>) => ({
+  hover: (styles: Record<string, unknown>) => ({
     '&:hover': styles,
   }),
 
   // Create disabled state styles
-  disabled: (styles: Record<string, any>) => ({
+  disabled: (styles: Record<string, unknown>) => ({
     '&:disabled': styles,
   }),
 
   // Create media query styles
-  mediaQuery: (query: string, styles: Record<string, any>) => ({
+  mediaQuery: (query: string, styles: Record<string, unknown>) => ({
     [`@media ${query}`]: styles,
   }),
 

@@ -1,6 +1,4 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import '@testing-library/jest-dom';
-import { fail } from 'assert';
 
 // Create a mock File
 const mockFile = new File(['test content'], 'test-image.png', { type: 'image/png' });
@@ -11,10 +9,9 @@ const mockDb = {
   put: vi.fn(),
   remove: vi.fn(),
   query: vi.fn(),
-  getAttachment: vi.fn(),
-  putAttachment: vi.fn(),
 };
 
+/*
 // Mock the call-ai module
 vi.mock('call-ai', () => ({
   imageGen: vi.fn().mockImplementation(async () => ({
@@ -23,6 +20,7 @@ vi.mock('call-ai', () => ({
   })),
   callAI: vi.fn().mockImplementation(async () => 'Mocked text response'),
 }));
+*/
 
 // Mock utility function to simulate addNewVersion behavior
 const mockAddNewVersion = vi.fn((doc, file, prompt) => ({
@@ -107,7 +105,6 @@ vi.mock('@vibes.diy/use-vibes-base', async () => {
 
 // Import after mocks
 import { ImageDocument } from '@vibes.diy/use-vibes-base';
-import { DocWithId } from 'use-fireproof';
 
 describe('Image Generation Refresh Functionality', () => {
   beforeEach(() => {

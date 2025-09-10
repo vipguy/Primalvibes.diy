@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { combineClasses } from '../../utils/style-utils.js';
+import { imgGenStyles } from '../../utils/styles.js';
 
 interface ImgGenFileDropProps {
   /** Callback when files are dropped or selected via browse */
@@ -102,6 +103,11 @@ export function ImgGenFileDrop({
         !isActive ? 'imggen-file-drop-disabled' : '',
         className
       )}
+      style={{
+        ...imgGenStyles.fileDrop,
+        ...(isDragging ? imgGenStyles.fileDropActive : {}),
+        ...(!isActive ? imgGenStyles.fileDropDisabled : {}),
+      }}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -115,7 +121,9 @@ export function ImgGenFileDrop({
         multiple
         style={{ display: 'none' }}
       />
-      <div className="imggen-file-drop-message">{addFilesMessage}</div>
+      <div className="imggen-file-drop-message" style={imgGenStyles.fileDropMessage}>
+        {addFilesMessage}
+      </div>
     </div>
   );
 }

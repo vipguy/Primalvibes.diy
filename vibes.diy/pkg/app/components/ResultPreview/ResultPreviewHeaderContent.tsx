@@ -1,7 +1,7 @@
 import React, { /*useEffect,*/ useRef } from "react"; // useEffect no longer needed here
 import { useParams } from "react-router";
 import { useSession } from "../../hooks/useSession.js";
-import type { ViewControlsType, ViewType } from "../../utils/ViewState.js";
+import type { ViewControlsType, ViewType } from "@vibes.diy/prompts";
 // import { useViewState } from '../../utils/ViewState'; // useViewState is now lifted to home.tsx
 import { BackButton } from "./BackButton.js";
 import { SaveButton } from "./SaveButton.js";
@@ -55,13 +55,13 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
   const sessionId = propSessionId || urlSessionId;
   const title = propTitle || urlView;
 
-  // Use the session hook to get and update session data
+  // Use the session hook to get and update session data - only if we have a sessionId
   const {
     session,
     docs: messages,
     updatePublishedUrl,
     updateFirehoseShared,
-  } = useSession(sessionId);
+  } = useSession(sessionId || "temp-session");
 
   // useViewState is now lifted, props like displayView, navigateToView, viewControls, showViewControls are passed in.
   // The useEffect syncing activeView with displayView is no longer needed.

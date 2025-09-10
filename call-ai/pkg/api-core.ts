@@ -20,7 +20,7 @@ import { globalDebug } from "./key-management.js";
 import { callAINonStreaming } from "./non-streaming.js";
 import { callAIStreaming } from "./streaming.js";
 import { PACKAGE_VERSION } from "./version.js";
-import { callAiEnv } from "./utils.js";
+import { callAiEnv } from "./env.js";
 
 // Import package version for debugging
 

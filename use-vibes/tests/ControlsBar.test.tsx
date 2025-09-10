@@ -1,22 +1,32 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import { ControlsBar } from '@vibes.diy/use-vibes-base';
 
 describe('ControlsBar Component', () => {
-  const defaultProps = {
-    handleDeleteConfirm: vi.fn(),
-    handlePrevVersion: vi.fn(),
-    handleNextVersion: vi.fn(),
-    handleRegen: vi.fn(),
-    versionIndex: 1,
-    totalVersions: 3,
-    editedPrompt: null,
-    promptText: 'Test prompt',
+  let defaultProps: {
+    handleDeleteConfirm: () => void;
+    handlePrevVersion: () => void;
+    handleNextVersion: () => void;
+    handleRegen: () => void;
+    versionIndex: number;
+    totalVersions: number;
+    editedPrompt: string | null;
+    promptText: string;
   };
 
   beforeEach(() => {
+    globalThis.document.body.innerHTML = ''; // Clear any existing modals in the document
+    defaultProps = {
+      handleDeleteConfirm: vi.fn(),
+      handlePrevVersion: vi.fn(),
+      handleNextVersion: vi.fn(),
+      handleRegen: vi.fn(),
+      versionIndex: 1,
+      totalVersions: 3,
+      editedPrompt: null,
+      promptText: 'Test prompt',
+    };
     vi.clearAllMocks();
   });
 
