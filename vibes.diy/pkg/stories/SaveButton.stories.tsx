@@ -47,6 +47,10 @@ const meta = {
         "Number of syntax errors. When > 0, button shows error count and becomes disabled.",
       control: { type: "number", min: 0, max: 10 },
     },
+    color: {
+      description:
+        "Color of the Button",
+    },
   },
   args: {
     onClick: () => console.log("Save clicked"),
