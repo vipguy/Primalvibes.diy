@@ -58,3 +58,18 @@ To test call-ai fixes by releasing a dev version:
 3. **Verify NPM Dev Channel**: Check `npm view call-ai versions --json` for the new dev version
 
 The CI reads the version from the git tag (not from package.json) and publishes accordingly. The `call-ai/pkg/package.json` version stays at `0.0.0` as a placeholder.
+
+## Dependency Management
+
+### PNPM Workspace System
+
+This repository uses PNPM workspaces to manage a monorepo structure with multiple packages:
+
+- **Root package.json**: Contains monorepo-level dependencies and scripts that coordinate across packages
+- **Individual package directories**: Each has its own `package.json` with specific dependencies
+- **Dependency installation**: Run `pnpm install` from the root to install all workspace dependencies
+- **Adding dependencies**: 
+  - Root-level: `pnpm add <package>` (affects the entire monorepo)
+  - Specific workspace: `pnpm add <package> --filter <workspace-name>`
+- **Script execution**: Scripts in root package.json often delegate to specific workspace packages
+- **Shared dependencies**: Common dependencies are hoisted to the root `node_modules` when possible
