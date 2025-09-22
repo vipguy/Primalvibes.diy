@@ -68,7 +68,7 @@ This repository uses PNPM workspaces to manage a monorepo structure with multipl
 - **Root package.json**: Contains monorepo-level dependencies and scripts that coordinate across packages
 - **Individual package directories**: Each has its own `package.json` with specific dependencies
 - **Dependency installation**: Run `pnpm install` from the root to install all workspace dependencies
-- **Adding dependencies**: 
+- **Adding dependencies**:
   - Root-level: `pnpm add <package>` (affects the entire monorepo)
   - Specific workspace: `pnpm add <package> --filter <workspace-name>`
 - **Script execution**: Scripts in root package.json often delegate to specific workspace packages

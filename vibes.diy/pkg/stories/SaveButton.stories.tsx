@@ -57,9 +57,9 @@ const meta = {
 } satisfies Meta<typeof SaveButton>;
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type _Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const Default: _Story = {
   args: {
     hasChanges: true,
     syntaxErrorCount: 0,
@@ -96,7 +96,7 @@ const colorNames: {
   { name: "Danger Red", value: "dangerRed" },
 ];
 
-export const WithErrors: Story = {
+export const WithErrors: _Story = {
   args: {
     hasChanges: true,
     syntaxErrorCount: 3,
@@ -111,7 +111,7 @@ export const WithErrors: Story = {
   },
 };
 
-export const SingleError: Story = {
+export const SingleError: _Story = {
   args: {
     hasChanges: true,
     syntaxErrorCount: 1,
@@ -126,7 +126,7 @@ export const SingleError: Story = {
   },
 };
 
-export const NoChanges: Story = {
+export const NoChanges: _Story = {
   args: {
     hasChanges: false,
     syntaxErrorCount: 0,
@@ -140,7 +140,7 @@ export const NoChanges: Story = {
   },
 };
 
-export const NeobrutalistShowcase: Story = {
+export const NeobrutalistShowcase: _Story = {
   args: {
     hasChanges: true,
     syntaxErrorCount: 0,
@@ -177,7 +177,7 @@ Try clicking the button to see the characteristic neobrutalism active state anim
   ],
 };
 
-export const ColorSystem: Story = {
+export const ColorSystem: _Story = {
   args: {
     hasChanges: true,
     syntaxErrorCount: 0,
@@ -190,7 +190,7 @@ export const ColorSystem: Story = {
     },
   },
   decorators: [
-    (Story) => (
+    () => (
       <div className="bg-background p-8 text-black">
         <div className="space-y-6">
           <h3 className="text-lg font-bold">Neobrutalism Color System</h3>
@@ -206,7 +206,7 @@ export const ColorSystem: Story = {
                 <h4 className="text-sm font-semibold">{color.name}</h4>
                 <SaveButton
                   hasChanges={true}
-                  onClick={() => {}}
+                  onClick={() => console.log(`${color.name} clicked`)}
                   color={color.value}
                 />
               </div>
