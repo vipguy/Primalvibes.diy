@@ -171,8 +171,31 @@
   </div>
 
   <script>
-    // 🔑 Replace with your real token
-    const API_TOKEN = "dBH_lNo9P2A49Tv0";
+    // Get API token from URL params, localStorage, or prompt user
+    function getApiToken() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlToken = urlParams.get('token');
+      if (urlToken) {
+        localStorage.setItem('pollinations_token', urlToken);
+        return urlToken;
+      }
+      
+      const storedToken = localStorage.getItem('pollinations_token');
+      if (storedToken) return storedToken;
+      
+      const userToken = prompt('Please enter your Pollinations AI token:');
+      if (userToken) {
+        localStorage.setItem('pollinations_token', userToken);
+        return userToken;
+      }
+      
+      return null;
+    }
+
+    const API_TOKEN = getApiToken();
+    if (!API_TOKEN) {
+      alert('No API token provided. Please refresh and enter your token, or add ?token=YOUR_TOKEN to the URL.');
+    }
     const API_URL = `https://text.pollinations.ai/openai?token=${API_TOKEN}`;
 
     const chatEl = document.getElementById("chat");
@@ -183,6 +206,7 @@
 
     let messages = [{ role: "system", content: "You are a helpful assistant." }];
     let isProcessing = false;
+    let streamBuffer = ""; // Buffer for handling partial SSE lines
 
     // Add welcome message
     addMessage("system", "Welcome to Pollinations AI Chat! You can send text messages, upload images, or audio files.");
@@ -235,6 +259,19 @@
         let userContent = [];
         if (text) userContent.push({ type: "text", text });
 
+        // Show user message immediately for better UX
+        if (text) addMessage("user", text);
+        if (file && !text) {
+          if (file.type.startsWith("image/")) {
+            addMessage("user", `[Image attached: ${file.name}]`);
+          } else if (file.type.startsWith("audio/")) {
+            addMessage("user", `[Audio attached: ${file.name}]`);
+          }
+        }
+
+        inputEl.value = "";
+        fileEl.value = "";
+
         if (file) {
           const reader = new FileReader();
           reader.onload = async () => {
@@ -244,7 +281,7 @@
                   type: "image_url", 
                   image_url: { url: reader.result } 
                 });
-                await sendToAPI(userContent, selectedModel === "openai-audio" ? "openai" : selectedModel);
+                await sendToAPI(userContent, selectedModel);
               } else if (file.type.startsWith("audio/")) {
                 if (selectedModel !== "openai-audio") {
                   addMessage("error", "Audio files require the OpenAI Audio model. Please select it from the dropdown.");
@@ -270,10 +307,6 @@
         } else {
           await sendToAPI(userContent, selectedModel);
         }
-
-        if (text) addMessage("user", text);
-        inputEl.value = "";
-        fileEl.value = "";
       } catch (error) {
         addMessage("error", `Error: ${error.message}`);
         setProcessing(false);
@@ -320,21 +353,35 @@
         div.className = "msg assistant";
         chatEl.appendChild(div);
 
+        streamBuffer = ""; // Reset buffer for new stream
+
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
           
-          const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split("\n").filter(l => l.startsWith("data: "));
+          // Add new chunk to buffer
+          streamBuffer += decoder.decode(value, { stream: true });
           
-          for (let line of lines) {
-            if (line.includes("[DONE]")) continue;
+          // Process complete events (split by double newline)
+          const events = streamBuffer.split("\n\n");
+          streamBuffer = events.pop() || ""; // Keep incomplete event in buffer
+          
+          for (let event of events) {
+            if (!event.trim()) continue;
+            
+            // Extract data lines from the event
+            const dataLines = event.split("\n").filter(l => l.startsWith("data: "));
+            if (dataLines.length === 0) continue;
+            
+            // Join multiple data lines if present
+            const combinedData = dataLines.map(l => l.replace("data: ", "")).join("");
+            
+            if (combinedData.includes("[DONE]")) continue;
             
             try {
-              const jsonStr = line.replace("data: ", "").trim();
-              if (!jsonStr) continue;
+              if (!combinedData.trim()) continue;
               
-              const data = JSON.parse(jsonStr);
+              const data = JSON.parse(combinedData);
               const delta = data.choices?.[0]?.delta?.content;
               
               if (delta) {
@@ -343,7 +390,7 @@
                 scrollToBottom();
               }
             } catch (e) {
-              console.warn("Failed to parse chunk:", line, e);
+              console.warn("Failed to parse SSE data:", combinedData, e);
             }
           }
         }
