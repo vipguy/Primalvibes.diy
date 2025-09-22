@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pollinations Multimodal Chat</title>
+  <style>
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+      margin: 0; 
+      padding: 0; 
+      background: #f5f5f5; 
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    #header {
+      background: #2563eb;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    #header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+    
+    #chat { 
+      flex: 1;
+      overflow-y: auto; 
+      padding: 1rem; 
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .msg { 
+      padding: 0.75rem 1rem; 
+      border-radius: 1rem; 
+      max-width: 70%; 
+      white-space: pre-wrap; 
+      word-wrap: break-word;
+      line-height: 1.4;
+    }
+    
+    .user { 
+      background: #dbeafe; 
+      border: 1px solid #bfdbfe;
+      margin-left: auto; 
+      border-bottom-right-radius: 0.25rem;
+    }
+    
+    .assistant { 
+      background: #f3f4f6; 
+      border: 1px solid #e5e7eb;
+      margin-right: auto; 
+      border-bottom-left-radius: 0.25rem;
+    }
+    
+    .error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      margin-right: auto;
+    }
+    
+    .system {
+      background: #fffbeb;
+      border: 1px solid #fed7aa;
+      color: #92400e;
+      text-align: center;
+      margin: 0 auto;
+      font-size: 0.875rem;
+    }
+    
+    #controls { 
+      padding: 1rem; 
+      border-top: 1px solid #e5e7eb; 
+      background: #fafafa;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    #textInput { 
+      flex: 1;
+      min-width: 200px;
+      padding: 0.75rem; 
+      border: 1px solid #d1d5db;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+    }
+    
+    #textInput:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    
+    #fileInput { 
+      padding: 0.5rem;
+    }
+    
+    button { 
+      padding: 0.75rem 1.5rem; 
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.2s;
+    }
+    
+    button:hover {
+      background: #1d4ed8;
+    }
+    
+    button:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+    
+    #modelSelect {
+      padding: 0.5rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.5rem;
+      background: white;
+    }
+    
+    .typing-indicator {
+      display: none;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      margin-right: auto;
+      padding: 0.75rem 1rem;
+      border-radius: 1rem;
+      border-bottom-left-radius: 0.25rem;
+      font-style: italic;
+      color: #6b7280;
+    }
+    
+    .typing-indicator.show {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div id="header">
+    <h1>🌸 Pollinations AI Chat</h1>
+  </div>
+  
+  <div id="chat"></div>
+  
+  <div id="controls">
+    <input id="textInput" type="text" placeholder="Type your message..." />
+    <input id="fileInput" type="file" accept="image/*,audio/*" />
+    <select id="modelSelect">
+      <option value="openai">OpenAI GPT-5 Nano (Default)</option>
+      <option value="openai-fast">OpenAI GPT-4.1 Nano (Fast)</option>
+      <option value="openai-audio">OpenAI Audio (Voice)</option>
+      <option value="gemini">Gemini 2.5 Flash</option>
+      <option value="deepseek">DeepSeek V3.1</option>
+      <option value="mistral">Mistral Small</option>
+    </select>
+    <button id="sendBtn">Send</button>
+  </div>
+
+  <script>
+    // Get API token from URL params, localStorage, or prompt user
+    function getApiToken() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlToken = urlParams.get('token');
+      if (urlToken) {
+        localStorage.setItem('pollinations_token', urlToken);
+        return urlToken;
+      }
+      
+      const storedToken = localStorage.getItem('pollinations_token');
+      if (storedToken) return storedToken;
+      
+      const userToken = prompt('Please enter your Pollinations AI token:');
+      if (userToken) {
+        localStorage.setItem('pollinations_token', userToken);
+        return userToken;
+      }
+      
+      return null;
+    }
+
+    const API_TOKEN = getApiToken();
+    const API_URL = API_TOKEN ? `https://text.pollinations.ai/openai?token=${API_TOKEN}` : null;
+
+    const chatEl = document.getElementById("chat");
+    const inputEl = document.getElementById("textInput");
+    const fileEl = document.getElementById("fileInput");
+    const modelEl = document.getElementById("modelSelect");
+    const sendBtn = document.getElementById("sendBtn");
+
+    let messages = [{ role: "system", content: "You are a helpful assistant." }];
+    let isProcessing = false;
+
+    // Model capabilities based on Pollinations API
+    const modelCapabilities = {
+      'openai': { vision: true, audio: false },
+      'openai-fast': { vision: true, audio: false },
+      'openai-audio': { vision: true, audio: true },
+      'gemini': { vision: true, audio: false },
+      'deepseek': { vision: false, audio: false },
+      'mistral': { vision: false, audio: false }
+    };
+
+    // Audio format mapping for common MIME types
+    function getAudioFormat(mimeType) {
+      const formatMap = {
+        'audio/mpeg': 'mp3',
+        'audio/mp3': 'mp3',
+        'audio/wav': 'wav',
+        'audio/wave': 'wav',
+        'audio/x-wav': 'wav',
+        'audio/m4a': 'm4a',
+        'audio/x-m4a': 'm4a',
+        'audio/webm': 'webm',
+        'audio/ogg': 'ogg',
+        'audio/oga': 'ogg'
+      };
+      return formatMap[mimeType] || mimeType.split('/')[1];
+    }
+
+    // Initialize UI based on token availability
+    if (!API_TOKEN) {
+      sendBtn.disabled = true;
+      sendBtn.textContent = "No Token";
+      addMessage("error", "No API token provided. Please refresh and enter your token, or add ?token=YOUR_TOKEN to the URL.");
+    } else {
+      addMessage("system", "Welcome to Pollinations AI Chat! You can send text messages, upload images, or audio files.");
+    }
+
+    function addMessage(role, content) {
+      const div = document.createElement("div");
+      div.className = `msg ${role}`;
+      div.textContent = content;
+      chatEl.appendChild(div);
+      scrollToBottom();
+    }
+
+    function addTypingIndicator() {
+      const div = document.createElement("div");
+      div.className = "typing-indicator show";
+      div.textContent = "AI is thinking...";
+      div.id = "typing";
+      chatEl.appendChild(div);
+      scrollToBottom();
+      return div;
+    }
+
+    function removeTypingIndicator() {
+      const typing = document.getElementById("typing");
+      if (typing) typing.remove();
+    }
+
+    function scrollToBottom() {
+      chatEl.scrollTop = chatEl.scrollHeight;
+    }
+
+    function setProcessing(processing) {
+      isProcessing = processing;
+      sendBtn.disabled = processing;
+      sendBtn.textContent = processing ? "Sending..." : "Send";
+    }
+
+    async function sendMessage() {
+      if (isProcessing || !API_TOKEN) return;
+      
+      const text = inputEl.value.trim();
+      const file = fileEl.files[0];
+      const selectedModel = modelEl.value;
+      
+      if (!text && !file) return;
+
+      // Check model capabilities for file uploads
+      if (file) {
+        const capabilities = modelCapabilities[selectedModel] || {};
+        
+        if (file.type.startsWith("image/") && !capabilities.vision) {
+          addMessage("error", `The ${selectedModel} model doesn't support images. Please select a vision-capable model like OpenAI or Gemini.`);
+          return;
+        }
+        
+        if (file.type.startsWith("audio/") && !capabilities.audio) {
+          addMessage("error", "Audio files require the OpenAI Audio model. Please select it from the dropdown.");
+          return;
+        }
+      }
+
+      setProcessing(true);
+
+      try {
+        let userContent = [];
+        if (text) userContent.push({ type: "text", text });
+
+        // Show user message immediately for better UX
+        if (text) addMessage("user", text);
+        if (file && !text) {
+          if (file.type.startsWith("image/")) {
+            addMessage("user", `[Image attached: ${file.name}]`);
+          } else if (file.type.startsWith("audio/")) {
+            addMessage("user", `[Audio attached: ${file.name}]`);
+          }
+        }
+
+        inputEl.value = "";
+        fileEl.value = "";
+
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = async () => {
+            try {
+              if (file.type.startsWith("image/")) {
+                userContent.push({ 
+                  type: "image_url", 
+                  image_url: { url: reader.result } 
+                });
+                await sendToAPI(userContent, selectedModel);
+              } else if (file.type.startsWith("audio/")) {
+                const base64Data = reader.result.split(",")[1];
+                const audioFormat = getAudioFormat(file.type);
+                userContent.push({ 
+                  type: "input_audio", 
+                  input_audio: { 
+                    data: base64Data, 
+                    format: audioFormat 
+                  } 
+                });
+                await sendToAPI(userContent, selectedModel);
+              }
+            } catch (error) {
+              addMessage("error", `File processing error: ${error.message}`);
+              setProcessing(false);
+            }
+          };
+          reader.readAsDataURL(file);
+        } else {
+          await sendToAPI(userContent, selectedModel);
+        }
+      } catch (error) {
+        addMessage("error", `Error: ${error.message}`);
+        setProcessing(false);
+      }
+    }
+
+    // Normalize messages for non-multimodal models
+    function normalizeMessagesForModel(messages, model) {
+      const supportsMultimodal = !!(modelCapabilities[model]?.vision || modelCapabilities[model]?.audio);
+      if (supportsMultimodal) return messages;
+      
+      return messages.map(msg => {
+        if (msg.role !== 'user' || typeof msg.content === 'string') return msg;
+        
+        // Convert multimodal content to text-only for non-multimodal models
+        if (Array.isArray(msg.content)) {
+          const textParts = [];
+          for (const part of msg.content) {
+            if (part.type === 'text') {
+              textParts.push(part.text);
+            } else if (part.type === 'image_url') {
+              textParts.push('[Image omitted]');
+            } else if (part.type === 'input_audio') {
+              textParts.push('[Audio omitted]');
+            }
+          }
+          return { ...msg, content: textParts.join(' ') };
+        }
+        
+        return msg;
+      });
+    }
+
+    async function sendToAPI(userContent, model) {
+      // Convert single text-only content to string for non-multimodal models
+      const supportsMultimodal = !!(modelCapabilities[model]?.vision || modelCapabilities[model]?.audio);
+      const textOnly = userContent.length === 1 && userContent[0].type === "text";
+      const contentForApi = textOnly && !supportsMultimodal ? userContent[0].text : userContent;
+      
+      messages.push({ role: "user", content: contentForApi });
+
+      // Normalize conversation history for the selected model
+      const normalizedMessages = normalizeMessagesForModel(messages, model);
+
+      const payload = { 
+        model, 
+        messages: normalizedMessages, 
+        stream: true, 
+        temperature: 0.7 
+      };
+
+      addTypingIndicator();
+      let streamBuffer = ""; // Local buffer for this stream
+
+      try {
+        const resp = await fetch(API_URL, {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "Accept": "text/event-stream"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!resp.ok) {
+          const errorText = await resp.text();
+          let errorMsg;
+          try {
+            const errorJson = JSON.parse(errorText);
+            errorMsg = errorJson.error || `HTTP ${resp.status}: ${resp.statusText}`;
+          } catch {
+            errorMsg = `HTTP ${resp.status}: ${resp.statusText}`;
+          }
+          throw new Error(errorMsg);
+        }
+
+        const reader = resp.body.getReader();
+        const decoder = new TextDecoder();
+        let assistantMsg = "";
+        let assistantDiv = null; // Create div only when we have content
+
+        let streamDone = false;
+        
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          // Add new chunk to buffer
+          streamBuffer += decoder.decode(value, { stream: true });
+          
+          // Normalize line endings for cross-platform compatibility
+          streamBuffer = streamBuffer.replace(/\r\n/g, "\n");
+          
+          // Process complete events (split by double newline)
+          const events = streamBuffer.split("\n\n");
+          streamBuffer = events.pop() || ""; // Keep incomplete event in buffer
+          
+          for (let event of events) {
+            if (!event.trim()) continue;
+            
+            // Extract data lines from the event
+            const dataLines = event.split("\n").filter(l => l.startsWith("data: "));
+            if (dataLines.length === 0) continue;
+            
+            // Join multiple data lines with newlines for SSE compliance
+            const combinedData = dataLines.map(l => l.replace("data: ", "")).join("\n");
+            
+            if (combinedData.includes("[DONE]")) {
+              streamDone = true;
+              break;
+            }
+            
+            try {
+              if (!combinedData.trim()) continue;
+              
+              const data = JSON.parse(combinedData);
+              const delta = data.choices?.[0]?.delta?.content;
+              
+              if (delta) {
+                // Create assistant div and remove typing indicator on first content
+                if (!assistantDiv) {
+                  removeTypingIndicator();
+                  assistantDiv = document.createElement("div");
+                  assistantDiv.className = "msg assistant";
+                  chatEl.appendChild(assistantDiv);
+                }
+                
+                assistantMsg += delta;
+                assistantDiv.textContent = assistantMsg;
+                scrollToBottom();
+              }
+            } catch (e) {
+              console.warn("Failed to parse SSE data:", combinedData, e);
+            }
+          }
+          
+          if (streamDone) break;
+        }
+        
+        // Process any remaining data in the buffer (handle tail events)
+        streamBuffer += decoder.decode();
+        if (streamBuffer.trim()) {
+          // Normalize line endings for remaining buffer
+          streamBuffer = streamBuffer.replace(/\r\n/g, "\n");
+          const events = streamBuffer.split("\n\n");
+          for (let event of events) {
+            if (!event.trim()) continue;
+            
+            const dataLines = event.split("\n").filter(l => l.startsWith("data: "));
+            if (dataLines.length === 0) continue;
+            
+            const combinedData = dataLines.map(l => l.replace("data: ", "")).join("\n");
+            if (combinedData.includes("[DONE]")) continue;
+            
+            try {
+              if (!combinedData.trim()) continue;
+              
+              const data = JSON.parse(combinedData);
+              const delta = data.choices?.[0]?.delta?.content;
+              
+              if (delta) {
+                // Create assistant div and remove typing indicator on first content if not already created
+                if (!assistantDiv) {
+                  removeTypingIndicator();
+                  assistantDiv = document.createElement("div");
+                  assistantDiv.className = "msg assistant";
+                  chatEl.appendChild(assistantDiv);
+                }
+                
+                assistantMsg += delta;
+                assistantDiv.textContent = assistantMsg;
+                scrollToBottom();
+              }
+            } catch (e) {
+              console.warn("Failed to parse final SSE data:", combinedData, e);
+            }
+          }
+        }
+
+        if (assistantMsg) {
+          messages.push({ role: "assistant", content: assistantMsg });
+        } else {
+          // Remove typing indicator and empty div if no content was received
+          removeTypingIndicator();
+          if (assistantDiv) {
+            assistantDiv.remove();
+          }
+          addMessage("error", "No response received from the API");
+        }
+
+      } catch (error) {
+        removeTypingIndicator();
+        throw error;
+      } finally {
+        setProcessing(false);
+      }
+    }
+
+    // Event listeners
+    sendBtn.onclick = sendMessage;
+    inputEl.addEventListener("keypress", e => { 
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage(); 
+      }
+    });
+
+    // Auto-focus input
+    inputEl.focus();
+  </script>
+</body>
+</html>
