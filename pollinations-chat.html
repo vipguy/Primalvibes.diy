@@ -220,6 +220,7 @@
         'audio/mpeg': 'mp3',
         'audio/mp3': 'mp3',
         'audio/wav': 'wav',
+        'audio/wave': 'wav',
         'audio/x-wav': 'wav',
         'audio/m4a': 'm4a',
         'audio/x-m4a': 'm4a',
@@ -362,11 +363,6 @@
         temperature: 0.7 
       };
 
-      // For audio model, bias toward text output unless user wants audio
-      if (model === "openai-audio") {
-        payload.modalities = ["text"];
-      }
-
       const typingIndicator = addTypingIndicator();
       let streamBuffer = ""; // Local buffer for this stream
 
@@ -397,9 +393,7 @@
         const reader = resp.body.getReader();
         const decoder = new TextDecoder();
         let assistantMsg = "";
-        const div = document.createElement("div");
-        div.className = "msg assistant";
-        chatEl.appendChild(div);
+        let assistantDiv = null; // Create div only when we have content
 
         let streamDone = false;
         
@@ -409,6 +403,9 @@
           
           // Add new chunk to buffer
           streamBuffer += decoder.decode(value, { stream: true });
+          
+          // Normalize line endings for cross-platform compatibility
+          streamBuffer = streamBuffer.replace(/\r\n/g, "\n");
           
           // Process complete events (split by double newline)
           const events = streamBuffer.split("\n\n");
@@ -436,8 +433,15 @@
               const delta = data.choices?.[0]?.delta?.content;
               
               if (delta) {
+                // Create assistant div on first content
+                if (!assistantDiv) {
+                  assistantDiv = document.createElement("div");
+                  assistantDiv.className = "msg assistant";
+                  chatEl.appendChild(assistantDiv);
+                }
+                
                 assistantMsg += delta;
-                div.textContent = assistantMsg;
+                assistantDiv.textContent = assistantMsg;
                 scrollToBottom();
               }
             } catch (e) {
@@ -451,6 +455,8 @@
         // Process any remaining data in the buffer (handle tail events)
         streamBuffer += decoder.decode();
         if (streamBuffer.trim()) {
+          // Normalize line endings for remaining buffer
+          streamBuffer = streamBuffer.replace(/\r\n/g, "\n");
           const events = streamBuffer.split("\n\n");
           for (let event of events) {
             if (!event.trim()) continue;
@@ -468,8 +474,15 @@
               const delta = data.choices?.[0]?.delta?.content;
               
               if (delta) {
+                // Create assistant div on first content if not already created
+                if (!assistantDiv) {
+                  assistantDiv = document.createElement("div");
+                  assistantDiv.className = "msg assistant";
+                  chatEl.appendChild(assistantDiv);
+                }
+                
                 assistantMsg += delta;
-                div.textContent = assistantMsg;
+                assistantDiv.textContent = assistantMsg;
                 scrollToBottom();
               }
             } catch (e) {
@@ -481,6 +494,10 @@
         if (assistantMsg) {
           messages.push({ role: "assistant", content: assistantMsg });
         } else {
+          // Remove empty div if no content was received
+          if (assistantDiv) {
+            assistantDiv.remove();
+          }
           addMessage("error", "No response received from the API");
         }
 
