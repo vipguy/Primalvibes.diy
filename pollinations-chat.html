@@ -353,6 +353,33 @@
       }
     }
 
+    // Normalize messages for non-multimodal models
+    function normalizeMessagesForModel(messages, model) {
+      const supportsMultimodal = !!(modelCapabilities[model]?.vision || modelCapabilities[model]?.audio);
+      if (supportsMultimodal) return messages;
+      
+      return messages.map(msg => {
+        if (msg.role !== 'user' || typeof msg.content === 'string') return msg;
+        
+        // Convert multimodal content to text-only for non-multimodal models
+        if (Array.isArray(msg.content)) {
+          const textParts = [];
+          for (const part of msg.content) {
+            if (part.type === 'text') {
+              textParts.push(part.text);
+            } else if (part.type === 'image_url') {
+              textParts.push('[Image omitted]');
+            } else if (part.type === 'input_audio') {
+              textParts.push('[Audio omitted]');
+            }
+          }
+          return { ...msg, content: textParts.join(' ') };
+        }
+        
+        return msg;
+      });
+    }
+
     async function sendToAPI(userContent, model) {
       // Convert single text-only content to string for non-multimodal models
       const supportsMultimodal = !!(modelCapabilities[model]?.vision || modelCapabilities[model]?.audio);
@@ -361,9 +388,12 @@
       
       messages.push({ role: "user", content: contentForApi });
 
+      // Normalize conversation history for the selected model
+      const normalizedMessages = normalizeMessagesForModel(messages, model);
+
       const payload = { 
         model, 
-        messages, 
+        messages: normalizedMessages, 
         stream: true, 
         temperature: 0.7 
       };
