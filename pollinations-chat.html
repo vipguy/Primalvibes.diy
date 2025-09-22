@@ -388,8 +388,6 @@
           throw new Error(errorMsg);
         }
 
-        removeTypingIndicator();
-
         const reader = resp.body.getReader();
         const decoder = new TextDecoder();
         let assistantMsg = "";
@@ -433,8 +431,9 @@
               const delta = data.choices?.[0]?.delta?.content;
               
               if (delta) {
-                // Create assistant div on first content
+                // Create assistant div and remove typing indicator on first content
                 if (!assistantDiv) {
+                  removeTypingIndicator();
                   assistantDiv = document.createElement("div");
                   assistantDiv.className = "msg assistant";
                   chatEl.appendChild(assistantDiv);
@@ -474,8 +473,9 @@
               const delta = data.choices?.[0]?.delta?.content;
               
               if (delta) {
-                // Create assistant div on first content if not already created
+                // Create assistant div and remove typing indicator on first content if not already created
                 if (!assistantDiv) {
+                  removeTypingIndicator();
                   assistantDiv = document.createElement("div");
                   assistantDiv.className = "msg assistant";
                   chatEl.appendChild(assistantDiv);
@@ -494,7 +494,8 @@
         if (assistantMsg) {
           messages.push({ role: "assistant", content: assistantMsg });
         } else {
-          // Remove empty div if no content was received
+          // Remove typing indicator and empty div if no content was received
+          removeTypingIndicator();
           if (assistantDiv) {
             assistantDiv.remove();
           }
