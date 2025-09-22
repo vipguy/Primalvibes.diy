@@ -354,7 +354,12 @@
     }
 
     async function sendToAPI(userContent, model) {
-      messages.push({ role: "user", content: userContent });
+      // Convert single text-only content to string for non-multimodal models
+      const supportsMultimodal = !!(modelCapabilities[model]?.vision || modelCapabilities[model]?.audio);
+      const textOnly = userContent.length === 1 && userContent[0].type === "text";
+      const contentForApi = textOnly && !supportsMultimodal ? userContent[0].text : userContent;
+      
+      messages.push({ role: "user", content: contentForApi });
 
       const payload = { 
         model, 
@@ -363,7 +368,7 @@
         temperature: 0.7 
       };
 
-      const typingIndicator = addTypingIndicator();
+      addTypingIndicator();
       let streamBuffer = ""; // Local buffer for this stream
 
       try {
