@@ -47,6 +47,9 @@ const meta = {
         "Number of syntax errors. When > 0, button shows error count and becomes disabled.",
       control: { type: "number", min: 0, max: 10 },
     },
+    color: {
+      description: "Color of the Button",
+    },
   },
   args: {
     onClick: () => console.log("Save clicked"),
@@ -54,9 +57,9 @@ const meta = {
 } satisfies Meta<typeof SaveButton>;
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type _Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const Default: _Story = {
   args: {
     hasChanges: true,
     syntaxErrorCount: 0,
@@ -71,7 +74,29 @@ export const Default: Story = {
   },
 };
 
-export const WithErrors: Story = {
+const colorNames: {
+  name: string;
+  value:
+    | "defaultBlue"
+    | "electricYellow"
+    | "hotPink"
+    | "cyberLime"
+    | "retroOrange"
+    | "coolCyan"
+    | "violetDream"
+    | "dangerRed";
+}[] = [
+  { name: "Default Blue", value: "defaultBlue" },
+  { name: "Electric Yellow", value: "electricYellow" },
+  { name: "Hot Pink", value: "hotPink" },
+  { name: "Cyber Lime", value: "cyberLime" },
+  { name: "Retro Orange", value: "retroOrange" },
+  { name: "Cool Cyan", value: "coolCyan" },
+  { name: "Violet Dream", value: "violetDream" },
+  { name: "Danger Red", value: "dangerRed" },
+];
+
+export const WithErrors: _Story = {
   args: {
     hasChanges: true,
     syntaxErrorCount: 3,
@@ -86,7 +111,7 @@ export const WithErrors: Story = {
   },
 };
 
-export const SingleError: Story = {
+export const SingleError: _Story = {
   args: {
     hasChanges: true,
     syntaxErrorCount: 1,
@@ -101,7 +126,7 @@ export const SingleError: Story = {
   },
 };
 
-export const NoChanges: Story = {
+export const NoChanges: _Story = {
   args: {
     hasChanges: false,
     syntaxErrorCount: 0,
@@ -115,7 +140,7 @@ export const NoChanges: Story = {
   },
 };
 
-export const NeobrutalistShowcase: Story = {
+export const NeobrutalistShowcase: _Story = {
   args: {
     hasChanges: true,
     syntaxErrorCount: 0,
@@ -136,7 +161,7 @@ Try clicking the button to see the characteristic neobrutalism active state anim
   },
   decorators: [
     (Story) => (
-      <div className="bg-background p-8">
+      <div className="bg-background p-8 text-black">
         <div className="space-y-4">
           <h3 className="text-lg font-bold">Neobrutalism Design Elements</h3>
           <div className="border-border bg-secondary-background rounded-[--radius-base] border-2 p-4">
@@ -152,7 +177,7 @@ Try clicking the button to see the characteristic neobrutalism active state anim
   ],
 };
 
-export const ColorSystem: Story = {
+export const ColorSystem: _Story = {
   args: {
     hasChanges: true,
     syntaxErrorCount: 0,
@@ -165,8 +190,8 @@ export const ColorSystem: Story = {
     },
   },
   decorators: [
-    (Story) => (
-      <div className="bg-background p-8">
+    () => (
+      <div className="bg-background p-8 text-black">
         <div className="space-y-6">
           <h3 className="text-lg font-bold">Neobrutalism Color System</h3>
           <p className="max-w-2xl text-sm text-gray-600">
@@ -176,59 +201,16 @@ export const ColorSystem: Story = {
             component integration.
           </p>
           <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold">Default Blue</h4>
-              <Story />
-            </div>
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold">Electric Yellow</h4>
-              <div className="space-y-2">
-                <div className="h-8 w-full rounded border-2 border-black bg-yellow-300"></div>
-                <p className="text-xs">#FFE500</p>
+            {colorNames.map((color) => (
+              <div key={color.value} className="space-y-3">
+                <h4 className="text-sm font-semibold">{color.name}</h4>
+                <SaveButton
+                  hasChanges={true}
+                  onClick={() => console.log(`${color.name} clicked`)}
+                  color={color.value}
+                />
               </div>
-            </div>
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold">Hot Pink</h4>
-              <div className="space-y-2">
-                <div className="h-8 w-full rounded border-2 border-black bg-pink-400"></div>
-                <p className="text-xs">#fa7fee</p>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold">Cyber Lime</h4>
-              <div className="space-y-2">
-                <div className="h-8 w-full rounded border-2 border-black bg-lime-400"></div>
-                <p className="text-xs">#7df752</p>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold">Retro Orange</h4>
-              <div className="space-y-2">
-                <div className="h-8 w-full rounded border-2 border-black bg-orange-400"></div>
-                <p className="text-xs">#fa8543</p>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold">Cool Cyan</h4>
-              <div className="space-y-2">
-                <div className="h-8 w-full rounded border-2 border-black bg-cyan-400"></div>
-                <p className="text-xs">#53f2fc</p>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold">Violet Dream</h4>
-              <div className="space-y-2">
-                <div className="h-8 w-full rounded border-2 border-black bg-violet-400"></div>
-                <p className="text-xs">#807dfa</p>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold">Danger Red</h4>
-              <div className="space-y-2">
-                <div className="h-8 w-full rounded border-2 border-black bg-red-400"></div>
-                <p className="text-xs">#f76363</p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>

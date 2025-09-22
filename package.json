@@ -27,7 +27,8 @@
     "dev:router": "cd vibes.diy/pkg && pnpm run dev:router",
     "pack": "echo skip pack",
     "publish": "echo skip publish",
-    "check": "pnpm format && pnpm build && pnpm test && pnpm lint"
+    "check": "pnpm format && pnpm build && pnpm test && pnpm lint",
+    "storybook": "cd vibes.diy/pkg && cross-env DISABLE_REACT_ROUTER=true pnpm run storybook"
   },
   "keywords": [
     "ai",
@@ -51,6 +52,7 @@
     "@types/deno": "^2.3.0",
     "@types/node": "^24.1.0",
     "@typescript/native-preview": "7.0.0-dev.20250806.1",
+    "cross-env": "^10.0.0",
     "eslint": "^9.31.0",
     "eslint-plugin-import": "^2.32.0",
     "prettier": "^3.6.2",
