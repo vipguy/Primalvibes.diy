@@ -373,7 +373,10 @@
       try {
         const resp = await fetch(API_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "Accept": "text/event-stream"
+          },
           body: JSON.stringify(payload)
         });
 
@@ -398,6 +401,8 @@
         div.className = "msg assistant";
         chatEl.appendChild(div);
 
+        let streamDone = false;
+        
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
@@ -419,7 +424,10 @@
             // Join multiple data lines with newlines for SSE compliance
             const combinedData = dataLines.map(l => l.replace("data: ", "")).join("\n");
             
-            if (combinedData.includes("[DONE]")) continue;
+            if (combinedData.includes("[DONE]")) {
+              streamDone = true;
+              break;
+            }
             
             try {
               if (!combinedData.trim()) continue;
@@ -434,6 +442,38 @@
               }
             } catch (e) {
               console.warn("Failed to parse SSE data:", combinedData, e);
+            }
+          }
+          
+          if (streamDone) break;
+        }
+        
+        // Process any remaining data in the buffer (handle tail events)
+        streamBuffer += decoder.decode();
+        if (streamBuffer.trim()) {
+          const events = streamBuffer.split("\n\n");
+          for (let event of events) {
+            if (!event.trim()) continue;
+            
+            const dataLines = event.split("\n").filter(l => l.startsWith("data: "));
+            if (dataLines.length === 0) continue;
+            
+            const combinedData = dataLines.map(l => l.replace("data: ", "")).join("\n");
+            if (combinedData.includes("[DONE]")) continue;
+            
+            try {
+              if (!combinedData.trim()) continue;
+              
+              const data = JSON.parse(combinedData);
+              const delta = data.choices?.[0]?.delta?.content;
+              
+              if (delta) {
+                assistantMsg += delta;
+                div.textContent = assistantMsg;
+                scrollToBottom();
+              }
+            } catch (e) {
+              console.warn("Failed to parse final SSE data:", combinedData, e);
             }
           }
         }
