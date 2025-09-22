@@ -193,10 +193,7 @@
     }
 
     const API_TOKEN = getApiToken();
-    if (!API_TOKEN) {
-      alert('No API token provided. Please refresh and enter your token, or add ?token=YOUR_TOKEN to the URL.');
-    }
-    const API_URL = `https://text.pollinations.ai/openai?token=${API_TOKEN}`;
+    const API_URL = API_TOKEN ? `https://text.pollinations.ai/openai?token=${API_TOKEN}` : null;
 
     const chatEl = document.getElementById("chat");
     const inputEl = document.getElementById("textInput");
@@ -206,10 +203,41 @@
 
     let messages = [{ role: "system", content: "You are a helpful assistant." }];
     let isProcessing = false;
-    let streamBuffer = ""; // Buffer for handling partial SSE lines
 
-    // Add welcome message
-    addMessage("system", "Welcome to Pollinations AI Chat! You can send text messages, upload images, or audio files.");
+    // Model capabilities based on Pollinations API
+    const modelCapabilities = {
+      'openai': { vision: true, audio: false },
+      'openai-fast': { vision: true, audio: false },
+      'openai-audio': { vision: true, audio: true },
+      'gemini': { vision: true, audio: false },
+      'deepseek': { vision: false, audio: false },
+      'mistral': { vision: false, audio: false }
+    };
+
+    // Audio format mapping for common MIME types
+    function getAudioFormat(mimeType) {
+      const formatMap = {
+        'audio/mpeg': 'mp3',
+        'audio/mp3': 'mp3',
+        'audio/wav': 'wav',
+        'audio/x-wav': 'wav',
+        'audio/m4a': 'm4a',
+        'audio/x-m4a': 'm4a',
+        'audio/webm': 'webm',
+        'audio/ogg': 'ogg',
+        'audio/oga': 'ogg'
+      };
+      return formatMap[mimeType] || mimeType.split('/')[1];
+    }
+
+    // Initialize UI based on token availability
+    if (!API_TOKEN) {
+      sendBtn.disabled = true;
+      sendBtn.textContent = "No Token";
+      addMessage("error", "No API token provided. Please refresh and enter your token, or add ?token=YOUR_TOKEN to the URL.");
+    } else {
+      addMessage("system", "Welcome to Pollinations AI Chat! You can send text messages, upload images, or audio files.");
+    }
 
     function addMessage(role, content) {
       const div = document.createElement("div");
@@ -245,13 +273,28 @@
     }
 
     async function sendMessage() {
-      if (isProcessing) return;
+      if (isProcessing || !API_TOKEN) return;
       
       const text = inputEl.value.trim();
       const file = fileEl.files[0];
       const selectedModel = modelEl.value;
       
       if (!text && !file) return;
+
+      // Check model capabilities for file uploads
+      if (file) {
+        const capabilities = modelCapabilities[selectedModel] || {};
+        
+        if (file.type.startsWith("image/") && !capabilities.vision) {
+          addMessage("error", `The ${selectedModel} model doesn't support images. Please select a vision-capable model like OpenAI or Gemini.`);
+          return;
+        }
+        
+        if (file.type.startsWith("audio/") && !capabilities.audio) {
+          addMessage("error", "Audio files require the OpenAI Audio model. Please select it from the dropdown.");
+          return;
+        }
+      }
 
       setProcessing(true);
 
@@ -283,20 +326,16 @@
                 });
                 await sendToAPI(userContent, selectedModel);
               } else if (file.type.startsWith("audio/")) {
-                if (selectedModel !== "openai-audio") {
-                  addMessage("error", "Audio files require the OpenAI Audio model. Please select it from the dropdown.");
-                  setProcessing(false);
-                  return;
-                }
                 const base64Data = reader.result.split(",")[1];
+                const audioFormat = getAudioFormat(file.type);
                 userContent.push({ 
                   type: "input_audio", 
                   input_audio: { 
                     data: base64Data, 
-                    format: file.type.split("/")[1] 
+                    format: audioFormat 
                   } 
                 });
-                await sendToAPI(userContent, "openai-audio");
+                await sendToAPI(userContent, selectedModel);
               }
             } catch (error) {
               addMessage("error", `File processing error: ${error.message}`);
@@ -323,7 +362,13 @@
         temperature: 0.7 
       };
 
+      // For audio model, bias toward text output unless user wants audio
+      if (model === "openai-audio") {
+        payload.modalities = ["text"];
+      }
+
       const typingIndicator = addTypingIndicator();
+      let streamBuffer = ""; // Local buffer for this stream
 
       try {
         const resp = await fetch(API_URL, {
@@ -353,8 +398,6 @@
         div.className = "msg assistant";
         chatEl.appendChild(div);
 
-        streamBuffer = ""; // Reset buffer for new stream
-
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
@@ -373,8 +416,8 @@
             const dataLines = event.split("\n").filter(l => l.startsWith("data: "));
             if (dataLines.length === 0) continue;
             
-            // Join multiple data lines if present
-            const combinedData = dataLines.map(l => l.replace("data: ", "")).join("");
+            // Join multiple data lines with newlines for SSE compliance
+            const combinedData = dataLines.map(l => l.replace("data: ", "")).join("\n");
             
             if (combinedData.includes("[DONE]")) continue;
             
