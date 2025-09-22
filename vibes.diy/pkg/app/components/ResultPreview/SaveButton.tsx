@@ -66,7 +66,7 @@ export function SaveButton({
           shadowClasses,
           activeClasses,
           variantClasses,
-          "hidden gap-2 px-4 py-2 sm:flex"
+          "hidden gap-2 px-4 py-2 sm:flex",
         )}
       >
         <MinidiscIcon className="h-4 w-4" />
@@ -81,7 +81,7 @@ export function SaveButton({
           shadowClasses,
           activeClasses,
           variantClasses,
-          "flex h-10 w-10 sm:hidden"
+          "flex h-10 w-10 sm:hidden",
         )}
         title={
           hasErrors

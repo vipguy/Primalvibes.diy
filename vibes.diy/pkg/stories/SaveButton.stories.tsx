@@ -48,8 +48,7 @@ const meta = {
       control: { type: "number", min: 0, max: 10 },
     },
     color: {
-      description:
-        "Color of the Button",
+      description: "Color of the Button",
     },
   },
   args: {
@@ -77,7 +76,7 @@ export const Default: Story = {
 
 const colorNames: {
   name: string;
-  value: 
+  value:
     | "defaultBlue"
     | "electricYellow"
     | "hotPink"
@@ -87,16 +86,15 @@ const colorNames: {
     | "violetDream"
     | "dangerRed";
 }[] = [
-  { name: "Default Blue", value: "defaultBlue"},
+  { name: "Default Blue", value: "defaultBlue" },
   { name: "Electric Yellow", value: "electricYellow" },
   { name: "Hot Pink", value: "hotPink" },
-  { name: "Cyber Lime", value: "cyberLime"},
+  { name: "Cyber Lime", value: "cyberLime" },
   { name: "Retro Orange", value: "retroOrange" },
   { name: "Cool Cyan", value: "coolCyan" },
   { name: "Violet Dream", value: "violetDream" },
   { name: "Danger Red", value: "dangerRed" },
 ];
-
 
 export const WithErrors: Story = {
   args: {
