@@ -3,39 +3,38 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../lib/utils.js";
 
-const baseClasses = 'inline-flex items-center justify-center whitespace-nowrap rounded-[--radius-base] text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border-2 border-borde inline-flex items-center justify-center whitespace-nowrap rounded-[5px] text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border-2 border-black';
+const baseClasses =
+  "inline-flex items-center justify-center whitespace-nowrap rounded-[--radius-base] text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border-2 border-borde inline-flex items-center justify-center whitespace-nowrap rounded-[5px] text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border-2 border-black";
 const shadowClasses = "shadow-[4px_4px_0px_0px_black]";
-const activeClasses = "active:translate-x-[4px] active:translate-y-[4px] active:shadow-none";
+const activeClasses =
+  "active:translate-x-[4px] active:translate-y-[4px] active:shadow-none";
 
-const buttonVariants = cva(
-  `${baseClasses} ${shadowClasses} ${activeClasses}`,
-  {
-    variants: {
-      variant: {
-        blue: "bg-blue-500 text-white hover:bg-blue-600",
-        electric: "bg-yellow-300 text-black hover:bg-yellow-400",
-        hot: "bg-pink-400 text-white hover:bg-pink-500",
-        cyber: "bg-lime-400 text-white hover:bg-lime-500",
-        retro: "bg-orange-400 text-white hover:bg-orange-500",
-        cool: "bg-cyan-400 text-white hover:bg-cyan-500",
-        dream: "bg-violet-400 text-white hover:bg-violet-500",
-        danger: "bg-red-400 text-white hover:bg-red-500",
-      },
-      size: {
-        default: "h-10 px-4 py-2 hidden sm:flex gap-2",
-        icon: "h-10 w-10 sm:hidden",
-      },
+const buttonVariants = cva(`${baseClasses} ${shadowClasses} ${activeClasses}`, {
+  variants: {
+    variant: {
+      blue: "bg-blue-500 text-white hover:bg-blue-600",
+      electric: "bg-yellow-300 text-black hover:bg-yellow-400",
+      hot: "bg-pink-400 text-white hover:bg-pink-500",
+      cyber: "bg-lime-400 text-white hover:bg-lime-500",
+      retro: "bg-orange-400 text-white hover:bg-orange-500",
+      cool: "bg-cyan-400 text-white hover:bg-cyan-500",
+      dream: "bg-violet-400 text-white hover:bg-violet-500",
+      danger: "bg-red-400 text-white hover:bg-red-500",
     },
-    defaultVariants: {
-      variant: "blue",
-      size: "default",
+    size: {
+      default: "h-10 px-4 py-2 hidden sm:flex gap-2",
+      icon: "h-10 w-10 sm:hidden",
     },
   },
-);
+  defaultVariants: {
+    variant: "blue",
+    size: "default",
+  },
+});
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-  VariantProps<typeof buttonVariants> {
+    VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 

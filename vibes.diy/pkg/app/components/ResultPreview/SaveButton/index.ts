@@ -1,1 +1,1 @@
-export { SaveButton } from './SaveButton.tsx';
+export { SaveButton } from "./SaveButton.js";

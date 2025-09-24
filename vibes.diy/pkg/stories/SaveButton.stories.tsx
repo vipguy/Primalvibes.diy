@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import React from "react";
-import { SaveButton } from "../app/components/ResultPreview/SaveButton/SaveButton.tsx";
+import { SaveButton } from "../app/components/ResultPreview/SaveButton/SaveButton.js";
 
 const meta = {
   title: "Components/Save Button",
@@ -78,13 +78,13 @@ const colorNames: {
   name: string;
   value:
     | "blue"
-  | "electric"
-  | "hot"
-  | "cyber"
-  | "retro"
-  | "cool"
-  | "dream"
-  | "danger";
+    | "electric"
+    | "hot"
+    | "cyber"
+    | "retro"
+    | "cool"
+    | "dream"
+    | "danger";
 }[] = [
   { name: "Default Blue", value: "blue" },
   { name: "Electric Yellow", value: "electric" },
@@ -160,7 +160,7 @@ Try clicking the button to see the characteristic neobrutalism active state anim
     },
   },
   decorators: [
-    (Story) => (
+    (Story: React.ComponentType) => (
       <div className="bg-background p-8 text-black">
         <div className="space-y-4">
           <h3 className="text-lg font-bold">Neobrutalism Design Elements</h3>

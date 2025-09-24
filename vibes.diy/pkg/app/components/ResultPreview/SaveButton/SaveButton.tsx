@@ -1,6 +1,6 @@
 import React from "react";
-import { MinidiscIcon } from "../../HeaderContent/SvgIcons.tsx";
-import { Button } from "../../ui/button.tsx";
+import { MinidiscIcon } from "../../HeaderContent/SvgIcons.js";
+import { Button } from "../../ui/button.js";
 import { SaveButtonProps, ButtonColor } from "./SaveButton.types.js";
 
 export const SaveButton: React.FC<SaveButtonProps> = ({
@@ -44,4 +44,4 @@ export const SaveButton: React.FC<SaveButtonProps> = ({
       </Button>
     </>
   );
-}
+};
