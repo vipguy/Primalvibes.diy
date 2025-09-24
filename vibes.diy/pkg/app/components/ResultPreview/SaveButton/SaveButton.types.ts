@@ -3,6 +3,7 @@ export interface SaveButtonProps {
   hasChanges: boolean;
   syntaxErrorCount?: number;
   color?: ButtonColor;
+  testId: string;
 }
 
 export type ButtonColor =

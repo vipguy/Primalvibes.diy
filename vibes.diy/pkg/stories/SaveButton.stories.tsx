@@ -50,6 +50,10 @@ const meta = {
     color: {
       description: "Color of the Button",
     },
+    testId: {
+       description: "Id for testing purpose",
+      control: "text"
+    },
   },
   args: {
     onClick: () => console.log("Save clicked"),
@@ -63,6 +67,7 @@ export const Default: _Story = {
   args: {
     hasChanges: true,
     syntaxErrorCount: 0,
+    testId: "save-button",
   },
   parameters: {
     docs: {
@@ -100,6 +105,7 @@ export const WithErrors: _Story = {
   args: {
     hasChanges: true,
     syntaxErrorCount: 3,
+    testId: "save-button",
   },
   parameters: {
     docs: {
@@ -115,6 +121,7 @@ export const SingleError: _Story = {
   args: {
     hasChanges: true,
     syntaxErrorCount: 1,
+    testId: "save-button",
   },
   parameters: {
     docs: {
@@ -130,6 +137,7 @@ export const NoChanges: _Story = {
   args: {
     hasChanges: false,
     syntaxErrorCount: 0,
+    testId: "save-button",
   },
   parameters: {
     docs: {
@@ -144,6 +152,7 @@ export const NeobrutalistShowcase: _Story = {
   args: {
     hasChanges: true,
     syntaxErrorCount: 0,
+    testId: "save-button",
   },
   parameters: {
     docs: {
@@ -181,6 +190,7 @@ export const ColorSystem: _Story = {
   args: {
     hasChanges: true,
     syntaxErrorCount: 0,
+    testId: "save-button",
   },
   parameters: {
     docs: {
@@ -208,6 +218,7 @@ export const ColorSystem: _Story = {
                   hasChanges={true}
                   onClick={() => console.log(`${color.name} clicked`)}
                   color={color.value}
+                  testId="save-button"
                 />
               </div>
             ))}

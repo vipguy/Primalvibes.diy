@@ -12,152 +12,81 @@ describe("SaveButton", () => {
 
   describe("Rendering", () => {
     it("does not render if hasChanges is false", () => {
-      const { container } = render(
-        <SaveButton onClick={mockOnClick} hasChanges={false} />,
+      const { queryByTestId } = render(
+        <SaveButton onClick={mockOnClick} hasChanges={false} testId="save-button-1" />
       );
-      expect(container.firstChild).toBeNull();
+      expect(queryByTestId("save-button-1")).toBeNull();
     });
 
-    it("renders desktop and mobile buttons when hasChanges is true", () => {
-      const { container } = render(
-        <SaveButton onClick={mockOnClick} hasChanges={true} />,
+    it("renders button when hasChanges is true", () => {
+      const { getByTestId } = render(
+        <SaveButton onClick={mockOnClick} hasChanges={true} testId="save-button-2" />
       );
-      const desktopButton = container.querySelector("button.sm\\:flex");
-      const mobileButton = container.querySelector("button.sm\\:hidden");
-      expect(desktopButton).toBeInTheDocument();
-      expect(mobileButton).toBeInTheDocument();
+      expect(getByTestId("save-button-2")).toBeInTheDocument();
     });
   });
 
   describe("Without errors", () => {
-    it("desktop button shows 'Save' text", () => {
-      const { container } = render(
-        <SaveButton
-          onClick={mockOnClick}
-          hasChanges={true}
-          syntaxErrorCount={0}
-        />,
+    it("button shows 'Save' text", () => {
+      const { getByTestId } = render(
+        <SaveButton onClick={mockOnClick} hasChanges={true} syntaxErrorCount={0} testId="save-button-3" />
       );
-      const desktopButton = container.querySelector("button.sm\\:flex");
-      expect(desktopButton).toHaveTextContent("Save");
+      const button = getByTestId("save-button-3");
+      expect(button).toHaveTextContent("Save");
     });
 
-    it("desktop button is enabled and calls onClick when clicked", () => {
-      const { container } = render(
-        <SaveButton
-          onClick={mockOnClick}
-          hasChanges={true}
-          syntaxErrorCount={0}
-        />,
+    it("button is enabled and calls onClick when clicked", () => {
+      const { getByTestId } = render(
+        <SaveButton onClick={mockOnClick} hasChanges={true} syntaxErrorCount={0} testId="save-button-4" />
       );
-      const desktopButton = container.querySelector("button.sm\\:flex");
-      expect(desktopButton).toBeTruthy();
-      if (!desktopButton) throw new Error("missing button");
-      fireEvent.click(desktopButton);
+      const button = getByTestId("save-button-4");
+      expect(button).toBeEnabled();
+      fireEvent.click(button);
       expect(mockOnClick).toHaveBeenCalledTimes(1);
-    });
-
-    it("mobile button shows icon-only with title", () => {
-      const { container } = render(
-        <SaveButton
-          onClick={mockOnClick}
-          hasChanges={true}
-          syntaxErrorCount={0}
-        />,
-      );
-      const mobileButton = container.querySelector("button.sm\\:hidden");
-      expect(mobileButton).toHaveAttribute("title", "Save changes");
     });
   });
 
   describe("With errors", () => {
-    it("desktop button shows singular error message", () => {
-      const { container } = render(
-        <SaveButton
-          onClick={mockOnClick}
-          hasChanges={true}
-          syntaxErrorCount={1}
-        />,
+    it("button shows singular error message and is disabled", () => {
+      const { getByTestId } = render(
+        <SaveButton onClick={mockOnClick} hasChanges={true} syntaxErrorCount={1} testId="save-button-5" />
       );
-      const desktopButton = container.querySelector("button.sm\\:flex");
-      expect(desktopButton).toHaveTextContent("1 Error");
-      expect(desktopButton).toBeDisabled();
+      const button = getByTestId("save-button-5");
+      expect(button).toHaveTextContent("1 Error");
+      expect(button).toBeDisabled();
     });
 
-    it("desktop button shows plural error message", () => {
-      const { container } = render(
-        <SaveButton
-          onClick={mockOnClick}
-          hasChanges={true}
-          syntaxErrorCount={3}
-        />,
+    it("button shows plural error message and is disabled", () => {
+      const { getByTestId } = render(
+        <SaveButton onClick={mockOnClick} hasChanges={true} syntaxErrorCount={3} testId="save-button-6" />
       );
-      const desktopButton = container.querySelector("button.sm\\:flex");
-      expect(desktopButton).toHaveTextContent("3 Errors");
-      expect(desktopButton).toBeDisabled();
-    });
-
-    it("does not call onClick when disabled", () => {
-      const { container } = render(
-        <SaveButton
-          onClick={mockOnClick}
-          hasChanges={true}
-          syntaxErrorCount={1}
-        />,
-      );
-      const desktopButton = container.querySelector("button.sm\\:flex");
-      expect(desktopButton).toBeTruthy();
-      if (!desktopButton) throw new Error("missing button");
-      fireEvent.click(desktopButton);
-      expect(mockOnClick).not.toHaveBeenCalled();
-    });
-
-    it("mobile button is disabled when errors exist", () => {
-      const { container } = render(
-        <SaveButton
-          onClick={mockOnClick}
-          hasChanges={true}
-          syntaxErrorCount={2}
-        />,
-      );
-      const mobileButton = container.querySelector("button.sm\\:hidden");
-      expect(mobileButton).toBeDisabled();
+      const button = getByTestId("save-button-6");
+      expect(button).toHaveTextContent("3 Errors");
+      expect(button).toBeDisabled();
     });
   });
 
   describe("Props handling", () => {
     it("handles undefined syntaxErrorCount as 0", () => {
-      const { container } = render(
-        <SaveButton onClick={mockOnClick} hasChanges={true} />,
+      const { getByTestId } = render(
+        <SaveButton onClick={mockOnClick} hasChanges={true} testId="save-button-7" />
       );
-      const desktopButton = container.querySelector("button.sm\\:flex");
-      expect(desktopButton).toHaveTextContent("Save");
+      const button = getByTestId("save-button-7");
+      expect(button).toHaveTextContent("Save");
     });
 
-    it("desktop button applies correct color variant when no errors", () => {
-      const { container } = render(
+    it("applies correct color variant when no errors", () => {
+      const { getByTestId } = render(
         <SaveButton
           onClick={mockOnClick}
           hasChanges={true}
           syntaxErrorCount={0}
           color="retro"
-        />,
+          testId="save-button-8"
+        />
       );
-      const desktopButton = container.querySelector("button.sm\\:flex");
-      expect(desktopButton?.className).toContain("bg-orange-400");
-    });
-
-    it("mobile button applies correct color variant when no errors", () => {
-      const { container } = render(
-        <SaveButton
-          onClick={mockOnClick}
-          hasChanges={true}
-          syntaxErrorCount={0}
-          color="retro"
-        />,
-      );
-      const mobileButton = container.querySelector("button.sm\\:hidden");
-      expect(mobileButton?.className).toContain("bg-orange-400");
+      const button = getByTestId("save-button-8");
+      expect(button.className).toContain("bg-orange-400");
     });
   });
 });

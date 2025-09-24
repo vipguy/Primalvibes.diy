@@ -8,6 +8,7 @@ export const SaveButton: React.FC<SaveButtonProps> = ({
   hasChanges,
   syntaxErrorCount = 0,
   color = "blue",
+  testId,
 }) => {
   if (!hasChanges) return null;
 
@@ -20,6 +21,7 @@ export const SaveButton: React.FC<SaveButtonProps> = ({
 
   return (
     <Button
+      data-testid={testId}
       onClick={onClick}
       disabled={hasErrors}
       variant={variant}
