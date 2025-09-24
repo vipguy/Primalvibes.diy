@@ -22,8 +22,7 @@ const buttonVariants = cva(`${baseClasses} ${shadowClasses} ${activeClasses}`, {
       danger: "bg-red-400 text-white hover:bg-red-500",
     },
     size: {
-      default: "h-10 px-4 py-2 hidden sm:flex gap-2",
-      icon: "h-10 w-10 sm:hidden",
+      default: "h-10 w-10 sm:w-auto sm:px-4 sm:gap-2",
     },
   },
   defaultVariants: {

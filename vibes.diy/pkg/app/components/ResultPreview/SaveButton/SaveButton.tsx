@@ -19,29 +19,15 @@ export const SaveButton: React.FC<SaveButtonProps> = ({
     : "Save";
 
   return (
-    <>
-      {/* Desktop */}
-      <Button
-        onClick={onClick}
-        disabled={hasErrors}
-        variant={variant}
-        size="default"
-        title="Save changes"
-      >
-        <MinidiscIcon className="h-4 w-4" />
-        {buttonText}
-      </Button>
-
-      {/* Mobile button */}
-      <Button
-        onClick={onClick}
-        disabled={hasErrors}
-        variant={hasErrors ? "danger" : color}
-        size="icon"
-        title="Save changes"
-      >
-        <MinidiscIcon className="h-4 w-4" />
-      </Button>
-    </>
+    <Button
+      onClick={onClick}
+      disabled={hasErrors}
+      variant={variant}
+      size="default"
+      title="Save changes"
+    >
+      <MinidiscIcon className="h-4 w-4" />
+      <span className="hidden sm:inline">{buttonText}</span>
+    </Button>
   );
 };
