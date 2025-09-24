@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import React from "react";
-import { SaveButton } from "../app/components/ResultPreview/SaveButton.js";
+import { SaveButton } from "../app/components/ResultPreview/SaveButton/SaveButton.tsx";
 
 const meta = {
-  title: "Components/SaveButton",
+  title: "Components/Save Button",
   component: SaveButton,
   parameters: {
     layout: "padded",
@@ -77,23 +77,23 @@ export const Default: _Story = {
 const colorNames: {
   name: string;
   value:
-    | "defaultBlue"
-    | "electricYellow"
-    | "hotPink"
-    | "cyberLime"
-    | "retroOrange"
-    | "coolCyan"
-    | "violetDream"
-    | "dangerRed";
+    | "blue"
+  | "electric"
+  | "hot"
+  | "cyber"
+  | "retro"
+  | "cool"
+  | "dream"
+  | "danger";
 }[] = [
-  { name: "Default Blue", value: "defaultBlue" },
-  { name: "Electric Yellow", value: "electricYellow" },
-  { name: "Hot Pink", value: "hotPink" },
-  { name: "Cyber Lime", value: "cyberLime" },
-  { name: "Retro Orange", value: "retroOrange" },
-  { name: "Cool Cyan", value: "coolCyan" },
-  { name: "Violet Dream", value: "violetDream" },
-  { name: "Danger Red", value: "dangerRed" },
+  { name: "Default Blue", value: "blue" },
+  { name: "Electric Yellow", value: "electric" },
+  { name: "Hot Pink", value: "hot" },
+  { name: "Cyber Lime", value: "cyber" },
+  { name: "Retro Orange", value: "retro" },
+  { name: "Cool Cyan", value: "cool" },
+  { name: "Violet Dream", value: "dream" },
+  { name: "Danger Red", value: "danger" },
 ];
 
 export const WithErrors: _Story = {
