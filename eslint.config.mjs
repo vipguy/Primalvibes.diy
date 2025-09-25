@@ -12,6 +12,10 @@ const opts = tseslint.config(
       globals: {
         queueMicrotask: "readonly",
       },
+      parserOptions: {
+        tsconfigRootDir: import.meta.dirname,
+        project: true,
+      },
     },
   },
   {
