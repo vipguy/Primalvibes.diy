@@ -51,8 +51,8 @@ const meta = {
       description: "Color of the Button",
     },
     testId: {
-       description: "Id for testing purpose",
-      control: "text"
+      description: "Id for testing purpose",
+      control: "text",
     },
   },
   args: {

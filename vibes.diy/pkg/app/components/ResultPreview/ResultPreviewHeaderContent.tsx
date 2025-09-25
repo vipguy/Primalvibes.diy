@@ -121,6 +121,7 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
               onClick={onCodeSave}
               hasChanges={hasCodeChanges}
               syntaxErrorCount={syntaxErrorCount}
+              testId="header-save-button"
             />
           )}
 
