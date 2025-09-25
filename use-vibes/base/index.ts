@@ -1,4 +1,3 @@
-// Re-export specific items from use-fireproof
 import type { ToCloudAttachable } from '@fireproof/core-types-protocols-cloud';
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -14,7 +13,7 @@ import { ManualRedirectStrategy } from './ManualRedirectStrategy.js';
 export { fireproof, ImgFile, ManualRedirectStrategy };
 
 // Re-export all types under a namespace
-  export type * as Fireproof from 'use-fireproof';
+export type * as Fireproof from 'use-fireproof';
 
 // Helper function to create toCloud configuration with ManualRedirectStrategy
 export function toCloud(opts?: UseFpToCloudParam): ToCloudAttachable {
@@ -148,7 +147,7 @@ import { callAI } from 'call-ai';
 export { callAI, callAI as callAi };
 
 // Re-export all types under a namespace
-  export type * as CallAI from 'call-ai';
+export type * as CallAI from 'call-ai';
 
 // Export ImgGen component - the primary export
 export { default as ImgGen } from './components/ImgGen.js';
@@ -181,6 +180,5 @@ export {
   type ImageDocument,
   type PartialImageDocument,
   type UseImageGenOptions,
-  type UseImageGenResult
+  type UseImageGenResult,
 } from './hooks/image-gen/types.js';
-
