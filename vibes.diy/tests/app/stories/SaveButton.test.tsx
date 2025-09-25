@@ -1,225 +1,124 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { SaveButton } from "~/vibes.diy/app/components/ResultPreview/SaveButton.js";
+import { SaveButton } from "~/vibes.diy/app/components/ResultPreview/SaveButton/index.js";
 
 describe("SaveButton", () => {
   const mockOnClick = vi.fn();
 
   beforeEach(() => {
-    globalThis.document.body.innerHTML = "";
     mockOnClick.mockClear();
   });
 
-  describe("Rendering behavior", () => {
-    it("should not render when hasChanges is false", () => {
-      const { container } = render(
-        <SaveButton onClick={mockOnClick} hasChanges={false} />,
+  describe("Rendering", () => {
+    it("does not render if hasChanges is false", () => {
+      const { queryByTestId } = render(
+        <SaveButton
+          onClick={mockOnClick}
+          hasChanges={false}
+          testId="save-button-1"
+        />,
       );
-      expect(container.firstChild).toBeNull();
+      expect(queryByTestId("save-button-1")).toBeNull();
     });
 
-    it("should render when hasChanges is true", () => {
-      const res = render(
-        <SaveButton onClick={mockOnClick} hasChanges={true} />,
+    it("renders button when hasChanges is true", () => {
+      const { getByTestId } = render(
+        <SaveButton
+          onClick={mockOnClick}
+          hasChanges={true}
+          testId="save-button-2"
+        />,
       );
-
-      // Should render both desktop and mobile versions
-      expect(res.getAllByRole("button", { name: /save/i })).toHaveLength(2);
+      expect(getByTestId("save-button-2")).toBeInTheDocument();
     });
   });
 
-  describe("Save state (no errors)", () => {
-    it('should show "Save" text on desktop version', () => {
-      const res = render(
+  describe("Without errors", () => {
+    it("button shows 'Save' text", () => {
+      const { getByTestId } = render(
         <SaveButton
           onClick={mockOnClick}
           hasChanges={true}
           syntaxErrorCount={0}
+          testId="save-button-3"
         />,
       );
-
-      expect(res.getByText("Save")).toBeInTheDocument();
+      const button = getByTestId("save-button-3");
+      expect(button).toHaveTextContent("Save");
     });
 
-    it("should have blue styling when no errors", () => {
-      const res = render(
+    it("button is enabled and calls onClick when clicked", () => {
+      const { getByTestId } = render(
         <SaveButton
           onClick={mockOnClick}
           hasChanges={true}
           syntaxErrorCount={0}
+          testId="save-button-4"
         />,
       );
-
-      const button = res.getByText("Save").closest("button");
-      expect(button).toHaveClass("bg-blue-500", "hover:bg-blue-600");
-      expect(button).not.toHaveClass("cursor-not-allowed", "opacity-75");
-      expect(button).not.toBeDisabled();
-    });
-
-    it("should call onClick when clicked and no errors", () => {
-      const res = render(
-        <SaveButton
-          onClick={mockOnClick}
-          hasChanges={true}
-          syntaxErrorCount={0}
-        />,
-      );
-
-      const button = res.getByText("Save");
+      const button = getByTestId("save-button-4");
+      expect(button).toBeEnabled();
       fireEvent.click(button);
-
       expect(mockOnClick).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe("Error state", () => {
-    it("should show singular error message for 1 error", () => {
-      const res = render(
+  describe("With errors", () => {
+    it("button shows singular error message and is disabled", () => {
+      const { getByTestId } = render(
         <SaveButton
           onClick={mockOnClick}
           hasChanges={true}
           syntaxErrorCount={1}
+          testId="save-button-5"
         />,
       );
-
-      expect(res.getByText("1 Error")).toBeInTheDocument();
+      const button = getByTestId("save-button-5");
+      expect(button).toHaveTextContent("1 Error");
+      expect(button).toBeDisabled();
     });
 
-    it("should show plural error message for multiple errors", () => {
-      const res = render(
+    it("button shows plural error message and is disabled", () => {
+      const { getByTestId } = render(
         <SaveButton
           onClick={mockOnClick}
           hasChanges={true}
           syntaxErrorCount={3}
+          testId="save-button-6"
         />,
       );
-
-      expect(res.getByText("3 Errors")).toBeInTheDocument();
-    });
-
-    it("should have red styling when errors exist", () => {
-      const res = render(
-        <SaveButton
-          onClick={mockOnClick}
-          hasChanges={true}
-          syntaxErrorCount={1}
-        />,
-      );
-
-      const button = res.getByText("1 Error").closest("button");
-      expect(button).toHaveClass("bg-red-500", "hover:bg-red-600");
-      expect(button).toHaveClass("cursor-not-allowed", "opacity-75");
+      const button = getByTestId("save-button-6");
+      expect(button).toHaveTextContent("3 Errors");
       expect(button).toBeDisabled();
     });
+  });
 
-    it("should not call onClick when clicked and has errors", () => {
-      const res = render(
+  describe("Props handling", () => {
+    it("handles undefined syntaxErrorCount as 0", () => {
+      const { getByTestId } = render(
         <SaveButton
           onClick={mockOnClick}
           hasChanges={true}
-          syntaxErrorCount={1}
+          testId="save-button-7"
         />,
       );
-
-      const button = res.getByText("1 Error");
-      fireEvent.click(button);
-
-      // Button is disabled, so click shouldn't trigger the handler
-      expect(mockOnClick).not.toHaveBeenCalled();
+      const button = getByTestId("save-button-7");
+      expect(button).toHaveTextContent("Save");
     });
-  });
 
-  describe("Responsive behavior", () => {
-    it("should render both desktop and mobile versions", () => {
-      const res = render(
+    it("applies correct color variant when no errors", () => {
+      const { getByTestId } = render(
         <SaveButton
           onClick={mockOnClick}
           hasChanges={true}
           syntaxErrorCount={0}
+          color="retro"
+          testId="save-button-8"
         />,
       );
-
-      // Desktop version (hidden on mobile)
-      const desktopButton = res.getByText("Save").closest("button");
-      expect(desktopButton).toHaveClass("hidden", "sm:flex");
-
-      // Mobile version (hidden on desktop) - find by title attribute
-      const mobileButton = res.getByTitle("Save changes");
-      expect(mobileButton).toHaveClass("sm:hidden");
-    });
-
-    it("should show error count in mobile tooltip when has errors", () => {
-      const res = render(
-        <SaveButton
-          onClick={mockOnClick}
-          hasChanges={true}
-          syntaxErrorCount={2}
-        />,
-      );
-
-      const mobileButton = res.getByTitle("2 syntax errors");
-      expect(mobileButton).toBeInTheDocument();
-      expect(mobileButton).toHaveClass("sm:hidden");
-    });
-
-    it("should show singular error in mobile tooltip for 1 error", () => {
-      const res = render(
-        <SaveButton
-          onClick={mockOnClick}
-          hasChanges={true}
-          syntaxErrorCount={1}
-        />,
-      );
-
-      const mobileButton = res.getByTitle("1 syntax error");
-      expect(mobileButton).toBeInTheDocument();
-    });
-  });
-
-  describe("Icon rendering", () => {
-    it("should render minidisc icon in both versions", () => {
-      const { container } = render(
-        <SaveButton onClick={mockOnClick} hasChanges={true} />,
-      );
-
-      // Both desktop and mobile versions should have SVG icons
-      const svgs = container.querySelectorAll("svg");
-      expect(svgs).toHaveLength(2);
-
-      // Each SVG should have the minidisc structure
-      svgs.forEach((svg) => {
-        expect(svg).toHaveAttribute("viewBox", "0 0 24 24");
-        expect(svg.querySelectorAll("circle")).toHaveLength(2); // outer and inner rings
-        expect(svg.querySelector("rect")).toBeInTheDocument(); // label area
-        expect(svg.querySelectorAll("line")).toHaveLength(3); // label lines
-      });
-    });
-  });
-
-  describe("Props validation", () => {
-    it("should handle undefined syntaxErrorCount", () => {
-      const res = render(
-        <SaveButton onClick={mockOnClick} hasChanges={true} />,
-      );
-
-      expect(res.getByText("Save")).toBeInTheDocument();
-      const button = res.getByText("Save").closest("button");
-      expect(button).not.toBeDisabled();
-    });
-
-    it("should handle zero syntaxErrorCount explicitly", () => {
-      const res = render(
-        <SaveButton
-          onClick={mockOnClick}
-          hasChanges={true}
-          syntaxErrorCount={0}
-        />,
-      );
-
-      expect(res.getByText("Save")).toBeInTheDocument();
-      const button = res.getByText("Save").closest("button");
-      expect(button).not.toBeDisabled();
+      const button = getByTestId("save-button-8");
+      expect(button.className).toContain("bg-orange-400");
     });
   });
 });

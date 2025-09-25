@@ -4,7 +4,7 @@ import { useSession } from "../../hooks/useSession.js";
 import type { ViewControlsType, ViewType } from "@vibes.diy/prompts";
 // import { useViewState } from '../../utils/ViewState'; // useViewState is now lifted to home.tsx
 import { BackButton } from "./BackButton.js";
-import { SaveButton } from "./SaveButton.js";
+import { SaveButton } from "./SaveButton/SaveButton.js";
 import { ShareButton } from "./ShareButton.js";
 import { ShareModal } from "./ShareModal.js";
 import { usePublish } from "./usePublish.js";
@@ -121,6 +121,7 @@ const ResultPreviewHeaderContent: React.FC<ResultPreviewHeaderContentProps> = ({
               onClick={onCodeSave}
               hasChanges={hasCodeChanges}
               syntaxErrorCount={syntaxErrorCount}
+              testId="header-save-button"
             />
           )}
 

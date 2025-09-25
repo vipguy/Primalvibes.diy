@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import React from "react";
-import { SaveButton } from "../app/components/ResultPreview/SaveButton.js";
+import { SaveButton } from "../app/components/ResultPreview/SaveButton/SaveButton.js";
 
 const meta = {
-  title: "Components/SaveButton",
+  title: "Components/Save Button",
   component: SaveButton,
   parameters: {
     layout: "padded",
@@ -50,6 +50,10 @@ const meta = {
     color: {
       description: "Color of the Button",
     },
+    testId: {
+      description: "Id for testing purpose",
+      control: "text",
+    },
   },
   args: {
     onClick: () => console.log("Save clicked"),
@@ -63,6 +67,7 @@ export const Default: _Story = {
   args: {
     hasChanges: true,
     syntaxErrorCount: 0,
+    testId: "save-button",
   },
   parameters: {
     docs: {
@@ -77,29 +82,30 @@ export const Default: _Story = {
 const colorNames: {
   name: string;
   value:
-    | "defaultBlue"
-    | "electricYellow"
-    | "hotPink"
-    | "cyberLime"
-    | "retroOrange"
-    | "coolCyan"
-    | "violetDream"
-    | "dangerRed";
+    | "blue"
+    | "electric"
+    | "hot"
+    | "cyber"
+    | "retro"
+    | "cool"
+    | "dream"
+    | "danger";
 }[] = [
-  { name: "Default Blue", value: "defaultBlue" },
-  { name: "Electric Yellow", value: "electricYellow" },
-  { name: "Hot Pink", value: "hotPink" },
-  { name: "Cyber Lime", value: "cyberLime" },
-  { name: "Retro Orange", value: "retroOrange" },
-  { name: "Cool Cyan", value: "coolCyan" },
-  { name: "Violet Dream", value: "violetDream" },
-  { name: "Danger Red", value: "dangerRed" },
+  { name: "Default Blue", value: "blue" },
+  { name: "Electric Yellow", value: "electric" },
+  { name: "Hot Pink", value: "hot" },
+  { name: "Cyber Lime", value: "cyber" },
+  { name: "Retro Orange", value: "retro" },
+  { name: "Cool Cyan", value: "cool" },
+  { name: "Violet Dream", value: "dream" },
+  { name: "Danger Red", value: "danger" },
 ];
 
 export const WithErrors: _Story = {
   args: {
     hasChanges: true,
     syntaxErrorCount: 3,
+    testId: "save-button",
   },
   parameters: {
     docs: {
@@ -115,6 +121,7 @@ export const SingleError: _Story = {
   args: {
     hasChanges: true,
     syntaxErrorCount: 1,
+    testId: "save-button",
   },
   parameters: {
     docs: {
@@ -130,6 +137,7 @@ export const NoChanges: _Story = {
   args: {
     hasChanges: false,
     syntaxErrorCount: 0,
+    testId: "save-button",
   },
   parameters: {
     docs: {
@@ -144,6 +152,7 @@ export const NeobrutalistShowcase: _Story = {
   args: {
     hasChanges: true,
     syntaxErrorCount: 0,
+    testId: "save-button",
   },
   parameters: {
     docs: {
@@ -160,7 +169,7 @@ Try clicking the button to see the characteristic neobrutalism active state anim
     },
   },
   decorators: [
-    (Story) => (
+    (Story: React.ComponentType) => (
       <div className="bg-background p-8 text-black">
         <div className="space-y-4">
           <h3 className="text-lg font-bold">Neobrutalism Design Elements</h3>
@@ -181,6 +190,7 @@ export const ColorSystem: _Story = {
   args: {
     hasChanges: true,
     syntaxErrorCount: 0,
+    testId: "save-button",
   },
   parameters: {
     docs: {
@@ -208,6 +218,7 @@ export const ColorSystem: _Story = {
                   hasChanges={true}
                   onClick={() => console.log(`${color.name} clicked`)}
                   color={color.value}
+                  testId="save-button"
                 />
               </div>
             ))}
