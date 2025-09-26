@@ -6,9 +6,8 @@ import { HomeIcon } from "../components/SessionSidebar/HomeIcon.js";
 import SimpleAppLayout from "../components/SimpleAppLayout.js";
 import { useAuth } from "../contexts/AuthContext.js";
 import modelsList from "../data/models.json" with { type: "json" };
-import stylePrompts from "../data/style-prompts.json" with { type: "json" };
 import { VibesDiyEnv } from "../config/env.js";
-import { UserSettings } from "@vibes.diy/prompts";
+import { UserSettings, stylePrompts } from "@vibes.diy/prompts";
 // Dependency chooser moved to per‑vibe App Settings view
 
 export function meta() {
