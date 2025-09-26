@@ -2,8 +2,14 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, waitFor } from '@testing-library/react';
 
-// Create a simpler mock approach that works with the new structure
-const mockCalls: { prompt?: string; _id?: string; regenerate?: boolean }[] = [];
+// Use vi.hoisted to create mock data that can be safely used in vi.mock factories
+const mockData = vi.hoisted(() => {
+  const mockCalls: { prompt?: string; _id?: string; regenerate?: boolean }[] = [];
+
+  return {
+    mockCalls,
+  };
+});
 
 // Mock call-ai to avoid actual AI calls
 vi.mock('call-ai', async (importOriginal) => {
@@ -35,7 +41,7 @@ vi.mock('use-vibes', (actual) => {
       return Promise.reject(new Error('Not found'));
     }),
     put: vi.fn().mockImplementation((doc) => {
-      mockCalls.push({ prompt: doc.prompt, _id: doc._id });
+      mockData.mockCalls.push({ prompt: doc.prompt, _id: doc._id });
       return Promise.resolve({ id: doc._id, rev: 'new-rev' });
     }),
     remove: vi.fn(),
@@ -61,7 +67,7 @@ import { ImgGen } from '@vibes.diy/use-vibes-base';
 describe('ImgGen Document ID Tracking', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockCalls.length = 0;
+    mockData.mockCalls.length = 0;
   });
 
   it('should track document ID when starting with just a prompt', async () => {

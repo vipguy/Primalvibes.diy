@@ -3,13 +3,12 @@ import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { ImgGen } from '@vibes.diy/use-vibes-base';
 
-// Create a mock base64 image for testing
-const mockBase64Image =
-  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+// Use vi.hoisted to create mock data that can be safely used in vi.mock factories
+const mockData = vi.hoisted(() => {
+  const mockBase64Image =
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
 
-// Use vi.hoisted for mocks that need to be referenced in vi.mock
-const mockImageGen = vi.hoisted(() =>
-  vi.fn().mockImplementation((prompt) => {
+  const mockImageGen = vi.fn().mockImplementation((prompt) => {
     if (prompt === 'error prompt') {
       return Promise.reject(new Error('API error'));
     }
@@ -24,8 +23,13 @@ const mockImageGen = vi.hoisted(() =>
         },
       ],
     });
-  })
-);
+  });
+
+  return {
+    mockBase64Image,
+    mockImageGen,
+  };
+});
 
 // Create a fully mocked database for Fireproof
 const _mockDb = vi.hoisted(() => ({
@@ -70,7 +74,7 @@ vi.mock('call-ai', async () => {
   const actual = await vi.importActual('call-ai');
   return {
     ...(actual as object),
-    imageGen: mockImageGen,
+    imageGen: mockData.mockImageGen,
   };
 });
 
@@ -131,15 +135,15 @@ describe('ImgGen Component', () => {
 
   it('should attempt image generation with correct parameters', async () => {
     // Clear any previous mock calls
-    mockImageGen.mockReset();
+    mockData.mockImageGen.mockReset();
 
     // Setup mock to return a successful response
-    mockImageGen.mockReturnValue(
+    mockData.mockImageGen.mockReturnValue(
       Promise.resolve({
         created: Date.now(),
         data: [
           {
-            b64_json: mockBase64Image,
+            b64_json: mockData.mockBase64Image,
             url: null,
             revised_prompt: 'Generated test image',
           },
@@ -171,13 +175,13 @@ describe('ImgGen Component', () => {
     vi.useRealTimers();
 
     // Verify the mock was called with correct parameters
-    expect(mockImageGen).toHaveBeenCalledWith(
+    expect(mockData.mockImageGen).toHaveBeenCalledWith(
       'beautiful landscape',
       expect.objectContaining(customOptions)
     );
 
     // Verify it was only called once
-    expect(mockImageGen).toHaveBeenCalledTimes(1);
+    expect(mockData.mockImageGen).toHaveBeenCalledTimes(1);
   });
 
   it('should handle errors gracefully', async () => {
@@ -191,7 +195,7 @@ describe('ImgGen Component', () => {
     });
 
     // Clear previous mock calls
-    mockImageGen.mockClear();
+    mockData.mockImageGen.mockClear();
 
     // Render with custom useImageGen hook that simulates error state
     const { container } = render(
@@ -244,7 +248,7 @@ describe('ImgGen Component', () => {
     });
 
     // Clear previous mock calls
-    mockImageGen.mockClear();
+    mockData.mockImageGen.mockClear();
 
     // Render with custom useImageGen hook and empty prompt
     const { container } = render(<ImgGen prompt="" useImageGen={mockUseImageGenEmpty} />);
@@ -261,7 +265,7 @@ describe('ImgGen Component', () => {
     );
 
     // Verify imageGen is not called when prompt is empty
-    expect(mockImageGen).not.toHaveBeenCalled();
+    expect(mockData.mockImageGen).not.toHaveBeenCalled();
   });
 
   it('should not display progress when no request is being made', () => {
@@ -304,7 +308,7 @@ describe('ImgGen Component', () => {
     });
 
     // Clear previous mock calls
-    mockImageGen.mockClear();
+    mockData.mockImageGen.mockClear();
 
     // Use fake timers for timing control
     vi.useFakeTimers();

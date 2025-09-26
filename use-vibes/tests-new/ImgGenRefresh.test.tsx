@@ -1,18 +1,22 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { addNewVersion, ImageDocument } from 'use-vibes';
 
-// Mock for database operations
-const mockDb = {
-  get: vi.fn(),
-  put: vi.fn(),
-  remove: vi.fn(),
-  query: vi.fn(),
-  getAttachment: vi.fn(),
-  putAttachment: vi.fn(),
-};
-
-// Create a mock File
-const mockFile = new File(['test content'], 'test-image.png', { type: 'image/png' });
+// Use vi.hoisted to create mock data that can be safely used in vi.mock factories
+const mockData = vi.hoisted(() => {
+  const mockFile = new File(['test content'], 'test-image.png', { type: 'image/png' });
+  const mockDb = {
+    get: vi.fn(),
+    put: vi.fn(),
+    remove: vi.fn(),
+    query: vi.fn(),
+    getAttachment: vi.fn(),
+    putAttachment: vi.fn(),
+  };
+  return {
+    mockFile,
+    mockDb,
+  };
+});
 
 // Mock the call-ai module
 // vi.mock('call-ai', () => ({
@@ -35,7 +39,7 @@ const regenerateImage = vi.fn(async ({ db, _id }) => {
   const doc = await db.get(_id);
 
   // Add a new version
-  const updatedDoc = addNewVersion(doc, mockFile);
+  const updatedDoc = addNewVersion(doc, mockData.mockData.mockFile);
 
   // Save to the database
   await db.put(updatedDoc);
@@ -43,7 +47,7 @@ const regenerateImage = vi.fn(async ({ db, _id }) => {
   // Return the result
   return {
     document: { ...updatedDoc, _rev: 'new-rev' },
-    file: mockFile,
+    file: mockData.mockData.mockFile,
   };
 });
 
@@ -56,12 +60,12 @@ const generateImage = vi.fn(async ({ db, _id, prompt }) => {
     doc = await db.get(_id);
 
     // Add new version with new prompt
-    const updatedDoc = addNewVersion(doc, mockFile, prompt);
+    const updatedDoc = addNewVersion(doc, mockData.mockFile, prompt);
     await db.put(updatedDoc);
 
     return {
       document: { ...updatedDoc, _rev: 'new-rev' },
-      file: mockFile,
+      file: mockData.mockFile,
     };
   } else {
     // Create new document
@@ -74,14 +78,14 @@ const generateImage = vi.fn(async ({ db, _id, prompt }) => {
       currentPromptKey: 'p1',
       versions: [{ id: 'v1', created: Date.now(), promptKey: 'p1' }],
       prompts: { p1: { text: prompt, created: Date.now() } },
-      _files: { v1: mockFile },
+      _files: { v1: mockData.mockFile },
     };
 
     await db.put(newDoc);
 
     return {
       document: { ...newDoc, _rev: 'new-rev' },
-      file: mockFile,
+      file: mockData.mockFile,
     };
   }
 });
@@ -89,8 +93,8 @@ const generateImage = vi.fn(async ({ db, _id, prompt }) => {
 describe('Image Generation Refresh Functionality', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockDb.get.mockReset();
-    mockDb.put.mockReset();
+    mockData.mockDb.get.mockReset();
+    mockData.mockDb.put.mockReset();
   });
 
   afterEach(() => {
@@ -113,29 +117,29 @@ describe('Image Generation Refresh Functionality', () => {
         p1: { text: 'Original test prompt', created: Date.now() - 1000 },
       },
       _files: {
-        v1: mockFile,
+        v1: mockData.mockFile,
       },
     };
 
     // Set up the database mock to return our test document
-    mockDb.get.mockResolvedValue(mockDocument);
-    mockDb.put.mockResolvedValue({ ...mockDocument, _rev: 'new-rev' });
+    mockData.mockDb.get.mockResolvedValue(mockDocument);
+    mockData.mockDb.put.mockResolvedValue({ ...mockDocument, _rev: 'new-rev' });
 
     // Call regenerateImage (the function that's called when refresh button is clicked)
     await regenerateImage({
-      db: mockDb,
+      db: mockData.mockDb,
       _id: existingDocId,
       prompt: mockDocument.prompt,
     });
 
     // Verify that the document was fetched from the database
-    expect(mockDb.get).toHaveBeenCalledWith(existingDocId);
+    expect(mockData.mockDb.get).toHaveBeenCalledWith(existingDocId);
 
     // Verify that the database.put was called to save the updated document
-    expect(mockDb.put).toHaveBeenCalled();
+    expect(mockData.mockDb.put).toHaveBeenCalled();
 
     // Get the document that was passed to put
-    const updatedDoc = mockDb.put.mock.calls[0][0];
+    const updatedDoc = mockData.mockDb.put.mock.calls[0][0];
 
     // Verify that the document ID was preserved (not creating a new document)
     expect(updatedDoc._id).toBe(existingDocId);
@@ -163,7 +167,7 @@ describe('Image Generation Refresh Functionality', () => {
         p1: { text: 'Original test prompt', created: Date.now() - 3000 },
       },
       _files: {
-        v1: mockFile,
+        v1: mockData.mockFile,
       },
     };
 
@@ -171,8 +175,8 @@ describe('Image Generation Refresh Functionality', () => {
     let updatedDoc = { ...originalDoc };
 
     // Configure mocks
-    mockDb.get.mockImplementation(() => Promise.resolve(updatedDoc));
-    mockDb.put.mockImplementation((doc) => {
+    mockData.mockDb.get.mockImplementation(() => Promise.resolve(updatedDoc));
+    mockData.mockDb.put.mockImplementation((doc) => {
       updatedDoc = { ...doc, _rev: 'new-rev-' + Math.random() };
       return Promise.resolve(updatedDoc);
     });
@@ -180,7 +184,7 @@ describe('Image Generation Refresh Functionality', () => {
     // Call regenerateImage three times to simulate refreshing multiple times
     for (let i = 0; i < 3; i++) {
       await regenerateImage({
-        db: mockDb,
+        db: mockData.mockDb,
         _id: existingDocId,
         prompt: originalDoc.prompt,
       });
@@ -219,21 +223,21 @@ describe('Image Generation Refresh Functionality', () => {
         p1: { text: initialPrompt, created: Date.now() - 1000 },
       },
       _files: {
-        v1: mockFile,
+        v1: mockData.mockFile,
       },
     };
 
     // Set up the database mocks
-    mockDb.get.mockResolvedValue(mockDocument);
+    mockData.mockDb.get.mockResolvedValue(mockDocument);
     let updatedDoc: ImageDocument | null = null;
-    mockDb.put.mockImplementation((doc) => {
+    mockData.mockDb.put.mockImplementation((doc) => {
       updatedDoc = { ...doc, _rev: 'new-rev' };
       return Promise.resolve(updatedDoc);
     });
 
     // Generate a new image version with a different prompt
     await generateImage({
-      db: mockDb,
+      db: mockData.mockDb,
       _id: existingDocId,
       prompt: newPrompt,
     });

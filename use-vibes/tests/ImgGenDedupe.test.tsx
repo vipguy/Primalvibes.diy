@@ -1,12 +1,17 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import React from 'react';
 
-// Create a mock base64 image for testing
-const mockBase64Image =
-  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+// Use vi.hoisted to create mock data that can be safely used in vi.mock factories
+const mockData = vi.hoisted(() => {
+  const mockBase64Image =
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+  const dbPuts: { _id: string; [key: string]: unknown }[] = [];
 
-// Array to track all database operations
-const dbPuts: UseImageGenOptions[] = [];
+  return {
+    mockBase64Image,
+    dbPuts,
+  };
+});
 
 // IMPORTANT: Use vi.hoisted for all mock functions used in vi.mock calls
 // since they're hoisted to the top of the file before normal initialization
@@ -17,7 +22,7 @@ const dbPuts: UseImageGenOptions[] = [];
 //       created: Date.now(),
 //       data: [
 //         {
-//           b64_json: mockBase64Image,
+//           b64_json: mockData.mockBase64Image,
 //           url: null,
 //           revised_prompt: 'Generated test image',
 //         },
@@ -34,7 +39,7 @@ const mockCallImageGen = vi.hoisted(() => {
       created: Date.now(),
       data: [
         {
-          b64_json: mockBase64Image,
+          b64_json: mockData.mockBase64Image,
           url: null,
           revised_prompt: 'Generated test image',
         },
@@ -68,7 +73,7 @@ const mockDbPut = vi.hoisted(() => {
     };
 
     // Make sure we're actually adding to the array in each test
-    dbPuts.push(docWithId);
+    mockData.dbPuts.push(docWithId);
 
     // Return a successful response with the document ID
     return Promise.resolve({
@@ -79,10 +84,10 @@ const mockDbPut = vi.hoisted(() => {
   });
 });
 
-// This ensures the dbPuts array is properly setup
+// This ensures the mockData.dbPuts array is properly setup
 beforeEach(() => {
   // Reset test state between each test
-  dbPuts.length = 0;
+  mockData.dbPuts.length = 0;
   MODULE_STATE.createdDocuments.clear();
   mockDbPut.mockClear();
 });
@@ -90,7 +95,7 @@ beforeEach(() => {
 const mockDbGet = vi.hoisted(() => {
   return vi.fn().mockImplementation((id) => {
     // Find the document in our tracked puts
-    const doc = dbPuts.find((d) => d._id === id);
+    const doc = mockData.dbPuts.find((d) => d._id === id);
     if (doc) {
       return Promise.resolve(doc);
     }
@@ -135,7 +140,7 @@ const mockImgFile = vi.hoisted(() => {
 //         prompt,
 //         options,
 //         url: 'test-url',
-//         b64_json: mockBase64Image,
+//         b64_json: mockData.mockBase64Image,
 //       };
 
 //       // Track in module state and write to DB
@@ -185,13 +190,13 @@ vi.mock('use-vibes', (actual) => {
 });
 
 // Import after mocks
-import { MODULE_STATE, UseImageGenOptions } from '@vibes.diy/use-vibes-base';
+import { MODULE_STATE } from '@vibes.diy/use-vibes-base';
 
 describe('ImgGen Document Deduplication', () => {
   beforeEach(() => {
     // Clear mocks and tracked state
     vi.clearAllMocks();
-    dbPuts.length = 0;
+    mockData.dbPuts.length = 0;
     MODULE_STATE.createdDocuments.clear();
     MODULE_STATE.processingRequests.clear();
     MODULE_STATE.pendingImageGenCalls.clear();
@@ -218,7 +223,7 @@ describe('ImgGen Document Deduplication', () => {
       type: 'imgGen',
       prompt,
       url: 'test-url',
-      b64_json: mockBase64Image,
+      b64_json: mockData.mockBase64Image,
     };
 
     // Track the document in MODULE_STATE and call mockDbPut
@@ -247,7 +252,7 @@ describe('ImgGen Document Deduplication', () => {
       type: 'imgGen',
       prompt: prompt1,
       url: 'test-url',
-      b64_json: mockBase64Image,
+      b64_json: mockData.mockBase64Image,
     };
 
     MODULE_STATE.createdDocuments.set(stableKey1, docId1);
@@ -263,7 +268,7 @@ describe('ImgGen Document Deduplication', () => {
       type: 'imgGen',
       prompt: prompt2,
       url: 'test-url',
-      b64_json: mockBase64Image,
+      b64_json: mockData.mockBase64Image,
     };
 
     MODULE_STATE.createdDocuments.set(stableKey2, docId2);
@@ -298,7 +303,7 @@ describe('ImgGen Document Deduplication', () => {
       prompt,
       options: options1,
       url: 'test-url',
-      b64_json: mockBase64Image,
+      b64_json: mockData.mockBase64Image,
     };
 
     MODULE_STATE.createdDocuments.set(stableKey1, docId1);
@@ -315,7 +320,7 @@ describe('ImgGen Document Deduplication', () => {
       prompt,
       options: options2,
       url: 'test-url',
-      b64_json: mockBase64Image,
+      b64_json: mockData.mockBase64Image,
     };
 
     MODULE_STATE.createdDocuments.set(stableKey2, docId2);
@@ -361,7 +366,7 @@ describe('ImgGen Document Deduplication', () => {
       type: 'imgGen',
       prompt,
       url: 'test-url',
-      b64_json: mockBase64Image,
+      b64_json: mockData.mockBase64Image,
     };
 
     // Add the document to the database
