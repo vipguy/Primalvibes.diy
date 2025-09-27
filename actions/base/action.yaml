@@ -11,6 +11,10 @@ runs:
       shell: bash
       run: pnpm install
 
+    - name: install playwright browsers
+      shell: bash
+      run: pnpm exec playwright install
+
     - name: format-check
       shell: bash
       run: pnpm run format --check
