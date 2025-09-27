@@ -1,5 +1,5 @@
 import type { ToCloudAttachable } from '@fireproof/core-types-protocols-cloud';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useId } from 'react';
 import {
   fireproof,
   ImgFile,
@@ -9,6 +9,24 @@ import {
   type UseFpToCloudParam,
 } from 'use-fireproof';
 import { ManualRedirectStrategy } from './ManualRedirectStrategy.js';
+
+// Track sync status by database name and instance ID
+const syncEnabledInstances = new Map<string, Set<string>>();
+
+// Helper to update body class based on global sync status
+function updateBodyClass() {
+  if (typeof window === 'undefined' || !document?.body) return;
+
+  const hasAnySyncEnabled = Array.from(syncEnabledInstances.values()).some(
+    (instanceSet) => instanceSet.size > 0
+  );
+
+  if (hasAnySyncEnabled) {
+    document.body.classList.add('vibes-connect-true');
+  } else {
+    document.body.classList.remove('vibes-connect-true');
+  }
+}
 
 export { fireproof, ImgFile, ManualRedirectStrategy };
 
@@ -30,6 +48,9 @@ export function toCloud(opts?: UseFpToCloudParam): ToCloudAttachable {
 
 // Custom useFireproof hook with implicit cloud sync and button integration
 export const useFireproof = (nameOrDatabase?: string | Database) => {
+  // Generate unique instance ID for this hook instance
+  const instanceId = useId();
+
   // Get database name for localStorage key
   const dbName =
     typeof nameOrDatabase === 'string' ? nameOrDatabase : nameOrDatabase?.name || 'default';
@@ -132,21 +153,41 @@ export const useFireproof = (nameOrDatabase?: string | Database) => {
       (result.attach?.state === 'attached' || result.attach?.state === 'attaching')) ||
     (manualAttach && typeof manualAttach === 'object' && manualAttach.state === 'attached');
 
-  // Manage body class based on sync status
+  // Manage global sync status tracking and body class
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
+    // Ensure database entry exists in Map
+    if (!syncEnabledInstances.has(dbName)) {
+      syncEnabledInstances.set(dbName, new Set());
+    }
+    const instanceSet = syncEnabledInstances.get(dbName);
+    if (!instanceSet) return;
+
     if (syncEnabled) {
-      document.body.classList.add('vibes-connect-true');
+      // Add this instance to the sync-enabled set
+      instanceSet.add(instanceId);
     } else {
-      document.body.classList.remove('vibes-connect-true');
+      // Remove this instance from the sync-enabled set
+      instanceSet.delete(instanceId);
     }
 
-    // Cleanup on unmount
+    // Update body class based on global sync status
+    updateBodyClass();
+
+    // Cleanup on unmount - remove this instance
     return () => {
-      document.body.classList.remove('vibes-connect-true');
+      const currentInstanceSet = syncEnabledInstances.get(dbName);
+      if (currentInstanceSet) {
+        currentInstanceSet.delete(instanceId);
+        // Clean up empty sets
+        if (currentInstanceSet.size === 0) {
+          syncEnabledInstances.delete(dbName);
+        }
+        updateBodyClass();
+      }
     };
-  }, [syncEnabled]);
+  }, [syncEnabled, dbName, instanceId]);
 
   // Return combined result, preferring original attach over manual
   return {

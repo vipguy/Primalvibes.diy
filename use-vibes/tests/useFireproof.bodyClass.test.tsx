@@ -97,7 +97,7 @@ describe('useFireproof body class management', () => {
     expect(document.body.classList.contains('vibes-connect-true')).toBe(false);
   });
 
-  it('should clean up body class when any component unmounts', () => {
+  it('should handle multiple instances with proper aggregation', () => {
     // Mock sync as enabled for both instances
     const mockAttach = { state: 'attached' };
     mockOriginalUseFireproof.mockReturnValue({
@@ -110,13 +110,44 @@ describe('useFireproof body class management', () => {
     localStorage.setItem('fireproof-sync-db2', 'true');
 
     const { unmount: unmount1 } = render(<TestComponent dbName="db1" />);
-    render(<TestComponent dbName="db2" />);
+    const { unmount: unmount2 } = render(<TestComponent dbName="db2" />);
+
+    // Class should be present when any instance has sync enabled
+    expect(document.body.classList.contains('vibes-connect-true')).toBe(true);
+
+    // Unmount first component - class should still be present (other instance still connected)
+    unmount1();
+    expect(document.body.classList.contains('vibes-connect-true')).toBe(true);
+
+    // Unmount second component - now class should be removed (no instances left)
+    unmount2();
+    expect(document.body.classList.contains('vibes-connect-true')).toBe(false);
+  });
+
+  it('should handle multiple instances of same database properly', () => {
+    // Mock sync as enabled
+    const mockAttach = { state: 'attached' };
+    mockOriginalUseFireproof.mockReturnValue({
+      database: { name: 'test-db' },
+      attach: mockAttach,
+      useLiveQuery: vi.fn(),
+    });
+
+    localStorage.setItem('fireproof-sync-same-db', 'true');
+
+    // Multiple components using the same database name
+    const { unmount: unmount1 } = render(<TestComponent dbName="same-db" />);
+    const { unmount: unmount2 } = render(<TestComponent dbName="same-db" />);
 
     // Class should be present
     expect(document.body.classList.contains('vibes-connect-true')).toBe(true);
 
-    // Unmount first component - class should be removed (current behavior)
+    // Unmount first component - class should still be present (other instance of same db still connected)
     unmount1();
+    expect(document.body.classList.contains('vibes-connect-true')).toBe(true);
+
+    // Unmount second component - now class should be removed
+    unmount2();
     expect(document.body.classList.contains('vibes-connect-true')).toBe(false);
   });
 });
