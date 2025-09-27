@@ -132,6 +132,22 @@ export const useFireproof = (nameOrDatabase?: string | Database) => {
       (result.attach?.state === 'attached' || result.attach?.state === 'attaching')) ||
     (manualAttach && typeof manualAttach === 'object' && manualAttach.state === 'attached');
 
+  // Manage body class based on sync status
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    if (syncEnabled) {
+      document.body.classList.add('vibes-connect-true');
+    } else {
+      document.body.classList.remove('vibes-connect-true');
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.classList.remove('vibes-connect-true');
+    };
+  }, [syncEnabled]);
+
   // Return combined result, preferring original attach over manual
   return {
     ...result,
