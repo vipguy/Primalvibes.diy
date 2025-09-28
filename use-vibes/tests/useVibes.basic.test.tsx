@@ -160,4 +160,48 @@ describe('useVibes - Basic Structure', () => {
     expect(result1.current.App).toBeDefined();
     expect(result2.current.App).toBeDefined();
   });
+
+  it('should not violate Rules of Hooks when transitioning between states', async () => {
+    mockData.mockCallAI.mockResolvedValue('export default function() { return <div>Test</div> }');
+
+    // Start with empty prompt
+    const { result, rerender } = renderHook(
+      ({ prompt, skip }) => useVibes(prompt, { skip }, mockData.mockCallAI),
+      {
+        initialProps: { prompt: '', skip: false },
+      }
+    );
+
+    // Should have error for empty prompt
+    expect(result.current.loading).toBe(false);
+    expect(result.current.error?.message).toContain('Prompt required');
+
+    // Rerender with valid prompt - this should not cause hooks error
+    rerender({ prompt: 'create button', skip: false });
+
+    // Should start loading
+    expect(result.current.loading).toBe(true);
+    expect(result.current.error).toBe(null);
+
+    await waitFor(() => expect(result.current.loading).toBe(false), { timeout: 3000 });
+
+    expect(result.current.App).toBeDefined();
+    expect(result.current.code).toContain('Test');
+
+    // Rerender with skip option - should not cause hooks error
+    rerender({ prompt: 'create button', skip: true });
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.App).toBe(null);
+    expect(result.current.error).toBe(null);
+
+    // Rerender back to normal - should not cause hooks error
+    rerender({ prompt: 'create new button', skip: false });
+
+    expect(result.current.loading).toBe(true);
+
+    await waitFor(() => expect(result.current.loading).toBe(false), { timeout: 3000 });
+
+    expect(result.current.App).toBeDefined();
+  });
 });

@@ -39,38 +39,11 @@ export function useVibes(
   options: UseVibesOptions = {},
   callAI: typeof defaultCallAI = defaultCallAI
 ): UseVibesResult {
-  // Validate inputs
-  if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
-    return {
-      App: null,
-      code: null,
-      loading: false,
-      error: new Error('Prompt required'),
-      progress: 0,
-      regenerate: () => {
-        // No-op for invalid prompt case
-      },
-    };
-  }
-
-  // Skip processing if explicitly requested
-  if (options.skip) {
-    return {
-      App: null,
-      code: null,
-      loading: false,
-      error: null,
-      progress: 0,
-      regenerate: () => {
-        // No-op for skip case
-      },
-    };
-  }
-
+  // Always call hooks first before any early returns
   const [state, setState] = useState<UseVibesState>({
     App: null,
     code: null,
-    loading: true,
+    loading: false, // Start as false, will be set to true when generation starts
     error: null,
     progress: 0,
     document: null,
@@ -107,6 +80,32 @@ export function useVibes(
   // Effect to start generation - only when prompt or options change
   useEffect(() => {
     if (!mountedRef.current) return;
+
+    // Validate inputs - set error state instead of early return
+    if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
+      setState((prev) => ({
+        ...prev,
+        loading: false,
+        error: new Error('Prompt required'),
+        App: null,
+        code: null,
+        progress: 0,
+      }));
+      return;
+    }
+
+    // Skip processing if explicitly requested
+    if (options.skip) {
+      setState((prev) => ({
+        ...prev,
+        loading: false,
+        error: null,
+        App: null,
+        code: null,
+        progress: 0,
+      }));
+      return;
+    }
 
     const generationId = Date.now().toString();
     generationIdRef.current = generationId;
