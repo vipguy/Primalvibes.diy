@@ -19,7 +19,7 @@ describe('useVibes - Basic Structure', () => {
 
   it('should accept prompt string and optional options', () => {
     const { result } = renderHook(() => useVibes('create a button', {}, mockData.mockCallAI));
-    
+
     expect(result.current.loading).toBe(true);
     expect(result.current.App).toBe(null);
     expect(result.current.code).toBe(null);
@@ -30,11 +30,11 @@ describe('useVibes - Basic Structure', () => {
 
   it('should return App component after loading', async () => {
     mockData.mockCallAI.mockResolvedValue('export default function() { return <div>Test</div> }');
-    
+
     const { result } = renderHook(() => useVibes('create a button', {}, mockData.mockCallAI));
-    
+
     await waitFor(() => expect(result.current.loading).toBe(false), { timeout: 3000 });
-    
+
     expect(result.current.App).toBeDefined();
     expect(result.current.code).toContain('Test');
     expect(result.current.error).toBe(null);
@@ -42,14 +42,18 @@ describe('useVibes - Basic Structure', () => {
 
   it('should accept options as second parameter', async () => {
     mockData.mockCallAI.mockResolvedValue('export default function() { return <div>Form</div> }');
-    
-    const { result } = renderHook(() => 
-      useVibes('create a form', { 
-        database: 'custom-db',
-        model: 'gpt-4'
-      }, mockData.mockCallAI)
+
+    const { result } = renderHook(() =>
+      useVibes(
+        'create a form',
+        {
+          database: 'custom-db',
+          model: 'gpt-4',
+        },
+        mockData.mockCallAI
+      )
     );
-    
+
     await waitFor(() => expect(result.current.loading).toBe(false), { timeout: 3000 });
     expect(result.current.App).toBeDefined();
     expect(result.current.code).toContain('Form');
@@ -57,7 +61,7 @@ describe('useVibes - Basic Structure', () => {
 
   it('should handle empty prompt gracefully', () => {
     const { result } = renderHook(() => useVibes('', {}, mockData.mockCallAI));
-    
+
     expect(result.current.loading).toBe(false);
     expect(result.current.App).toBe(null);
     expect(result.current.error?.message).toContain('Prompt required');
@@ -65,7 +69,7 @@ describe('useVibes - Basic Structure', () => {
 
   it('should handle undefined prompt gracefully', () => {
     const { result } = renderHook(() => useVibes(undefined as any, {}, mockData.mockCallAI));
-    
+
     expect(result.current.loading).toBe(false);
     expect(result.current.App).toBe(null);
     expect(result.current.error?.message).toContain('Prompt required');
@@ -73,12 +77,12 @@ describe('useVibes - Basic Structure', () => {
 
   it('should handle errors from AI service', async () => {
     mockData.mockCallAI.mockRejectedValue(new Error('Service unavailable'));
-    
+
     const { result } = renderHook(() => useVibes('create button', {}, mockData.mockCallAI));
-    
+
     // Wait for loading to complete (error or success)
     await waitFor(() => expect(result.current.loading).toBe(false), { timeout: 3000 });
-    
+
     // Check that error was set
     expect(result.current.error).toBeDefined();
     expect(result.current.error?.message).toBe('Service unavailable');
@@ -86,10 +90,10 @@ describe('useVibes - Basic Structure', () => {
   });
 
   it('should handle skip option', () => {
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useVibes('create button', { skip: true }, mockData.mockCallAI)
     );
-    
+
     expect(result.current.loading).toBe(false);
     expect(result.current.App).toBe(null);
     expect(result.current.code).toBe(null);
@@ -98,13 +102,15 @@ describe('useVibes - Basic Structure', () => {
   });
 
   it('should provide regenerate function', async () => {
-    mockData.mockCallAI.mockResolvedValue('export default function() { return <div>Initial</div> }');
-    
+    mockData.mockCallAI.mockResolvedValue(
+      'export default function() { return <div>Initial</div> }'
+    );
+
     const { result } = renderHook(() => useVibes('create button', {}, mockData.mockCallAI));
-    
+
     await waitFor(() => expect(result.current.loading).toBe(false), { timeout: 3000 });
     expect(result.current.code).toContain('Initial');
-    
+
     // For now, just test that regenerate function exists and is callable
     // Full regeneration testing will be added in Cycle 2 with proper state management
     expect(typeof result.current.regenerate).toBe('function');
@@ -113,34 +119,42 @@ describe('useVibes - Basic Structure', () => {
 
   it('should show progress updates during generation', async () => {
     // Mock a delayed response to test progress
-    mockData.mockCallAI.mockImplementation(() => 
-      new Promise(resolve => 
-        setTimeout(() => resolve('export default function() { return <div>Done</div> }'), 200)
-      )
+    mockData.mockCallAI.mockImplementation(
+      () =>
+        new Promise((resolve) =>
+          setTimeout(() => resolve('export default function() { return <div>Done</div> }'), 200)
+        )
     );
-    
+
     const { result } = renderHook(() => useVibes('create button', {}, mockData.mockCallAI));
-    
+
     expect(result.current.progress).toBeGreaterThanOrEqual(0);
     expect(result.current.loading).toBe(true);
-    
+
     await waitFor(() => expect(result.current.loading).toBe(false), { timeout: 3000 });
-    
+
     // Progress should reach 100 when loading is complete, but async timing may cause small delay
     await waitFor(() => expect(result.current.progress).toBe(100), { timeout: 1000 });
   });
 
   it('should handle concurrent requests properly', async () => {
     mockData.mockCallAI.mockResolvedValue('export default function() { return <div>Button</div> }');
-    
-    const { result: result1 } = renderHook(() => useVibes('create button', {}, mockData.mockCallAI));
-    const { result: result2 } = renderHook(() => useVibes('create button', {}, mockData.mockCallAI));
-    
-    await waitFor(() => {
-      expect(result1.current.loading).toBe(false);
-      expect(result2.current.loading).toBe(false);
-    }, { timeout: 3000 });
-    
+
+    const { result: result1 } = renderHook(() =>
+      useVibes('create button', {}, mockData.mockCallAI)
+    );
+    const { result: result2 } = renderHook(() =>
+      useVibes('create button', {}, mockData.mockCallAI)
+    );
+
+    await waitFor(
+      () => {
+        expect(result1.current.loading).toBe(false);
+        expect(result2.current.loading).toBe(false);
+      },
+      { timeout: 3000 }
+    );
+
     expect(result1.current.App).toBeDefined();
     expect(result2.current.App).toBeDefined();
   });

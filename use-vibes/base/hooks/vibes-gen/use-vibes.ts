@@ -1,11 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { callAI as defaultCallAI } from 'call-ai';
-import type { 
-  UseVibesOptions, 
-  UseVibesResult, 
-  UseVibesState,
-  VibeDocument 
-} from './types.js';
+import type { UseVibesOptions, UseVibesResult, UseVibesState, VibeDocument } from './types.js';
 
 /**
  * Mock component compiler for Cycle 1
@@ -14,15 +9,19 @@ import type {
 function compileMockComponent(code: string): React.ComponentType<any> {
   // For now, return a simple mock component that displays the code
   return function MockComponent(props: any) {
-    return React.createElement('div', {
-      'data-testid': 'mock-component',
-      style: { 
-        padding: '10px', 
-        border: '1px solid #ccc',
-        fontFamily: 'monospace',
-        fontSize: '12px'
-      }
-    }, `Mock Component: ${code.substring(0, 100)}...`);
+    return React.createElement(
+      'div',
+      {
+        'data-testid': 'mock-component',
+        style: {
+          padding: '10px',
+          border: '1px solid #ccc',
+          fontFamily: 'monospace',
+          fontSize: '12px',
+        },
+      },
+      `Mock Component: ${code.substring(0, 100)}...`
+    );
   };
 }
 
@@ -77,12 +76,15 @@ export function useVibes(
   const simulateProgress = useCallback((currentProgress: number = 0) => {
     const increment = Math.random() * 20 + 10; // 10-30% increments
     const newProgress = Math.min(currentProgress + increment, 90);
-    
+
     if (mountedRef.current) {
-      setState(prev => ({ ...prev, progress: newProgress }));
-      
+      setState((prev) => ({ ...prev, progress: newProgress }));
+
       if (newProgress < 90) {
-        progressTimerRef.current = setTimeout(() => simulateProgress(newProgress), 100 + Math.random() * 200);
+        progressTimerRef.current = setTimeout(
+          () => simulateProgress(newProgress),
+          100 + Math.random() * 200
+        );
       }
     }
   }, []);
@@ -96,7 +98,7 @@ export function useVibes(
   // Effect to start generation - only when prompt or options change
   useEffect(() => {
     if (!mountedRef.current) return;
-    
+
     const generationId = Date.now().toString();
     generationIdRef.current = generationId;
 
@@ -109,7 +111,7 @@ export function useVibes(
         }
 
         // Reset state for new generation
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
           loading: true,
           error: null,
@@ -127,7 +129,7 @@ Return only the JSX code with a default export. Use modern React patterns with h
 
         const messages = [
           { role: 'system' as const, content: systemPrompt },
-          { role: 'user' as const, content: prompt }
+          { role: 'user' as const, content: prompt },
         ];
 
         const aiResponse = await callAI(messages, {
@@ -146,7 +148,7 @@ Return only the JSX code with a default export. Use modern React patterns with h
         const App = compileMockComponent(code);
 
         // Update state with results
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
           App,
           code,
@@ -163,14 +165,13 @@ Return only the JSX code with a default export. Use modern React patterns with h
             version: 1,
           },
         }));
-
       } catch (error) {
         // Check if this request is still current
         if (generationIdRef.current !== generationId || !mountedRef.current) {
           return;
         }
 
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
           loading: false,
           error: error instanceof Error ? error : new Error('Generation failed'),
