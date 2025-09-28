@@ -239,3 +239,11 @@ export {
   type UseImageGenOptions,
   type UseImageGenResult,
 } from './hooks/image-gen/types.js';
+
+// Export useVibes hook and types
+export { useVibes } from './hooks/vibes-gen/index.js';
+export type {
+  UseVibesOptions,
+  UseVibesResult,
+  VibeDocument,
+} from './hooks/vibes-gen/types.js';
