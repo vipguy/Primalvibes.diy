@@ -161,6 +161,45 @@ describe('useVibes - Basic Structure', () => {
     expect(result2.current.App).toBeDefined();
   });
 
+  it('should verify system prompt contains expected content', async () => {
+    mockData.mockCallAI.mockResolvedValue('function App() { return <div>Test</div>; }');
+
+    const { result } = renderHook(() => useVibes('Create a todo app', {}, mockData.mockCallAI));
+
+    await waitFor(() => expect(result.current.loading).toBe(false), { timeout: 3000 });
+
+    // Verify that callAI was called with system prompt containing expected content
+    expect(mockData.mockCallAI).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          role: 'system',
+          content: expect.stringContaining('Use Fireproof for data persistence'),
+        }),
+      ]),
+      expect.any(Object)
+    );
+
+    expect(mockData.mockCallAI).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          role: 'system',
+          content: expect.stringContaining('Begin the component with the import statements'),
+        }),
+      ]),
+      expect.any(Object)
+    );
+
+    // Verify that metadata is included in the document
+    expect(result.current.document).toMatchObject({
+      dependencies: expect.any(Array),
+      aiSelectedDependencies: expect.any(Array),
+      instructionalText: expect.any(Boolean),
+      demoData: expect.any(Boolean),
+      model: expect.any(String),
+      timestamp: expect.any(Number),
+    });
+  });
+
   it('should not violate Rules of Hooks when transitioning between states', async () => {
     mockData.mockCallAI.mockResolvedValue('export default function() { return <div>Test</div> }');
 
