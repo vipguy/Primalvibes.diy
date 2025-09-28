@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { callAI as defaultCallAI } from 'call-ai';
-import type { UseVibesOptions, UseVibesResult, UseVibesState, GeneratedComponentProps } from './types.js';
+import type {
+  UseVibesOptions,
+  UseVibesResult,
+  UseVibesState,
+  GeneratedComponentProps,
+} from './types.js';
 
 /**
  * Mock component compiler for Cycle 1

@@ -68,7 +68,9 @@ describe('useVibes - Basic Structure', () => {
   });
 
   it('should handle undefined prompt gracefully', () => {
-    const { result } = renderHook(() => useVibes(undefined as string, {}, mockData.mockCallAI));
+    const { result } = renderHook(() =>
+      useVibes(undefined as unknown as string, {}, mockData.mockCallAI)
+    );
 
     expect(result.current.loading).toBe(false);
     expect(result.current.App).toBe(null);
@@ -133,8 +135,8 @@ describe('useVibes - Basic Structure', () => {
 
     await waitFor(() => expect(result.current.loading).toBe(false), { timeout: 3000 });
 
-    // Progress should reach 100 when loading is complete, but async timing may cause small delay
-    await waitFor(() => expect(result.current.progress).toBe(100), { timeout: 1000 });
+    // Progress should reach 100 when loading is complete
+    expect(result.current.progress).toBe(100);
   });
 
   it('should handle concurrent requests properly', async () => {
