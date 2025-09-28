@@ -41,6 +41,95 @@ export async function resolveEffectiveModel(
   return defaultCodingModel();
 }
 
+export interface ComponentGenerationResult {
+  systemPrompt: string;
+  metadata: {
+    dependencies: string[];
+    aiSelectedDependencies: string[];
+    instructionalText: boolean;
+    demoData: boolean;
+    model: string;
+    timestamp: number;
+  };
+}
+
+export async function generateComponentWithDependencies(
+  prompt: string,
+  options: Partial<UserSettings> & LlmSelectionOptions,
+  model?: string,
+): Promise<ComponentGenerationResult> {
+  const effectiveModel = model || (await defaultCodingModel());
+
+  // Stage 1: Select dependencies (unless overridden)
+  let selectedDependencies: string[] = [];
+  let instructionalText = true;
+  let demoData = true;
+
+  if (!options.dependenciesUserOverride) {
+    const decisions = await selectLlmsAndOptions(
+      effectiveModel,
+      prompt,
+      options.history || [],
+      options,
+    );
+    selectedDependencies = decisions.selected;
+    instructionalText = decisions.instructionalText;
+    demoData = decisions.demoData;
+
+    console.log("🎯 Component generation: AI selected dependencies:", {
+      selected: selectedDependencies,
+      instructionalText,
+      demoData,
+      prompt,
+      model: effectiveModel,
+    });
+  } else {
+    selectedDependencies = options.dependencies || [];
+  }
+
+  // Apply overrides if provided
+  if (typeof options.instructionalTextOverride === "boolean") {
+    instructionalText = options.instructionalTextOverride;
+  }
+  if (typeof options.demoDataOverride === "boolean") {
+    demoData = options.demoDataOverride;
+  }
+
+  // Stage 2: Generate system prompt with selected dependencies
+  const systemPrompt = await makeBaseSystemPrompt(
+    effectiveModel,
+    {
+      ...options,
+      dependencies: selectedDependencies,
+      dependenciesUserOverride: !!options.dependenciesUserOverride,
+      instructionalTextOverride: instructionalText,
+      demoDataOverride: demoData,
+    },
+    (decisions) => {
+      console.log(
+        "🎯 Dependencies confirmed for prompt generation:",
+        decisions,
+      );
+    },
+  );
+
+  const metadata = {
+    dependencies: selectedDependencies,
+    aiSelectedDependencies: selectedDependencies,
+    instructionalText,
+    demoData,
+    model: effectiveModel,
+    timestamp: Date.now(),
+  };
+
+  console.log("📦 Component metadata for storage:", metadata);
+
+  return {
+    systemPrompt,
+    metadata,
+  };
+}
+
 function escapeRegExp(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

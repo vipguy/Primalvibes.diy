@@ -202,7 +202,7 @@ Return only the JSX code with a default export. Use modern React patterns with h
   // Cleanup on unmount
   useEffect(() => {
     mountedRef.current = true;
-    
+
     return () => {
       mountedRef.current = false;
       if (progressTimerRef.current) {
