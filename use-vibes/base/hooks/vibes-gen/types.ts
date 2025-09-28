@@ -1,6 +1,11 @@
 import { ComponentType } from 'react';
 
 /**
+ * Generic props type for generated components
+ */
+export type GeneratedComponentProps = Record<string, unknown>;
+
+/**
  * Options for the useVibes hook
  */
 export interface UseVibesOptions {
@@ -28,7 +33,7 @@ export interface UseVibesOptions {
  */
 export interface UseVibesResult {
   /** The generated React component (ready to render) */
-  App: ComponentType<any> | null;
+  App: ComponentType<GeneratedComponentProps> | null;
 
   /** Raw JSX source code */
   code: string | null;
@@ -94,7 +99,7 @@ export interface VibeDocument {
  * Internal state used by the hook
  */
 export interface UseVibesState {
-  App: ComponentType<any> | null;
+  App: ComponentType<GeneratedComponentProps> | null;
   code: string | null;
   loading: boolean;
   error: Error | null;

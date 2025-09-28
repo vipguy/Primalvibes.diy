@@ -68,7 +68,7 @@ describe('useVibes - Basic Structure', () => {
   });
 
   it('should handle undefined prompt gracefully', () => {
-    const { result } = renderHook(() => useVibes(undefined as any, {}, mockData.mockCallAI));
+    const { result } = renderHook(() => useVibes(undefined as string, {}, mockData.mockCallAI));
 
     expect(result.current.loading).toBe(false);
     expect(result.current.App).toBe(null);

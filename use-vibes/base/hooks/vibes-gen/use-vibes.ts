@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { callAI as defaultCallAI } from 'call-ai';
-import type { UseVibesOptions, UseVibesResult, UseVibesState, VibeDocument } from './types.js';
+import type { UseVibesOptions, UseVibesResult, UseVibesState, GeneratedComponentProps } from './types.js';
 
 /**
  * Mock component compiler for Cycle 1
  * In Cycle 3, this will be replaced with real JSX compilation
  */
-function compileMockComponent(code: string): React.ComponentType<any> {
+function compileMockComponent(code: string): React.ComponentType<GeneratedComponentProps> {
   // For now, return a simple mock component that displays the code
-  return function MockComponent(props: any) {
+  return function MockComponent(_props: GeneratedComponentProps) {
     return React.createElement(
       'div',
       {
@@ -42,7 +42,9 @@ export function useVibes(
       loading: false,
       error: new Error('Prompt required'),
       progress: 0,
-      regenerate: () => {},
+      regenerate: () => {
+        // No-op for invalid prompt case
+      },
     };
   }
 
@@ -54,7 +56,9 @@ export function useVibes(
       loading: false,
       error: null,
       progress: 0,
-      regenerate: () => {},
+      regenerate: () => {
+        // No-op for skip case
+      },
     };
   }
 
@@ -73,7 +77,7 @@ export function useVibes(
   const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Progress simulation for Cycle 1
-  const simulateProgress = useCallback((currentProgress: number = 0) => {
+  const simulateProgress = useCallback((currentProgress = 0) => {
     const increment = Math.random() * 20 + 10; // 10-30% increments
     const newProgress = Math.min(currentProgress + increment, 90);
 
