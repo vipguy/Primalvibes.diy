@@ -1,68 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { callAI as defaultCallAI } from 'call-ai';
 import { makeBaseSystemPrompt, parseContent } from '@vibes.diy/prompts';
-import IframeVibesComponent from './IframeVibesComponent.tsx';
+import IframeVibesComponent from './IframeVibesComponent.js';
 import type {
   UseVibesOptions,
   UseVibesResult,
   UseVibesState,
-  GeneratedComponentProps,
 } from './types.js';
 
-/**
- * Mock component compiler for Cycle 1
- * In Cycle 3, this will be replaced with real JSX compilation
- */
-function compileMockComponent(code: string): React.ComponentType<GeneratedComponentProps> {
-  // For now, return a simple mock component that displays the extracted code
-  return function MockComponent(_props: GeneratedComponentProps) {
-    const codePreview = code.trim() ? code.substring(0, 200) : 'No code extracted';
-    const isCodeExtracted = code.trim().length > 0;
-
-    return React.createElement(
-      'div',
-      {
-        'data-testid': 'mock-component',
-        style: {
-          padding: '20px',
-          border: isCodeExtracted ? '2px solid #4ade80' : '2px solid #f87171',
-          borderRadius: '8px',
-          fontFamily: 'monospace',
-          fontSize: '12px',
-          backgroundColor: isCodeExtracted ? '#f0fdf4' : '#fef2f2',
-          maxWidth: '100%',
-          overflow: 'auto',
-        },
-      },
-      React.createElement(
-        'div',
-        null,
-        React.createElement(
-          'div',
-          {
-            style: {
-              fontWeight: 'bold',
-              marginBottom: '10px',
-              color: isCodeExtracted ? '#16a34a' : '#dc2626',
-            },
-          },
-          isCodeExtracted ? '✅ Code Extracted Successfully' : '❌ No Code Block Found'
-        ),
-        React.createElement(
-          'pre',
-          {
-            style: {
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-all',
-              margin: 0,
-            },
-          },
-          codePreview + (code.length > 200 ? '...' : '')
-        )
-      )
-    );
-  };
-}
 
 /**
  * useVibes hook - Cycle 1 implementation
