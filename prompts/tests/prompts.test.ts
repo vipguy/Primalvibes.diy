@@ -3,7 +3,13 @@ import { makeBaseSystemPrompt, RESPONSE_FORMAT } from "@vibes.diy/prompts";
 
 // We need to mock the module properly, not test the real implementation yet
 vi.mock("@vibes.diy/prompts", () => ({
-  makeBaseSystemPrompt: vi.fn().mockResolvedValue("mocked system prompt"),
+  makeBaseSystemPrompt: vi.fn().mockResolvedValue({
+    systemPrompt: "mocked system prompt",
+    dependencies: ["fireproof", "callai"],
+    instructionalText: true,
+    demoData: true,
+    model: "test-model",
+  }),
   RESPONSE_FORMAT: {
     dependencies: {
       format: '{dependencies: { "package-name": "version" }}',
@@ -32,19 +38,19 @@ describe("Prompts Utility", () => {
 
   it("generates a base system prompt with model documentation", async () => {
     const model = "gpt-4";
-    const prompt = await makeBaseSystemPrompt(model, opts);
+    const result = await makeBaseSystemPrompt(model, opts);
 
     // Check that the prompt includes expected content from the mock
-    expect(prompt).toBe("mocked system prompt");
+    expect(result.systemPrompt).toBe("mocked system prompt");
   });
 
   it("handles different models", async () => {
     // Test with a different model
     const model = "claude-3";
-    const prompt = await makeBaseSystemPrompt(model, opts);
+    const result = await makeBaseSystemPrompt(model, opts);
 
     // The base prompt should be the same regardless of model (in current implementation)
-    expect(prompt).toBe("mocked system prompt");
+    expect(result.systemPrompt).toBe("mocked system prompt");
   });
 
   it("defines the correct response format", () => {

@@ -41,6 +41,14 @@ export async function resolveEffectiveModel(
   return defaultCodingModel();
 }
 
+export interface SystemPromptResult {
+  systemPrompt: string;
+  dependencies: string[];
+  instructionalText: boolean;
+  demoData: boolean;
+  model: string;
+}
+
 export interface ComponentGenerationResult {
   systemPrompt: string;
   metadata: {
@@ -60,50 +68,12 @@ export async function generateComponentWithDependencies(
 ): Promise<ComponentGenerationResult> {
   const effectiveModel = model || (await defaultCodingModel());
 
-  // Stage 1: Select dependencies (unless overridden)
-  let selectedDependencies: string[] = [];
-  let instructionalText = true;
-  let demoData = true;
-
-  if (!options.dependenciesUserOverride) {
-    const decisions = await selectLlmsAndOptions(
-      effectiveModel,
-      prompt,
-      options.history || [],
-      options,
-    );
-    selectedDependencies = decisions.selected;
-    instructionalText = decisions.instructionalText;
-    demoData = decisions.demoData;
-
-    console.log("🎯 Component generation: AI selected dependencies:", {
-      selected: selectedDependencies,
-      instructionalText,
-      demoData,
-      prompt,
-      model: effectiveModel,
-    });
-  } else {
-    selectedDependencies = options.dependencies || [];
-  }
-
-  // Apply overrides if provided
-  if (typeof options.instructionalTextOverride === "boolean") {
-    instructionalText = options.instructionalTextOverride;
-  }
-  if (typeof options.demoDataOverride === "boolean") {
-    demoData = options.demoDataOverride;
-  }
-
-  // Stage 2: Generate system prompt with selected dependencies
-  const systemPrompt = await makeBaseSystemPrompt(
+  // Use makeBaseSystemPrompt to get both prompt and metadata
+  const result = await makeBaseSystemPrompt(
     effectiveModel,
     {
       ...options,
-      dependencies: selectedDependencies,
-      dependenciesUserOverride: !!options.dependenciesUserOverride,
-      instructionalTextOverride: instructionalText,
-      demoDataOverride: demoData,
+      userPrompt: prompt,
     },
     (decisions) => {
       console.log(
@@ -114,18 +84,18 @@ export async function generateComponentWithDependencies(
   );
 
   const metadata = {
-    dependencies: selectedDependencies,
-    aiSelectedDependencies: selectedDependencies,
-    instructionalText,
-    demoData,
-    model: effectiveModel,
+    dependencies: result.dependencies,
+    aiSelectedDependencies: result.dependencies, // for backward compatibility
+    instructionalText: result.instructionalText,
+    demoData: result.demoData,
+    model: result.model,
     timestamp: Date.now(),
   };
 
   console.log("📦 Component metadata for storage:", metadata);
 
   return {
-    systemPrompt,
+    systemPrompt: result.systemPrompt,
     metadata,
   };
 }
@@ -373,7 +343,7 @@ export async function makeBaseSystemPrompt(
   model: string,
   sessionDoc: Partial<UserSettings> & LlmSelectionOptions,
   onAiDecisions?: (decisions: { selected: string[] }) => void,
-) {
+): Promise<SystemPromptResult> {
   const userPrompt = sessionDoc?.userPrompt || "";
   const history: HistoryMessage[] = Array.isArray(sessionDoc?.history)
     ? sessionDoc.history
@@ -386,6 +356,7 @@ export async function makeBaseSystemPrompt(
 
   const llmsCatalog = await getLlmCatalog(sessionDoc.fallBackUrl);
   const llmsCatalogNames = await getLlmCatalogNames(sessionDoc.fallBackUrl);
+
   if (useOverride && Array.isArray(sessionDoc?.dependencies)) {
     selectedNames = (sessionDoc.dependencies as unknown[])
       .filter((v): v is string => typeof v === "string")
@@ -449,7 +420,7 @@ ${text || ""}
     ? `- If your app has a function that uses callAI with a schema to save data, include a Demo Data button that calls that function with an example prompt. Don't write an extra function, use real app code so the data illustrates what it looks like to use the app.\n- Never have have an instance of callAI that is only used to generate demo data, always use the same calls that are triggered by user actions in the app.\n`
     : "";
 
-  return `
+  const systemPrompt = `
 You are an AI assistant tasked with creating React components. You should create components that:
 - Use modern React practices and follow the rules of hooks
 - Don't use any TypeScript, just use JavaScript
@@ -498,6 +469,14 @@ import React, { ... } from "react"${generateImportStatements(chosenLlms)}
 \`\`\`
 
 `;
+
+  return {
+    systemPrompt,
+    dependencies: selectedNames,
+    instructionalText: includeInstructional,
+    demoData: includeDemoData,
+    model,
+  };
 }
 
 // Response format requirements

@@ -202,7 +202,7 @@ describe("prompt builder (real implementation)", () => {
     // Warm cache so docs are available via raw imports
     // await preloadLlmsText();
 
-    const prompt = await makeBaseSystemPrompt("test-model", {
+    const result = await makeBaseSystemPrompt("test-model", {
       stylePrompt: undefined,
       userPrompt: undefined,
       ...opts,
@@ -214,14 +214,14 @@ describe("prompt builder (real implementation)", () => {
     );
     const importBlock = generateImportStatements(chosenLlms);
 
-    expect(prompt).toContain("```js");
-    expect(prompt).toContain(
+    expect(result.systemPrompt).toContain("```js");
+    expect(result.systemPrompt).toContain(
       'import React, { ... } from "react"' + importBlock,
     );
 
     for (const llm of chosenLlms) {
-      expect(prompt).toContain(`<${llm.label}-docs>`);
-      expect(prompt).toContain(`</${llm.label}-docs>`);
+      expect(result.systemPrompt).toContain(`<${llm.label}-docs>`);
+      expect(result.systemPrompt).toContain(`</${llm.label}-docs>`);
     }
     // Concatenated docs for chosen LLMs in the same order
     // const expectedDocs = chosenLlms
@@ -234,13 +234,13 @@ describe("prompt builder (real implementation)", () => {
 
     // Default style prompt appears when undefined
     // Use a distinctive phrase from the default
-    expect(prompt).toContain("Memphis Alchemy");
+    expect(result.systemPrompt).toContain("Memphis Alchemy");
   });
 
   it("makeBaseSystemPrompt: supports custom stylePrompt and userPrompt", async () => {
     // await preloadLlmsText();
 
-    const prompt = await makeBaseSystemPrompt("test-model", {
+    const result = await makeBaseSystemPrompt("test-model", {
       ...opts,
       stylePrompt: "custom",
       userPrompt: "hello",
@@ -250,102 +250,110 @@ describe("prompt builder (real implementation)", () => {
       knownModuleNames.includes(llm.name),
     ); // mocked AI call returns finite set
     const importBlock = generateImportStatements(chosenLlms);
-    expect(prompt).toContain(
+    expect(result.systemPrompt).toContain(
       'import React, { ... } from "react"' + importBlock,
     );
 
     // Custom stylePrompt line replaces default
-    expect(prompt).toContain(
+    expect(result.systemPrompt).toContain(
       "Don't use words from the style prompt in your copy: custom",
     );
-    expect(prompt).not.toContain("Memphis Alchemy");
+    expect(result.systemPrompt).not.toContain("Memphis Alchemy");
 
     // User prompt appears verbatim
-    expect(prompt).toContain("hello");
+    expect(result.systemPrompt).toContain("hello");
   });
 
   it("makeBaseSystemPrompt: honors explicit dependencies only when override=true", async () => {
     // await preloadLlmsText();
-    const prompt = await makeBaseSystemPrompt("test-model", {
+    const result = await makeBaseSystemPrompt("test-model", {
       ...opts,
       dependencies: ["fireproof"],
       dependenciesUserOverride: true,
     });
-    expect(prompt).toContain("<useFireproof-docs>");
-    expect(prompt).not.toContain("<callAI-docs>");
+    expect(result.systemPrompt).toContain("<useFireproof-docs>");
+    expect(result.systemPrompt).not.toContain("<callAI-docs>");
   });
 
   it("makeBaseSystemPrompt: includes instructional-text and demo-data guidance when selector enables them (test mode)", async () => {
     // await preloadLlmsText();
-    const prompt = await makeBaseSystemPrompt("test-model", {
+    const result = await makeBaseSystemPrompt("test-model", {
       ...opts,
       stylePrompt: undefined,
       userPrompt: undefined,
       history: [],
     });
-    expect(prompt).toMatch(/include a Demo Data button/i);
-    expect(prompt).toMatch(/include a vivid description of the app's purpose/i);
+    expect(result.systemPrompt).toMatch(/include a Demo Data button/i);
+    expect(result.systemPrompt).toMatch(
+      /include a vivid description of the app's purpose/i,
+    );
   });
 
   it("makeBaseSystemPrompt: respects instructionalTextOverride=false to disable instructional text", async () => {
     // await preloadLlmsText();
-    const prompt = await makeBaseSystemPrompt("test-model", {
+    const result = await makeBaseSystemPrompt("test-model", {
       ...opts,
       stylePrompt: undefined,
       userPrompt: undefined,
       history: [],
       instructionalTextOverride: false,
     });
-    expect(prompt).not.toMatch(
+    expect(result.systemPrompt).not.toMatch(
       /include a vivid description of the app's purpose/i,
     );
     // Demo data should still appear (not overridden)
-    expect(prompt).toMatch(/include a Demo Data button/i);
+    expect(result.systemPrompt).toMatch(/include a Demo Data button/i);
   });
 
   it("makeBaseSystemPrompt: respects instructionalTextOverride=true to force instructional text", async () => {
     // await preloadLlmsText();
-    const prompt = await makeBaseSystemPrompt("test-model", {
+    const result = await makeBaseSystemPrompt("test-model", {
       ...opts,
       stylePrompt: undefined,
       userPrompt: undefined,
       history: [],
       instructionalTextOverride: true,
     });
-    expect(prompt).toMatch(/include a vivid description of the app's purpose/i);
-    expect(prompt).toMatch(/include a Demo Data button/i);
+    expect(result.systemPrompt).toMatch(
+      /include a vivid description of the app's purpose/i,
+    );
+    expect(result.systemPrompt).toMatch(/include a Demo Data button/i);
   });
 
   it("makeBaseSystemPrompt: respects demoDataOverride=false to disable demo data", async () => {
     // await preloadLlmsText();
-    const prompt = await makeBaseSystemPrompt("test-model", {
+    const result = await makeBaseSystemPrompt("test-model", {
       ...opts,
       stylePrompt: undefined,
       userPrompt: undefined,
       history: [],
       demoDataOverride: false,
     });
-    expect(prompt).not.toMatch(/include a Demo Data button/i);
+    expect(result.systemPrompt).not.toMatch(/include a Demo Data button/i);
     // Instructional text should still appear (not overridden)
-    expect(prompt).toMatch(/include a vivid description of the app's purpose/i);
+    expect(result.systemPrompt).toMatch(
+      /include a vivid description of the app's purpose/i,
+    );
   });
 
   it("makeBaseSystemPrompt: respects demoDataOverride=true to force demo data", async () => {
     // await preloadLlmsText();
-    const prompt = await makeBaseSystemPrompt("test-model", {
+    const result = await makeBaseSystemPrompt("test-model", {
       ...opts,
       stylePrompt: undefined,
       userPrompt: undefined,
       history: [],
       demoDataOverride: true,
     });
-    expect(prompt).toMatch(/include a Demo Data button/i);
-    expect(prompt).toMatch(/include a vivid description of the app's purpose/i);
+    expect(result.systemPrompt).toMatch(/include a Demo Data button/i);
+    expect(result.systemPrompt).toMatch(
+      /include a vivid description of the app's purpose/i,
+    );
   });
 
   it("makeBaseSystemPrompt: respects both overrides simultaneously", async () => {
     // await preloadLlmsText();
-    const prompt = await makeBaseSystemPrompt("test-model", {
+    const result = await makeBaseSystemPrompt("test-model", {
       ...opts,
       stylePrompt: undefined,
       userPrompt: undefined,
@@ -353,9 +361,9 @@ describe("prompt builder (real implementation)", () => {
       instructionalTextOverride: false,
       demoDataOverride: false,
     });
-    expect(prompt).not.toMatch(
+    expect(result.systemPrompt).not.toMatch(
       /include a vivid description of the app's purpose/i,
     );
-    expect(prompt).not.toMatch(/include a Demo Data button/i);
+    expect(result.systemPrompt).not.toMatch(/include a Demo Data button/i);
   });
 });
