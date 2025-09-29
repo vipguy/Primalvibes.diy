@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { callAI as defaultCallAI } from 'call-ai';
 import { makeBaseSystemPrompt, parseContent } from '@vibes.diy/prompts';
+import IframeVibesComponent from './IframeVibesComponent.tsx';
 import type {
   UseVibesOptions,
   UseVibesResult,
@@ -249,8 +250,14 @@ Return only the JSX code with a default export. Use modern React patterns with h
         // Use extracted code for compilation, fallback to raw response if no code found
         const codeToUse = extractedCode || rawResponse;
 
-        // Compile the code to a component (mock for Cycle 1)
-        const App = compileMockComponent(codeToUse);
+        // Create iframe component with extracted code
+        const sessionId = `vibes-${Date.now()}`;
+        const App = () => React.createElement(IframeVibesComponent, {
+          code: codeToUse,
+          sessionId: sessionId,
+          onReady: () => console.log('🎯 useVibes: Component ready'),
+          onError: (error) => console.error('🎯 useVibes: Component error:', error)
+        });
 
         // Update state with results, including rich metadata from orchestrator
         setState((prev) => ({
