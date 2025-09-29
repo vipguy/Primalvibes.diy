@@ -10,7 +10,14 @@ const { mockMakeBaseSystemPrompt, mockCallAI } = vi.hoisted(() => ({
     demoData: false,
     model: 'anthropic/claude-sonnet-4',
   }),
-  mockCallAI: vi.fn().mockResolvedValue('export default function TestComponent() { return <div>Test Component</div>; }'),
+  mockCallAI: vi.fn().mockImplementation((messages) => {
+    // First call is for dependency selection (has catalog in system prompt)
+    if (messages.some((m: any) => m.content && m.content.includes('catalog'))) {
+      return Promise.resolve('{"selected": ["fireproof", "callai"], "instructionalText": true, "demoData": false}');
+    }
+    // Second call is for component generation  
+    return Promise.resolve('export default function TestComponent() { return <div>Test Component</div>; }');
+  }),
 }));
 
 vi.mock('@vibes.diy/prompts', () => ({
@@ -34,7 +41,15 @@ describe('useVibes - Basic Structure', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Mocks are already set up at module level
+    // Reset the mock implementation to ensure consistent behavior
+    mockCallAI.mockImplementation((messages) => {
+      // First call is for dependency selection (has catalog in system prompt)
+      if (messages.some((m: any) => m.content && m.content.includes('catalog'))) {
+        return Promise.resolve('{"selected": ["fireproof", "callai"], "instructionalText": true, "demoData": false}');
+      }
+      // Second call is for component generation  
+      return Promise.resolve('export default function TestComponent() { return <div>Test Component</div>; }');
+    });
   });
 
   afterEach(() => {
