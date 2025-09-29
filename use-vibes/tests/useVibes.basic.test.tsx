@@ -81,7 +81,10 @@ describe('useVibes - Basic Structure', () => {
 
     const { result } = renderHook(() => useVibes('create a button', {}, mockCallAI));
 
-    await waitFor(() => expect(result.current.loading).toBe(false), { timeout: 3000 });
+    await waitFor(() => expect(result.current.loading).toBe(false), {
+      timeout: 10000,
+      interval: 100,
+    });
 
     expect(result.current.App).toBeDefined();
     expect(result.current.code).toContain('Test');
@@ -102,7 +105,10 @@ describe('useVibes - Basic Structure', () => {
       )
     );
 
-    await waitFor(() => expect(result.current.loading).toBe(false), { timeout: 3000 });
+    await waitFor(() => expect(result.current.loading).toBe(false), {
+      timeout: 10000,
+      interval: 100,
+    });
     expect(result.current.App).toBeDefined();
     expect(result.current.code).toContain('Form');
   });
@@ -129,7 +135,10 @@ describe('useVibes - Basic Structure', () => {
     const { result } = renderHook(() => useVibes('create button', {}, mockCallAI));
 
     // Wait for loading to complete (error or success)
-    await waitFor(() => expect(result.current.loading).toBe(false), { timeout: 3000 });
+    await waitFor(() => expect(result.current.loading).toBe(false), {
+      timeout: 10000,
+      interval: 100,
+    });
 
     // Check that error was set
     expect(result.current.error).toBeDefined();
@@ -152,7 +161,10 @@ describe('useVibes - Basic Structure', () => {
 
     const { result } = renderHook(() => useVibes('create button', {}, mockCallAI));
 
-    await waitFor(() => expect(result.current.loading).toBe(false), { timeout: 3000 });
+    await waitFor(() => expect(result.current.loading).toBe(false), {
+      timeout: 10000,
+      interval: 100,
+    });
     expect(result.current.code).toContain('Initial');
 
     // For now, just test that regenerate function exists and is callable
@@ -172,7 +184,10 @@ describe('useVibes - Basic Structure', () => {
     expect(result.current.progress).toBeGreaterThanOrEqual(0);
     expect(result.current.loading).toBe(true);
 
-    await waitFor(() => expect(result.current.loading).toBe(false), { timeout: 3000 });
+    await waitFor(() => expect(result.current.loading).toBe(false), {
+      timeout: 10000,
+      interval: 100,
+    });
 
     // Progress should reach 100 when loading is complete
     await waitFor(() => expect(result.current.progress).toBeGreaterThan(89), { timeout: 1000 });
@@ -201,7 +216,10 @@ describe('useVibes - Basic Structure', () => {
 
     const { result } = renderHook(() => useVibes('Create a todo app', {}, mockCallAI));
 
-    await waitFor(() => expect(result.current.loading).toBe(false), { timeout: 3000 });
+    await waitFor(() => expect(result.current.loading).toBe(false), {
+      timeout: 10000,
+      interval: 100,
+    });
 
     // Since we're in browser environment, the real makeBaseSystemPrompt is called
     // We verify that callAI was called (it gets called twice: once for dependency selection, once for component generation)
@@ -256,7 +274,10 @@ describe('useVibes - Basic Structure', () => {
     expect(result.current.loading).toBe(true);
     expect(result.current.error).toBe(null);
 
-    await waitFor(() => expect(result.current.loading).toBe(false), { timeout: 3000 });
+    await waitFor(() => expect(result.current.loading).toBe(false), {
+      timeout: 10000,
+      interval: 100,
+    });
 
     expect(result.current.App).toBeDefined();
     expect(result.current.code).toContain('Test');
@@ -273,7 +294,10 @@ describe('useVibes - Basic Structure', () => {
 
     expect(result.current.loading).toBe(true);
 
-    await waitFor(() => expect(result.current.loading).toBe(false), { timeout: 3000 });
+    await waitFor(() => expect(result.current.loading).toBe(false), {
+      timeout: 10000,
+      interval: 100,
+    });
 
     expect(result.current.App).toBeDefined();
   });

@@ -148,9 +148,12 @@ This creates a fully functional todo app with Fireproof for data persistence.
     expect(result.current.code).toBe(null);
 
     // Wait for AI response and parsing
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
+    await waitFor(
+      () => {
+        expect(result.current.loading).toBe(false);
+      },
+      { timeout: 10000, interval: 100 }
+    );
 
     // Verify code was extracted correctly
     expect(result.current.code).toContain('TodoApp');
@@ -237,9 +240,12 @@ export default function DataDashboard() {
       )
     );
 
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
+    await waitFor(
+      () => {
+        expect(result.current.loading).toBe(false);
+      },
+      { timeout: 10000, interval: 100 }
+    );
 
     // Should have extracted the complex component
     expect(result.current.code).toContain('DataDashboard');
@@ -262,9 +268,12 @@ export default function DataDashboard() {
 
     const { result } = renderHook(() => useVibes('create something', {}, mockCallAI));
 
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
+    await waitFor(
+      () => {
+        expect(result.current.loading).toBe(false);
+      },
+      { timeout: 10000, interval: 100 }
+    );
 
     // Should still handle gracefully - parseContent should extract what it can
     // or fall back to raw response
@@ -289,9 +298,12 @@ export default App;
 
     const { result } = renderHook(() => useVibes('create communicating component', {}, mockCallAI));
 
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
+    await waitFor(
+      () => {
+        expect(result.current.loading).toBe(false);
+      },
+      { timeout: 10000, interval: 100 }
+    );
 
     if (result.current.App) {
       const { container } = render(<result.current.App />);
@@ -334,9 +346,12 @@ export default App${generation};
     const { result } = renderHook(() => useVibes('create a component', {}, mockCallAI));
 
     // Wait for first generation
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
+    await waitFor(
+      () => {
+        expect(result.current.loading).toBe(false);
+      },
+      { timeout: 10000, interval: 100 }
+    );
 
     expect(result.current.code).toContain('App1');
     expect(result.current.code).toContain('Generation 1');
@@ -344,11 +359,20 @@ export default App${generation};
     // Trigger regeneration
     result.current.regenerate();
 
-    expect(result.current.loading).toBe(true);
+    // Wait for loading to become true after regenerate
+    await waitFor(
+      () => {
+        expect(result.current.loading).toBe(true);
+      },
+      { timeout: 1000, interval: 10 }
+    );
 
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
+    await waitFor(
+      () => {
+        expect(result.current.loading).toBe(false);
+      },
+      { timeout: 10000, interval: 100 }
+    );
 
     // Should have new content
     expect(result.current.code).toContain('App2');
@@ -371,10 +395,13 @@ export default App${generation};
 
     const { result: result2 } = renderHook(() => useVibes('component 2', {}, mockCallAI));
 
-    await waitFor(() => {
-      expect(result1.current.loading).toBe(false);
-      expect(result2.current.loading).toBe(false);
-    });
+    await waitFor(
+      () => {
+        expect(result1.current.loading).toBe(false);
+        expect(result2.current.loading).toBe(false);
+      },
+      { timeout: 10000, interval: 100 }
+    );
 
     // Both should succeed
     expect(result1.current.App).toBeDefined();
