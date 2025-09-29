@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useVibes } from 'use-vibes';
 import './App.css';
+import './VibesGeneratorExample.css';
 
 function VibesGeneratorExample() {
   const [inputPrompt, setInputPrompt] = useState('');
@@ -139,9 +140,9 @@ function VibesGeneratorExample() {
               gap: '0.5rem',
             }}
           >
-            {examplePrompts.map((prompt, index) => (
+            {examplePrompts.map((prompt) => (
               <button
-                key={index}
+                key={prompt}
                 onClick={() => handleExamplePrompt(prompt)}
                 disabled={loading}
                 style={{
@@ -185,7 +186,7 @@ function VibesGeneratorExample() {
               }}
             />
             <span style={{ color: '#1976d2', fontWeight: '500' }}>
-              Generating your component... ({progress}%)
+              Generating your component... ({Math.round(Math.max(0, Math.min(100, progress)))}%)
             </span>
           </div>
           <div
@@ -199,7 +200,7 @@ function VibesGeneratorExample() {
           >
             <div
               style={{
-                width: `${progress}%`,
+                width: `${Math.round(Math.max(0, Math.min(100, progress)))}%`,
                 height: '100%',
                 backgroundColor: '#007acc',
                 borderRadius: '4px',
@@ -326,13 +327,6 @@ function VibesGeneratorExample() {
           <li>Components are cached - identical prompts will load instantly</li>
         </ul>
       </div>
-
-      <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 }

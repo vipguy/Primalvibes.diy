@@ -28,7 +28,7 @@ export function useSystemPromptManager(
         role: "user" | "assistant" | "system";
         content: string;
       }[];
-    }) => {
+    }): Promise<SystemPromptResult> => {
       if (VibesDiyEnv.APP_MODE() === "test") {
         return {
           systemPrompt: "Test system prompt",

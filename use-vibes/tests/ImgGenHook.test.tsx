@@ -20,7 +20,12 @@ vi.mock('call-ai', () => {
       });
     }),
     callAI: vi.fn(),
-    joinUrlParts: vi.fn((base: string, path: string) => `${base}${path}`),
+    joinUrlParts: vi.fn((base: string, path: string) => {
+      if (!base || !path) return base || path || '';
+      const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
+      const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+      return `${cleanBase}/${cleanPath}`;
+    }),
   };
 });
 
@@ -77,8 +82,13 @@ describe('ImgGen Render Test', () => {
       render(<ImgGen prompt="test image" />);
     });
 
-    // Wait a bit to ensure any effects have run
-    await new Promise((r) => setTimeout(r, 100));
+    // Wait for any async effects to complete using waitFor
+    await waitFor(
+      () => {
+        expect(mockImageGen).toHaveBeenCalled();
+      },
+      { timeout: 1000 }
+    );
 
     // Check how many times imageGen was called
     console.log('Number of imageGen calls:', mockImageGen.mock.calls.length);
@@ -107,7 +117,12 @@ describe('ImgGen Render Test', () => {
     });
 
     // Wait for initial render to complete
-    await new Promise((r) => setTimeout(r, 100));
+    await waitFor(
+      () => {
+        expect(mockImageGen).toHaveBeenCalled();
+      },
+      { timeout: 1000 }
+    );
 
     // Check initial calls
     const initialCalls = mockImageGen.mock.calls.length;

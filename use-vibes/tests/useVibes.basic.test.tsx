@@ -120,12 +120,9 @@ describe('useVibes - Basic Structure', () => {
   });
 
   it('should show progress updates during generation', async () => {
-    // Mock a delayed response to test progress
-    mockData.mockCallAI.mockImplementation(
-      () =>
-        new Promise((resolve) =>
-          setTimeout(() => resolve('export default function() { return <div>Done</div> }'), 200)
-        )
+    // Mock an immediate response to test progress (no need for actual delay in mocked test)
+    mockData.mockCallAI.mockImplementation(() =>
+      Promise.resolve('export default function() { return <div>Done</div> }')
     );
 
     const { result } = renderHook(() => useVibes('create button', {}, mockData.mockCallAI));
