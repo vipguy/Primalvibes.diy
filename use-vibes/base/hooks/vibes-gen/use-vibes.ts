@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { callAI as defaultCallAI } from 'call-ai';
-import { makeBaseSystemPrompt } from '@vibes.diy/prompts';
+import { makeBaseSystemPrompt, parseContent } from '@vibes.diy/prompts';
 import type {
   UseVibesOptions,
   UseVibesResult,
@@ -13,20 +13,52 @@ import type {
  * In Cycle 3, this will be replaced with real JSX compilation
  */
 function compileMockComponent(code: string): React.ComponentType<GeneratedComponentProps> {
-  // For now, return a simple mock component that displays the code
+  // For now, return a simple mock component that displays the extracted code
   return function MockComponent(_props: GeneratedComponentProps) {
+    const codePreview = code.trim() ? code.substring(0, 200) : 'No code extracted';
+    const isCodeExtracted = code.trim().length > 0;
+
     return React.createElement(
       'div',
       {
         'data-testid': 'mock-component',
         style: {
-          padding: '10px',
-          border: '1px solid #ccc',
+          padding: '20px',
+          border: isCodeExtracted ? '2px solid #4ade80' : '2px solid #f87171',
+          borderRadius: '8px',
           fontFamily: 'monospace',
           fontSize: '12px',
+          backgroundColor: isCodeExtracted ? '#f0fdf4' : '#fef2f2',
+          maxWidth: '100%',
+          overflow: 'auto',
         },
       },
-      `Mock Component: ${code.substring(0, 100)}...`
+      React.createElement(
+        'div',
+        null,
+        React.createElement(
+          'div',
+          {
+            style: {
+              fontWeight: 'bold',
+              marginBottom: '10px',
+              color: isCodeExtracted ? '#16a34a' : '#dc2626',
+            },
+          },
+          isCodeExtracted ? '✅ Code Extracted Successfully' : '❌ No Code Block Found'
+        ),
+        React.createElement(
+          'pre',
+          {
+            style: {
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-all',
+              margin: 0,
+            },
+          },
+          codePreview + (code.length > 200 ? '...' : '')
+        )
+      )
     );
   };
 }
@@ -188,22 +220,49 @@ Return only the JSX code with a default export. Use modern React patterns with h
           return;
         }
 
-        const code = typeof aiResponse === 'string' ? aiResponse : '';
+        const rawResponse = typeof aiResponse === 'string' ? aiResponse : '';
+
+        // Parse the AI response to extract code segments
+        const { segments } = parseContent(rawResponse);
+
+        // Find the first code block
+        const codeSegment = segments.find((segment) => segment.type === 'code');
+        const extractedCode = codeSegment ? codeSegment.content : '';
+
+        // Log the extracted code block
+        console.log('🎯 useVibes: Extracted code block:', extractedCode);
+        console.log(
+          '🎯 useVibes: Total segments found:',
+          segments.length,
+          'Code segments:',
+          segments.filter((s) => s.type === 'code').length
+        );
+
+        // Add warning if no code block was found
+        if (!extractedCode) {
+          console.warn(
+            '⚠️ useVibes: No code block found in AI response. Using raw response as fallback.'
+          );
+          console.warn('🎯 useVibes: Raw response preview:', rawResponse.substring(0, 100) + '...');
+        }
+
+        // Use extracted code for compilation, fallback to raw response if no code found
+        const codeToUse = extractedCode || rawResponse;
 
         // Compile the code to a component (mock for Cycle 1)
-        const App = compileMockComponent(code);
+        const App = compileMockComponent(codeToUse);
 
         // Update state with results, including rich metadata from orchestrator
         setState((prev) => ({
           ...prev,
           App,
-          code,
+          code: codeToUse,
           loading: false,
           progress: 100,
           document: {
             _id: `vibe-${Date.now()}`,
             prompt,
-            code,
+            code: codeToUse,
             title: 'Generated Component',
             // Include all metadata from the orchestrator
             ...metadata,
