@@ -133,14 +133,29 @@ export function useVibes(
         simulateProgress(0);
 
         // Use the full orchestrator for two-stage generation
-        const result = await makeBaseSystemPrompt(options.model || 'anthropic/claude-sonnet-4', {
-          userPrompt: prompt,
-          history: [],
-          fallBackUrl: 'https://esm.sh/@vibes.diy/prompts/llms',
-          // Pass through any user overrides
-          dependencies: options.dependencies,
-          dependenciesUserOverride: !!options.dependencies,
-        });
+        let result;
+        try {
+          result = await makeBaseSystemPrompt(options.model || 'anthropic/claude-sonnet-4', {
+            userPrompt: prompt,
+            history: [],
+            fallBackUrl: 'https://esm.sh/@vibes.diy/prompts/llms',
+            // Pass through any user overrides
+            dependencies: options.dependencies,
+            dependenciesUserOverride: !!options.dependencies,
+          });
+        } catch (error) {
+          console.warn('makeBaseSystemPrompt failed, using fallback:', error);
+          // Fallback to a simple but functional system prompt
+          result = {
+            systemPrompt: `You are a React component generator. Generate a complete React component based on the user's prompt. 
+Use Fireproof for data persistence. Begin the component with the import statements.
+Return only the JSX code with a default export. Use modern React patterns with hooks if needed.`,
+            dependencies: options.dependencies || ['useFireproof'],
+            instructionalText: true,
+            demoData: false,
+            model: options.model || 'anthropic/claude-sonnet-4',
+          };
+        }
 
         const systemPrompt = result.systemPrompt;
         const metadata = {
