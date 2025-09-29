@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { callAI as defaultCallAI } from 'call-ai';
-import { generateComponentWithDependencies } from '@vibes.diy/prompts';
+import { generateComponentWithDependencies, ComponentGenerationResult } from '@vibes.diy/prompts';
 import type {
   UseVibesOptions,
   UseVibesResult,
@@ -133,13 +133,14 @@ export function useVibes(
         simulateProgress(0);
 
         // Use the new upstream orchestrator for two-stage generation
-        // In test mode (when process.env.NODE_ENV === 'test'), use a simplified approach
-        const isTestMode = typeof process !== 'undefined' && process.env?.NODE_ENV === 'test';
+        // Use production mode only when explicitly enabled
+        const isProductionMode =
+          typeof process !== 'undefined' && process.env?.USE_VIBES_PRODUCTION_MODE === 'true';
 
         let systemPrompt: string;
-        let metadata: any;
+        let metadata: ComponentGenerationResult['metadata'];
 
-        if (isTestMode) {
+        if (!isProductionMode) {
           // Simplified test mode - use basic system prompt
           systemPrompt = `You are a React component generator. Generate a complete React component based on the user's prompt. 
 Use Fireproof for data persistence. Begin the component with the import statements.

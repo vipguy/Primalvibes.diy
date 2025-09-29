@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeAll, beforeEach } from "vitest";
+import { createMockFetchFromPkgFiles } from "./helpers/load-mock-data.js";
 
 // Mock the call-ai module
 vi.mock("call-ai", () => ({
@@ -6,17 +7,34 @@ vi.mock("call-ai", () => ({
   joinUrlParts: vi.fn((base: string, path: string) => `${base}${path}`),
 }));
 
+// Mock global fetch for the tests
+const mockFetch = vi.fn();
+globalThis.fetch = mockFetch;
+
+// Use a known finite set for testing, excluding three-js to keep tests stable
+const knownModuleNames = ["callai", "fireproof", "image-gen", "web-audio"];
+
+const opts = {
+  fallBackUrl: new URL("https://example.com/fallback"),
+  callAiEndpoint: "https://example.com/call-ai",
+  mock: {
+    callAI: vi.fn().mockResolvedValue(
+      JSON.stringify({
+        selected: knownModuleNames,
+        instructionalText: true,
+        demoData: true,
+      }),
+    ),
+  },
+};
+
 describe("generateComponentWithDependencies", () => {
   let generateComponentWithDependencies: typeof import("../pkg/prompts.js").generateComponentWithDependencies;
   let mockCallAI: ReturnType<typeof vi.fn>;
 
-  beforeEach(async () => {
-    // Reset mocks
-    vi.clearAllMocks();
-
-    // Get the mocked callAI
-    const callAiModule = await import("call-ai");
-    mockCallAI = callAiModule.callAI as ReturnType<typeof vi.fn>;
+  beforeAll(async () => {
+    // Set up mock using real files from pkg directory
+    mockFetch.mockImplementation(createMockFetchFromPkgFiles());
 
     // Import the function to test
     const module = await import("../pkg/prompts.js");
@@ -24,11 +42,20 @@ describe("generateComponentWithDependencies", () => {
       module.generateComponentWithDependencies;
   });
 
+  beforeEach(() => {
+    // Reset mocks
+    mockFetch.mockClear();
+
+    // Get the mocked callAI from opts
+    mockCallAI = opts.mock.callAI;
+    mockCallAI.mockClear();
+  });
+
   it("should perform two-stage generation: dependency selection then system prompt", async () => {
     // Mock Stage 1: AI selects dependencies
     mockCallAI.mockResolvedValueOnce(
       JSON.stringify({
-        selected: ["useFireproof", "LucideIcons"],
+        selected: ["fireproof", "image-gen"],
         instructionalText: true,
         demoData: false,
       }),
@@ -37,7 +64,7 @@ describe("generateComponentWithDependencies", () => {
     const result = await generateComponentWithDependencies(
       "Create a todo app with local storage",
       {
-        fallBackUrl: "https://esm.sh/use-vibes/prompt-catalog/llms",
+        ...opts,
         userPrompt: "Create a todo app with local storage",
         history: [],
       },
@@ -81,8 +108,8 @@ describe("generateComponentWithDependencies", () => {
 
     // Verify metadata contains all expected fields
     expect(result.metadata).toMatchObject({
-      dependencies: ["useFireproof", "LucideIcons"],
-      aiSelectedDependencies: ["useFireproof", "LucideIcons"],
+      dependencies: ["fireproof", "image-gen"],
+      aiSelectedDependencies: ["fireproof", "image-gen"],
       instructionalText: true,
       demoData: false,
       model: expect.any(String),
@@ -92,10 +119,10 @@ describe("generateComponentWithDependencies", () => {
 
   it("should use dependency overrides when provided", async () => {
     const result = await generateComponentWithDependencies("Create a form", {
-      fallBackUrl: "https://esm.sh/use-vibes/prompt-catalog/llms",
+      ...opts,
       userPrompt: "Create a form",
       history: [],
-      dependencies: ["ReactHookForm", "Zod"],
+      dependencies: ["fireproof"],
       dependenciesUserOverride: true,
     });
 
@@ -103,25 +130,22 @@ describe("generateComponentWithDependencies", () => {
     expect(mockCallAI).not.toHaveBeenCalled();
 
     // Should use the provided dependencies
-    expect(result.metadata.dependencies).toEqual(["ReactHookForm", "Zod"]);
-    expect(result.metadata.aiSelectedDependencies).toEqual([
-      "ReactHookForm",
-      "Zod",
-    ]);
+    expect(result.metadata.dependencies).toEqual(["fireproof"]);
+    expect(result.metadata.aiSelectedDependencies).toEqual(["fireproof"]);
   });
 
   it("should respect instructionalText and demoData overrides", async () => {
     // Mock Stage 1: AI suggests true for both
     mockCallAI.mockResolvedValueOnce(
       JSON.stringify({
-        selected: ["useFireproof"],
+        selected: ["fireproof"],
         instructionalText: true,
         demoData: true,
       }),
     );
 
     const result = await generateComponentWithDependencies("Create an app", {
-      fallBackUrl: "https://esm.sh/use-vibes/prompt-catalog/llms",
+      ...opts,
       userPrompt: "Create an app",
       history: [],
       instructionalTextOverride: false,
@@ -135,10 +159,15 @@ describe("generateComponentWithDependencies", () => {
 
   it.skip("should handle dependency selection timeout gracefully", async () => {
     // Mock a call that will never resolve (simulating timeout)
-    mockCallAI.mockImplementation(() => new Promise(() => {}));
+    mockCallAI.mockImplementation(
+      () =>
+        new Promise(() => {
+          // This promise never resolves, simulating a timeout
+        }),
+    );
 
     const result = await generateComponentWithDependencies("Create an app", {
-      fallBackUrl: "https://esm.sh/use-vibes/prompt-catalog/llms",
+      ...opts,
       userPrompt: "Create an app",
       history: [],
     });
@@ -154,7 +183,7 @@ describe("generateComponentWithDependencies", () => {
     // Mock Stage 1
     mockCallAI.mockResolvedValueOnce(
       JSON.stringify({
-        selected: ["useFireproof"],
+        selected: ["fireproof"],
         instructionalText: true,
         demoData: false,
       }),
@@ -168,7 +197,7 @@ describe("generateComponentWithDependencies", () => {
     ];
 
     await generateComponentWithDependencies("Add a button", {
-      fallBackUrl: "https://esm.sh/use-vibes/prompt-catalog/llms",
+      ...opts,
       userPrompt: "Add a button",
       history,
     });
@@ -183,7 +212,7 @@ describe("generateComponentWithDependencies", () => {
   it("should use custom model when provided", async () => {
     mockCallAI.mockResolvedValueOnce(
       JSON.stringify({
-        selected: ["useFireproof"],
+        selected: ["fireproof"],
         instructionalText: true,
         demoData: true,
       }),
@@ -193,7 +222,7 @@ describe("generateComponentWithDependencies", () => {
     const result = await generateComponentWithDependencies(
       "Create an app",
       {
-        fallBackUrl: "https://esm.sh/use-vibes/prompt-catalog/llms",
+        ...opts,
         userPrompt: "Create an app",
         history: [],
       },
@@ -212,14 +241,14 @@ describe("generateComponentWithDependencies", () => {
 
     mockCallAI.mockResolvedValueOnce(
       JSON.stringify({
-        selected: ["useFireproof", "LucideIcons"],
+        selected: ["fireproof", "image-gen"],
         instructionalText: false,
         demoData: true,
       }),
     );
 
     await generateComponentWithDependencies("Create a dashboard", {
-      fallBackUrl: "https://esm.sh/use-vibes/prompt-catalog/llms",
+      ...opts,
       userPrompt: "Create a dashboard",
       history: [],
     });
@@ -228,7 +257,7 @@ describe("generateComponentWithDependencies", () => {
     expect(consoleSpy).toHaveBeenCalledWith(
       "🎯 Component generation: AI selected dependencies:",
       expect.objectContaining({
-        selected: ["useFireproof", "LucideIcons"],
+        selected: ["fireproof", "image-gen"],
         instructionalText: false,
         demoData: true,
         prompt: "Create a dashboard",
@@ -241,7 +270,7 @@ describe("generateComponentWithDependencies", () => {
       "📦 Component metadata for storage:",
       expect.objectContaining({
         dependencies: expect.any(Array),
-        aiSelectedDependencies: ["useFireproof", "LucideIcons"],
+        aiSelectedDependencies: ["fireproof", "image-gen"],
         instructionalText: false,
         demoData: true,
         model: expect.any(String),

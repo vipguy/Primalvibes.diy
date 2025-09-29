@@ -20,6 +20,7 @@ vi.mock('call-ai', () => {
       });
     }),
     callAI: vi.fn(),
+    joinUrlParts: vi.fn((base: string, path: string) => `${base}${path}`),
   };
 });
 
