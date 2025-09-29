@@ -38,7 +38,7 @@ import type {
   UserChatMessage,
 } from "@vibes.diy/prompts";
 import type { DocResponse } from "use-fireproof";
-import { parseContent } from "~/vibes.diy/app/utils/segmentParser.js";
+import { parseContent } from "@vibes.diy/prompts";
 
 // Helper function to convert chunks into SSE format
 function formatAsSSE(chunks: string[]): string[] {

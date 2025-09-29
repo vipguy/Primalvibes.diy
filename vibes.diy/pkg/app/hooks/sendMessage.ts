@@ -7,7 +7,7 @@ import {
   type SystemPromptResult,
 } from "@vibes.diy/prompts";
 import { trackChatInputClick } from "../utils/analytics.js";
-import { parseContent } from "../utils/segmentParser.js";
+import { parseContent } from "@vibes.diy/prompts";
 import { streamAI } from "../utils/streamHandler.js";
 import { generateTitle } from "../utils/titleGenerator.js";
 

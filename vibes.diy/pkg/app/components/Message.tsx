@@ -7,7 +7,7 @@ import type {
   SystemChatMessageDocument,
   ViewType,
 } from "@vibes.diy/prompts";
-import { parseContent } from "../utils/segmentParser.js";
+import { parseContent } from "@vibes.diy/prompts";
 
 interface MessageProps {
   message: ChatMessageDocument;

@@ -3,7 +3,7 @@ import { cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useSimpleChat } from "~/vibes.diy/app/hooks/useSimpleChat.js";
 import type { AiChatMessage, ChatMessage } from "@vibes.diy/prompts";
-import { parseContent } from "~/vibes.diy/app/utils/segmentParser.js";
+import { parseContent } from "@vibes.diy/prompts";
 
 // Mock the prompts module
 vi.mock("~/vibes.diy/app/prompts.js", () => ({

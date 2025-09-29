@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { parseContent } from "~/vibes.diy/app/utils/segmentParser.js";
+import { parseContent } from "@vibes.diy/prompts";
 import type { ChatMessage, AiChatMessage } from "@vibes.diy/prompts";
 
 // Mock the prompts module

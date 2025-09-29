@@ -171,19 +171,20 @@ vi.mock("~/vibes.diy/app/components/AppLayout", () => ({
 }));
 
 // Mock segmentParser functions
-vi.mock("~/vibes.diy/app/utils/segmentParser.js", async (original) => {
+vi.mock("@vibes.diy/prompts", async (original) => {
   const mockCode = Array(210)
     .fill(0)
     .map((_, i) => `console.log("Line ${i}");`)
     .join("\n");
-  const all =
-    (await original()) as typeof import("~/vibes.diy/app/utils/segmentParser.js");
+  const all = (await original()) as typeof import("@vibes.diy/prompts");
   return {
     ...all,
-    segments: [
-      { type: "markdown", content: "Explanation of the code" } as Segment,
-      { type: "code", content: mockCode } as Segment,
-    ],
+    parseContent: () => ({
+      segments: [
+        { type: "markdown", content: "Explanation of the code" } as Segment,
+        { type: "code", content: mockCode } as Segment,
+      ],
+    }),
   };
 });
 

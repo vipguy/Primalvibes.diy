@@ -1,6 +1,6 @@
 import { useMemo, useCallback, useState, useEffect } from "react";
 import type { Segment, ChatMessageDocument } from "@vibes.diy/prompts";
-import { parseContent } from "../utils/segmentParser.js";
+import { parseContent } from "@vibes.diy/prompts";
 
 /**
  * Hook for managing message selection and content processing
