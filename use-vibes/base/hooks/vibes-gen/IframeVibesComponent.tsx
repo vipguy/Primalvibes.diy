@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { transformImports } from './transformImports.ts';
-import { normalizeComponentExports } from './normalizeExports.ts';
+import { transformImports } from './transformImports.js';
+import { normalizeComponentExports } from './normalizeExports.js';
 
 interface IframeVibesComponentProps {
   code: string;

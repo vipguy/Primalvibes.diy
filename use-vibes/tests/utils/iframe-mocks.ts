@@ -49,7 +49,7 @@ export function createMockIframe(postMessage = vi.fn()): MockIframe {
   return iframe;
 }
 
-export function simulateIframeMessage(data: any, origin = 'https://test.vibesbox.dev') {
+export function simulateIframeMessage(data: unknown, origin = 'https://test.vibesbox.dev') {
   act(() => {
     window.dispatchEvent(
       new MessageEvent('message', {
@@ -60,7 +60,7 @@ export function simulateIframeMessage(data: any, origin = 'https://test.vibesbox
   });
 }
 
-export function createMockMessageEvent(data: any, origin?: string): MessageEvent {
+export function createMockMessageEvent(data: unknown, origin?: string): MessageEvent {
   return new MessageEvent('message', {
     data,
     origin,

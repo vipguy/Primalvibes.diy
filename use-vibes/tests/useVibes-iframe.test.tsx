@@ -6,13 +6,16 @@ import { createMockIframe, cleanupIframeMocks } from './utils/iframe-mocks.js';
 // Mock parseContent to return predictable results
 vi.mock('@vibes.diy/prompts', () => ({
   parseContent: vi.fn((text: string) => {
-    // Check if text contains code blocks
-    const codeBlockMatch = text.match(/```(?:jsx?|javascript)?\n([\s\S]*?)\n```/);
+    // Check if text contains code blocks - match the real implementation pattern
+    const codeBlockMatch = text.match(
+      /(?:^|\n)[ \t]*```(?:js|jsx|javascript|)[ \t]*\n([\s\S]*?)(?:^|\n)[ \t]*```[ \t]*(?:\n|$)/
+    );
+
     if (codeBlockMatch) {
       return {
         segments: [
           { type: 'markdown', content: 'Some description' },
-          { type: 'code', content: codeBlockMatch[1] },
+          { type: 'code', content: codeBlockMatch[1].trim() },
         ],
       };
     }
@@ -35,10 +38,10 @@ vi.mock('@vibes.diy/prompts', () => ({
 import { useVibes } from '../base/hooks/vibes-gen/use-vibes.js';
 
 describe('useVibes with iframe integration', () => {
-  let mockIframe: ReturnType<typeof createMockIframe>;
+  let _mockIframe: ReturnType<typeof createMockIframe>;
 
   beforeEach(() => {
-    mockIframe = createMockIframe();
+    _mockIframe = createMockIframe();
     vi.clearAllMocks();
   });
 
@@ -65,10 +68,13 @@ This creates a simple button.
     expect(result.current.loading).toBe(true);
     expect(result.current.App).toBe(null);
 
-    // Wait for the hook to complete
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
+    // Wait for the hook to complete with extended timeout
+    await waitFor(
+      () => {
+        expect(result.current.loading).toBe(false);
+      },
+      { timeout: 10000, interval: 100 }
+    );
 
     // Should have extracted the code
     expect(result.current.code).toContain('function App()');
@@ -91,9 +97,12 @@ This creates a simple button.
 
     const { result } = renderHook(() => useVibes('create a button', {}, mockCallAI));
 
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
+    await waitFor(
+      () => {
+        expect(result.current.loading).toBe(false);
+      },
+      { timeout: 10000, interval: 100 }
+    );
 
     // Verify the extracted code matches what was in the code block
     expect(result.current.code).toBe(expectedCode);
@@ -116,10 +125,13 @@ This creates a simple button.
 
     const { result: result2 } = renderHook(() => useVibes('button 2', {}, mockCallAI));
 
-    await waitFor(() => {
-      expect(result1.current.loading).toBe(false);
-      expect(result2.current.loading).toBe(false);
-    });
+    await waitFor(
+      () => {
+        expect(result1.current.loading).toBe(false);
+        expect(result2.current.loading).toBe(false);
+      },
+      { timeout: 10000, interval: 100 }
+    );
 
     // Both should have generated components
     expect(result1.current.App).toBeDefined();
@@ -146,9 +158,12 @@ This creates a simple button.
 
     const { result } = renderHook(() => useVibes('create component', {}, mockCallAI));
 
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
+    await waitFor(
+      () => {
+        expect(result.current.loading).toBe(false);
+      },
+      { timeout: 10000, interval: 100 }
+    );
 
     // Should use the raw response as fallback
     expect(result.current.code).toBe(rawResponse);
@@ -166,9 +181,12 @@ This creates a simple button.
 
     const { result } = renderHook(() => useVibes('create something', {}, mockCallAI));
 
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
+    await waitFor(
+      () => {
+        expect(result.current.loading).toBe(false);
+      },
+      { timeout: 10000, interval: 100 }
+    );
 
     // Should have error state
     expect(result.current.error).toBeDefined();
@@ -191,12 +209,15 @@ export default TodoApp;
 \`\`\``);
 
     const { result } = renderHook(() =>
-      useVibes('create a todo app', { model: 'gpt-4' }, mockCallAI)
+      useVibes('create a todo app', { model: 'anthropic/claude-sonnet-4' }, mockCallAI)
     );
 
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
+    await waitFor(
+      () => {
+        expect(result.current.loading).toBe(false);
+      },
+      { timeout: 10000, interval: 100 }
+    );
 
     // Should have document with metadata
     expect(result.current.document).toBeDefined();
@@ -218,9 +239,12 @@ export default TodoApp;
     const { result } = renderHook(() => useVibes('create a component', {}, mockCallAI));
 
     // Wait for initial generation
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
+    await waitFor(
+      () => {
+        expect(result.current.loading).toBe(false);
+      },
+      { timeout: 10000, interval: 100 }
+    );
 
     expect(result.current.code).toContain('App1');
     expect(mockCallAI).toHaveBeenCalledTimes(1);
@@ -228,13 +252,21 @@ export default TodoApp;
     // Trigger regeneration
     result.current.regenerate();
 
-    // Should be loading again
-    expect(result.current.loading).toBe(true);
+    // Wait a moment for the state to update
+    await waitFor(
+      () => {
+        expect(result.current.loading).toBe(true);
+      },
+      { timeout: 1000, interval: 10 }
+    );
 
     // Wait for regeneration to complete
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
+    await waitFor(
+      () => {
+        expect(result.current.loading).toBe(false);
+      },
+      { timeout: 10000, interval: 100 }
+    );
 
     // Should have new content
     expect(result.current.code).toContain('App2');

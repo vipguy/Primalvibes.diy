@@ -27,6 +27,7 @@ export function useVibes(
   const generationIdRef = useRef<string | null>(null);
   const mountedRef = useRef(true);
   const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [regenerationTrigger, setRegenerationTrigger] = useState<number>(0);
 
   // Progress simulation for Cycle 1
   const simulateProgress = useCallback((currentProgress = 0) => {
@@ -47,8 +48,9 @@ export function useVibes(
 
   // Regenerate function
   const regenerate = useCallback(() => {
-    // Trigger regeneration by updating generation ID
+    // Trigger regeneration by updating generation ID and state
     generationIdRef.current = `regen-${Date.now()}`;
+    setRegenerationTrigger((prev) => prev + 1);
   }, []);
 
   // Effect to start generation - only when prompt or options change
@@ -242,7 +244,7 @@ Return only the JSX code with a default export. Use modern React patterns with h
         progressTimerRef.current = null;
       }
     };
-  }, [prompt, JSON.stringify(options), callAI, simulateProgress]); // Only depend on actual inputs
+  }, [prompt, JSON.stringify(options), callAI, simulateProgress, regenerationTrigger]); // Include regeneration trigger
 
   // Cleanup on unmount
   useEffect(() => {

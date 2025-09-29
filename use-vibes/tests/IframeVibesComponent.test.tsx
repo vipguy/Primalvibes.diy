@@ -139,9 +139,9 @@ describe('IframeVibesComponent', () => {
       },
     ];
 
-    for (const { input, shouldContain } of testCases) {
+    for (const { input } of testCases) {
       const mockPostMessage = vi.fn();
-      const localMockIframe = createMockIframe(mockPostMessage);
+      const _localMockIframe = createMockIframe(mockPostMessage);
 
       const { unmount } = render(
         <React.Suspense fallback={<div>Loading...</div>}>

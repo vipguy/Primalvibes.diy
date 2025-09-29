@@ -1,11 +1,7 @@
 import React from 'react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { render, renderHook, waitFor } from '@testing-library/react';
-import {
-  createMockIframe,
-  simulateIframeMessage,
-  cleanupIframeMocks,
-} from './utils/iframe-mocks.js';
+import { createMockIframe, cleanupIframeMocks } from './utils/iframe-mocks.js';
 
 // Mock the environment config that would be used for endpoints
 vi.mock('../../base/config/env', () => ({
@@ -64,10 +60,10 @@ vi.mock('@vibes.diy/prompts', () => ({
 import { useVibes } from '../base/hooks/vibes-gen/use-vibes.js';
 
 describe('useVibes Integration Tests', () => {
-  let mockIframe: ReturnType<typeof createMockIframe>;
+  let _mockIframe: ReturnType<typeof createMockIframe>;
 
   beforeEach(() => {
-    mockIframe = createMockIframe();
+    _mockIframe = createMockIframe();
     vi.clearAllMocks();
   });
 
