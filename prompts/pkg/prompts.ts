@@ -49,57 +49,6 @@ export interface SystemPromptResult {
   model: string;
 }
 
-export interface ComponentGenerationResult {
-  systemPrompt: string;
-  metadata: {
-    dependencies: string[];
-    aiSelectedDependencies: string[];
-    instructionalText: boolean;
-    demoData: boolean;
-    model: string;
-    timestamp: number;
-  };
-}
-
-export async function generateComponentWithDependencies(
-  prompt: string,
-  options: Partial<UserSettings> & LlmSelectionOptions,
-  model?: string,
-): Promise<ComponentGenerationResult> {
-  const effectiveModel = model || (await defaultCodingModel());
-
-  // Use makeBaseSystemPrompt to get both prompt and metadata
-  const result = await makeBaseSystemPrompt(
-    effectiveModel,
-    {
-      ...options,
-      userPrompt: prompt,
-    },
-    (decisions) => {
-      console.log(
-        "🎯 Dependencies confirmed for prompt generation:",
-        decisions,
-      );
-    },
-  );
-
-  const metadata = {
-    dependencies: result.dependencies,
-    aiSelectedDependencies: result.dependencies, // for backward compatibility
-    instructionalText: result.instructionalText,
-    demoData: result.demoData,
-    model: result.model,
-    timestamp: Date.now(),
-  };
-
-  console.log("📦 Component metadata for storage:", metadata);
-
-  return {
-    systemPrompt: result.systemPrompt,
-    metadata,
-  };
-}
-
 function escapeRegExp(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { callAI as defaultCallAI } from 'call-ai';
-import { generateComponentWithDependencies, ComponentGenerationResult } from '@vibes.diy/prompts';
+import { makeBaseSystemPrompt, SystemPromptResult } from '@vibes.diy/prompts';
 import type {
   UseVibesOptions,
   UseVibesResult,
@@ -138,7 +138,14 @@ export function useVibes(
           typeof process !== 'undefined' && process.env?.USE_VIBES_PRODUCTION_MODE === 'true';
 
         let systemPrompt: string;
-        let metadata: ComponentGenerationResult['metadata'];
+        let metadata: {
+          dependencies: string[];
+          aiSelectedDependencies: string[];
+          instructionalText: boolean;
+          demoData: boolean;
+          model: string;
+          timestamp: number;
+        };
 
         if (!isProductionMode) {
           // Simplified test mode - use basic system prompt
@@ -155,21 +162,24 @@ Return only the JSX code with a default export. Use modern React patterns with h
           };
         } else {
           // Production mode - use full orchestrator
-          const result = await generateComponentWithDependencies(
-            prompt,
-            {
-              userPrompt: prompt,
-              history: [],
-              fallBackUrl: 'https://esm.sh/use-vibes/prompt-catalog/llms',
-              // Pass through any user overrides
-              dependencies: options.dependencies,
-              dependenciesUserOverride: !!options.dependencies,
-            },
-            options.model
-          );
+          const result = await makeBaseSystemPrompt(options.model || 'anthropic/claude-sonnet-4', {
+            userPrompt: prompt,
+            history: [],
+            fallBackUrl: 'https://esm.sh/use-vibes/prompt-catalog/llms',
+            // Pass through any user overrides
+            dependencies: options.dependencies,
+            dependenciesUserOverride: !!options.dependencies,
+          });
 
           systemPrompt = result.systemPrompt;
-          metadata = result.metadata;
+          metadata = {
+            dependencies: result.dependencies,
+            aiSelectedDependencies: result.dependencies,
+            instructionalText: result.instructionalText,
+            demoData: result.demoData,
+            model: result.model,
+            timestamp: Date.now(),
+          };
 
           console.log(
             '🎯 useVibes: Component metadata captured for future database storage:',
