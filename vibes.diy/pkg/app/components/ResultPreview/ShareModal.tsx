@@ -93,8 +93,8 @@ export function ShareModal({
         >
           <p className="mb-4 text-xs text-blue-700 italic dark:text-blue-200">
             You are in <strong>dev mode</strong>. Data is temporary until you
-            publish your app. Publishing allows anyone with the link to share
-            and remix. Selected apps are featured in{" "}
+            publish your app. Publishing allows anyone with the link to share,
+            remix, and install their own copy. Selected apps are featured in{" "}
             <a
               href="https://discord.gg/vnpWycj4Ta"
               target="_blank"
