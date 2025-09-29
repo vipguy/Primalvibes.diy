@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { callAI as defaultCallAI } from 'call-ai';
-import { makeBaseSystemPrompt, SystemPromptResult } from '@vibes.diy/prompts';
+import { makeBaseSystemPrompt } from '@vibes.diy/prompts';
 import type {
   UseVibesOptions,
   UseVibesResult,

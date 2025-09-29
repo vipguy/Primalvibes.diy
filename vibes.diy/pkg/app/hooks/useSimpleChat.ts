@@ -127,8 +127,10 @@ export function useSimpleChat(sessionId: string): ChatState {
     }): Promise<SystemPromptResult> => {
       const result = await baseEnsureSystemPrompt(overrides);
 
-      // Update dependencies from result
-      updateAiSelectedDependencies(result.dependencies);
+      // Update dependencies from result (with safety check for tests)
+      if (typeof updateAiSelectedDependencies === "function") {
+        updateAiSelectedDependencies(result.dependencies);
+      }
 
       return result;
     },
