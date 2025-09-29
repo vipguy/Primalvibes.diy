@@ -2,12 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { callAI as defaultCallAI } from 'call-ai';
 import { makeBaseSystemPrompt, parseContent } from '@vibes.diy/prompts';
 import IframeVibesComponent from './IframeVibesComponent.js';
-import type {
-  UseVibesOptions,
-  UseVibesResult,
-  UseVibesState,
-} from './types.js';
-
+import type { UseVibesOptions, UseVibesResult, UseVibesState } from './types.js';
 
 /**
  * useVibes hook - Cycle 1 implementation
@@ -197,12 +192,13 @@ Return only the JSX code with a default export. Use modern React patterns with h
 
         // Create iframe component with extracted code
         const sessionId = `vibes-${Date.now()}`;
-        const App = () => React.createElement(IframeVibesComponent, {
-          code: codeToUse,
-          sessionId: sessionId,
-          onReady: () => console.log('🎯 useVibes: Component ready'),
-          onError: (error) => console.error('🎯 useVibes: Component error:', error)
-        });
+        const App = () =>
+          React.createElement(IframeVibesComponent, {
+            code: codeToUse,
+            sessionId: sessionId,
+            onReady: () => console.log('🎯 useVibes: Component ready'),
+            onError: (error) => console.error('🎯 useVibes: Component error:', error),
+          });
 
         // Update state with results, including rich metadata from orchestrator
         setState((prev) => ({

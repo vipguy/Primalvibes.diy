@@ -1,5 +1,5 @@
-import { vi } from "vitest";
-import { act } from "@testing-library/react";
+import { vi } from 'vitest';
+import { act } from '@testing-library/react';
 
 export interface MockIframe {
   src: string;
@@ -14,7 +14,7 @@ export interface MockIframe {
 export function createMockIframe(postMessage = vi.fn()): MockIframe {
   // Create a proper DOM iframe element and enhance it
   const actualIframe = document.createElement('iframe');
-  
+
   const iframe: MockIframe = {
     src: '',
     contentWindow: { postMessage },
@@ -24,19 +24,19 @@ export function createMockIframe(postMessage = vi.fn()): MockIframe {
       }
     }),
     removeEventListener: vi.fn(),
-    onload: null
+    onload: null,
   };
-  
+
   // Use property descriptors to properly mock read-only properties
   Object.defineProperty(actualIframe, 'contentWindow', {
     get: () => iframe.contentWindow,
-    configurable: true
+    configurable: true,
   });
-  
+
   // Override methods with mocks
   actualIframe.addEventListener = iframe.addEventListener;
   actualIframe.removeEventListener = iframe.removeEventListener;
-  
+
   // Mock document.createElement to return our enhanced iframe when 'iframe' is requested
   const originalCreateElement = document.createElement;
   vi.spyOn(document, 'createElement').mockImplementation((tagName) => {
@@ -45,16 +45,18 @@ export function createMockIframe(postMessage = vi.fn()): MockIframe {
     }
     return originalCreateElement.call(document, tagName);
   });
-  
+
   return iframe;
 }
 
 export function simulateIframeMessage(data: any, origin = 'https://test.vibesbox.dev') {
   act(() => {
-    window.dispatchEvent(new MessageEvent('message', {
-      data,
-      origin
-    }));
+    window.dispatchEvent(
+      new MessageEvent('message', {
+        data,
+        origin,
+      })
+    );
   });
 }
 
@@ -65,7 +67,7 @@ export function createMockMessageEvent(data: any, origin?: string): MessageEvent
     source: window,
     // Add required MessageEvent properties
     lastEventId: '',
-    ports: []
+    ports: [],
   });
 }
 

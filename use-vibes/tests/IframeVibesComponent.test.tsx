@@ -1,15 +1,19 @@
 import React from 'react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { render, act, waitFor } from '@testing-library/react';
-import { createMockIframe, simulateIframeMessage, cleanupIframeMocks } from './utils/iframe-mocks.js';
+import {
+  createMockIframe,
+  simulateIframeMessage,
+  cleanupIframeMocks,
+} from './utils/iframe-mocks.js';
 
 // We'll import this once it's implemented
 // For now, create a placeholder that will fail until implementation exists
-const IframeVibesComponent = React.lazy(() => 
+const IframeVibesComponent = React.lazy(() =>
   import('../base/hooks/vibes-gen/IframeVibesComponent.js').catch(() => {
     // Return a placeholder component that shows we need to implement it
     return Promise.resolve({
-      default: () => <div data-testid="placeholder">IframeVibesComponent not implemented yet</div>
+      default: () => <div data-testid="placeholder">IframeVibesComponent not implemented yet</div>,
     });
   })
 );
@@ -29,13 +33,13 @@ describe('IframeVibesComponent', () => {
   it('should render iframe with session-based vibesbox URL', async () => {
     const { container } = render(
       <React.Suspense fallback={<div>Loading...</div>}>
-        <IframeVibesComponent 
-          code="function App() { return <div>Test</div> }" 
+        <IframeVibesComponent
+          code="function App() { return <div>Test</div> }"
           sessionId="test-123"
         />
       </React.Suspense>
     );
-    
+
     // Wait for lazy component to load
     await waitFor(() => {
       expect(container.querySelector('[data-testid="placeholder"]')).toBeInTheDocument();
@@ -48,16 +52,16 @@ describe('IframeVibesComponent', () => {
   });
 
   it('should send code via postMessage when iframe loads', async () => {
-    const code = "function App() { return <div>Hello</div> }";
+    const code = 'function App() { return <div>Hello</div> }';
     const mockPostMessage = vi.fn();
     mockIframe.contentWindow.postMessage = mockPostMessage;
-    
+
     render(
       <React.Suspense fallback={<div>Loading...</div>}>
         <IframeVibesComponent code={code} />
       </React.Suspense>
     );
-    
+
     // Trigger load event to simulate iframe loading
     act(() => {
       if (mockIframe.onload) {
@@ -73,8 +77,8 @@ describe('IframeVibesComponent', () => {
           code: expect.stringContaining('function App'),
           apiKey: 'sk-vibes-proxy-managed',
           sessionId: expect.any(String),
-          endpoint: expect.any(String)
-        }, 
+          endpoint: expect.any(String),
+        },
         '*'
       );
     });
@@ -87,16 +91,16 @@ describe('IframeVibesComponent', () => {
       import { useFireproof } from "use-fireproof"
       import lodash from "lodash"
     `;
-    
+
     const mockPostMessage = vi.fn();
     mockIframe.contentWindow.postMessage = mockPostMessage;
-    
+
     render(
       <React.Suspense fallback={<div>Loading...</div>}>
         <IframeVibesComponent code={code} />
       </React.Suspense>
     );
-    
+
     // Wait for component to load and process
     await waitFor(() => {
       // This test will fail until component is implemented
@@ -107,14 +111,14 @@ describe('IframeVibesComponent', () => {
     // act(() => {
     //   mockIframe.onload?.();
     // });
-    
+
     // const sentCode = mockPostMessage.mock.calls[0]?.[0]?.code;
-    
+
     // Core imports should remain unchanged
     // expect(sentCode).toContain('from "react"');
     // expect(sentCode).toContain('from "call-ai"');
     // expect(sentCode).toContain('from "use-fireproof"');
-    
+
     // Other imports should be transformed
     // expect(sentCode).toContain('from "https://esm.sh/lodash"');
   });
@@ -123,28 +127,28 @@ describe('IframeVibesComponent', () => {
     const testCases = [
       {
         input: 'export default function App() { return <div/> }',
-        shouldContain: 'export default'
+        shouldContain: 'export default',
       },
       {
         input: 'function App() { return <div/> }\\nexport { App as default }',
-        shouldContain: 'export default'
+        shouldContain: 'export default',
       },
       {
         input: 'const App = () => <div/>; export default App',
-        shouldContain: 'export default'
-      }
+        shouldContain: 'export default',
+      },
     ];
-    
+
     for (const { input, shouldContain } of testCases) {
       const mockPostMessage = vi.fn();
       const localMockIframe = createMockIframe(mockPostMessage);
-      
+
       const { unmount } = render(
         <React.Suspense fallback={<div>Loading...</div>}>
           <IframeVibesComponent code={input} />
         </React.Suspense>
       );
-      
+
       // Wait for component to process
       await waitFor(() => {
         expect(true).toBe(true); // Placeholder
@@ -154,10 +158,10 @@ describe('IframeVibesComponent', () => {
       // act(() => {
       //   localMockIframe.onload?.();
       // });
-      
+
       // const sentCode = mockPostMessage.mock.calls[0]?.[0]?.code;
       // expect(sentCode).toContain(shouldContain);
-      
+
       unmount();
       cleanupIframeMocks();
     }
@@ -165,13 +169,13 @@ describe('IframeVibesComponent', () => {
 
   it('should update ready state when preview-ready message received', async () => {
     const onReady = vi.fn();
-    
+
     render(
       <React.Suspense fallback={<div>Loading...</div>}>
         <IframeVibesComponent code="..." onReady={onReady} />
       </React.Suspense>
     );
-    
+
     // Wait for component to mount
     await waitFor(() => {
       expect(onReady).not.toHaveBeenCalled(); // Initial state
@@ -179,7 +183,7 @@ describe('IframeVibesComponent', () => {
 
     // Simulate message from iframe
     simulateIframeMessage({ type: 'preview-ready' }, 'https://test.vibesbox.dev');
-    
+
     // Expected behavior once implemented:
     // await waitFor(() => {
     //   expect(onReady).toHaveBeenCalled();
@@ -188,24 +192,27 @@ describe('IframeVibesComponent', () => {
 
   it('should call onError when error message received', async () => {
     const onError = vi.fn();
-    
+
     render(
       <React.Suspense fallback={<div>Loading...</div>}>
         <IframeVibesComponent code="..." onError={onError} />
       </React.Suspense>
     );
-    
+
     // Wait for component to mount
     await waitFor(() => {
       expect(onError).not.toHaveBeenCalled(); // Initial state
     });
 
     // Simulate error message from iframe
-    simulateIframeMessage({ 
-      type: 'error', 
-      error: 'Syntax error in component' 
-    }, 'https://test.vibesbox.dev');
-    
+    simulateIframeMessage(
+      {
+        type: 'error',
+        error: 'Syntax error in component',
+      },
+      'https://test.vibesbox.dev'
+    );
+
     // Expected behavior once implemented:
     // await waitFor(() => {
     //   expect(onError).toHaveBeenCalledWith(
@@ -222,7 +229,7 @@ describe('IframeVibesComponent', () => {
         <IframeVibesComponent code="function App() { return <div>Test</div> }" />
       </React.Suspense>
     );
-    
+
     // Wait for component to mount
     await waitFor(() => {
       expect(true).toBe(true); // Placeholder
@@ -235,23 +242,23 @@ describe('IframeVibesComponent', () => {
 
   it('should clean up event listeners on unmount', async () => {
     const removeEventListenerSpy = vi.spyOn(window, 'removeEventListener');
-    
+
     const { unmount } = render(
       <React.Suspense fallback={<div>Loading...</div>}>
         <IframeVibesComponent code="function App() { return <div>Test</div> }" />
       </React.Suspense>
     );
-    
+
     // Wait for component to mount
     await waitFor(() => {
       expect(true).toBe(true);
     });
 
     unmount();
-    
+
     // Expected behavior once implemented:
     // expect(removeEventListenerSpy).toHaveBeenCalledWith('message', expect.any(Function));
-    
+
     removeEventListenerSpy.mockRestore();
   });
 });
