@@ -6,8 +6,15 @@ import type { AiChatMessage, ChatMessage } from "@vibes.diy/prompts";
 import { parseContent } from "@vibes.diy/prompts";
 
 // Mock the prompts module
-vi.mock("~/vibes.diy/app/prompts.js", () => ({
-  makeBaseSystemPrompt: vi.fn().mockResolvedValue("Mocked system prompt"),
+vi.mock("@vibes.diy/prompts", () => ({
+  makeBaseSystemPrompt: vi.fn().mockResolvedValue({
+    systemPrompt: "Mocked system prompt",
+    dependencies: ['useFireproof'],
+    instructionalText: true,
+    demoData: false,
+    model: 'anthropic/claude-sonnet-4',
+  }),
+  parseContent: vi.fn(),
 }));
 
 // Credit checking mocks no longer needed
