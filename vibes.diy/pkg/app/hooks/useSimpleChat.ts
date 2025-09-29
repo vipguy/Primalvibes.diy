@@ -5,6 +5,7 @@ import type {
   ChatMessageDocument,
   ChatState,
   UserSettings,
+  SystemPromptResult,
 } from "@vibes.diy/prompts";
 
 import { useFireproof } from "use-fireproof";
@@ -115,19 +116,23 @@ export function useSimpleChat(sessionId: string): ChatState {
   // Derive model to use from settings or default
   const modelToUse = effectiveModel;
 
-  // Create callback to store AI-selected dependencies
-  const handleAiDecisions = useCallback(
-    (decisions: { selected: string[] }) => {
-      updateAiSelectedDependencies(decisions.selected);
-    },
-    [updateAiSelectedDependencies],
-  );
-
   // Use our custom hooks
-  const ensureSystemPrompt = useSystemPromptManager(
-    settingsDoc,
-    vibeDoc,
-    handleAiDecisions,
+  const baseEnsureSystemPrompt = useSystemPromptManager(settingsDoc, vibeDoc);
+
+  // Create wrapper that handles dependency updates
+  const ensureSystemPrompt = useCallback(
+    async (overrides?: {
+      userPrompt?: string;
+      history?: { role: "user" | "assistant" | "system"; content: string }[];
+    }): Promise<SystemPromptResult> => {
+      const result = await baseEnsureSystemPrompt(overrides);
+
+      // Update dependencies from result
+      updateAiSelectedDependencies(result.dependencies);
+
+      return result;
+    },
+    [baseEnsureSystemPrompt, updateAiSelectedDependencies],
   );
 
   const { throttledMergeAiMessage, isProcessingRef } =

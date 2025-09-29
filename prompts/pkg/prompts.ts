@@ -291,7 +291,6 @@ export function generateImportStatements(llms: LlmCatalogEntry[]) {
 export async function makeBaseSystemPrompt(
   model: string,
   sessionDoc: Partial<UserSettings> & LlmSelectionOptions,
-  onAiDecisions?: (decisions: { selected: string[] }) => void,
 ): Promise<SystemPromptResult> {
   const userPrompt = sessionDoc?.userPrompt || "";
   const history: HistoryMessage[] = Array.isArray(sessionDoc?.history)
@@ -326,8 +325,6 @@ export async function makeBaseSystemPrompt(
 
     if (selectedNames.length === 0)
       selectedNames = [...(await getDefaultDependencies())];
-
-    onAiDecisions?.({ selected: selectedNames });
   }
 
   if (typeof sessionDoc?.instructionalTextOverride === "boolean") {
