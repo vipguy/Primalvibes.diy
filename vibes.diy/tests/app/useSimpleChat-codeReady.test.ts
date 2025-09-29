@@ -9,10 +9,10 @@ import { parseContent } from "@vibes.diy/prompts";
 vi.mock("@vibes.diy/prompts", () => ({
   makeBaseSystemPrompt: vi.fn().mockResolvedValue({
     systemPrompt: "Mocked system prompt",
-    dependencies: ['useFireproof'],
+    dependencies: ["useFireproof"],
     instructionalText: true,
     demoData: false,
-    model: 'anthropic/claude-sonnet-4',
+    model: "anthropic/claude-sonnet-4",
   }),
   parseContent: vi.fn(),
 }));

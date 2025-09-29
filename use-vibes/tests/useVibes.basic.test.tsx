@@ -4,7 +4,8 @@ import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 // Use vi.hoisted to ensure mocks are available at the top level
 const { mockMakeBaseSystemPrompt, mockCallAI } = vi.hoisted(() => ({
   mockMakeBaseSystemPrompt: vi.fn().mockResolvedValue({
-    systemPrompt: 'You are a React component generator. Generate a complete React component based on the user\'s prompt. Use Fireproof for data persistence.',
+    systemPrompt:
+      "You are a React component generator. Generate a complete React component based on the user's prompt. Use Fireproof for data persistence.",
     dependencies: ['useFireproof'],
     instructionalText: true,
     demoData: false,
@@ -13,17 +14,21 @@ const { mockMakeBaseSystemPrompt, mockCallAI } = vi.hoisted(() => ({
   mockCallAI: vi.fn().mockImplementation((messages) => {
     // First call is for dependency selection (has catalog in system prompt)
     if (messages.some((m: any) => m.content && m.content.includes('catalog'))) {
-      return Promise.resolve('{"selected": ["fireproof", "callai"], "instructionalText": true, "demoData": false}');
+      return Promise.resolve(
+        '{"selected": ["fireproof", "callai"], "instructionalText": true, "demoData": false}'
+      );
     }
-    // Second call is for component generation  
-    return Promise.resolve('export default function TestComponent() { return <div>Test Component</div>; }');
+    // Second call is for component generation
+    return Promise.resolve(
+      'export default function TestComponent() { return <div>Test Component</div>; }'
+    );
   }),
 }));
 
 vi.mock('@vibes.diy/prompts', () => ({
   makeBaseSystemPrompt: mockMakeBaseSystemPrompt,
   parseContent: vi.fn((text) => ({
-    segments: [{ type: 'code', content: text }]
+    segments: [{ type: 'code', content: text }],
   })),
 }));
 
@@ -45,10 +50,14 @@ describe('useVibes - Basic Structure', () => {
     mockCallAI.mockImplementation((messages) => {
       // First call is for dependency selection (has catalog in system prompt)
       if (messages.some((m: any) => m.content && m.content.includes('catalog'))) {
-        return Promise.resolve('{"selected": ["fireproof", "callai"], "instructionalText": true, "demoData": false}');
+        return Promise.resolve(
+          '{"selected": ["fireproof", "callai"], "instructionalText": true, "demoData": false}'
+        );
       }
-      // Second call is for component generation  
-      return Promise.resolve('export default function TestComponent() { return <div>Test Component</div>; }');
+      // Second call is for component generation
+      return Promise.resolve(
+        'export default function TestComponent() { return <div>Test Component</div>; }'
+      );
     });
   });
 
@@ -107,9 +116,7 @@ describe('useVibes - Basic Structure', () => {
   });
 
   it('should handle undefined prompt gracefully', () => {
-    const { result } = renderHook(() =>
-      useVibes(undefined as unknown as string, {}, mockCallAI)
-    );
+    const { result } = renderHook(() => useVibes(undefined as unknown as string, {}, mockCallAI));
 
     expect(result.current.loading).toBe(false);
     expect(result.current.App).toBe(null);
@@ -131,9 +138,7 @@ describe('useVibes - Basic Structure', () => {
   });
 
   it('should handle skip option', () => {
-    const { result } = renderHook(() =>
-      useVibes('create button', { skip: true }, mockCallAI)
-    );
+    const { result } = renderHook(() => useVibes('create button', { skip: true }, mockCallAI));
 
     expect(result.current.loading).toBe(false);
     expect(result.current.App).toBe(null);
@@ -143,9 +148,7 @@ describe('useVibes - Basic Structure', () => {
   });
 
   it('should provide regenerate function', async () => {
-    mockCallAI.mockResolvedValue(
-      'export default function() { return <div>Initial</div> }'
-    );
+    mockCallAI.mockResolvedValue('export default function() { return <div>Initial</div> }');
 
     const { result } = renderHook(() => useVibes('create button', {}, mockCallAI));
 
@@ -178,12 +181,8 @@ describe('useVibes - Basic Structure', () => {
   it('should handle concurrent requests properly', async () => {
     mockCallAI.mockResolvedValue('export default function() { return <div>Button</div> }');
 
-    const { result: result1 } = renderHook(() =>
-      useVibes('create button', {}, mockCallAI)
-    );
-    const { result: result2 } = renderHook(() =>
-      useVibes('create button', {}, mockCallAI)
-    );
+    const { result: result1 } = renderHook(() => useVibes('create button', {}, mockCallAI));
+    const { result: result2 } = renderHook(() => useVibes('create button', {}, mockCallAI));
 
     await waitFor(
       () => {
@@ -207,9 +206,10 @@ describe('useVibes - Basic Structure', () => {
     // Since we're in browser environment, the real makeBaseSystemPrompt is called
     // We verify that callAI was called (it gets called twice: once for dependency selection, once for component generation)
     expect(mockCallAI).toHaveBeenCalledTimes(2);
-    
+
     // The second call should be for component generation and contain the system prompt
-    expect(mockCallAI).toHaveBeenNthCalledWith(2,
+    expect(mockCallAI).toHaveBeenNthCalledWith(
+      2,
       expect.arrayContaining([
         expect.objectContaining({
           role: 'system',

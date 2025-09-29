@@ -17,24 +17,6 @@ vi.mock("@vibes.diy/prompts.js", () => ({
   isPermittedModelId: vi
     .fn()
     .mockImplementation((id: unknown) => typeof id === "string" && !!id.trim()),
-  resolveEffectiveModel: vi
-    .fn()
-    .mockImplementation(
-      (
-        settingsDoc?: { model?: string },
-        vibeDoc?: { selectedModel?: string },
-      ) => {
-        const session =
-          typeof vibeDoc?.selectedModel === "string"
-            ? vibeDoc.selectedModel.trim()
-            : "";
-        const global =
-          typeof settingsDoc?.model === "string"
-            ? settingsDoc.model.trim()
-            : "";
-        return session || global || "anthropic/claude-sonnet-4";
-      },
-    ),
   RESPONSE_FORMAT: {
     dependencies: {
       format: '{dependencies: { "package-name": "version" }}',

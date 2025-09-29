@@ -205,7 +205,7 @@ describe("usePublish Hook", () => {
 
     // Verify urlCopied state is set to true initially (the core functionality)
     expect(result.current.urlCopied).toBe(true);
-    
+
     // Note: We don't test the timeout reset to avoid slow tests
     // The timeout is just UX and doesn't affect core functionality
   });

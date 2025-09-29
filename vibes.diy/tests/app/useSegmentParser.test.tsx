@@ -2,17 +2,22 @@ import { describe, it, expect, vi } from "vitest";
 import { parseContent } from "@vibes.diy/prompts";
 import type { ChatMessage, AiChatMessage } from "@vibes.diy/prompts";
 
-// Mock the prompts module
-vi.mock("@vibes.diy/prompts", () => ({
-  makeBaseSystemPrompt: vi.fn().mockResolvedValue({
-    systemPrompt: "Mocked system prompt",
-    dependencies: ['useFireproof'],
-    instructionalText: true,
-    demoData: false,
-    model: 'anthropic/claude-sonnet-4',
-  }),
-  parseContent: vi.fn(),
-}));
+// Mock the prompts module - we'll unmock parseContent for these tests
+vi.mock("@vibes.diy/prompts", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@vibes.diy/prompts")>();
+  return {
+    ...actual,
+    makeBaseSystemPrompt: vi.fn().mockResolvedValue({
+      systemPrompt: "Mocked system prompt",
+      dependencies: ["useFireproof"],
+      instructionalText: true,
+      demoData: false,
+      model: "anthropic/claude-sonnet-4",
+    }),
+    // Keep the real parseContent function for these tests
+    parseContent: actual.parseContent,
+  };
+});
 
 // Mock the provisioning module
 vi.mock("~/vibes.diy/app/config/provisioning");
