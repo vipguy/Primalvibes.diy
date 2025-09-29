@@ -108,7 +108,7 @@ describe("ShareModal", () => {
     // Should have the community message
     expect(
       screen.getByText(
-        /Publishing allows anyone with the link to share and remix/i,
+        /Publishing allows anyone with the link to share, remix, and install/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getByText(/our community/i)).toBeInTheDocument();
