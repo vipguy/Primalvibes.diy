@@ -1,16 +1,34 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { useVibes } from '../base/hooks/vibes-gen/use-vibes.js';
 
 // Use vi.hoisted for mock functions to ensure they're available at top level
 const mockData = vi.hoisted(() => {
   const mockCallAI = vi.fn();
-  return { mockCallAI };
+  const mockMakeBaseSystemPrompt = vi.fn();
+  return { mockCallAI, mockMakeBaseSystemPrompt };
 });
+
+// Mock the @vibes.diy/prompts module
+vi.mock('@vibes.diy/prompts', () => ({
+  makeBaseSystemPrompt: mockData.mockMakeBaseSystemPrompt,
+}));
+
+import { useVibes } from '../base/hooks/vibes-gen/use-vibes.js';
 
 describe('useVibes - Basic Structure', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Setup default mock for makeBaseSystemPrompt
+    mockData.mockMakeBaseSystemPrompt.mockResolvedValue({
+      systemPrompt: `You are a React component generator. Generate a complete React component based on the user's prompt. 
+Use Fireproof for data persistence. Begin the component with the import statements.
+Return only the JSX code with a default export. Use modern React patterns with hooks if needed.`,
+      dependencies: ['useFireproof'],
+      instructionalText: true,
+      demoData: false,
+      model: 'anthropic/claude-sonnet-4',
+    });
   });
 
   afterEach(() => {
@@ -158,29 +176,31 @@ describe('useVibes - Basic Structure', () => {
     expect(result2.current.App).toBeDefined();
   });
 
-  it('should verify system prompt contains expected content', async () => {
+  it('should verify system prompt generation and metadata', async () => {
     mockData.mockCallAI.mockResolvedValue('function App() { return <div>Test</div>; }');
 
     const { result } = renderHook(() => useVibes('Create a todo app', {}, mockData.mockCallAI));
 
     await waitFor(() => expect(result.current.loading).toBe(false), { timeout: 3000 });
 
-    // Verify that callAI was called with system prompt containing expected content
+    // Verify that makeBaseSystemPrompt was called with the correct parameters
+    expect(mockData.mockMakeBaseSystemPrompt).toHaveBeenCalledWith(
+      'anthropic/claude-sonnet-4',
+      expect.objectContaining({
+        userPrompt: 'Create a todo app',
+        history: [],
+        fallBackUrl: 'https://esm.sh/use-vibes/prompt-catalog/llms',
+        dependencies: undefined,
+        dependenciesUserOverride: false,
+      })
+    );
+
+    // Verify that callAI was called with the system prompt from makeBaseSystemPrompt
     expect(mockData.mockCallAI).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
           role: 'system',
           content: expect.stringContaining('Use Fireproof for data persistence'),
-        }),
-      ]),
-      expect.any(Object)
-    );
-
-    expect(mockData.mockCallAI).toHaveBeenCalledWith(
-      expect.arrayContaining([
-        expect.objectContaining({
-          role: 'system',
-          content: expect.stringContaining('Begin the component with the import statements'),
         }),
       ]),
       expect.any(Object)

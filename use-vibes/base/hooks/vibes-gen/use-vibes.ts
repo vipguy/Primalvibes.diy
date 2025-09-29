@@ -132,60 +132,30 @@ export function useVibes(
         // Start progress simulation
         simulateProgress(0);
 
-        // Use the new upstream orchestrator for two-stage generation
-        // Use production mode only when explicitly enabled
-        const isProductionMode =
-          typeof process !== 'undefined' && process.env?.USE_VIBES_PRODUCTION_MODE === 'true';
+        // Use the full orchestrator for two-stage generation
+        const result = await makeBaseSystemPrompt(options.model || 'anthropic/claude-sonnet-4', {
+          userPrompt: prompt,
+          history: [],
+          fallBackUrl: 'https://esm.sh/@vibes.diy/prompts/llms',
+          // Pass through any user overrides
+          dependencies: options.dependencies,
+          dependenciesUserOverride: !!options.dependencies,
+        });
 
-        let systemPrompt: string;
-        let metadata: {
-          dependencies: string[];
-          aiSelectedDependencies: string[];
-          instructionalText: boolean;
-          demoData: boolean;
-          model: string;
-          timestamp: number;
+        const systemPrompt = result.systemPrompt;
+        const metadata = {
+          dependencies: result.dependencies,
+          aiSelectedDependencies: result.dependencies,
+          instructionalText: result.instructionalText,
+          demoData: result.demoData,
+          model: result.model,
+          timestamp: Date.now(),
         };
 
-        if (!isProductionMode) {
-          // Simplified test mode - use basic system prompt
-          systemPrompt = `You are a React component generator. Generate a complete React component based on the user's prompt. 
-Use Fireproof for data persistence. Begin the component with the import statements.
-Return only the JSX code with a default export. Use modern React patterns with hooks if needed.`;
-          metadata = {
-            dependencies: options.dependencies || ['useFireproof'],
-            aiSelectedDependencies: options.dependencies || ['useFireproof'],
-            instructionalText: true,
-            demoData: false,
-            model: options.model || 'anthropic/claude-sonnet-4',
-            timestamp: Date.now(),
-          };
-        } else {
-          // Production mode - use full orchestrator
-          const result = await makeBaseSystemPrompt(options.model || 'anthropic/claude-sonnet-4', {
-            userPrompt: prompt,
-            history: [],
-            fallBackUrl: 'https://esm.sh/use-vibes/prompt-catalog/llms',
-            // Pass through any user overrides
-            dependencies: options.dependencies,
-            dependenciesUserOverride: !!options.dependencies,
-          });
-
-          systemPrompt = result.systemPrompt;
-          metadata = {
-            dependencies: result.dependencies,
-            aiSelectedDependencies: result.dependencies,
-            instructionalText: result.instructionalText,
-            demoData: result.demoData,
-            model: result.model,
-            timestamp: Date.now(),
-          };
-
-          console.log(
-            '🎯 useVibes: Component metadata captured for future database storage:',
-            metadata
-          );
-        }
+        console.log(
+          '🎯 useVibes: Component metadata captured for future database storage:',
+          metadata
+        );
 
         // Generate the actual component using the system prompt
         const messages = [
