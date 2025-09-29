@@ -8,9 +8,20 @@ const mockData = vi.hoisted(() => {
   return { mockCallAI, mockMakeBaseSystemPrompt };
 });
 
-// Mock the @vibes.diy/prompts module
+// Mock call-ai module first - must be before any imports that use it
+vi.mock('call-ai', async () => {
+  const actual = await vi.importActual('call-ai');
+  return {
+    ...actual,
+    callAI: mockData.mockCallAI,
+  };
+});
+
+// Mock the @vibes.diy/prompts module - must be before imports
 vi.mock('@vibes.diy/prompts', () => ({
   makeBaseSystemPrompt: mockData.mockMakeBaseSystemPrompt,
+  parseContent: vi.fn(),
+  // Add other commonly used exports as needed
 }));
 
 import { useVibes } from '../base/hooks/vibes-gen/use-vibes.js';
@@ -19,15 +30,23 @@ describe('useVibes - Basic Structure', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
+    // Setup default mock for callAI
+    mockData.mockCallAI.mockResolvedValue(
+      'export default function TestComponent() { return <div>Test Component</div>; }'
+    );
+
     // Setup default mock for makeBaseSystemPrompt
-    mockData.mockMakeBaseSystemPrompt.mockResolvedValue({
-      systemPrompt: `You are a React component generator. Generate a complete React component based on the user's prompt. 
+    mockData.mockMakeBaseSystemPrompt.mockImplementation(async (model, options) => {
+      console.log('🧪 MOCK makeBaseSystemPrompt called with:', model, options);
+      return {
+        systemPrompt: `You are a React component generator. Generate a complete React component based on the user's prompt. 
 Use Fireproof for data persistence. Begin the component with the import statements.
 Return only the JSX code with a default export. Use modern React patterns with hooks if needed.`,
-      dependencies: ['useFireproof'],
-      instructionalText: true,
-      demoData: false,
-      model: 'anthropic/claude-sonnet-4',
+        dependencies: ['useFireproof'],
+        instructionalText: true,
+        demoData: false,
+        model: model || 'anthropic/claude-sonnet-4',
+      };
     });
   });
 
