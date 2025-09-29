@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { VibesDiyEnv } from "../config/env.js";
 import {
-  makeBaseSystemPrompt,
+  generateComponentWithDependencies,
   resolveEffectiveModel,
   UserSettings,
   VibeDocument,
@@ -33,17 +33,19 @@ export function useSystemPromptManager(
       if (VibesDiyEnv.APP_MODE() === "test") {
         return "Test system prompt";
       }
-      return makeBaseSystemPrompt(
-        await resolveEffectiveModel(settingsDoc, vibeDoc),
+      const result = await generateComponentWithDependencies(
+        overrides?.userPrompt || "",
         {
           fallBackUrl: VibesDiyEnv.PROMPT_FALL_BACKURL(),
           callAiEndpoint: VibesDiyEnv.CALLAI_ENDPOINT(),
           ...(settingsDoc || {}),
           ...(vibeDoc || {}),
-          ...(overrides || {}),
+          ...overrides,
         },
-        onAiDecisions,
+        await resolveEffectiveModel(settingsDoc, vibeDoc),
       );
+
+      return result.systemPrompt;
     },
     [settingsDoc, vibeDoc, onAiDecisions],
   );
