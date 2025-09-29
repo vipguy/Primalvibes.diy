@@ -119,7 +119,6 @@ export function useVibes(
             dependenciesUserOverride: !!options.dependencies,
           });
         } catch (error) {
-          console.warn('makeBaseSystemPrompt failed, using fallback:', error);
           // Fallback to a simple but functional system prompt
           result = {
             systemPrompt: `You are a React component generator. Generate a complete React component based on the user's prompt. 
@@ -141,11 +140,6 @@ Return only the JSX code with a default export. Use modern React patterns with h
           model: result.model,
           timestamp: Date.now(),
         };
-
-        console.log(
-          '🎯 useVibes: Component metadata captured for future database storage:',
-          metadata
-        );
 
         // Generate the actual component using the system prompt
         const messages = [
@@ -172,23 +166,6 @@ Return only the JSX code with a default export. Use modern React patterns with h
         const codeSegment = segments.find((segment) => segment.type === 'code');
         const extractedCode = codeSegment ? codeSegment.content : '';
 
-        // Log the extracted code block
-        console.log('🎯 useVibes: Extracted code block:', extractedCode);
-        console.log(
-          '🎯 useVibes: Total segments found:',
-          segments.length,
-          'Code segments:',
-          segments.filter((s) => s.type === 'code').length
-        );
-
-        // Add warning if no code block was found
-        if (!extractedCode) {
-          console.warn(
-            '⚠️ useVibes: No code block found in AI response. Using raw response as fallback.'
-          );
-          console.warn('🎯 useVibes: Raw response preview:', rawResponse.substring(0, 100) + '...');
-        }
-
         // Use extracted code for compilation, fallback to raw response if no code found
         const codeToUse = extractedCode || rawResponse;
 
@@ -198,8 +175,12 @@ Return only the JSX code with a default export. Use modern React patterns with h
           React.createElement(IframeVibesComponent, {
             code: codeToUse,
             sessionId: sessionId,
-            onReady: () => console.log('🎯 useVibes: Component ready'),
-            onError: (error) => console.error('🎯 useVibes: Component error:', error),
+            onReady: () => {
+              // Component is ready
+            },
+            onError: (_error) => {
+              // Component error occurred
+            },
           });
 
         // Update state with results, including rich metadata from orchestrator
