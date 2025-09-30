@@ -3,10 +3,12 @@ import React, { useEffect, useRef, useState } from "react";
 import type { IframeFiles } from "./ResultPreviewTypes.js";
 // API key import removed - proxy handles authentication
 import { VibesDiyEnv } from "../../config/env.js";
-import { normalizeComponentExports } from "../../utils/normalizeComponentExports.js";
+import {
+  normalizeComponentExports,
+  transformImports,
+} from "@vibes.diy/prompts";
 import { DatabaseListView } from "./DataView/index.js";
 import { setupMonacoEditor } from "./setupMonacoEditor.js";
-import { transformImports } from "use-vibes";
 import { editor } from "monaco-editor";
 import { BundledLanguage, BundledTheme, HighlighterGeneric } from "shiki";
 

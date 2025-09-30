@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { normalizeComponentExports } from "~/vibes.diy/app/utils/normalizeComponentExports.js";
+import { normalizeComponentExports } from "@vibes.diy/prompts";
 
 describe("normalizeComponentExports edge cases", () => {
   // Test for the case in app1.jsx where a component named 'App' is already declared

@@ -12,3 +12,10 @@ export { parseContent } from "./segment-parser.js";
 
 // Explicitly export resolveEffectiveModel to ensure it's available
 export { resolveEffectiveModel } from "./prompts.js";
+
+// Export component transformation utilities
+export {
+  normalizeComponentExports,
+  transformImports,
+  coreImportMap,
+} from "./component-transforms.js";

@@ -243,6 +243,3 @@ export {
 // Export useVibes hook and types
 export { useVibes } from './hooks/vibes-gen/index.js';
 export type { UseVibesOptions, UseVibesResult, VibeDocument } from './hooks/vibes-gen/types.js';
-
-// Export transform utilities
-export { transformImports, coreImportMap } from './hooks/vibes-gen/transformImports.js';
