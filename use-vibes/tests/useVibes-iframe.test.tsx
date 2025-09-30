@@ -1,7 +1,13 @@
 import React from 'react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { render, renderHook, waitFor } from '@testing-library/react';
+import { render, renderHook, waitFor, act } from '@testing-library/react';
 import { createMockIframe, cleanupIframeMocks } from './utils/iframe-mocks.js';
+
+// Mock call-ai module to prevent network calls
+vi.mock('call-ai', () => ({
+  callAI: vi.fn().mockResolvedValue('Mocked AI response'),
+  joinUrlParts: vi.fn((...parts) => parts.join('')),
+}));
 
 // Mock parseContent to return predictable results
 vi.mock('@vibes.diy/prompts', () => ({
@@ -25,12 +31,15 @@ vi.mock('@vibes.diy/prompts', () => ({
       segments: [{ type: 'markdown', content: text }],
     };
   }),
-  makeBaseSystemPrompt: vi.fn().mockResolvedValue({
-    systemPrompt: 'You are a React component generator',
-    dependencies: ['useFireproof'],
-    instructionalText: true,
-    demoData: false,
-    model: 'anthropic/claude-sonnet-4',
+  makeBaseSystemPrompt: vi.fn().mockImplementation((model) => {
+    console.log('🧪 makeBaseSystemPrompt called:', model);
+    return Promise.resolve({
+      systemPrompt: 'You are a React component generator',
+      dependencies: ['useFireproof'],
+      instructionalText: true,
+      demoData: false,
+      model: 'anthropic/claude-sonnet-4',
+    });
   }),
 }));
 
@@ -38,10 +47,8 @@ vi.mock('@vibes.diy/prompts', () => ({
 import { useVibes } from '../base/hooks/vibes-gen/use-vibes.js';
 
 describe('useVibes with iframe integration', () => {
-  let _mockIframe: ReturnType<typeof createMockIframe>;
-
   beforeEach(() => {
-    _mockIframe = createMockIframe();
+    createMockIframe();
     vi.clearAllMocks();
   });
 
@@ -50,7 +57,17 @@ describe('useVibes with iframe integration', () => {
   });
 
   it('should return IframeVibesComponent when code is extracted', async () => {
-    const mockCallAI = vi.fn().mockResolvedValue(`
+    console.log('🧪 TEST Starting: should return IframeVibesComponent when code is extracted');
+    const startTime = performance.now();
+
+    const mockCallAI = vi.fn().mockImplementation((messages, options) => {
+      console.log(
+        '🧪 MOCK callAI called with messages:',
+        messages?.length,
+        'model:',
+        options?.model
+      );
+      return Promise.resolve(`
 Here's a button component:
 
 \`\`\`jsx
@@ -61,6 +78,7 @@ function App() {
 
 This creates a simple button.
     `);
+    });
 
     const { result } = renderHook(() => useVibes('create a button', {}, mockCallAI));
 
@@ -68,13 +86,18 @@ This creates a simple button.
     expect(result.current.loading).toBe(true);
     expect(result.current.App).toBe(null);
 
-    // Wait for the hook to complete with extended timeout
+    console.log('🧪 TEST Waiting for completion...');
+    // Wait for the hook to complete with reduced timeout
     await waitFor(
       () => {
+        console.log('🧪 TEST Loading state:', result.current.loading);
         expect(result.current.loading).toBe(false);
       },
-      { timeout: 10000, interval: 100 }
+      { timeout: 2000, interval: 50 }
     );
+
+    const endTime = performance.now();
+    console.log(`🧪 TEST Completed in ${endTime - startTime}ms`);
 
     // Should have extracted the code
     expect(result.current.code).toContain('function App()');
@@ -101,7 +124,7 @@ This creates a simple button.
       () => {
         expect(result.current.loading).toBe(false);
       },
-      { timeout: 10000, interval: 100 }
+      { timeout: 2000, interval: 50 }
     );
 
     // Verify the extracted code matches what was in the code block
@@ -130,7 +153,7 @@ This creates a simple button.
         expect(result1.current.loading).toBe(false);
         expect(result2.current.loading).toBe(false);
       },
-      { timeout: 10000, interval: 100 }
+      { timeout: 2000, interval: 50 }
     );
 
     // Both should have generated components
@@ -162,7 +185,7 @@ This creates a simple button.
       () => {
         expect(result.current.loading).toBe(false);
       },
-      { timeout: 10000, interval: 100 }
+      { timeout: 2000, interval: 50 }
     );
 
     // Should use the raw response as fallback
@@ -185,7 +208,7 @@ This creates a simple button.
       () => {
         expect(result.current.loading).toBe(false);
       },
-      { timeout: 10000, interval: 100 }
+      { timeout: 2000, interval: 50 }
     );
 
     // Should have error state
@@ -216,7 +239,7 @@ export default TodoApp;
       () => {
         expect(result.current.loading).toBe(false);
       },
-      { timeout: 10000, interval: 100 }
+      { timeout: 2000, interval: 50 }
     );
 
     // Should have document with metadata
@@ -243,29 +266,26 @@ export default TodoApp;
       () => {
         expect(result.current.loading).toBe(false);
       },
-      { timeout: 10000, interval: 100 }
+      { timeout: 2000, interval: 50 }
     );
 
     expect(result.current.code).toContain('App1');
     expect(mockCallAI).toHaveBeenCalledTimes(1);
 
-    // Trigger regeneration
-    result.current.regenerate();
+    // Trigger regeneration within act to ensure state updates
+    act(() => {
+      result.current.regenerate();
+    });
 
-    // Wait a moment for the state to update
-    await waitFor(
-      () => {
-        expect(result.current.loading).toBe(true);
-      },
-      { timeout: 1000, interval: 10 }
-    );
+    // Check loading state immediately after regenerate
+    expect(result.current.loading).toBe(true);
 
     // Wait for regeneration to complete
     await waitFor(
       () => {
         expect(result.current.loading).toBe(false);
       },
-      { timeout: 10000, interval: 100 }
+      { timeout: 2000, interval: 50 }
     );
 
     // Should have new content

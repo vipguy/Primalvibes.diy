@@ -1,7 +1,13 @@
 import React from 'react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { render, renderHook, waitFor } from '@testing-library/react';
+import { render, renderHook, waitFor, act } from '@testing-library/react';
 import { createMockIframe, cleanupIframeMocks } from './utils/iframe-mocks.js';
+
+// Mock call-ai module to prevent network calls
+vi.mock('call-ai', () => ({
+  callAI: vi.fn().mockResolvedValue('Mocked AI response'),
+  joinUrlParts: vi.fn((...parts) => parts.join('')),
+}));
 
 // Mock the environment config that would be used for endpoints
 vi.mock('../../base/config/env', () => ({
@@ -47,23 +53,27 @@ vi.mock('@vibes.diy/prompts', () => ({
     return { segments };
   }),
 
-  makeBaseSystemPrompt: vi.fn().mockImplementation(async (model, options) => ({
-    systemPrompt: `You are a React component generator for ${model}`,
-    dependencies: options?.dependencies || ['useFireproof'],
-    instructionalText: true,
-    demoData: false,
-    model: model || 'anthropic/claude-sonnet-4',
-  })),
+  makeBaseSystemPrompt: vi.fn().mockImplementation((model, options) => {
+    console.log('🧪 MOCK makeBaseSystemPrompt called for model:', model, 'options:', options);
+    const result = {
+      systemPrompt: `You are a React component generator for ${model}`,
+      dependencies: options?.dependencies || ['useFireproof'],
+      instructionalText: true,
+      demoData: false,
+      model: model || 'anthropic/claude-sonnet-4',
+    };
+    console.log('🧪 MOCK makeBaseSystemPrompt returning:', result);
+    // Return resolved promise immediately
+    return Promise.resolve(result);
+  }),
 }));
 
 // Import the hook after mocks are set up
 import { useVibes } from '../base/hooks/vibes-gen/use-vibes.js';
 
 describe('useVibes Integration Tests', () => {
-  let _mockIframe: ReturnType<typeof createMockIframe>;
-
   beforeEach(() => {
-    _mockIframe = createMockIframe();
+    createMockIframe();
     vi.clearAllMocks();
   });
 
@@ -72,7 +82,16 @@ describe('useVibes Integration Tests', () => {
   });
 
   it('should complete full flow from prompt to iframe render', async () => {
-    const mockCallAI = vi.fn().mockImplementation(() => {
+    console.log('🧪 TEST Starting: should complete full flow from prompt to iframe render');
+    const startTime = performance.now();
+
+    const mockCallAI = vi.fn().mockImplementation((messages, options) => {
+      console.log(
+        '🧪 MOCK callAI called with messages:',
+        messages?.length,
+        'model:',
+        options?.model
+      );
       return Promise.resolve(`
 Here's your todo app:
 
@@ -148,12 +167,17 @@ This creates a fully functional todo app with Fireproof for data persistence.
     expect(result.current.code).toBe(null);
 
     // Wait for AI response and parsing
+    console.log('🧪 TEST Waiting for completion...');
     await waitFor(
       () => {
+        console.log('🧪 TEST Loading state:', result.current.loading);
         expect(result.current.loading).toBe(false);
       },
-      { timeout: 10000, interval: 100 }
+      { timeout: 2000, interval: 50 }
     );
+
+    const endTime = performance.now();
+    console.log(`🧪 TEST Completed in ${endTime - startTime}ms`);
 
     // Verify code was extracted correctly
     expect(result.current.code).toContain('TodoApp');
@@ -244,7 +268,7 @@ export default function DataDashboard() {
       () => {
         expect(result.current.loading).toBe(false);
       },
-      { timeout: 10000, interval: 100 }
+      { timeout: 2000, interval: 50 }
     );
 
     // Should have extracted the complex component
@@ -272,7 +296,7 @@ export default function DataDashboard() {
       () => {
         expect(result.current.loading).toBe(false);
       },
-      { timeout: 10000, interval: 100 }
+      { timeout: 2000, interval: 50 }
     );
 
     // Should still handle gracefully - parseContent should extract what it can
@@ -302,7 +326,7 @@ export default App;
       () => {
         expect(result.current.loading).toBe(false);
       },
-      { timeout: 10000, interval: 100 }
+      { timeout: 2000, interval: 50 }
     );
 
     if (result.current.App) {
@@ -350,28 +374,25 @@ export default App${generation};
       () => {
         expect(result.current.loading).toBe(false);
       },
-      { timeout: 10000, interval: 100 }
+      { timeout: 2000, interval: 50 }
     );
 
     expect(result.current.code).toContain('App1');
     expect(result.current.code).toContain('Generation 1');
 
-    // Trigger regeneration
-    result.current.regenerate();
+    // Trigger regeneration within act to ensure state updates
+    act(() => {
+      result.current.regenerate();
+    });
 
-    // Wait for loading to become true after regenerate
-    await waitFor(
-      () => {
-        expect(result.current.loading).toBe(true);
-      },
-      { timeout: 1000, interval: 10 }
-    );
+    // Check loading state immediately after regenerate
+    expect(result.current.loading).toBe(true);
 
     await waitFor(
       () => {
         expect(result.current.loading).toBe(false);
       },
-      { timeout: 10000, interval: 100 }
+      { timeout: 2000, interval: 50 }
     );
 
     // Should have new content
@@ -400,7 +421,7 @@ export default App${generation};
         expect(result1.current.loading).toBe(false);
         expect(result2.current.loading).toBe(false);
       },
-      { timeout: 10000, interval: 100 }
+      { timeout: 2000, interval: 50 }
     );
 
     // Both should succeed
