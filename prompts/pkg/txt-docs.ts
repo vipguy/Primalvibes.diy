@@ -85,19 +85,5 @@ export async function getTexts(
     }
   }
 
-  // Try prefix match if exact match fails
-  for (const file of files) {
-    const fileName =
-      file
-        .split("/")
-        .pop()
-        ?.toLowerCase()
-        .replace(/\.(txt|md)$/, "") || "";
-    if (fileName.startsWith(name)) {
-      const doc = await loadTxtDoc(file, fallBackUrl);
-      return doc?.txt;
-    }
-  }
-
   return undefined;
 }

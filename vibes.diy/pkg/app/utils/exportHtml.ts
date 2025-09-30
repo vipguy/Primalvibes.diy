@@ -1,7 +1,7 @@
 import { VibesDiyEnv } from "../config/env.js";
 import iframeTemplateRaw from "../components/ResultPreview/templates/iframe-template.html?raw";
 import { normalizeComponentExports } from "./normalizeComponentExports.js";
-import { transformImports } from "../components/ResultPreview/transformImports.js";
+import { transformImports } from "use-vibes";
 
 export function generateStandaloneHtml(params: { code: string }): string {
   const normalized = normalizeComponentExports(params.code);

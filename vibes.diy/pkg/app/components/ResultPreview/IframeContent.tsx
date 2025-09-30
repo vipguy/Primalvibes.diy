@@ -6,7 +6,7 @@ import { VibesDiyEnv } from "../../config/env.js";
 import { normalizeComponentExports } from "../../utils/normalizeComponentExports.js";
 import { DatabaseListView } from "./DataView/index.js";
 import { setupMonacoEditor } from "./setupMonacoEditor.js";
-import { transformImports } from "./transformImports.js";
+import { transformImports } from "use-vibes";
 import { editor } from "monaco-editor";
 import { BundledLanguage, BundledTheme, HighlighterGeneric } from "shiki";
 

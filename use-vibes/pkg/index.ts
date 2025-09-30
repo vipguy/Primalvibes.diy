@@ -20,6 +20,10 @@ export {
   type UseVibesResult,
   type VibeDocument,
 
+  // Transform utilities
+  transformImports,
+  coreImportMap,
+
   // Type namespaces
   type Fireproof,
   type CallAI,
