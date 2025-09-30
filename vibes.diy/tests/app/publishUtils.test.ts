@@ -1,11 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, Mock, vi } from "vitest";
-import { normalizeComponentExports } from "~/vibes.diy/app/utils/normalizeComponentExports.js";
 import { publishApp } from "~/vibes.diy/app/utils/publishUtils.js";
 
 // Mock dependencies
 vi.mock("use-fireproof");
 vi.mock("~/vibes.diy/app/utils/databaseManager.js");
-vi.mock("~/vibes.diy/app/utils/normalizeComponentExports.js");
+vi.mock("@vibes.diy/prompts", () => ({
+  normalizeComponentExports: vi.fn().mockImplementation((code: string) => code),
+}));
 
 // Import mocked modules
 import { fireproof } from "use-fireproof";
@@ -94,9 +95,6 @@ describe("publishApp", () => {
 
     (fireproof as Mock).mockReturnValue(mockFireproofDb);
     (getSessionDatabaseName as Mock).mockReturnValue("test-session-db");
-    vi.mocked(normalizeComponentExports).mockImplementation(
-      (code: string) => code,
-    );
 
     // Re-setup fetch mock after reset
     mockFetch.mockImplementation(async () => ({

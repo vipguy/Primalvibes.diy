@@ -1,4 +1,4 @@
-import type { Segment } from "@vibes.diy/prompts";
+import type { Segment } from "./chat.js";
 
 /**
  * Parse content into segments of markdown and code

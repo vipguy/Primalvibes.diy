@@ -8,8 +8,7 @@ import {
   getSessionDatabaseName,
   updateUserVibespaceDoc,
 } from "./databaseManager.js";
-import { normalizeComponentExports } from "./normalizeComponentExports.js";
-import { VibeDocument } from "@vibes.diy/prompts";
+import { normalizeComponentExports, VibeDocument } from "@vibes.diy/prompts";
 import { joinUrlParts } from "call-ai";
 
 /**

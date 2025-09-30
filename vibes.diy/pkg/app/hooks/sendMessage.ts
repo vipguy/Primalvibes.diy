@@ -4,9 +4,10 @@ import {
   type AiChatMessageDocument,
   type ChatMessageDocument,
   type VibeDocument,
+  type SystemPromptResult,
 } from "@vibes.diy/prompts";
 import { trackChatInputClick } from "../utils/analytics.js";
-import { parseContent } from "../utils/segmentParser.js";
+import { parseContent } from "@vibes.diy/prompts";
 import { streamAI } from "../utils/streamHandler.js";
 import { generateTitle } from "../utils/titleGenerator.js";
 
@@ -19,7 +20,7 @@ export interface SendMessageContext {
   ensureSystemPrompt: (overrides?: {
     userPrompt?: string;
     history?: { role: "user" | "assistant" | "system"; content: string }[];
-  }) => Promise<string>;
+  }) => Promise<SystemPromptResult>;
   submitUserMessage: () => Promise<void>;
   buildMessageHistory: () => {
     role: "user" | "assistant" | "system";
@@ -107,10 +108,11 @@ export async function sendChatMessage(
   const messageHistory = buildMessageHistory();
 
   // Compose system prompt with schema-based module selection using prompt + history
-  const currentSystemPrompt = await ensureSystemPrompt({
+  const promptResult = await ensureSystemPrompt({
     userPrompt: promptText,
     history: messageHistory,
   });
+  const currentSystemPrompt = promptResult.systemPrompt;
 
   const modelToUse = await resolveEffectiveModel(
     { model: ctx.modelToUse?.[0] },

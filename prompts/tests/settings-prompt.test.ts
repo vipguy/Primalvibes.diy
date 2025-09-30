@@ -37,7 +37,7 @@ Mock documentation for ${llm.label}
       // Get user prompt from session document if available
       const userPrompt = sessionDoc?.userPrompt || "";
 
-      return `
+      const systemPrompt = `
 You are an AI assistant tasked with creating React components. You should create components that:
 - Use modern React practices and follow the rules of hooks
 - Don't use any TypeScript, just use JavaScript
@@ -76,6 +76,14 @@ import { callAI } from "call-ai"
 // other imports only when requested
 \`\`\`
 `;
+
+      return {
+        systemPrompt,
+        dependencies: ["fireproof", "callai"],
+        instructionalText: true,
+        demoData: true,
+        model,
+      };
     },
   };
 });
@@ -91,16 +99,16 @@ afterEach(() => {
 describe("Settings and Prompt Integration", () => {
   it("generates a base system prompt with default values when no settings provided", async () => {
     const model = "test-model";
-    const prompt = await makeBaseSystemPrompt(model, {
+    const result = await makeBaseSystemPrompt(model, {
       fallBackUrl: new URL("https://example.com/fallback"),
       callAiEndpoint: "https://example.com/call-ai",
     });
 
     // Check that the prompt includes the default style
-    expect(prompt).toContain("have a DIY zine vibe");
+    expect(result.systemPrompt).toContain("have a DIY zine vibe");
 
     // Should not contain any user prompt content
-    expect(prompt).not.toContain("Custom user instructions");
+    expect(result.systemPrompt).not.toContain("Custom user instructions");
   });
 
   it("uses style prompt from settings document when provided", async () => {
@@ -112,11 +120,13 @@ describe("Settings and Prompt Integration", () => {
       callAiEndpoint: "https://example.com/call-ai",
     };
 
-    const prompt = await makeBaseSystemPrompt(model, settingsDoc);
+    const result = await makeBaseSystemPrompt(model, settingsDoc);
 
     // Check that the prompt includes the custom style
-    expect(prompt).toContain("have a synthwave (80s digital aesthetic) vibe");
-    expect(prompt).not.toContain("DIY zine");
+    expect(result.systemPrompt).toContain(
+      "have a synthwave (80s digital aesthetic) vibe",
+    );
+    expect(result.systemPrompt).not.toContain("DIY zine");
   });
 
   it("includes user prompt from settings document when provided", async () => {
@@ -130,10 +140,10 @@ describe("Settings and Prompt Integration", () => {
       callAiEndpoint: "https://example.com/call-ai",
     };
 
-    const prompt = await makeBaseSystemPrompt(model, settingsDoc);
+    const result = await makeBaseSystemPrompt(model, settingsDoc);
 
     // Check that the prompt includes the user prompt
-    expect(prompt).toContain(userPromptText);
+    expect(result.systemPrompt).toContain(userPromptText);
   });
 
   it("combines both style and user prompts when both are provided", async () => {
@@ -148,12 +158,12 @@ describe("Settings and Prompt Integration", () => {
       callAiEndpoint: "https://example.com/call-ai",
     };
 
-    const prompt = await makeBaseSystemPrompt(model, settingsDoc);
+    const result = await makeBaseSystemPrompt(model, settingsDoc);
 
     // Check that the prompt includes both custom settings
-    expect(prompt).toContain(`have a ${stylePromptText} vibe`);
-    expect(prompt).toContain(userPromptText);
-    expect(prompt).not.toContain("DIY zine");
+    expect(result.systemPrompt).toContain(`have a ${stylePromptText} vibe`);
+    expect(result.systemPrompt).toContain(userPromptText);
+    expect(result.systemPrompt).not.toContain("DIY zine");
   });
 
   it("handles empty settings document gracefully", async () => {
@@ -164,23 +174,23 @@ describe("Settings and Prompt Integration", () => {
       callAiEndpoint: "https://example.com/call-ai",
     };
 
-    const prompt = await makeBaseSystemPrompt(model, settingsDoc);
+    const result = await makeBaseSystemPrompt(model, settingsDoc);
 
     // Should fall back to defaults
-    expect(prompt).toContain("have a DIY zine vibe");
+    expect(result.systemPrompt).toContain("have a DIY zine vibe");
   });
 
   it("includes LLM documentation in the prompt", async () => {
     const model = "test-model";
-    const prompt = await makeBaseSystemPrompt(model, {
+    const result = await makeBaseSystemPrompt(model, {
       fallBackUrl: new URL("https://example.com/fallback"),
       callAiEndpoint: "https://example.com/call-ai",
     });
 
     // Check that the LLM documentation is included
-    expect(prompt).toContain("<llm1-docs>");
-    expect(prompt).toContain("<llm2-docs>");
-    expect(prompt).toContain("Mock documentation for llm1");
-    expect(prompt).toContain("Mock documentation for llm2");
+    expect(result.systemPrompt).toContain("<llm1-docs>");
+    expect(result.systemPrompt).toContain("<llm2-docs>");
+    expect(result.systemPrompt).toContain("Mock documentation for llm1");
+    expect(result.systemPrompt).toContain("Mock documentation for llm2");
   });
 });

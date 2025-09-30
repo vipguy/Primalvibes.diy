@@ -1,14 +1,21 @@
 import { useState } from 'react';
 import ImageGeneratorExample from './ImageGeneratorExample';
 import TodoListExample from './TodoListExample';
+import VibesGeneratorExample from './VibesGeneratorExample';
 import './App.css';
 
-type ExampleKey = 'home' | 'image-generator' | 'todo-list';
+type ExampleKey = 'home' | 'image-generator' | 'todo-list' | 'vibes-generator';
 
 function App() {
   const [currentExample, setCurrentExample] = useState<ExampleKey>('home');
 
   const examples = [
+    {
+      key: 'vibes-generator' as const,
+      title: 'Vibes Generator',
+      description: 'Generate React components from text prompts using AI',
+      component: <VibesGeneratorExample />,
+    },
     {
       key: 'image-generator' as const,
       title: 'Image Generator',

@@ -20,6 +20,7 @@
     "@fireproof/core-runtime": "^0.23.13",
     "@fireproof/core-types-base": "^0.23.13",
     "@fireproof/core-types-protocols-cloud": "^0.23.13",
+    "@vibes.diy/prompts": "workspace:*",
     "call-ai": "workspace:*",
     "react-dom": "^19.1.1",
     "use-fireproof": "^0.23.13",

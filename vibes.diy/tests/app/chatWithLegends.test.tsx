@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { normalizeComponentExports } from "~/vibes.diy/app/utils/normalizeComponentExports.js";
+import { normalizeComponentExports } from "@vibes.diy/prompts";
 
 describe("normalizeComponentExports BUG DEMONSTRATION", () => {
   it("CRITICAL BUG: the normalizer produces non-runnable code for variable components", () => {

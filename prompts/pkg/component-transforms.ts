@@ -1,4 +1,38 @@
 /**
+ * Component transformation utilities for code generation and export normalization.
+ * Handles both import transformations and component export standardization.
+ */
+
+// ============================================================================
+// IMPORT TRANSFORMATIONS
+// ============================================================================
+
+export const coreImportMap = [
+  "react",
+  "react-dom",
+  "react-dom/client",
+  "use-fireproof",
+  "call-ai",
+  "use-vibes",
+];
+
+export function transformImports(code: string): string {
+  return code.replace(
+    /import\s+(?:(?:\{[^}]*\}|\*\s+as\s+\w+|\w+)\s+from\s+)?['"]([^/][^'"]*)['"];?/g,
+    (match, importPath) => {
+      if (coreImportMap.includes(importPath)) {
+        return match;
+      }
+      return match.replace(`"${importPath}"`, `"https://esm.sh/${importPath}"`);
+    },
+  );
+}
+
+// ============================================================================
+// COMPONENT EXPORT NORMALIZATIONS
+// ============================================================================
+
+/**
  * Attempts to normalize various React component export patterns to a standard
  * `export default App` format. This is necessary because the AI might generate
  * components with different export styles.
@@ -16,13 +50,14 @@
  * - export function ComponentName() {} (converts to default)
  * - export const ComponentName = ... (converts to default)
  */
+
 import {
   transformArrowFunction,
   transformClassDeclaration,
   transformFunctionDeclaration,
   transformHOC,
   transformObjectLiteral,
-} from "./componentExportTransforms.js";
+} from "./component-export-transforms.js";
 
 export function normalizeComponentExports(code: string): string {
   // Clean up the code by removing leading/trailing comments and whitespace

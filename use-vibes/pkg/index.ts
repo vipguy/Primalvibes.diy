@@ -14,6 +14,12 @@ export {
   callAI,
   callAi,
 
+  // Vibes generation hook
+  useVibes,
+  type UseVibesOptions,
+  type UseVibesResult,
+  type VibeDocument,
+
   // Type namespaces
   type Fireproof,
   type CallAI,

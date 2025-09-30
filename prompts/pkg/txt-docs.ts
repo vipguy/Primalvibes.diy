@@ -25,20 +25,44 @@ export interface TxtDocs {
   [key: string]: TxtDoc;
 }
 
-export const txtDocs = new ResolveOnce<TxtDocs>();
-export async function getTxtDocs(fallBackUrl: CoerceURI): Promise<TxtDocs> {
-  return txtDocs.once(async () => {
-    const m: TxtDocs = {} as TxtDocs;
-    for (const f of files) {
-      const rAsset = await loadDocs(f, fallBackUrl);
-      if (rAsset.isErr()) {
-        console.error(`Failed to load asset ${f}: ${rAsset.Err()}`);
-        continue;
-      }
-      m[f] = { name: f, txt: rAsset.Ok() };
+// Lazy loading per file instead of eager loading all files
+const fileLoaders = new Map<string, ResolveOnce<TxtDoc | undefined>>();
+
+function getFileLoader(
+  file: string,
+  fallBackUrl: CoerceURI,
+): ResolveOnce<TxtDoc | undefined> {
+  const key = `${fallBackUrl?.toString() || ""}:${file}`;
+  if (!fileLoaders.has(key)) {
+    fileLoaders.set(key, new ResolveOnce<TxtDoc | undefined>());
+  }
+  const loader = fileLoaders.get(key);
+  if (!loader) {
+    throw new Error(`File loader not found for key: ${key}`);
+  }
+  return loader;
+}
+
+async function loadTxtDoc(
+  file: string,
+  fallBackUrl: CoerceURI,
+): Promise<TxtDoc | undefined> {
+  const loader = getFileLoader(file, fallBackUrl);
+  return loader.once(async () => {
+    const rAsset = await loadDocs(file, fallBackUrl);
+    if (rAsset.isErr()) {
+      console.error(`Failed to load asset ${file}: ${rAsset.Err()}`);
+      return undefined;
     }
-    return m;
+    return { name: file, txt: rAsset.Ok() };
   });
+}
+
+export async function getTxtDocs(_fallBackUrl: CoerceURI): Promise<TxtDocs> {
+  // Only load files that are actually requested
+  const m: TxtDocs = {} as TxtDocs;
+  // Don't eagerly load all files - they'll be loaded on demand
+  return m;
 }
 
 export async function getTexts(
@@ -46,15 +70,20 @@ export async function getTexts(
   fallBackUrl: CoerceURI,
 ): Promise<string | undefined> {
   name = name.toLocaleLowerCase().trim();
-  const docs = await getTxtDocs(fallBackUrl);
-  let doc = docs[name];
-  if (!doc) {
-    for (const key of Object.keys(docs)) {
-      if (key.toLocaleLowerCase().trim().startsWith(name)) {
-        doc = docs[key];
-        break;
-      }
+
+  // Try exact match first by looking for the file directly
+  for (const file of files) {
+    const fileName =
+      file
+        .split("/")
+        .pop()
+        ?.toLowerCase()
+        .replace(/\.(txt|md)$/, "") || "";
+    if (fileName === name) {
+      const doc = await loadTxtDoc(file, fallBackUrl);
+      return doc?.txt;
     }
   }
-  return doc?.txt;
+
+  return undefined;
 }

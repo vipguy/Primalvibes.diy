@@ -41,6 +41,14 @@ export async function resolveEffectiveModel(
   return defaultCodingModel();
 }
 
+export interface SystemPromptResult {
+  systemPrompt: string;
+  dependencies: string[];
+  instructionalText: boolean;
+  demoData: boolean;
+  model: string;
+}
+
 function escapeRegExp(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -283,8 +291,7 @@ export function generateImportStatements(llms: LlmCatalogEntry[]) {
 export async function makeBaseSystemPrompt(
   model: string,
   sessionDoc: Partial<UserSettings> & LlmSelectionOptions,
-  onAiDecisions?: (decisions: { selected: string[] }) => void,
-) {
+): Promise<SystemPromptResult> {
   const userPrompt = sessionDoc?.userPrompt || "";
   const history: HistoryMessage[] = Array.isArray(sessionDoc?.history)
     ? sessionDoc.history
@@ -297,6 +304,7 @@ export async function makeBaseSystemPrompt(
 
   const llmsCatalog = await getLlmCatalog(sessionDoc.fallBackUrl);
   const llmsCatalogNames = await getLlmCatalogNames(sessionDoc.fallBackUrl);
+
   if (useOverride && Array.isArray(sessionDoc?.dependencies)) {
     selectedNames = (sessionDoc.dependencies as unknown[])
       .filter((v): v is string => typeof v === "string")
@@ -317,8 +325,6 @@ export async function makeBaseSystemPrompt(
 
     if (selectedNames.length === 0)
       selectedNames = [...(await getDefaultDependencies())];
-
-    onAiDecisions?.({ selected: selectedNames });
   }
 
   if (typeof sessionDoc?.instructionalTextOverride === "boolean") {
@@ -360,7 +366,7 @@ ${text || ""}
     ? `- If your app has a function that uses callAI with a schema to save data, include a Demo Data button that calls that function with an example prompt. Don't write an extra function, use real app code so the data illustrates what it looks like to use the app.\n- Never have have an instance of callAI that is only used to generate demo data, always use the same calls that are triggered by user actions in the app.\n`
     : "";
 
-  return `
+  const systemPrompt = `
 You are an AI assistant tasked with creating React components. You should create components that:
 - Use modern React practices and follow the rules of hooks
 - Don't use any TypeScript, just use JavaScript
@@ -409,6 +415,14 @@ import React, { ... } from "react"${generateImportStatements(chosenLlms)}
 \`\`\`
 
 `;
+
+  return {
+    systemPrompt,
+    dependencies: selectedNames,
+    instructionalText: includeInstructional,
+    demoData: includeDemoData,
+    model,
+  };
 }
 
 // Response format requirements

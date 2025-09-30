@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      playwright:
+        specifier: ^1.55.0
+        version: 1.55.0
     devDependencies:
       '@eslint/js':
         specifier: ^9.31.0
@@ -274,6 +278,9 @@ importers:
       '@fireproof/core-types-protocols-cloud':
         specifier: ^0.23.13
         version: 0.23.13(typescript@5.8.3)
+      '@vibes.diy/prompts':
+        specifier: workspace:*
+        version: link:../../prompts/pkg
       call-ai:
         specifier: workspace:*
         version: link:../../call-ai/pkg

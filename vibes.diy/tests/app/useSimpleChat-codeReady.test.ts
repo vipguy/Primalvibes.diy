@@ -3,12 +3,27 @@ import { cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useSimpleChat } from "~/vibes.diy/app/hooks/useSimpleChat.js";
 import type { AiChatMessage, ChatMessage } from "@vibes.diy/prompts";
-import { parseContent } from "~/vibes.diy/app/utils/segmentParser.js";
+import { parseContent } from "@vibes.diy/prompts";
 
-// Mock the prompts module
-vi.mock("~/vibes.diy/app/prompts.js", () => ({
-  makeBaseSystemPrompt: vi.fn().mockResolvedValue("Mocked system prompt"),
-}));
+// Mock the prompts module - use partial mocking to keep real parseContent
+vi.mock("@vibes.diy/prompts", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@vibes.diy/prompts")>();
+  return {
+    ...actual,
+    makeBaseSystemPrompt: vi.fn().mockResolvedValue({
+      systemPrompt: "Mocked system prompt",
+      dependencies: ["useFireproof"],
+      instructionalText: true,
+      demoData: false,
+      model: "anthropic/claude-sonnet-4",
+    }),
+    resolveEffectiveModel: vi
+      .fn()
+      .mockResolvedValue("anthropic/claude-sonnet-4"),
+    // Keep the real parseContent function for these tests
+    parseContent: actual.parseContent,
+  };
+});
 
 // Credit checking mocks no longer needed
 

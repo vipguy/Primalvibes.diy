@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseContent } from "~/vibes.diy/app/utils/segmentParser.js";
+import { parseContent } from "@vibes.diy/prompts";
 import { BuildURI, loadAsset, pathOps } from "@adviser/cement";
 
 describe("segmentParser utilities", () => {

@@ -6,8 +6,7 @@ import { ImgGen } from '@vibes.diy/use-vibes-base';
 // Define mock modules first (these are hoisted to the top by Vitest)
 vi.mock('call-ai', () => {
   return {
-    imageGen: vi.fn().mockImplementation((prompt, options) => {
-      console.log('imageGen called with:', prompt, options);
+    imageGen: vi.fn().mockImplementation((_prompt, _options) => {
       return Promise.resolve({
         created: Date.now(),
         data: [
@@ -20,6 +19,12 @@ vi.mock('call-ai', () => {
       });
     }),
     callAI: vi.fn(),
+    joinUrlParts: vi.fn((base: string, path: string) => {
+      if (!base || !path) return base || path || '';
+      const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
+      const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+      return `${cleanBase}/${cleanPath}`;
+    }),
   };
 });
 
@@ -76,11 +81,15 @@ describe('ImgGen Render Test', () => {
       render(<ImgGen prompt="test image" />);
     });
 
-    // Wait a bit to ensure any effects have run
-    await new Promise((r) => setTimeout(r, 100));
+    // Wait for any async effects to complete using waitFor
+    await waitFor(
+      () => {
+        expect(mockImageGen).toHaveBeenCalled();
+      },
+      { timeout: 1000 }
+    );
 
     // Check how many times imageGen was called
-    console.log('Number of imageGen calls:', mockImageGen.mock.calls.length);
 
     // This should be 1, but the bug might show 2 or more
     expect(mockImageGen).toHaveBeenCalledTimes(1);
@@ -106,11 +115,15 @@ describe('ImgGen Render Test', () => {
     });
 
     // Wait for initial render to complete
-    await new Promise((r) => setTimeout(r, 100));
+    await waitFor(
+      () => {
+        expect(mockImageGen).toHaveBeenCalled();
+      },
+      { timeout: 1000 }
+    );
 
     // Check initial calls
     const initialCalls = mockImageGen.mock.calls.length;
-    console.log('Initial imageGen calls:', initialCalls);
 
     // Change the prompt
     await act(async () => {
@@ -127,7 +140,6 @@ describe('ImgGen Render Test', () => {
 
     // Should only have one additional call
     const finalCalls = mockImageGen.mock.calls.length;
-    console.log('Final imageGen calls:', finalCalls);
 
     // We expect exactly one more call
     expect(finalCalls).toBe(initialCalls + 1);

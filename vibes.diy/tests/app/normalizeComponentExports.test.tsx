@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { normalizeComponentExports } from "~/vibes.diy/app/utils/normalizeComponentExports.js";
+import { normalizeComponentExports } from "@vibes.diy/prompts";
 
 describe("normalizeComponentExports", () => {
   // Case 1: TaskTracker pattern - function declaration followed by export
