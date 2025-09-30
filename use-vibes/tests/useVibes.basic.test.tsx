@@ -35,7 +35,12 @@ vi.mock('@vibes.diy/prompts', () => ({
 vi.mock('call-ai', () => ({
   callAI: mockCallAI,
   callAi: mockCallAI,
-  joinUrlParts: vi.fn((base: string, path: string) => `${base}/${path}`),
+  joinUrlParts: vi.fn((base: string, path: string) => {
+    if (!base || !path) return base || path || '';
+    const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
+    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+    return `${cleanBase}/${cleanPath}`;
+  }),
   entriesHeaders: vi.fn(),
   callAiEnv: {},
 }));

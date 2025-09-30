@@ -6,7 +6,12 @@ import { createMockIframe, cleanupIframeMocks } from './utils/iframe-mocks.js';
 // Mock call-ai module to prevent network calls
 vi.mock('call-ai', () => ({
   callAI: vi.fn().mockResolvedValue('Mocked AI response'),
-  joinUrlParts: vi.fn((...parts) => parts.join('')),
+  joinUrlParts: vi.fn((base: string, path: string) => {
+    if (!base || !path) return base || path || '';
+    const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
+    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+    return `${cleanBase}/${cleanPath}`;
+  }),
 }));
 
 // Mock the environment config that would be used for endpoints
